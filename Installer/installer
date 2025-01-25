@@ -18041,21 +18041,23 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 
 # srsRAN/srsLTE
 programs_ubuntu24_04.append(('srsRAN (362.31 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -18778,10 +18780,10 @@ anki -h
 
 # Bless
 programs_ubuntu24_04.append(('Bless (4.00 kB)',
-"""sudo apt-get install -y bless  # Too much wrong with it to build from source
+"""sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
-""",False,'Data'))
+snap list bless-unofficial
+""",True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
 programs_ubuntu24_04.append(('trackerjacker (2.49 MB)',
@@ -20189,12 +20191,12 @@ cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
-cmake ..
+cmake ../
 make
 sudo make install
 sudo ldconfig
