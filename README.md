@@ -10,9 +10,14 @@ The framework and tools included with FISSURE are designed to detect the presenc
 
 The friendly Python codebase and user interface allows beginners to quickly learn about popular tools and techniques involving RF and reverse engineering. Educators in cybersecurity and engineering can take advantage of the built-in material or utilize the framework to demonstrate their own real-world applications. Developers and researchers can use FISSURE for their daily tasks or to expose their cutting-edge solutions to a wider audience. As awareness and usage of FISSURE grows in the community, so will the extent of its capabilities and the breadth of the technology it encompasses.
 
+FISSURE is particularly effective in two key domains: 1) it provides hooks for techniques and technology related to RF reverse engineering and 2) it supports multiple deployment options to expand its operational relevance by joining different types of user interfaces, networks, hardware/software processing, and distributed remote sensor nodes. 
 
 <p align="center">
 <img src="/docs/Icons/README/rf_re.png" width="400" height="400">
+</p>
+
+<p align="center">
+<img src="/docs/Icons/README/fissure_deployments.jpg" width="858" height="482">
 </p>
 
 ## News
@@ -201,6 +206,8 @@ The following is a list of "supported" hardware with varying levels of integrati
 
 There are now two branches within FISSURE: the Python3 branch and the Python2_maint-3.7 branch. The Python3 branch contains the latest code and has support for PyQt5 and GNU Radio versions 3.8 and 3.10. The Python2_maint-3.7 branch has been deprecated and will only be updated if specific third-party tools require GNU Radio version 3.7 or an older operating system. Only the latest minor versions of operating systems will be supported for installs and we will do our best to keep up.
 
+The GitHub releases provided in this repository are periodic snapshots of the project's state, intended primarily for archival purposes. These releases may not include the latest updates, bug fixes, or features currently under development. To access the most up-to-date version of the software, we strongly recommend using the main Python3 branch, which reflects ongoing development and the current state of the project.
+
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
 | BackBox Linux 8 (amd64) | Python3 | maint-3.10 |
@@ -214,6 +221,7 @@ Operating System | FISSURE Branch | Default GNU Radio Version
 | Ubuntu 22.04 (x64) | Python3 | maint-3.10 |
 | Ubuntu 22.04 (ARM/Orange Pi) | Python3 | maint-3.10 |
 | Ubuntu 24.04 (x86) | Python3 | maint-3.10 |
+| Windows 11 WSL2 | See Supported Linux Version | See Supported Linux Version |
 
 **In-Progress (beta)**
 
@@ -312,6 +320,34 @@ python3 ./fissure/Sensor_Node/SensorNode.py
 ```
 
 The sensor node code will stay active until ctrl+c is applied. Connecting to the remote sensor node is performed through the top buttons of the FISSURE Dashboard. Right-clicking the top buttons will select an active sensor node to perform operations. Future operations that utilize more than one node at a time will be handled on a case-by-case basis within the individual tabs.
+
+**Windows 11 WSL2 Instructions**
+
+FISSURE can run in Windows 11 using WSL2 for supported Linux Operating systems. The following are instructions to help install WSL2, install a Linux operating system, set up USB passthrough, and install FISSURE in the Linux operating system.
+
+Install WSL2:
+
+1. Open PowerShell as Administrator
+2. `wsl --install`
+3. Enable Virtualization in BIOS, check using: Task Manager>Performance>CPU>Virtualization
+4. `wsl --set-default-version 2`
+5. `wsl --list --online`
+6. Install a specific version (plain Ubuntu should be the latest version listed): `wsl --install -d Ubuntu-22.04`
+7. Open the Start Menu, search for Ubuntu and launch it
+
+Enable USB passthrough in a PowerShell as Administrator:
+
+1. `winget install usbipd`
+2. Add usbipd to System PATH: Start Menu>Environment Variables>Edit the system environment variables>System Properties>Environment Variables>System Variables>Path>Edit>New: `C:\Program Files\usbipd-win`
+3. Close and reopen PowerShell as Administrator
+4. `usbipd wsl list`
+5. `usbipd wsl attach --busid <BUS_ID>` or `usbipd wsl attach --busid <BUS_ID> --wsl <DistributionName>` (replace <BUS_ID> with the actual BUS ID of the device)
+6. To detach: `usbipd wsl detach --busid <BUS_ID>`
+
+Install FISSURE in Linux Terminal:
+
+1. `sudo apt-get install git`
+2. Clone FISSURE and install as detailed above
 
 ## Lessons
 

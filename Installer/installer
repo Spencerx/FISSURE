@@ -83,13 +83,15 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
-sudo python3 -m pip install tensorflow
+sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython
 sudo python3 -m pip install scikit-learn==1.3.2
 sudo python3 -m pip install opencv-python
 sudo python3 -m pip install pyzipper
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -1011,23 +1013,25 @@ sudo python3 -m pip install -U pyyaml
 # sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
 # """,True))
 
-# srsRAN/srsLTE
-programs_ubuntu20_04.append(('srsRAN (805.2 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_ubuntu20_04.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsLTE/srsGUI.git  # Does not install
+git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -1348,27 +1352,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_ubuntu20_04.append(('SdrGlut (377.1 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+programs_ubuntu20_04.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_ubuntu20_04.append(('rehex (208.0 MB)',
@@ -1752,10 +1747,11 @@ anki -h
 """,True,'Ham Radio'))
 
 # Bless
-programs_ubuntu20_04.append(('Bless (59.5 MB)',
-"""sudo apt-get install -y bless
+programs_ubuntu20_04.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
+snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker
@@ -1832,49 +1828,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan/h4bcm.so
 """,True,'Bluetooth'))
 
 # SigDigger
-programs_ubuntu20_04.append(('SigDigger (174.0 MB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-3 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-# wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-# chmod a+x blsd
-# ./blsd
-
-git clone https://github.com/BatchDrake/sigutils.git
-cd sigutils/
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-sudo ldconfig
-#suscan
-sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-cd ~/Installed_by_FISSURE
-git clone https://github.com/BatchDrake/suscan.git
-cd suscan
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-#SuWidgets
-cd ~/Installed_by_FISSURE
-git clone https://github.com/BatchDrake/SuWidgets
-cd SuWidgets
-qmake SuWidgetsLib.pro
-make
-sudo make install
-#SigDigger
-cd ~/Installed_by_FISSURE
-git clone https://github.com/BatchDrake/SigDigger
-cd SigDigger
-qmake SigDigger.pro
-make
-sudo make install
+programs_ubuntu20_04.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls /usr/local/bin/SigDigger
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
 """,True,'SDR'))
 
 # QSSTV
@@ -2243,13 +2204,15 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow --break-system-packages
+sudo python3 -m pip install tensorflow-cpu --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython
 sudo python3 -m pip install scikit-learn==1.3.2
 sudo python3 -m pip install opencv-python
 sudo python3 -m pip install pyzipper
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -3151,23 +3114,25 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_parrot_os_6_1.append(('srsRAN',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_parrot_os_6_1.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -3487,26 +3452,17 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 
 # SdrGlut
 programs_parrot_os_6_1.append(('SdrGlut',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_parrot_os_6_1.append(('rehex',
@@ -3893,10 +3849,11 @@ anki -h
 """,False,'Ham Radio'))
 
 # Bless
-programs_parrot_os_6_1.append(('Bless',
-"""sudo apt-get install -y bless
+programs_parrot_os_6_1.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
+snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker
@@ -3975,54 +3932,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan/h4bcm.so
 """,True,'Bluetooth'))
 
 # SigDigger
-programs_parrot_os_6_1.append(('SigDigger',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev    
-sudo apt-get install -y libfftw3-3
-sudo apt-get install -y qmake6
-sudo apt-get install -y soapysdr-tools
-sudo apt-get install -y libsoapysdr-dev
-sudo apt-get install -y portaudio19-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+programs_parrot_os_6_1.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
 """,True,'SDR'))
 
 # QSSTV
@@ -4372,13 +4289,15 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
-sudo python3 -m pip install tensorflow
+sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython
 sudo python3 -m pip install scikit-learn==1.3.2
 sudo python3 -m pip install opencv-python
 sudo python3 -m pip install pyzipper
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -5279,23 +5198,25 @@ sudo python3 -m pip install -U pyyaml
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_ubuntu22_04.append(('srsRAN (795.5 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_ubuntu22_04.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -5614,27 +5535,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_ubuntu22_04.append(('SdrGlut (364.9 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+programs_ubuntu22_04.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_ubuntu22_04.append(('rehex (197.1 MB)',
@@ -6016,10 +5928,11 @@ anki -h
 """,True,'Ham Radio'))
 
 # Bless
-programs_ubuntu22_04.append(('Bless (60.0 MB)',
-"""sudo apt-get install -y bless
+programs_ubuntu22_04.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
+snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
@@ -6098,49 +6011,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
 """,True,'Bluetooth'))
 
 # SigDigger
-programs_ubuntu22_04.append(('SigDigger (169.3 MB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-3 qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+programs_ubuntu22_04.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
 """,True,'SDR'))
 
 # QSSTV
@@ -6489,12 +6367,14 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
-sudo python3 -m pip install tensorflow
+sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython
 sudo python3 -m pip install scikit-learn==1.3.2
 sudo python3 -m pip install opencv-python
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """, True, "Minimum Install"))
 
@@ -7734,26 +7614,17 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 
 # SdrGlut
 programs_dragonOS_focalx.append(('SdrGlut',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""", False, 'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_dragonOS_focalx.append(('rehex',
@@ -8135,11 +8006,12 @@ anki -h
 """, True, 'Ham Radio'))
 
 # Bless
-programs_dragonOS_focalx.append(('Bless',
-"""sudo apt-get install -y bless
+programs_dragonOS_focalx.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
-""", True, 'Data'))
+snap list bless-unofficial
+""",True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
 programs_dragonOS_focalx.append(('trackerjacker',
@@ -8617,13 +8489,15 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow --break-system-packages
+sudo python3 -m pip install tensorflow-cpu --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython --break-system-packages
 sudo python3 -m pip install scikit-learn==1.3.2 --break-system-packages
 sudo python3 -m pip install opencv-python --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -9527,23 +9401,25 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_kali.append(('srsRAN (748.3 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_kali.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -9563,7 +9439,7 @@ sudo apt-get install -y fortune cowsay lolcat  # IMSI-Catcher 4G
 # gnome-terminal --tab --title="srsENB" -- /bin/sh -c 'sudo srsenb; $SHELL'
 ########## Verify ##########
 srsenb --help
-""",False,'LTE'))
+""",True,'LTE'))
 
 # FALCON - FIX (needs older soapysdr version?)
 programs_kali.append(('FALCON',
@@ -9861,27 +9737,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_kali.append(('SdrGlut (363.9 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut0 libalut-dev libsndfile1-dev  # Missing: freeglut3
+programs_kali.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_kali.append(('rehex (581.02 MB)',
@@ -10271,11 +10138,12 @@ anki -h
 """,True,'Ham Radio'))
 
 # Bless
-programs_kali.append(('Bless (61.1 MB)',
-"""sudo apt-get install -y bless
+programs_kali.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
-""",False,'Data'))
+snap list bless-unofficial
+""",True,'Data'))
 
 # trackerjacker (no longer complains about needing newer scapy version?, something else (netattack2?) resets it, some pieces don't work while running it)
 programs_kali.append(('trackerjacker',
@@ -10352,51 +10220,15 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
 """,True,'Bluetooth'))
 
 # SigDigger
-programs_kali.append(('SigDigger (175.1 MB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-
-wget https://actinid.org/blsd  # Fails on building SigDigger
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # Needs SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+programs_kali.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
-""",False,'SDR'))
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
+""",True,'SDR'))
 
 # QSSTV
 programs_kali.append(('QSSTV (3.2 MB)',
@@ -10751,13 +10583,15 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
-sudo python3 -m pip install tensorflow
+sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython
 sudo python3 -m pip install scikit-learn==1.3.2
 sudo python3 -m pip install opencv-python
 sudo python3 -m pip install pyzipper
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -11657,23 +11491,25 @@ sudo python3 -m pip install -U pyyaml
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_backbox_linux_8.append(('srsRAN (795.5 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_backbox_linux_8.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -11992,27 +11828,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_backbox_linux_8.append(('SdrGlut (364.9 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+programs_backbox_linux_8.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_backbox_linux_8.append(('rehex (197.1 MB)',
@@ -12394,10 +12221,11 @@ anki -h
 """,True,'Ham Radio'))
 
 # Bless
-programs_backbox_linux_8.append(('Bless (60.0 MB)',
-"""sudo apt-get install -y bless
+programs_backbox_linux_8.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
+snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
@@ -12475,50 +12303,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
 """,True,'Bluetooth'))
 
 # SigDigger
-programs_backbox_linux_8.append(('SigDigger (169.3 MB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-3 qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+programs_backbox_linux_8.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
 """,True,'SDR'))
 
 # QSSTV
@@ -12868,7 +12660,7 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow --break-system-packages
+sudo python3 -m pip install tensorflow-cpu --break-system-packages
 
 sudo apt install -y nodejs npm build-essential libgtk-3-dev libwebkit2gtk-4.0-dev  # netron
 mkdir -p ~/Installed_by_FISSURE  # netron
@@ -12882,6 +12674,8 @@ sudo python3 -m pip install ipython --break-system-packages
 sudo python3 -m pip install scikit-learn==1.3.2 --break-system-packages
 sudo python3 -m pip install opencv-python --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -13788,23 +13582,25 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_raspberry_pi_os.append(('srsRAN',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_raspberry_pi_os.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -14124,26 +13920,17 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 
 # SdrGlut
 programs_raspberry_pi_os.append(('SdrGlut',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_raspberry_pi_os.append(('rehex',
@@ -14525,10 +14312,11 @@ anki -h
 """,False,'Ham Radio'))
 
 # Bless
-programs_raspberry_pi_os.append(('Bless',
-"""sudo apt-get install -y bless
+programs_raspberry_pi_os.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
+snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker
@@ -14607,50 +14395,15 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
 """,False,'Bluetooth'))
 
 # SigDigger
-programs_raspberry_pi_os.append(('SigDigger',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-3 qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+programs_raspberry_pi_os.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
-""",False,'SDR'))
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
+""",True,'SDR'))
 
 # QSSTV
 programs_raspberry_pi_os.append(('QSSTV',
@@ -15001,13 +14754,15 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
-sudo python3 -m pip install tensorflow
+sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython
 sudo python3 -m pip install scikit-learn==1.3.2
 sudo python3 -m pip install opencv-python
 sudo python3 -m pip install pyzipper
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -15909,23 +15664,25 @@ sudo python3 -m pip install -U pyyaml
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_ubuntu22_04_arm.append(('srsRAN (795.5 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_ubuntu22_04_arm.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
 cd ~/Installed_by_FISSURE
-git clone https://github.com/srsRAN/srsRAN.git
-cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN/lib/examples/  # IMSI-Catcher 4G
-cd srsRAN/
+git clone https://github.com/srsRAN/srsRAN_4G.git
+cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed_by_FISSURE/srsRAN_4G/lib/examples/  # IMSI-Catcher 4G
+cd srsRAN_4G/
 mkdir build
 cd build
 cmake ..
@@ -16244,27 +16001,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_ubuntu22_04_arm.append(('SdrGlut (364.9 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+programs_ubuntu22_04_arm.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_ubuntu22_04_arm.append(('rehex (197.1 MB)',
@@ -16646,10 +16394,11 @@ anki -h
 """,True,'Ham Radio'))
 
 # Bless
-programs_ubuntu22_04_arm.append(('Bless (60.0 MB)',
-"""sudo apt-get install -y bless
+programs_ubuntu22_04_arm.append(('Bless (4.00 kB)',
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
+snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
@@ -16728,49 +16477,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
 """,True,'Bluetooth'))
 
 # SigDigger
-programs_ubuntu22_04_arm.append(('SigDigger (169.3 MB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-3 qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+programs_ubuntu22_04_arm.append(('SigDigger (48.00 kB)',
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
 """,True,'SDR'))
 
 # QSSTV
@@ -17129,13 +16843,15 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow --break-system-packages
+sudo python3 -m pip install tensorflow-cpu --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython --break-system-packages
 sudo python3 -m pip install scikit-learn==1.3.2 --break-system-packages
 sudo python3 -m pip install opencv-python --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -18039,8 +17755,8 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_ubuntu24_04.append(('srsRAN (362.31 MB)',
+# srsRAN_4G/srsRAN/srsLTE
+programs_ubuntu24_04.append(('srsRAN_4G',
 """sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
@@ -18077,7 +17793,7 @@ sudo apt-get install -y fortune cowsay lolcat  # IMSI-Catcher 4G
 # gnome-terminal --tab --title="srsENB" -- /bin/sh -c 'sudo srsenb; $SHELL'
 ########## Verify ##########
 srsenb --help
-""",False,'LTE'))
+""",True,'LTE'))
 
 # FALCON - FIX (needs older soapysdr version?)
 programs_ubuntu24_04.append(('FALCON',
@@ -18376,27 +18092,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_ubuntu24_04.append(('SdrGlut (364.9 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+programs_ubuntu24_04.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_ubuntu24_04.append(('rehex (76.98 MB)',
@@ -18780,7 +18487,8 @@ anki -h
 
 # Bless
 programs_ubuntu24_04.append(('Bless (4.00 kB)',
-"""sudo snap install bless-unofficial
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
 snap list bless-unofficial
 """,True,'Data'))
@@ -18862,49 +18570,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
 
 # SigDigger
 programs_ubuntu24_04.append(('SigDigger (48.00 kB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
-""",False,'SDR'))
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
+""",True,'SDR'))
 
 # QSSTV
 programs_ubuntu24_04.append(('QSSTV (2.75 MB)',
@@ -19267,13 +18940,15 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow --break-system-packages
+sudo python3 -m pip install tensorflow-cpu --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython --break-system-packages
 sudo python3 -m pip install scikit-learn==1.3.2 --break-system-packages
 sudo python3 -m pip install opencv-python --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
+sudo apt-get install -y unzip
+sudo apt-get install -y usbutils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -20177,16 +19852,18 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 #Needs gr-foo and gr-ieee802-11
 """,True,'V2V'))
 
-# srsRAN/srsLTE
-programs_arch_linux.append(('srsRAN (362.31 MB)',
-"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
+# srsRAN_4G/srsRAN/srsLTE
+programs_arch_linux.append(('srsRAN_4G',
+"""sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/srsLTE/srsGUI.git
 cd srsGUI
 mkdir build
-cd build 
+cd build
+export CC=$(which gcc-11)
+export CXX=$(which g++-11)
 cmake ..
 make
 sudo make install
@@ -20196,7 +19873,7 @@ cp """ + fissure_directory + """/Tools/IMSI-Catcher_4G/cell_search.c ~/Installed
 cd srsRAN_4G/
 mkdir build
 cd build
-cmake ../
+cmake ..
 make
 sudo make install
 sudo ldconfig
@@ -20213,7 +19890,7 @@ sudo apt-get install -y fortune cowsay lolcat  # IMSI-Catcher 4G
 # gnome-terminal --tab --title="srsENB" -- /bin/sh -c 'sudo srsenb; $SHELL'
 ########## Verify ##########
 srsenb --help
-""",False,'LTE'))
+""",True,'LTE'))
 
 # FALCON - FIX (needs older soapysdr version?)
 programs_arch_linux.append(('FALCON',
@@ -20512,27 +20189,18 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_arch_linux.append(('SdrGlut (364.9 MB)',
-"""sudo apt-get install -y librtaudio-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3 freeglut3-dev libalut0 libalut-dev libsndfile1-dev 
+programs_arch_linux.append(('SdrGlut',
+"""sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/jgaeddert/liquid-dsp.git
-cd liquid-dsp/
-./bootstrap.sh
-./configure
-make
-sudo make install
-sudo ldconfig
-cd ~/Installed_by_FISSURE
-git clone https://github.com/righthalfplane/SdrGlut.git
-cp -f """ + fissure_directory + """/Tools/SdrGlut/firstFile.h ~/Installed_by_FISSURE/SdrGlut/MainSource/
-cp -f """ + fissure_directory + """/Tools/SdrGlut/makefileUbunta ~/Installed_by_FISSURE/SdrGlut/makefileUbunta
+git clone --depth=1 https://github.com/righthalfplane/SdrGlut.git
 cd SdrGlut
-sudo cp /usr/local/lib/libliquid.a.1.5 /usr/local/lib/libliquid.a  # Certain libliquid versions renamed this file
-make -f makefileUbunta
+make -f makefileUbuntu -j 8
+cd iqSDR
+make -f makefileUbuntuOLD -j 8
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
-""",False,'SDR'))
+""",True,'SDR'))
 
 # rehex
 programs_arch_linux.append(('rehex (76.98 MB)',
@@ -20916,10 +20584,11 @@ anki -h
 
 # Bless
 programs_arch_linux.append(('Bless (4.00 kB)',
-"""sudo apt-get install -y bless  # Too much wrong with it to build from source
+"""sudo apt-get install -y snapd
+sudo snap install bless-unofficial
 ########## Verify ##########
-ls /usr/bin/bless
-""",False,'Data'))
+snap list bless-unofficial
+""",True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
 programs_arch_linux.append(('trackerjacker (2.49 MB)',
@@ -20998,49 +20667,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
 
 # SigDigger
 programs_arch_linux.append(('SigDigger (48.00 kB)',
-"""#sigutils
-sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://actinid.org/blsd  # Needs newer version of QMake. Above 5.12.8, 5.14?
-chmod a+x blsd
-./blsd
-
-# git clone https://github.com/BatchDrake/sigutils.git
-# cd sigutils/
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# sudo ldconfig
-# #suscan
-# sudo apt-get install -y libxml2-dev cmake build-essential  # SoapySDR
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/suscan.git
-# cd suscan
-# mkdir build
-# cd build
-# cmake ..
-# make
-# sudo make install
-# #SuWidgets
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SuWidgets
-# cd SuWidgets
-# qmake SuWidgetsLib.pro
-# make
-# sudo make install
-# #SigDigger
-# cd ~/Installed_by_FISSURE
-# git clone https://github.com/BatchDrake/SigDigger
-# cd SigDigger
-# qmake SigDigger.pro
-# make
-# sudo make install
+"""sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+mkdir -p ~/Installed_by_FISSURE/SigDigger
+cd ~/Installed_by_FISSURE/SigDigger
+wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
+chmod a+x SigDigger-0.3.0-x86_64-full.AppImage
 ########## Verify ##########
-ls ~/Installed_by_FISSURE/blsd-dir/SigDigger/SigDigger
-""",False,'SDR'))
+ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
+""",True,'SDR'))
 
 # QSSTV
 programs_arch_linux.append(('QSSTV (2.75 MB)',

@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-1-25
+
+Updating the installer and README.
+
+### Added
+
+- unzip, usbutils packages to installer
+- FISSURE Deployments image in README and supporting text
+- Added a note about GitHub releases in the README
+- Windows 11 WSL2 Instructions in README
+
+### Changed
+
+- srsRAN install changed to srsRAN_4G
+- SigDigger install changed from blsd to AppImage
+- Switching from GPU version of tensorflow to CPU version in the installer
+
+### Fixed
+
+- SdrGlut install updated
+- Made "Loading..." text wider in splash screen to prevent 'L' from being cut off
+
 ## 2025-1-22
 
 Adding Alerts tab.

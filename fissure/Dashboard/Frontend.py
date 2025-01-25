@@ -909,7 +909,7 @@ class Dashboard(QtWidgets.QMainWindow):
         elif get_os == 'Kali':
             self.window.actionZigbeeOpen_Sniffer.setEnabled(False)
             self.window.actionFALCON.setEnabled(False)
-            self.window.actionSrsLTE.setEnabled(False)
+            # self.window.actionSrsLTE.setEnabled(False)
             #self.window.actionLTE_ciphercheck.setEnabled(False)
             self.window.actionOpenCPN.setEnabled(False)
             self.window.actionRTLSDR_Airband.setEnabled(False)
@@ -917,7 +917,7 @@ class Dashboard(QtWidgets.QMainWindow):
             self.window.actionSystemback.setEnabled(False)
             self.window.actiondump978.setEnabled(False)
             self.window.actionOpenWebRX.setEnabled(False)
-            self.window.actionSigDigger.setEnabled(False)
+            # self.window.actionSigDigger.setEnabled(False)
             self.window.actionFoxtrotGPS.setEnabled(False)
             self.window.actionArduino.setEnabled(False)
             self.window.actionBless.setEnabled(False)
@@ -937,7 +937,7 @@ class Dashboard(QtWidgets.QMainWindow):
             self.window.actionOpenCPN.setEnabled(False)
             self.window.actionSDRTrunk.setEnabled(False)
             self.window.actionSimpleScreenRecorder.setEnabled(False)
-            self.window.actionSdrGlut.setEnabled(False)
+            # self.window.actionSdrGlut.setEnabled(False)
             self.window.actionRehex.setEnabled(False)
             self.window.actionNETATTACK2.setEnabled(False)
             self.window.actionRouterSploit.setEnabled(False)
@@ -947,19 +947,19 @@ class Dashboard(QtWidgets.QMainWindow):
             self.window.actionAnki.setEnabled(False)
             self.window.actionTrackerjacker.setEnabled(False)
             self.window.actionBTSnifferBREDR.setEnabled(False)
-            self.window.actionSigDigger.setEnabled(False)
+            # self.window.actionSigDigger.setEnabled(False)
             self.window.actionSystemback.setEnabled(False)
             self.window.actionguidus.setEnabled(False)
             self.window.actionICE9_Bluetooth_Scanner.setEnabled(False)
             self.window.actionOpenWebRX.setEnabled(False)
             self.window.actionRadiosonde_auto_rx.setEnabled(False)
         elif get_os == 'Ubuntu 24.04':
-            self.window.actionSrsLTE.setEnabled(False)
+            # self.window.actionSrsLTE.setEnabled(False)
             self.window.action4G_IMSI_Catcher.setEnabled(False)
-            self.window.actionSdrGlut.setEnabled(False)
+            # self.window.actionSdrGlut.setEnabled(False)
             self.window.actionFALCON.setEnabled(False)
             self.window.actionNETATTACK2.setEnabled(False)
-            self.window.actionSigDigger.setEnabled(False)
+            # self.window.actionSigDigger.setEnabled(False)
             self.window.actionOpenWebRX.setEnabled(False)
             self.window.actionTower_Search.setEnabled(False)
             self.window.actionTower_Search_Part_2.setEnabled(False)
@@ -1593,7 +1593,7 @@ class SplashScreen(QtWidgets.QDialog):
         self.label.setStyleSheet("color: #f0f0f0; font-size: 14px; font-weight: bold;")
 
         # Center the text label within the window
-        label_width = self.label.fontMetrics().boundingRect(self.label.text()).width() + 10
+        label_width = self.label.fontMetrics().boundingRect(self.label.text()).width() + 20
         label_height = self.label.fontMetrics().boundingRect(self.label.text()).height()
         
         # Calculate position to center the text
