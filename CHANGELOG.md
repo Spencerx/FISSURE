@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-1-27
+
+WSL2 adjustments and suppressing installer prompts.
+
+### Added
+
+- Bluesky link to README
+
+### Changed
+
+- Adjusting "Deployment Configurations" image size limits in README to prevent rescaling the aspect ratio
+
+### Fixed
+
+- Adding ubuntu-standard, eog to Ubuntu installations
+- Installing opencv-python-headless instead of opencv-python to fix WSL2 errors
+- Fixed pip items without --break-system-packages for Parrot OS installation
+- Forcing package installation for monitor_rtl433
+- Removing python3-cryptography before installing PyGPSClient
+- Suppressing user inputs for tshark (Wireshark), Wifite2 (macchanger), rehex (cpan Template)
+
 ## 2025-1-25
 
 Updating the installer and README.

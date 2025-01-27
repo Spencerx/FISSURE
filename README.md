@@ -17,7 +17,7 @@ FISSURE is particularly effective in two key domains: 1) it provides hooks for t
 </p>
 
 <p align="center">
-<img src="/docs/Icons/README/fissure_deployments.jpg" width="858" height="482">
+<img src="/docs/Icons/README/fissure_deployments.jpg" style="max-width: 858px; width: 100%; height: auto;">
 </p>
 
 ## News
@@ -323,7 +323,7 @@ The sensor node code will stay active until ctrl+c is applied. Connecting to the
 
 **Windows 11 WSL2 Instructions**
 
-FISSURE can run in Windows 11 using WSL2 for supported Linux Operating systems. The following are instructions to help install WSL2, install a Linux operating system, set up USB passthrough, and install FISSURE in the Linux operating system.
+FISSURE can run in Windows 11 using WSL2 for supported Linux operating systems. The following are instructions to help install WSL2, install a Linux operating system, set up USB passthrough, and install FISSURE in the Linux operating system.
 
 Install WSL2:
 
@@ -484,6 +484,8 @@ For license details, see LICENSE file.
 Join the Discord Server: [https://discord.gg/JZDs5sgxcG](https://discord.gg/JZDs5sgxcG)
 
 Follow on Twitter/X: [@FissureRF](https://twitter.com/fissurerf), [@AinfoSec](https://twitter.com/ainfosec)
+
+Follow on Bluesky: [@fissurerf.bsky.social](https://bsky.app/profile/fissurerf.bsky.social)
 
 Connect on LinkedIn: [FISSURE - The RF Framework](https://www.linkedin.com/company/fissure-the-rf-framework)
 
