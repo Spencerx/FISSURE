@@ -1,6 +1,30 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-1-31
+
+Querying sensor nodes for GPS coordinates and mapping results.
+
+### Added
+
+- Find, Map buttons to Sensor Node Configuration dialog for querying GPS receivers and opening locations in default KML viewer
+- GPS utility functions for converting between formats
+- Hardware probing functions for acquiring GPS coordinates from gpsd
+- mgrs to the installer
+- GPS Acquisition and mapping to News section in README
+- Career fair event in README
+
+### Changed
+
+- Replaced inline slot functions for selecting new plugin supporting files in the tables
+- Changed installation steps for blaze in m17-cxx-demod
+- Using default options for Kismet installation
+
+### Fixed
+
+- Loading a new plugin supporting file populates text in the correct row and table
+- Added Blaze libraries to all m17-cxx-demod installer items
+
 ## 2025-1-27
 
 WSL2 adjustments and suppressing installer prompts.

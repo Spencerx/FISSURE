@@ -1434,3 +1434,21 @@ async def removePlugin(component: object, sensor_node_id: int, plugin_name: str)
     if sensor_node_id > -1:
         # remove plugin
         plugin.remove(plugin_name)
+
+
+async def findGPS_Coordinates(component: object, tab_index=0, format=""):
+    """
+    Find the sensor node GPS coordinates using gpsd and return the information.
+    """
+    # Retrieve Coordinates
+    get_coordinates = fissure.utils.hardware.probe_gpsd(format)
+
+    # Return the Text
+    if get_coordinates:
+        PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

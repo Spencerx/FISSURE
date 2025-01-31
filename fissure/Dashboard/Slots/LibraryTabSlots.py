@@ -1600,25 +1600,27 @@ def _slotLibraryPluginSupportAddClicked(dashboard: QtCore.QObject):
         new_action_combobox.setCurrentIndex(0)
         new_action_combobox.setEnabled(False)
 
-        def handle_file_selection(target_table, row_position):
-            file_dialog = QtWidgets.QFileDialog()
-            file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-            file_dialog.setDirectory(fissure.utils.FISSURE_ROOT)
-            selected_file, _ = file_dialog.getOpenFileName()
-            if selected_file:
-                # Place the selected file in the correct row and column (assume column 2)
-                new_file_item = QtWidgets.QTableWidgetItem(selected_file)
-                new_file_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                target_table.setItem(row_position, 2, new_file_item)
-
         new_pushbutton = QtWidgets.QPushButton(get_table, objectName='pushButton_')
         new_pushbutton.setText("...")
         new_pushbutton.setFixedSize(36, 23)
         get_table.setCellWidget(row_position, 3, new_pushbutton)
-        new_pushbutton.clicked.connect(lambda checked, row=row_position: handle_file_selection(get_table, row))
+        new_pushbutton.clicked.connect(lambda checked, table=get_table, row=row_position: _slotLibraryPluginSupportFileSelectionClicked(dashboard, table, row))
         get_table.resizeRowsToContents()
     else:
         dashboard.logger.info("No QTableWidget found on the current page.")
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotLibraryPluginSupportFileSelectionClicked(dashboard: QtCore.QObject, target_table, row_position):
+    file_dialog = QtWidgets.QFileDialog()
+    file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+    file_dialog.setDirectory(fissure.utils.FISSURE_ROOT)
+    selected_file, _ = file_dialog.getOpenFileName()
+    if selected_file:
+        # Place the selected file in the correct row and column (assume column 2)
+        new_file_item = QtWidgets.QTableWidgetItem(selected_file)
+        new_file_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        target_table.setItem(row_position, 2, new_file_item)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)

@@ -1417,24 +1417,12 @@ async def responsePluginTableData(component: object, plugin_name: str, table_dat
                 # Ensure the table updates visually
                 target_table.viewport().update()
 
-            # Pushbutton Slot
-            def handle_file_selection(target_table, row_position):
-                file_dialog = QtWidgets.QFileDialog()
-                file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-                file_dialog.setDirectory(fissure.utils.FISSURE_ROOT)
-                selected_file, _ = file_dialog.getOpenFileName()
-                if selected_file:
-                    # Place the selected file in the correct row and column (assume column 2)
-                    new_file_item = QtWidgets.QTableWidgetItem(selected_file)
-                    new_file_item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-                    target_table.setItem(row_position, 2, new_file_item)
-
             # Create Pushbutton
             new_pushbutton = QtWidgets.QPushButton(target_table, objectName='pushButton_')
             new_pushbutton.setText("...")
             new_pushbutton.setFixedSize(36, 23)
             target_table.setCellWidget(row_position, 3, new_pushbutton)
-            new_pushbutton.clicked.connect(lambda checked, row=row_position: handle_file_selection(target_table, row))
+            new_pushbutton.clicked.connect(lambda checked, table=target_table, row=row_position: LibraryTabSlots._slotLibraryPluginSupportFileSelectionClicked(component.frontend, table, row))
 
             # Activate Combobox Slot
             new_action_combobox.currentIndexChanged.connect(
@@ -1554,3 +1542,28 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     new_count = current_count + 1
     new_text = f"{base_text.strip()} ({new_count})"
     component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(3, new_text)
+
+
+async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):
+    """
+    Returns the GPS coordinate results to the HardwareSelectDialog.
+    """
+    # Populate Location
+    location_widget = [
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_1,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_2,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_3,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_4,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_5
+    ]
+    location_widget[int(tab_index)].setPlainText(str(coordinates))
+
+    # Enable the Find Button
+    find_widgets = [
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_1,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_2,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_3,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_4,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_5
+    ]
+    find_widgets[int(tab_index)].setEnabled(True)

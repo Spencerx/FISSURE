@@ -333,6 +333,8 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             disconnect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_disconnect_{node_idx}")
             more_a_button: QtWidgets.QPushButton = getattr(self, f"pushButton_more_a_{node_idx}")
             more_b_button: QtWidgets.QPushButton = getattr(self, f"pushButton_more_b_{node_idx}")
+            find_button: QtWidgets.QPushButton = getattr(self, f"pushButton_find_{node_idx}")
+            map_button: QtWidgets.QPushButton = getattr(self, f"pushButton_map_{node_idx}")
             manual_button: QtWidgets.QPushButton = getattr(self, f"pushButton_manual_{node_idx}")
             scan_results_remove_button: QtWidgets.QPushButton = getattr(self, f"pushButton_scan_results_remove_{node_idx}")
             add_to_all_button: QtWidgets.QPushButton = getattr(self, f"pushButton_add_to_all_{node_idx}")
@@ -359,6 +361,8 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             disconnect_button.clicked.connect(lambda: HardwareSelectSlots.disconnect(self))
             more_a_button.clicked.connect(lambda: HardwareSelectSlots.more(self))
             more_b_button.clicked.connect(lambda: HardwareSelectSlots.more(self))
+            find_button.clicked.connect(lambda: HardwareSelectSlots.find(self))
+            map_button.clicked.connect(lambda: HardwareSelectSlots.map(self))
             manual_button.clicked.connect(lambda: HardwareSelectSlots.manual(self))
             scan_results_remove_button.clicked.connect(lambda: HardwareSelectSlots.scan_results_remove(self))
             add_to_all_button.clicked.connect(lambda: HardwareSelectSlots.add_to_all(self))
@@ -725,6 +729,13 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             self.textEdit_hb_port_4,
             self.textEdit_hb_port_5,
         ]
+        find_widgets = [
+            self.pushButton_find_1,
+            self.pushButton_find_2,
+            self.pushButton_find_3,
+            self.pushButton_find_4,
+            self.pushButton_find_5,
+        ]
         stacked_widgets[tab_index].setCurrentIndex(2)
         bottom_stacked_widgets[tab_index].setCurrentIndex(0)
         scan_pushbuttons[tab_index].setEnabled(True)
@@ -737,6 +748,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         ip_widgets[tab_index].setEnabled(True)
         msg_port_widgets[tab_index].setEnabled(True)
         hb_port_widgets[tab_index].setEnabled(True)
+        find_widgets[tab_index].setEnabled(True)
 
 
     def importResults(self, settings_dict=""):
@@ -792,6 +804,13 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             self.stackedWidget_details_4,
             self.stackedWidget_details_5,
         ]
+        find_widgets = [
+            self.pushButton_find_1,
+            self.pushButton_find_2,
+            self.pushButton_find_3,
+            self.pushButton_find_4,
+            self.pushButton_find_5,
+        ]
 
         if local_buttons[tab_index].isChecked():
             stacked_widgets[tab_index].setCurrentIndex(0)
@@ -802,6 +821,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         local_buttons[tab_index].setEnabled(True)
         remote_buttons[tab_index].setEnabled(True)
         details_stacked_widgets[tab_index].setCurrentIndex(0)
+        find_widgets[tab_index].setEnabled(False)
 
         # Support Only One Local Sensor Node
         get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]

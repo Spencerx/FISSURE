@@ -372,7 +372,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>5</y>
-          <width>175</width>
+          <width>200</width>
           <height>27</height>
          </rect>
         </property>
@@ -395,7 +395,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>35</y>
-          <width>175</width>
+          <width>250</width>
           <height>27</height>
          </rect>
         </property>
@@ -493,6 +493,72 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>More</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_find_1">
+        <property name="geometry">
+         <rect>
+          <x>410</x>
+          <y>36</y>
+          <width>50</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_format_1">
+        <property name="geometry">
+         <rect>
+          <x>335</x>
+          <y>36</y>
+          <width>70</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>DD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MGRS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DMS</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QPushButton" name="pushButton_map_1">
+        <property name="geometry">
+         <rect>
+          <x>465</x>
+          <y>35</y>
+          <width>40</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Map</string>
         </property>
        </widget>
       </widget>
@@ -2145,7 +2211,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>35</y>
-          <width>175</width>
+          <width>250</width>
           <height>27</height>
          </rect>
         </property>
@@ -2168,7 +2234,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>5</y>
-          <width>175</width>
+          <width>200</width>
           <height>27</height>
          </rect>
         </property>
@@ -2200,6 +2266,69 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>More</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_find_2">
+        <property name="geometry">
+         <rect>
+          <x>410</x>
+          <y>36</y>
+          <width>50</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_format_2">
+        <property name="geometry">
+         <rect>
+          <x>335</x>
+          <y>36</y>
+          <width>70</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>DD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MGRS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DMS</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QPushButton" name="pushButton_map_2">
+        <property name="geometry">
+         <rect>
+          <x>465</x>
+          <y>35</y>
+          <width>40</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Map</string>
         </property>
        </widget>
       </widget>
@@ -3866,7 +3995,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>35</y>
-          <width>175</width>
+          <width>250</width>
           <height>27</height>
          </rect>
         </property>
@@ -3889,7 +4018,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>5</y>
-          <width>175</width>
+          <width>200</width>
           <height>27</height>
          </rect>
         </property>
@@ -3921,6 +4050,69 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>More</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_find_3">
+        <property name="geometry">
+         <rect>
+          <x>410</x>
+          <y>36</y>
+          <width>50</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_format_3">
+        <property name="geometry">
+         <rect>
+          <x>335</x>
+          <y>36</y>
+          <width>70</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>DD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MGRS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DMS</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QPushButton" name="pushButton_map_3">
+        <property name="geometry">
+         <rect>
+          <x>465</x>
+          <y>35</y>
+          <width>40</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Map</string>
         </property>
        </widget>
       </widget>
@@ -5590,7 +5782,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>35</y>
-          <width>175</width>
+          <width>250</width>
           <height>27</height>
          </rect>
         </property>
@@ -5613,7 +5805,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>5</y>
-          <width>175</width>
+          <width>200</width>
           <height>27</height>
          </rect>
         </property>
@@ -5645,6 +5837,69 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>More</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_find_4">
+        <property name="geometry">
+         <rect>
+          <x>410</x>
+          <y>36</y>
+          <width>50</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_format_4">
+        <property name="geometry">
+         <rect>
+          <x>335</x>
+          <y>36</y>
+          <width>70</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>DD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MGRS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DMS</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QPushButton" name="pushButton_map_4">
+        <property name="geometry">
+         <rect>
+          <x>465</x>
+          <y>35</y>
+          <width>40</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Map</string>
         </property>
        </widget>
       </widget>
@@ -7336,7 +7591,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>35</y>
-          <width>175</width>
+          <width>250</width>
           <height>27</height>
          </rect>
         </property>
@@ -7359,7 +7614,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>80</x>
           <y>5</y>
-          <width>175</width>
+          <width>200</width>
           <height>27</height>
          </rect>
         </property>
@@ -7391,6 +7646,69 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>More</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_find_5">
+        <property name="geometry">
+         <rect>
+          <x>410</x>
+          <y>36</y>
+          <width>50</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Find</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_format_5">
+        <property name="geometry">
+         <rect>
+          <x>335</x>
+          <y>36</y>
+          <width>70</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text">
+          <string>DD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MGRS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DMS</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QPushButton" name="pushButton_map_5">
+        <property name="geometry">
+         <rect>
+          <x>465</x>
+          <y>35</y>
+          <width>40</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Map</string>
         </property>
        </widget>
       </widget>

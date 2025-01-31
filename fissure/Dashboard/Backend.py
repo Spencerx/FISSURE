@@ -525,16 +525,22 @@ class DashboardBackend:
 
 
     async def probe_sensor_node(self, tab_index, table_row_text):
+        """
+        Probes hardware connected to a sensor node.
+        """
         PARAMETERS = {"tab_index": tab_index, "table_row_text": table_row_text}
         probe_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
             fissure.comms.MessageFields.MESSAGE_NAME: "probeHardware",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, probe_cmd)
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, probe_cmd)    
 
 
     async def guess_sensor_node(self, tab_index, table_row, table_row_text, guess_index):
+        """
+        Guesses identifiers for hardware connected to a sensor node.
+        """
         PARAMETERS = {
             "tab_index": tab_index,
             "table_row": table_row,
@@ -1914,3 +1920,16 @@ class DashboardBackend:
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def findGPS_Coordinates(self, tab_index=0, format=""):
+        """
+        Queries the remote sensor node for its GPS coordinates. 
+        """
+        PARAMETERS = {"tab_index": tab_index, "format": format}
+        find_gps_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_Coordinates",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, find_gps_cmd)

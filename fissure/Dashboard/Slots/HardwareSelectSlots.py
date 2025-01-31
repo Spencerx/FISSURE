@@ -7,6 +7,9 @@ import time
 import os
 import yaml
 import asyncio
+import tempfile
+import subprocess
+
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -2461,4 +2464,114 @@ def delete(HWSelect: QtCore.QObject):
         HWSelect.accept()
 
 
+@qasync.asyncSlot(QtCore.QObject)
+async def find(HWSelect: QtCore.QObject):
+    """ 
+    Finds the GPS location for the provided method.
+    """
+    # GPS Data Format
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    format_widgets = [
+        HWSelect.comboBox_format_1,
+        HWSelect.comboBox_format_2,
+        HWSelect.comboBox_format_3,
+        HWSelect.comboBox_format_4,
+        HWSelect.comboBox_format_5
+    ]
+    get_format = str(format_widgets[tab_index].currentText())
 
+    # Detect if Connected
+    local_remote_stacked_widgets = [
+        HWSelect.stackedWidget_local_remote_1,
+        HWSelect.stackedWidget_local_remote_2,
+        HWSelect.stackedWidget_local_remote_3,
+        HWSelect.stackedWidget_local_remote_4,
+        HWSelect.stackedWidget_local_remote_5
+    ]
+    if local_remote_stacked_widgets[tab_index].currentIndex() == 2:
+        # Send the Message
+        await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_format)
+
+        # Disable the Find Button
+        find_widgets = [
+            HWSelect.pushButton_find_1,
+            HWSelect.pushButton_find_2,
+            HWSelect.pushButton_find_3,
+            HWSelect.pushButton_find_4,
+            HWSelect.pushButton_find_5
+        ]
+        find_widgets[tab_index].setEnabled(False)
+    else:
+        HWSelect.dashboard.logger.error("Sensor node not connected. Unable to retrieve GPS location.")
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def map(HWSelect: QtCore.QObject):
+    """ 
+    Maps the GPS location in default KML viewer (likely Google Earth Pro).
+    """
+    # Gather Location
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    location_widgets = [
+        HWSelect.textEdit_location_1,
+        HWSelect.textEdit_location_2,
+        HWSelect.textEdit_location_3,
+        HWSelect.textEdit_location_4,
+        HWSelect.textEdit_location_5
+    ]
+    format_widgets = [
+        HWSelect.comboBox_format_1,
+        HWSelect.comboBox_format_2,
+        HWSelect.comboBox_format_3,
+        HWSelect.comboBox_format_4,
+        HWSelect.comboBox_format_5
+    ]
+    get_format = str(format_widgets[tab_index].currentText())
+
+    # Convert to DD if needed
+    try:
+        coord = str(location_widgets[tab_index].toPlainText()).strip()
+        
+        if get_format == "MGRS":
+            lat, lon = fissure.utils.mgrs_to_dd(coord)
+        elif get_format == "DMS":
+            lat, lon = fissure.utils.dms_to_dd(coord)
+        else:  # Already in Decimal Degrees
+            parts = coord.split(',')
+            if len(parts) != 2:
+                raise ValueError(f"Invalid Decimal Degrees format: {coord}")
+            
+            lat = parts[0].strip()
+            lon = parts[1].strip()
+
+        HWSelect.dashboard.logger.debug(f"✅ Converted Coordinates: {lat}, {lon}")  # Debugging output
+
+    except ValueError as e:
+        HWSelect.dashboard.logger.error(f"❌ Error in coordinate conversion: {e}")
+        return
+
+    except Exception as e:
+        HWSelect.dashboard.logger.error(f"❌ Unexpected error: {e}")
+        return
+
+    # Construct KML
+    kml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Placemark>
+        <name>GPS Location</name>
+        <Point>
+          <coordinates>{lon},{lat},0</coordinates>
+        </Point>
+      </Placemark>
+    </kml>
+    """
+
+    # Create a temporary KML file in /tmp/
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".kml", dir="/tmp/") as temp_kml:
+        temp_kml.write(kml_content.encode('utf-8'))
+        temp_kml_path = temp_kml.name
+
+    HWSelect.dashboard.logger.info(f"KML written to: {temp_kml_path}")
+
+    # Open the file using xdg-open (respects user's default KML viewer)
+    subprocess.run(["xdg-open", temp_kml_path], check=False)

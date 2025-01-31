@@ -1,4 +1,7 @@
 import subprocess
+import time
+from gps import gps, WATCH_ENABLE
+from fissure.utils import format_coordinates
 
 
 SUPPORTED_HARDWARE = [
@@ -1175,3 +1178,34 @@ def findRSPdxR2(guess_serial="", guess_index=0):
         pass
         
     return scan_results, guess_index
+
+
+def probe_gpsd(format=""):
+    """ 
+    Probes GPS devices using gpsd and returns the coordinates.
+    """
+    try:
+        session = gps(mode=WATCH_ENABLE)
+
+        start_time = time.time()  # Track the start time
+        timeout = 3  # Maximum wait time in seconds
+
+        while True:
+            report = session.next()
+
+            if report['class'] == 'TPV':  # Check if it's valid position data
+                lat = getattr(report, 'lat', None)
+                lon = getattr(report, 'lon', None)
+
+                if lat is not None and lon is not None:
+                    get_coordinates = format_coordinates(lat, lon, format)
+                    print(f"✅ GPS Data Received: {get_coordinates}")  # Debugging output
+                    return get_coordinates  # Exit loop once we have valid coordinates
+
+            if time.time() - start_time > timeout:
+                print("❌ GPS timeout: No valid data received.")
+                return None
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return

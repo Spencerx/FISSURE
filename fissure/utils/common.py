@@ -12,6 +12,8 @@ import zmq.asyncio
 import zmq.auth
 import zmq.auth.asyncio
 import subprocess
+import re
+import mgrs
 
 FISSURE_ROOT: os.PathLike = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 LOG_DIR: os.PathLike = os.path.join(FISSURE_ROOT, "Logs")
@@ -465,3 +467,131 @@ def get_library_version():
         return "maint-3.8"
     elif os_info in OS_3_10_KEYWORDS:
         return "maint-3.10"
+
+
+############################################# GPS Functions ####################################################
+
+def format_coordinates(lat, lon, format_type):
+    if format_type == "DD":  # Decimal Degrees
+        return f"{lat:.6f}, {lon:.6f}"  # Ensure full precision
+    elif format_type == "MGRS":
+        return mgrs.MGRS().toMGRS(lat, lon)
+    elif format_type == "DMS":
+        return decimal_to_dms(lat, lon)
+    return "Invalid format."
+
+
+def parse_nmea(nmea_sentence):
+    """
+    Parses an NMEA sentence (e.g., $GPGGA) and extracts latitude and longitude.
+    """
+    parts = nmea_sentence.strip().split(',')
+
+    if parts[0] not in ["$GPGGA", "$GPRMC"]:  # Ensure it's a valid GPS sentence
+        return None, None
+
+    try:
+        # Extract latitude
+        lat_raw = parts[2]
+        lat_dir = parts[3]  # N or S
+        lon_raw = parts[4]
+        lon_dir = parts[5]  # E or W
+
+        # Convert to Decimal Degrees
+        lat = convert_to_decimal(lat_raw, lat_dir)
+        lon = convert_to_decimal(lon_raw, lon_dir)
+
+        return lat, lon
+    except (IndexError, ValueError):
+        return None, None
+
+
+def convert_to_decimal(degrees_minutes, direction):
+    """
+    Converts NMEA latitude/longitude format to decimal degrees.
+    """
+    if not degrees_minutes:
+        return None
+
+    # NMEA format: DDMM.MMMM (degrees and minutes)
+    degrees = int(degrees_minutes[:2])  # First 2 digits are degrees
+    minutes = float(degrees_minutes[2:])  # Rest are minutes
+
+    decimal_degrees = degrees + (minutes / 60)
+
+    # South and West are negative
+    if direction in ['S', 'W']:
+        decimal_degrees *= -1
+
+    return decimal_degrees
+
+
+def mgrs_to_dd(mgrs_coord):
+    """
+    Convert MGRS to Decimal Degrees (DD)
+    """
+    m = mgrs.MGRS()
+    lat, lon = m.toLatLon(mgrs_coord)
+    return lat, lon
+
+
+def dms_to_dd(dms_str):
+    """
+    Converts Degrees, Minutes, Seconds (DMS) format to Decimal Degrees (DD).
+    Supports various spacing and delimiters.
+    """
+    # Improved regex pattern to match different DMS formats
+    pattern = re.compile(r"""
+        (\d+)[°\s]+      # Degrees (D° or D )
+        (\d+)['′\s]+     # Minutes (M' or M )
+        ([\d.]+)?        # Seconds (S.S" or S.S, optional)
+        ["″]?\s*([NS])   # N/S hemisphere
+        [, ]+\s*         # Separator between lat/lon
+        (\d+)[°\s]+      # Degrees (D° or D )
+        (\d+)['′\s]+     # Minutes (M' or M )
+        ([\d.]+)?        # Seconds (S.S" or S.S, optional)
+        ["″]?\s*([EW])   # E/W hemisphere
+    """, re.VERBOSE)
+
+    match = pattern.match(dms_str)
+
+    if not match:
+        raise ValueError(f"Invalid DMS format: {dms_str}")
+
+    lat_d, lat_m, lat_s, lat_dir, lon_d, lon_m, lon_s, lon_dir = match.groups()
+
+    # Convert to Decimal Degrees
+    lat_dd = int(lat_d) + int(lat_m) / 60 + (float(lat_s) if lat_s else 0) / 3600
+    lon_dd = int(lon_d) + int(lon_m) / 60 + (float(lon_s) if lon_s else 0) / 3600
+
+    # Apply hemisphere corrections
+    if lat_dir == "S":
+        lat_dd *= -1
+    if lon_dir == "W":
+        lon_dd *= -1
+
+    return lat_dd, lon_dd
+
+
+def decimal_to_dms(lat, lon):
+    """
+    Converts latitude and longitude from Decimal Degrees (DD) to Degrees, Minutes, Seconds (DMS).
+    """
+    def convert(coord):
+        degrees = int(coord)
+        minutes = int((abs(coord) - abs(degrees)) * 60)
+        seconds = (abs(coord) - abs(degrees) - minutes / 60) * 3600
+        return degrees, minutes, seconds
+
+    # Convert latitude and longitude
+    lat_d, lat_m, lat_s = convert(lat)
+    lon_d, lon_m, lon_s = convert(lon)
+
+    # Determine N/S and E/W
+    lat_dir = "N" if lat >= 0 else "S"
+    lon_dir = "E" if lon >= 0 else "W"
+
+    # Format output
+    return f"{abs(lat_d)}°{lat_m}'{lat_s:.2f}\" {lat_dir}, {abs(lon_d)}°{lon_m}'{lon_s:.2f}\" {lon_dir}"
+
+##################################################################################################

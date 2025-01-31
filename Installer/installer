@@ -97,6 +97,7 @@ sudo python3 -m pip install opencv-python-headless
 sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -924,7 +925,10 @@ ls /usr/local/bin/grip
 
 # Kismet
 programs_ubuntu20_04.append(('Kismet (14.4 MB)',
-"""sudo apt-get install -y kismet  # add your computer's username to the group
+"""echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
+sudo apt-get install -y kismet  # add your computer's username to the group
 ########## Verify ##########
 ls /usr/bin/kismet
 """,True,'802.11'))
@@ -1857,6 +1861,10 @@ programs_ubuntu20_04.append(('m17-cxx-demod (141.0 MB)',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
+git clone https://bitbucket.org/blaze-lib/blaze.git
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
+cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
 mkdir build
@@ -2223,6 +2231,7 @@ sudo python3 -m pip install opencv-python-headless --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -3095,7 +3104,9 @@ programs_parrot_os_6_1.append(('Kismet',
 echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
 sudo apt update
-sudo apt-get install -y kismet
+echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 """,True,'802.11'))
 
 # UDP Replay
@@ -3966,6 +3977,10 @@ programs_parrot_os_6_1.append(('m17-cxx-demod',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
+git clone https://bitbucket.org/blaze-lib/blaze.git
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
+cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
 mkdir build
@@ -4315,6 +4330,7 @@ sudo python3 -m pip install opencv-python-headless
 sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -5186,7 +5202,9 @@ programs_ubuntu22_04.append(('Kismet (106.4 MB)',
 echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
 sudo apt update
-sudo apt-get install -y kismet
+echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 """,True,'802.11'))
 
 # UDP Replay
@@ -6052,6 +6070,10 @@ programs_ubuntu22_04.append(('m17-cxx-demod (21.8 MB)',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
+git clone https://bitbucket.org/blaze-lib/blaze.git
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
+cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
 mkdir build
@@ -6397,6 +6419,7 @@ sudo python3 -m pip uninstall opencv-python
 sudo python3 -m pip install opencv-python-headless
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs
 . ~/.bashrc
 """, True, "Minimum Install"))
 
@@ -8525,6 +8548,7 @@ sudo python3 -m pip install opencv-python-headless --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -10272,9 +10296,8 @@ programs_kali.append(('m17-cxx-demod (326.49 MB)',
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://bitbucket.org/blaze-lib/blaze.git
-cd blaze
-sudo cp -r blaze /usr/local/include/
-cmake -DBLAZE_INCLUDE_DIR=/usr/local/include/blaze
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
@@ -10624,6 +10647,7 @@ sudo python3 -m pip install opencv-python-headless
 sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -11494,7 +11518,9 @@ programs_backbox_linux_8.append(('Kismet (106.4 MB)',
 echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
 sudo apt update
-sudo apt-get install -y kismet
+echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 """,True,'802.11'))
 
 # UDP Replay
@@ -12359,6 +12385,10 @@ programs_backbox_linux_8.append(('m17-cxx-demod (21.8 MB)',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
+git clone https://bitbucket.org/blaze-lib/blaze.git
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
+cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
 mkdir build
@@ -12713,6 +12743,7 @@ sudo python3 -m pip install opencv-python-headless --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -13590,7 +13621,9 @@ programs_raspberry_pi_os.append(('Kismet',
 echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
 sudo apt update
-sudo apt-get install -y kismet
+echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 """,True,'802.11'))
 
 # UDP Replay
@@ -14456,6 +14489,10 @@ programs_raspberry_pi_os.append(('m17-cxx-demod',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
+git clone https://bitbucket.org/blaze-lib/blaze.git
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
+cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
 mkdir build
@@ -14807,6 +14844,7 @@ sudo python3 -m pip install opencv-python-headless
 sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -15679,7 +15717,9 @@ programs_ubuntu22_04_arm.append(('Kismet (106.4 MB)',
 echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
 sudo apt update
-sudo apt-get install -y kismet
+echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 """,True,'802.11'))
 
 # UDP Replay
@@ -16545,6 +16585,10 @@ programs_ubuntu22_04_arm.append(('m17-cxx-demod (21.8 MB)',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
+git clone https://bitbucket.org/blaze-lib/blaze.git
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
+cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
 mkdir build
@@ -16903,6 +16947,7 @@ sudo python3 -m pip install opencv-python-headless --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -17777,7 +17822,9 @@ programs_ubuntu24_04.append(('Kismet (108.00 kB)',
 echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
 sudo apt update
-sudo apt-get install -y kismet
+echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
+echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 """,True,'802.11'))
 
 # UDP Replay
@@ -18645,9 +18692,8 @@ programs_ubuntu24_04.append(('m17-cxx-demod (326.55 MB)',
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://bitbucket.org/blaze-lib/blaze.git
-cd blaze
-sudo cp -r blaze /usr/local/include/
-cmake -DBLAZE_INCLUDE_DIR=/usr/local/include/blaze
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/
@@ -19005,6 +19051,7 @@ sudo python3 -m pip install opencv-python-headless --break-system-packages
 sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
+sudo python3 -m pip install mgrs --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -20747,9 +20794,8 @@ programs_arch_linux.append(('m17-cxx-demod (326.55 MB)',
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://bitbucket.org/blaze-lib/blaze.git
-cd blaze
-sudo cp -r blaze /usr/local/include/
-cmake -DBLAZE_INCLUDE_DIR=/usr/local/include/blaze
+sudo mkdir -p /usr/local/include/blaze
+sudo cp -r blaze/blaze /usr/local/include/
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mobilinkd/m17-cxx-demod.git
 cd m17-cxx-demod/

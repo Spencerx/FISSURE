@@ -2681,3 +2681,30 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def findGPS_Coordinates(component: object, tab_index=0, format=""):
+    """
+    Queries the remote sensor node for its GPS coordinates. 
+    """
+    # Forward the Message
+    PARAMETERS = {"tab_index": tab_index, "format": format}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_Coordinates",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):
+    """
+    Forwards the GPS coordinate results message to the Dashboard.
+    """
+    PARAMETERS = {"tab_index": tab_index, "coordinates": coordinates}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

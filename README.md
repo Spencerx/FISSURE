@@ -24,6 +24,10 @@ FISSURE is particularly effective in two key domains: 1) it provides hooks for t
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
 
+**GPS Acquisition and Mapping** in sensor node configuration.
+
+![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
+
 **Plugins** to import and export capabilities into the FISSURE library and share with collaborators. (A work in progress)
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
@@ -70,6 +74,8 @@ The deployment of multiple sensor nodes on the same network unlocks many geospat
 ![Conference](https://img.shields.io/badge/Event-Conference-darkgray) **Tue. September 17, 2024**: GNU Radio Conference 2024 - 1605-1635 EST [Description/Slides](https://events.gnuradio.org/event/24/contributions/649/), [Live Recording](https://youtu.be/5UYhUi8SiK4?t=27282)
 
 ![CTF](https://img.shields.io/badge/Event-CTF-purple) **January 20, 2025 (Runs Indefinitely)**: FISSURE Challenge. [Link](https://fissure.ainfosec.com/) (Now Live)
+
+![Career Fair](https://img.shields.io/badge/Event-Career%20Fair-green) **Thu. February 6, 2025**: Binghamton University Spring 2025 Job and Internship Fair - 1100-1500 EST
 
 ## Documentation
 
@@ -255,7 +261,7 @@ Notes:
 - The git submodule command will download all missing GNU Radio out-of-tree modules from their online repositories and is required to install the GNU Radio out-of-tree modules.
 - The installer will ask to install PyQt software dependencies required to launch the installation GUIs if they are not found. 
 - Select the operating option in the GUI that best matches your operating system (should be detected automatically if your OS matches an option).
-- Periodically answer prompts regarding third-party throughout the install. Use your best judgment, the answers will not likely impact FISSURE.
+- Periodically answer prompts regarding third-party software throughout the install. Use your best judgment, the answers will not likely impact FISSURE.
 
 <p align="center">
 <img src="/docs/Icons/README/install1.png">
