@@ -127,6 +127,19 @@ class Dashboard(QtWidgets.QMainWindow):
         else:
             MenuBarSlots.setStyleSheet(self, "light")
 
+        # Scale Factor
+        if fissure.utils.isFloat(self.backend.settings["qt_scale_factor"]):
+            if float(self.backend.settings["qt_scale_factor"]) == 1.0:
+                self.window.actionScaleFactor1_0x.setChecked(True)
+            elif float(self.backend.settings["qt_scale_factor"]) == 1.25:
+                self.window.actionScaleFactor1_25x.setChecked(True)
+            elif float(self.backend.settings["qt_scale_factor"]) == 1.5:
+                self.window.actionScaleFactor1_5x.setChecked(True)
+            elif float(self.backend.settings["qt_scale_factor"]) == 2.0:
+                self.window.actionScaleFactor2_0x.setChecked(True)
+            else:
+                self.window.actionScaleFactorCustom.setChecked(True)
+
         # Remember Configuration
         if self.backend.settings["remember_configuration"] == True:
             self.window.actionRemember_Configuration.setChecked(True)
@@ -969,6 +982,7 @@ class Dashboard(QtWidgets.QMainWindow):
             self.window.actionwl_color_picker.setEnabled(False)
             self.window.actiontpms_rx.setEnabled(False)
             self.window.actionBaudline.setEnabled(False)
+            self.window.menuESP32_Bluetooth_Classic_Sniffer.setEnabled(False)
 
         # Disable Menu Items for all maint-3.10 Operating Systems
         # elif any(keyword == get_os for keyword in fissure.utils.OS_3_10_KEYWORDS):
@@ -981,6 +995,7 @@ class Dashboard(QtWidgets.QMainWindow):
             self.window.actionGr_air_modes.setEnabled(False)
             self.window.actionAiS_TX.setEnabled(False)
             self.window.actionBaudline.setEnabled(False)
+            self.window.menuESP32_Bluetooth_Classic_Sniffer.setEnabled(False)
 
 
     def load_MPL_components(self):
@@ -1156,6 +1171,16 @@ class Dashboard(QtWidgets.QMainWindow):
             await qasync.asyncio.sleep(0.1)
 
         self.all_closed_down = True
+
+        # Wait for Remember Configuration to Write to File
+        start_time = time.time()
+        timeout = 5  # seconds
+        while self.backend.shutdown_complete == False:
+            if time.time() - start_time > timeout:
+                print("Exit timed out before Remember Configuration could write to file. Settings may not be saved")
+                break
+            await qasync.asyncio.sleep(0.1)
+
         self.close()
 
 
@@ -1684,6 +1709,11 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionDark_Mode.triggered.connect(lambda: MenuBarSlots.setStyleSheet(dashboard, "dark"))
     dashboard.window.actionCustom_Mode.triggered.connect(lambda: MenuBarSlots.setStyleSheet(dashboard, "custom"))
     dashboard.window.actionRandom.triggered.connect(lambda: MenuBarSlots.setStyleSheet(dashboard, "random"))
+    dashboard.window.actionScaleFactor1_0x.triggered.connect(lambda: MenuBarSlots._slotMenuViewScaleFactor1_0xClicked(dashboard))
+    dashboard.window.actionScaleFactor1_25x.triggered.connect(lambda: MenuBarSlots._slotMenuViewScaleFactor1_25xClicked(dashboard))
+    dashboard.window.actionScaleFactor1_5x.triggered.connect(lambda: MenuBarSlots._slotMenuViewScaleFactor1_5xClicked(dashboard))
+    dashboard.window.actionScaleFactor2_0x.triggered.connect(lambda: MenuBarSlots._slotMenuViewScaleFactor2_0xClicked(dashboard))
+    dashboard.window.actionScaleFactorCustom.triggered.connect(lambda: MenuBarSlots._slotMenuViewScaleFactorCustomClicked(dashboard))
 
     # Options Menu
     dashboard.window.actionAll_Options.triggered.connect(lambda: MenuBarSlots._slotMenuOptionsClicked(dashboard))

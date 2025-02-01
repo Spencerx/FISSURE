@@ -4860,6 +4860,9 @@ def _slotMenuRememberConfigurationClicked(dashboard: QtWidgets.QMainWindow):
         fissure.utils.save_yaml(fissure.utils.FISSURE_CONFIG_FILE, get_settings)
         fissure.utils.save_yaml(fissure.utils.FISSURE_CONFIG_DEFAULT, get_settings_default)
 
+        # Save to Settings
+        dashboard.backend.settings["remember_configuration"] = True
+
     # Forget
     else:
         # Change the Value
@@ -4869,6 +4872,9 @@ def _slotMenuRememberConfigurationClicked(dashboard: QtWidgets.QMainWindow):
         # Save the YAML
         fissure.utils.save_yaml(fissure.utils.FISSURE_CONFIG_FILE, get_settings)
         fissure.utils.save_yaml(fissure.utils.FISSURE_CONFIG_DEFAULT, get_settings_default)
+
+        # Save to Settings
+        dashboard.backend.settings["remember_configuration"] = False
 
 
 @QtCore.pyqtSlot()
@@ -5055,7 +5061,7 @@ def _slotMenuLessonZ_WaveClicked():
     )
 
 
-@qasync.asyncSlot(QtCore.QObject)
+@QtCore.pyqtSlot()
 def _slotMenuLessonCeilingFansClicked():
     """
     Opens the html file in a browser.
@@ -5675,4 +5681,123 @@ async def _slotMenuDemoLogAllClicked(dashboard: QtWidgets.QMainWindow):
     Executes the demo script and logs its progress.
     """
     pass
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotMenuViewScaleFactor1_0xClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Sets qt_scale_factor to 1.0 in settings with remember configuraiton checked. Requires a restart to apply.
+    """
+    # Change Settings Dictionary
+    dashboard.backend.settings["qt_scale_factor"] = 1.0
+
+    # Check for Remember Configuration
+    if not dashboard.window.actionRemember_Configuration.isChecked():
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Remember Configuration must be checked for scale factor to be applied on restart of the FISSURE Dashboard.")
+    else:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Changing the scale factor requires restarting the FISSURE Dashboard to take effect.")
+
+    # Uncheck Other Menu Items
+    dashboard.window.actionScaleFactor1_25x.setChecked(False)
+    dashboard.window.actionScaleFactor1_5x.setChecked(False)
+    dashboard.window.actionScaleFactor2_0x.setChecked(False)
+    dashboard.window.actionScaleFactorCustom.setChecked(False)
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotMenuViewScaleFactor1_25xClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Sets qt_scale_factor to 1.25 in settings with remember configuraiton checked. Requires a restart to apply.
+    """
+    # Change Settings Dictionary
+    dashboard.backend.settings["qt_scale_factor"] = 1.25
+
+    # Check for Remember Configuration
+    if not dashboard.window.actionRemember_Configuration.isChecked():
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Remember Configuration must be checked for scale factor to be applied on restart of the FISSURE Dashboard.")
+    else:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Changing the scale factor requires restarting the FISSURE Dashboard to take effect.")
+
+    # Uncheck Other Menu Items
+    dashboard.window.actionScaleFactor1_0x.setChecked(False)
+    dashboard.window.actionScaleFactor1_5x.setChecked(False)
+    dashboard.window.actionScaleFactor2_0x.setChecked(False)
+    dashboard.window.actionScaleFactorCustom.setChecked(False)
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotMenuViewScaleFactor1_5xClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Sets qt_scale_factor to 1.5 in settings with remember configuraiton checked. Requires a restart to apply.
+    """
+    # Change Settings Dictionary
+    print(dashboard.backend.settings["qt_scale_factor"])
+    dashboard.backend.settings["qt_scale_factor"] = 1.5
+    print(dashboard.backend.settings["qt_scale_factor"])
+
+    # Check for Remember Configuration
+    if not dashboard.window.actionRemember_Configuration.isChecked():
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Remember Configuration must be checked for scale factor to be applied on restart of the FISSURE Dashboard.")
+    else:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Changing the scale factor requires restarting the FISSURE Dashboard to take effect.")
+
+    # Uncheck Other Menu Items
+    dashboard.window.actionScaleFactor1_0x.setChecked(False)
+    dashboard.window.actionScaleFactor1_25x.setChecked(False)
+    dashboard.window.actionScaleFactor2_0x.setChecked(False)
+    dashboard.window.actionScaleFactorCustom.setChecked(False)
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotMenuViewScaleFactor2_0xClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Sets qt_scale_factor to 2.0 in settings with remember configuraiton checked. Requires a restart to apply.
+    """
+    # Change Settings Dictionary
+    dashboard.backend.settings["qt_scale_factor"] = 2.0
+
+    # Check for Remember Configuration
+    if not dashboard.window.actionRemember_Configuration.isChecked():
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Remember Configuration must be checked for scale factor to be applied on restart of the FISSURE Dashboard.")
+    else:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Changing the scale factor requires restarting the FISSURE Dashboard to take effect.")
+
+    # Uncheck Other Menu Items
+    dashboard.window.actionScaleFactor1_0x.setChecked(False)
+    dashboard.window.actionScaleFactor1_25x.setChecked(False)
+    dashboard.window.actionScaleFactor1_5x.setChecked(False)
+    dashboard.window.actionScaleFactorCustom.setChecked(False)
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotMenuViewScaleFactorCustomClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Sets qt_scale_factor to custom value >= 1.0 in settings with remember configuraiton checked. Requires a restart to apply.
+    """
+    # Open Chooser
+    scale_factor_result = await fissure.Dashboard.UI_Components.Qt5.async_textedit_dialog(
+        parent=None, 
+        label_text="Enter New Scale Factor (>=1.0):", 
+    )
+    if scale_factor_result:
+        dashboard.logger.debug("New scale factor: " + str(scale_factor_result))
+        if fissure.utils.isFloat(scale_factor_result):
+            scale_factor_result = float(scale_factor_result)
+
+            # Change Settings Dictionary
+            dashboard.backend.settings["qt_scale_factor"] = scale_factor_result
+        else:
+            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Scale factor must be a valid float value.")
+            return
+    else:
+        return  
+
+    # Check for Remember Configuration
+    if not dashboard.window.actionRemember_Configuration.isChecked():
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Remember Configuration must be checked for scale factor to be applied on restart of the FISSURE Dashboard.")
+    else:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Changing the scale factor requires restarting the FISSURE Dashboard to take effect.")
+
+    # Uncheck Other Menu Items
+    dashboard.window.actionScaleFactor1_0x.setChecked(False)
+    dashboard.window.actionScaleFactor1_25x.setChecked(False)
+    dashboard.window.actionScaleFactor1_5x.setChecked(False)
+    dashboard.window.actionScaleFactor2_0x.setChecked(False)
 

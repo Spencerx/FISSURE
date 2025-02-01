@@ -297,7 +297,12 @@ class FissureZMQNode(ABC):
             raise Exception(f"method {cb_name} not implemented in context {context}")
 
         params = parsed_command.get("Parameters")
-        self.logger.debug(f"executing callback: {cb_name} with parameters: {params}")
+
+        # Ignore Message Parameters in Logging
+        if cb_name in BANNED_MESSAGE_NAMES:
+            self.logger.debug(f"executing callback: {cb_name}")
+        else:
+            self.logger.debug(f"executing callback: {cb_name} with parameters: {params}")
 
         # Process parameters and execute callback functon
         if params is None:

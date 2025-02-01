@@ -6,6 +6,7 @@ import asyncio
 import fissure.utils
 import qasync
 import sys
+import os
 
 
 def run():
@@ -16,6 +17,11 @@ def run():
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+    # Set Qt Scaling
+    settings = fissure.utils.get_fissure_config()
+    qt_scale_factor = settings.get("qt_scale_factor", "1.0") 
+    os.environ["QT_SCALE_FACTOR"] = str(qt_scale_factor)  # >=1.0
 
     app = QtWidgets.QApplication(sys.argv)
 

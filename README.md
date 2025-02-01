@@ -4,13 +4,13 @@
 
 **Frequency Independent SDR-based Signal Understanding and Reverse Engineering**
 
-FISSURE is an open-source RF and reverse engineering framework designed for all skill levels with hooks for signal detection and classification, protocol discovery, attack execution, IQ manipulation, vulnerability analysis, automation, and AI/ML. The framework was built to promote the rapid integration of software modules, radios, protocols, signal data, scripts, flow graphs, reference material, and third-party tools. FISSURE is a workflow enabler that keeps software in one location and allows teams to effortlessly get up to speed while sharing the same proven baseline configuration for specific Linux distributions.
+FISSURE is an open-source RF and reverse engineering framework designed for all skill levels with hooks for signal detection and classification, protocol discovery, attack execution, IQ manipulation, vulnerability analysis, automation, and AI/ML integration. The framework was built to promote the rapid integration of software modules, radios, protocols, signal data, scripts, flow graphs, reference material, and third-party tools. FISSURE streamlines workflows by centralizing software and enabling teams to quickly get up to speed while sharing a proven baseline configuration for specific Linux distributions.
 
-The framework and tools included with FISSURE are designed to detect the presence of RF energy, understand the characteristics of a signal, collect and analyze samples, develop transmit and/or injection techniques, and craft custom payloads or messages. FISSURE contains a growing library of protocol and signal information to assist in identification, packet crafting, and fuzzing. Online archive capabilities exist to download signal files and build playlists to simulate traffic and test systems. 
+The framework and tools included with FISSURE are designed to detect the presence of RF energy, understand the characteristics of a signal, collect and analyze samples, develop transmit and/or injection techniques, and craft custom payloads or messages. FISSURE contains a growing library of protocol and signal information to assist in identification, packet crafting, and fuzzing. FISSURE includes online archive capabilities for downloading signal files and building playlists to simulate traffic and test systems. 
 
 The friendly Python codebase and user interface allows beginners to quickly learn about popular tools and techniques involving RF and reverse engineering. Educators in cybersecurity and engineering can take advantage of the built-in material or utilize the framework to demonstrate their own real-world applications. Developers and researchers can use FISSURE for their daily tasks or to expose their cutting-edge solutions to a wider audience. As awareness and usage of FISSURE grows in the community, so will the extent of its capabilities and the breadth of the technology it encompasses.
 
-FISSURE is particularly effective in two key domains: 1) it provides hooks for techniques and technology related to RF reverse engineering and 2) it supports multiple deployment options to expand its operational relevance by joining different types of user interfaces, networks, hardware/software processing, and distributed remote sensor nodes. 
+FISSURE is particularly effective in two key domains: 1) it provides hooks RF reverse engineering techniques and 2) it supports multiple deployment options to expand its operational relevance by integrating different types of user interfaces, networks, hardware/software processing, and distributed remote sensor nodes. 
 
 <p align="center">
 <img src="/docs/Icons/README/rf_re.png" width="400" height="400">
@@ -340,6 +340,7 @@ Install WSL2:
 5. `wsl --list --online`
 6. Install a specific version (plain Ubuntu should be the latest version listed): `wsl --install -d Ubuntu-22.04`
 7. Open the Start Menu, search for Ubuntu and launch it
+8. To uninstall a distribution: `wsl --unregister Ubuntu-22.04`
 
 Enable USB passthrough in a PowerShell as Administrator:
 

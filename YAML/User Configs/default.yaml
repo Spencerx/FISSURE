@@ -61,6 +61,7 @@ moving_avg_points: 5
 pd_bits_port: 5066
 pd_hiprfisr_dealer_port: 5054
 pd_pub_port: 5063
+qt_scale_factor: 1.0
 remember_configuration: false
 sensor_node1:
   archive: ''

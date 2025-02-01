@@ -101,6 +101,7 @@ class DashboardBackend:
         self.session_active = False
         self.shutdown = False
         self.shutting_down_message_received = False
+        self.shutdown_complete = False
 
         # Load Library
         self.plugins = []
@@ -229,8 +230,9 @@ class DashboardBackend:
 
         # Shut Down Comms
         await self.shutdown_comms()
-        fissure.utils.save_fissure_config(data=self.settings)  # Check is in save_fissure_config
+        fissure.utils.save_fissure_config(data=self.settings)  # Check for Remember Configuration is in save_fissure_config
         self.logger.info("=== SHUTDOWN ===")
+        self.shutdown_complete = True
 
 
     async def send_heartbeat(self):

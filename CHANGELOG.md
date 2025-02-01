@@ -1,6 +1,29 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-01
+
+Qt scaling options and remember configuration fixes.
+
+### Added
+
+- Unregister commmand for removing a WSL2 distribution in README
+- Global scale factors in View and Options menus for setting QT_SCALE_FACTOR (>=1.0). Must restart FISSURE to see changes.
+
+### Changed
+
+- Removing prompt from Xasitr install items
+- Installing VLC with apt instead of snap
+- Reworded README text
+- Disabling ESP32 Bluetooth Classic Sniffer in menu and unchecking it in installer items (needs fixes for newer Wireshark versions)
+
+### Fixed
+
+- Ceiling fan lesson not opening from menu
+- Remember Configuration not writing to file on close, Frontend was closing before Backend completed shutdown
+- Remember Configuration not saving to Backend settings on check/uncheck preventing saving on close
+- Removing parameters for banned message types in logging when executing callbacks
+
 ## 2025-1-31
 
 Querying sensor nodes for GPS coordinates and mapping results.

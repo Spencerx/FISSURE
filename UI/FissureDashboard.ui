@@ -39,10 +39,22 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuScale_Factor">
+     <property name="title">
+      <string>Scale Factor</string>
+     </property>
+     <addaction name="actionScaleFactor1_0x"/>
+     <addaction name="actionScaleFactor1_25x"/>
+     <addaction name="actionScaleFactor1_5x"/>
+     <addaction name="actionScaleFactor2_0x"/>
+     <addaction name="actionScaleFactorCustom"/>
+    </widget>
     <addaction name="actionLight_Mode"/>
     <addaction name="actionDark_Mode"/>
     <addaction name="actionCustom_Mode"/>
     <addaction name="actionRandom"/>
+    <addaction name="separator"/>
+    <addaction name="menuScale_Factor"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -3433,6 +3445,46 @@
   <action name="actionRemote_Server">
    <property name="text">
     <string>Remote Server</string>
+   </property>
+  </action>
+  <action name="actionScaleFactor1_0x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1.0x</string>
+   </property>
+  </action>
+  <action name="actionScaleFactor1_25x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1.25x</string>
+   </property>
+  </action>
+  <action name="actionScaleFactor1_5x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1.5x</string>
+   </property>
+  </action>
+  <action name="actionScaleFactor2_0x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2.0x</string>
+   </property>
+  </action>
+  <action name="actionScaleFactorCustom">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Custom</string>
    </property>
   </action>
  </widget>

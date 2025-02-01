@@ -98,6 +98,7 @@ sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -1331,8 +1332,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_ubuntu20_04.append(('VLC (402.2 MB)',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -1667,7 +1667,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_ubuntu20_04.append(('Xastir (87.4 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -1817,7 +1818,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_ubuntu20_04.append(('ESP32 BT Classic Sniffer (400.7 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -1836,7 +1838,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan
 rm ~/.local/lib/wireshark/plugins/4.0/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_ubuntu20_04.append(('SigDigger (48.00 kB)',
@@ -2232,6 +2234,7 @@ sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -3444,8 +3447,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_parrot_os_6_1.append(('VLC',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -3781,7 +3783,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_parrot_os_6_1.append(('Xastir',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -3933,7 +3936,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_parrot_os_6_1.append(('ESP32 BT Classic Sniffer',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.0.11
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.0.11
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -3952,7 +3956,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan
 rm ~/.local/lib/wireshark/plugins/4.0/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_parrot_os_6_1.append(('SigDigger (48.00 kB)',
@@ -4331,6 +4335,7 @@ sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -5542,8 +5547,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_ubuntu22_04.append(('VLC (402.1 MB)',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -5874,7 +5878,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_ubuntu22_04.append(('Xastir (53.3 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -6026,7 +6031,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_ubuntu22_04.append(('ESP32 BT Classic Sniffer (400.0 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -6045,7 +6051,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan
 rm ~/.local/lib/wireshark/plugins/4.2/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_ubuntu22_04.append(('SigDigger (48.00 kB)',
@@ -6420,6 +6426,7 @@ sudo python3 -m pip install opencv-python-headless
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """, True, "Minimum Install"))
 
@@ -7629,8 +7636,7 @@ ls /usr/bin/mplayer
 
 # # VLC
 # programs_dragonOS_focalx.append(('VLC',
-# """sudo apt-get install -y snapd
-# sudo snap install vlc
+# """sudo apt-get install -y vlc
 # ########## Verify ##########
 # vlc --help
 # """,True,'Video'))
@@ -7962,7 +7968,8 @@ foxtrotgps --help
 
 # Xastir
 programs_dragonOS_focalx.append(('Xastir',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """, True, 'Ham Radio'))
@@ -8117,7 +8124,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_dragonOS_focalx.append(('ESP32 BT Classic Sniffer',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -8136,7 +8144,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan
 rm ~/.local/lib/wireshark/plugins/4.2/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
-""", True, 'Bluetooth'))
+""", False, 'Bluetooth'))
 
 # # SigDigger
 # programs_dragonOS_focalx.append(('SigDigger',
@@ -8549,6 +8557,7 @@ sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -10093,7 +10102,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_kali.append(('Xastir (43.07 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -10251,7 +10261,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_kali.append(('ESP32 BT Classic Sniffer (411.8 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -10270,7 +10281,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan
 rm ~/.local/lib/wireshark/plugins/4.4/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_kali.append(('SigDigger (48.00 kB)',
@@ -10648,6 +10659,7 @@ sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -11858,8 +11870,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_backbox_linux_8.append(('VLC (402.1 MB)',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -12190,7 +12201,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_backbox_linux_8.append(('Xastir (53.3 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -12341,7 +12353,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_backbox_linux_8.append(('ESP32 BT Classic Sniffer (400.0 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -12360,7 +12373,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan
 rm ~/.local/lib/wireshark/plugins/4.2/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_backbox_linux_8.append(('SigDigger (48.00 kB)',
@@ -12744,6 +12757,7 @@ sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -13961,8 +13975,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_raspberry_pi_os.append(('VLC',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -14293,7 +14306,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_raspberry_pi_os.append(('Xastir',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -14445,7 +14459,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_raspberry_pi_os.append(('ESP32 BT Classic Sniffer',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -14845,6 +14860,7 @@ sudo python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -16057,8 +16073,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_ubuntu22_04_arm.append(('VLC (402.1 MB)',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -16389,7 +16404,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_ubuntu22_04_arm.append(('Xastir (53.3 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -16541,7 +16557,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_ubuntu22_04_arm.append(('ESP32 BT Classic Sniffer (400.0 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -16560,7 +16577,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan
 rm ~/.local/lib/wireshark/plugins/4.2/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.2/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_ubuntu22_04_arm.append(('SigDigger (48.00 kB)',
@@ -16948,6 +16965,7 @@ sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -18162,8 +18180,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_ubuntu24_04.append(('VLC (328.04 MB)',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -18495,7 +18512,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_ubuntu24_04.append(('Xastir (77.59 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -18647,7 +18665,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_ubuntu24_04.append(('ESP32 BT Classic Sniffer (380.50 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -18666,7 +18685,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan
 rm ~/.local/lib/wireshark/plugins/4.4/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_ubuntu24_04.append(('SigDigger (48.00 kB)',
@@ -19052,6 +19071,7 @@ sudo python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
+sudo apt-get install -y debconf-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -20264,8 +20284,7 @@ ls /usr/bin/mplayer
 
 # VLC
 programs_arch_linux.append(('VLC (328.04 MB)',
-"""sudo apt-get install -y snapd
-sudo snap install vlc
+"""sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
@@ -20597,7 +20616,8 @@ ls /usr/local/bin/multimon-ng
 
 # Xastir
 programs_arch_linux.append(('Xastir (77.59 MB)',
-"""sudo apt-get install -y xastir  # should non-superusers be allowed? sure, why not.
+"""echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
 sudo xastir -V
 """,True,'Ham Radio'))
@@ -20749,7 +20769,8 @@ ls /usr/bin/enscribe
 
 # ESP32 Bluetooth Classic Sniffer
 programs_arch_linux.append(('ESP32 BT Classic Sniffer (380.50 MB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
+"""# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
@@ -20768,7 +20789,7 @@ sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan
 rm ~/.local/lib/wireshark/plugins/4.4/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
 ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
-""",True,'Bluetooth'))
+""",False,'Bluetooth'))
 
 # SigDigger
 programs_arch_linux.append(('SigDigger (48.00 kB)',

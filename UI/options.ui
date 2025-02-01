@@ -1017,6 +1017,16 @@
         </font>
        </property>
       </row>
+      <row>
+       <property name="text">
+        <string>qt_scale_factor</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+      </row>
       <column>
        <property name="text">
         <string/>
