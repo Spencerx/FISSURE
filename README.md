@@ -10,7 +10,7 @@ The framework and tools included with FISSURE are designed to detect the presenc
 
 The friendly Python codebase and user interface allows beginners to quickly learn about popular tools and techniques involving RF and reverse engineering. Educators in cybersecurity and engineering can take advantage of the built-in material or utilize the framework to demonstrate their own real-world applications. Developers and researchers can use FISSURE for their daily tasks or to expose their cutting-edge solutions to a wider audience. As awareness and usage of FISSURE grows in the community, so will the extent of its capabilities and the breadth of the technology it encompasses.
 
-FISSURE is particularly effective in two key domains: 1) it provides hooks RF reverse engineering techniques and 2) it supports multiple deployment options to expand its operational relevance by integrating different types of user interfaces, networks, hardware/software processing, and distributed remote sensor nodes. 
+FISSURE is particularly effective in two key domains: 1) it provides hooks for RF reverse engineering techniques and 2) it supports multiple deployment options to expand its operational relevance by integrating different types of user interfaces, networks, hardware/software processing, and distributed remote sensor nodes. 
 
 <p align="center">
 <img src="/docs/Icons/README/rf_re.png" width="400" height="400">

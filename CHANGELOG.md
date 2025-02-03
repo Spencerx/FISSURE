@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-03
+
+Kali/Kali Rolling installation fixes 2.
+
+### Fixed
+
+- Adding sudo apt update to start of install script
+- Adding missing word in README
+- Adding libzmq3-dev, zstd to Kali installer
+- Enabling dump978, OpenCPN, Arduino IDE, RTLSDR-Airband in Kali installer
+
 ## 2025-2-02
 
 Kali/Kali Rolling installation fixes 1.

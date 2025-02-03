@@ -8561,6 +8561,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y libzmq3-dev
+sudo apt-get install -y zstd
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -9568,7 +9570,7 @@ sudo ./install.sh
 cp -R """ + fissure_directory + """/Tools/Esp8266_listen_trigger/ ~/Installed_by_FISSURE/
 ########## Verify ##########
 arduino --version
-""",False,'Development'))
+""",True,'Development'))
 
 # ~ # Minicom
 # ~ programs_kali.append(('Minicom',
@@ -9662,7 +9664,7 @@ sudo apt-get update
 sudo apt-get install -y opencpn
 ########## Verify ##########
 ls /usr/bin/opencpn
-""",False,'AIS'))
+""",True,'AIS'))
 
 # Kalibrate
 programs_kali.append(('Kalibrate (1.96 MB)',
@@ -9686,9 +9688,16 @@ make
 ls ~/Installed_by_FISSURE/retrogram-rtlsdr-master/retrogram-rtlsdr
 """,True,'SDR'))
 
-# RTLSDR-Airband - FIX
+# RTLSDR-Airband
 programs_kali.append(('RTLSDR-Airband (7.2 MB)',
-"""sudo apt-get install -y build-essential cmake pkg-config libmp3lame-dev libshout3-dev libconfig++-dev libfftw3-dev libpulse-dev
+"""sudo apt-get install -y build-essential
+sudo apt-get install -y cmake 
+sudo apt-get install -y pkg-config 
+sudo apt-get install -y libmp3lame-dev 
+sudo apt-get install -y libshout3-dev 
+sudo apt-get install -y libconfig++-dev 
+sudo apt-get install -y libfftw3-dev 
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/szpajder/RTLSDR-Airband.git
@@ -9700,7 +9709,7 @@ make
 sudo make install
 ########## Verify ##########
 rtl_airband -h
-""",False,'SDR'))
+""",True,'SDR'))
 
 # Spektrum
 programs_kali.append(('Spektrum (230.65 MB)',
@@ -10418,7 +10427,7 @@ sudo make install
 ls ~/Installed_by_FISSURE/ice9-bluetooth-sniffer/build/ice9-bluetooth
 """,True,'Bluetooth'))
 
-# dump978 - FIX
+# dump978
 programs_kali.append(('dump978',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -10427,7 +10436,7 @@ cd dump978
 make
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/dump978/dump978
-""",False,'Aircraft'))
+""",True,'Aircraft'))
 
 # htop
 programs_kali.append(('htop (652.00 kB)',
