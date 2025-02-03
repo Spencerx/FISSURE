@@ -120,7 +120,11 @@ then
             # Ubuntu 20.04
             if [[ -n "$ubuntu20_04" ]]
             then
-                sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5
+                sudo apt-get install -y build-essential
+                sudo apt-get install -y qtcreator
+                sudo apt-get install -y qt5-default
+                sudo apt-get install -y python3-pyqt5
+                sudo apt-get install -y fonts-ubuntu
             fi
             
             # KDE Neon
@@ -130,7 +134,10 @@ then
                 if [[ -n "$kde_version" ]]
                 then
                     # KDE neon 5.25
-                    sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5
+                    sudo apt-get install -y build-essential 
+                    sudo apt-get install -y qtcreator
+                    sudo apt-get install -y qt5-default
+                    sudo apt-get install -y python3-pyqt5
                     sudo apt-get install -y fonts-ubuntu
                 fi                            
             fi
@@ -138,11 +145,14 @@ then
             # Ubuntu 22.04, Kali 23.1, BackBox, Ubuntu 24.04
             if [[ -n "$ubuntu22_04" ]] || [[ -n "$kali23_1" ]] || [[ -n "$backbox" ]] || [[ -n "$raspberry_pi_os" ]] || [[ -n "$parrot_os" ]] || [[ -n "$ubuntu24_04" ]]
             then
-                sudo apt-get install -y build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5
-                if [[ -n "$kali23_1" ]] || [[ -n "$raspberry_pi_os" ]] || [[ -n "$parrot_os" ]]
-                then
-                    sudo apt-get install -y fonts-ubuntu
-                fi
+                sudo apt-get install -y build-essential
+                sudo apt-get install -y qtcreator
+                sudo apt-get install -y qtbase5-dev
+                sudo apt-get install -y qtchooser
+                sudo apt-get install -y qt5-qmake
+                sudo apt-get install -y qtbase5-dev-tools
+                sudo apt-get install -y python3-pyqt5
+                sudo apt-get install -y fonts-ubuntu
             fi
         ;;
     esac

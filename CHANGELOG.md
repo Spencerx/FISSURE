@@ -1,6 +1,22 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-02
+
+Kali/Kali Rolling installation fixes 1.
+
+### Changed
+
+- Removing version from docker-compose.yml to prevent warnings
+
+### Fixed
+
+- Moved install script items to their own lines to prevent complete failure for OS updates
+- Adding Python2 to the Kali installer
+- Replacing killall command with pkill in GNU Radio installation in the Kali installer
+- Changing docker-compose-v2 in the Kali installer for database installation
+- Making docker start on boot for Kali
+
 ## 2025-2-01
 
 Qt scaling options and remember configuration fixes.
