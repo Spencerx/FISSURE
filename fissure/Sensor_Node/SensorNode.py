@@ -33,6 +33,8 @@ import logging
 
 from concurrent.futures import ThreadPoolExecutor
 
+from fissure.utils.alert_sender import alertSender
+
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)  # Scapy warnings
 
@@ -670,7 +672,7 @@ class SensorNode():
 
                 # In New Terminal
                 if trigger_action == False:
-                    proc = subprocess.Popen('gnome-terminal -- ' + osCommandString + " &", shell=True)
+                    _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket)
                     
                     # In FISSURE Dashboard
                     #proc = subprocess.Popen(osCommandString + " &", shell=True)#, stderr=subprocess.PIPE)
