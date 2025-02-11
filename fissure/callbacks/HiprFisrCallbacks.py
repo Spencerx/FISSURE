@@ -2724,5 +2724,16 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
-async def takPlot(component: object, lat: float, lon: float, time: float, data: any):
-    pass
+async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+    # TODO: send to TAK; forward to dashboard for testing
+    alert_text = time + ' - ' + uid + ': ' + str(lat) + ', ' + str(lon) + ', ' + str(alt) + ', remarks: ' + remarks
+    PARAMETERS = {
+        "sensor_node_id": 0,
+        "alert_text": alert_text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

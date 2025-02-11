@@ -19,8 +19,9 @@ import time
 import json
 import subprocess
 from multiprocessing import Process
+from datetime import datetime, timezone
 
-FREQUENCY = 315e6
+FREQUENCY = 315e6 # or 433e6
 GAIN = 49
 NOTES = 'Use rtl_433 to capture TPMS messages'
 
@@ -37,9 +38,24 @@ def main(frequency: float=FREQUENCY, gain: float=GAIN):
         while True:
             time.sleep(0.1)
             data = client_socket.recvfrom(512)
+            print(data)
             data = data[0].decode('utf-8')
             data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
-            sys.stdout.write(data.get('type') + ', ID=' + data.get('id') + ', snr=' + data.get('snr') + ', model=' + data.get('model'))
+            print('DATA:' + str(data))
+            #sys.stdout.write(data.get('type') + ', ID=' + data.get('id') + ', snr=' + data.get('snr') + ', model=' + data.get('model'))
+            sys.stdout.write(json.dumps({
+                'msg': 'alert',
+                'text': time.strftime('%Y-%m-%d %H:%M:%S') + ' TPMS: id=' + data.get('id') + ' snr=' + str(data.get('snr')) + ' latitude=%(latitude)f longitude=%(longitude)f altitude=%(altitude)f'
+            }) + '\n')
+            sys.stdout.write(json.dumps({
+                'msg': 'tak',
+                'uid': data.get('id'),
+                'lat': '%(latitude)f',
+                'lon': '%(longitude)f',
+                'alt': '%(altitude)f',
+                'time': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%fZ'),
+                'remarks': 'model=' + data.get('model')
+            }) + '\n')
             sys.stdout.flush()
     except Exception as e:
         print(e)

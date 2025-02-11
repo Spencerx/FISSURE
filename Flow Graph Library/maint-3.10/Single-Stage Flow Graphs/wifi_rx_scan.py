@@ -13,6 +13,8 @@ import subprocess
 import time
 import csv
 import numpy as np
+import json
+from datetime import datetime, timezone
 
 DURATION = -1 # to run until interrupted
 DWELL = 1 # 1 second per channel
@@ -125,7 +127,19 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 'ssid': ssid
                             }
                             taobv = transmitters.get(ta)
-                            sys.stdout.write('New Transmitter: ' + str(ta) + ', frequency=' + str(taobv.get('frequency')) + ' MHz, snr=' + str(taobv.get('power')) + '\n')
+                            sys.stdout.write(json.dumps({
+                                'msg': 'alert',
+                                'text': time.strftime('%Y-%m-%d %H:%M:%S') + ' New Wifi Device: ' + str(ta) + ' frequency=' + str(taobv.get('frequency')) + ' snr=' + str(taobv.get('power')) + ' latitude=%(latitude)f longitude=%(longitude)f altitude=%(altitude)f'
+                            }) + '\n')
+                            sys.stdout.write(json.dumps({
+                                'msg': 'tak',
+                                'uid': str(ta),
+                                'lat': '%(latitude)f',
+                                'lon': '%(longitude)f',
+                                'alt': '%(altitude)f',
+                                'time': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%fZ'),
+                                'remarks': 'ssid=' + ssid + ', freq=' + str(taobv.get('frequency')) + ' MHz'
+                            }) + '\n')
                             sys.stdout.flush()
                         
         if not newta:
