@@ -21,13 +21,15 @@ import subprocess
 from multiprocessing import Process
 from datetime import datetime, timezone
 
+DEVICE = 0 # device index
 FREQUENCY = 315e6 # or 433e6
-GAIN = 49
+GAIN = 49 # rx gain
 NOTES = 'Use rtl_433 to capture TPMS messages'
 
-def main(frequency: float=FREQUENCY, gain: float=GAIN):
+def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
     # launch tpms receiver
-    p = Process(target=subprocess.run, args=(['rtl_433', '-M', 'level', '-f', '%d'%frequency, '-g', '%d'%gain, '-F', 'syslog:127.0.0.1:1514'],), kwargs={'shell': True})
+    cmd = ['rtl_433', '-d', '%d'%device, '-M', 'level', '-f', '%d'%frequency, '-g', '%d'%gain, '-v', '-F', 'syslog:127.0.0.1:1514']
+    p = Process(target=subprocess.run, args=(' '.join(cmd),), kwargs={'shell': True})
     p.start()
     time.sleep(1) # let rtl_433 start
 
@@ -38,15 +40,8 @@ def main(frequency: float=FREQUENCY, gain: float=GAIN):
         while True:
             time.sleep(0.1)
             data = client_socket.recvfrom(512)
-            print(data)
             data = data[0].decode('utf-8')
             data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
-            print('DATA:' + str(data))
-            #sys.stdout.write(data.get('type') + ', ID=' + data.get('id') + ', snr=' + data.get('snr') + ', model=' + data.get('model'))
-            sys.stdout.write(json.dumps({
-                'msg': 'alert',
-                'text': time.strftime('%Y-%m-%d %H:%M:%S') + ' TPMS: id=' + data.get('id') + ' snr=' + str(data.get('snr')) + ' latitude=%(latitude)f longitude=%(longitude)f altitude=%(altitude)f'
-            }) + '\n')
             sys.stdout.write(json.dumps({
                 'msg': 'tak',
                 'uid': data.get('id'),
@@ -54,37 +49,47 @@ def main(frequency: float=FREQUENCY, gain: float=GAIN):
                 'lon': '%(longitude)f',
                 'alt': '%(altitude)f',
                 'time': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%fZ'),
-                'remarks': 'model=' + data.get('model')
+                'remarks': json.dumps({
+                    'type': data.get('type'),
+                    'model': data.get('model'),
+                    'status': data.get('status'),
+                    'pressure_PSI': data.get('pressure_PSI'),
+                    'temperature_C': data.get('temperature_C'),
+                    'mic': data.get('mic'),
+                    'mod': data.get('mod'),
+                    'freq1': data.get('freq1'),
+                    'freq2': data.get('freq2'),
+                    'rssi': data.get('rssi'),
+                    'snr': data.get('snr'),
+                    'noise': data.get('noise'),
+                })
             }) + '\n')
             sys.stdout.flush()
     except Exception as e:
-        print(e)
+        print('ERROR:' + e)
         client_socket.close()
         p.terminate()
 
 def getArguments():
+    device = DEVICE
     frequency = FREQUENCY
     gain = GAIN
     notes = NOTES
 
     return (
-        ['frequency', 'gain', 'notes'],
-        [frequency, gain, notes]
+        ['device', 'frequency', 'gain', 'notes'],
+        [device, frequency, gain, notes]
     )
 
 if __name__ == '__main__':
     # get default values
-    (frequency, gain, notes) = getArguments()[1]
+    (device, frequency, gain, notes) = getArguments()[1]
 
     # handle input
     nargs = len(sys.argv)
-    frequency = float(sys.argv[1]) if nargs > 1 else frequency
-    gain = float(sys.argv[2]) if nargs > 2 else gain
-    notes = sys.argv[3] if nargs > 3 else notes
-
-    print(frequency)
-    print(gain)
-    print(notes)
+    device = float(sys.argv[1]) if nargs > 1 else device
+    frequency = float(sys.argv[2]) if nargs > 2 else frequency
+    gain = float(sys.argv[3]) if nargs > 3 else gain
 
     # run
-    main(frequency, gain)
+    main(device, frequency, gain)
