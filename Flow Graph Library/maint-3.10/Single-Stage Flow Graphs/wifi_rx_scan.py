@@ -137,7 +137,7 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 'lat': '%(latitude)f',
                                 'lon': '%(longitude)f',
                                 'alt': '%(altitude)f',
-                                'time': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%fZ'),
+                                'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                                 'remarks': 'ssid=' + ssid + ', freq=' + str(taobv.get('frequency')) + ' MHz'
                             }) + '\n')
                             sys.stdout.flush()

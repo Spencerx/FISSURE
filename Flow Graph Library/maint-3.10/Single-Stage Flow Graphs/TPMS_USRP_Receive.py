@@ -23,12 +23,12 @@ from datetime import datetime, timezone
 
 DEVICE = 0 # device index
 FREQUENCY = 315e6 # or 433e6
-GAIN = 49 # rx gain
+GAIN = 76 # rx gain
 NOTES = 'Use rtl_433 to capture TPMS messages'
 
 def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
     # launch tpms receiver
-    cmd = ['rtl_433', '-d', '%d'%device, '-M', 'level', '-f', '%d'%frequency, '-g', '%d'%gain, '-v', '-F', 'syslog:127.0.0.1:1514']
+    cmd = ['rtl_433', '-d', 'driver=uhd', '-t', 'antenna=RX2', '-M', 'level', '-Y', 'minsnr=1.0', '-f', '%d'%frequency, '-g', '%d'%gain, '-v', '-F', 'syslog:127.0.0.1:1515']
     p = Process(target=subprocess.run, args=(' '.join(cmd),), kwargs={'shell': True})
     p.start()
     time.sleep(1) # let rtl_433 start
@@ -36,7 +36,7 @@ def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
     # create message parser
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        client_socket.bind(('localhost', 1514))
+        client_socket.bind(('localhost', 1515))
         while True:
             time.sleep(0.1)
             data = client_socket.recvfrom(512)

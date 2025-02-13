@@ -46,10 +46,15 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
             try:
                 data = json.loads(proc_text)
 
-                if not data is dict or not 'msg' in data.keys():
-                    pass # not an accepted format
+                if not data.__class__ is dict:
+                    # not within the scope of alert messaging; print to stdout
+                    print('[STDOUT] ' + str(data))
 
-                if data.get('msg') == 'alert':
+                elif not 'msg' in list(data.keys()):
+                    # not within the scope of alert messaging; print to stdout
+                    print('[STDOUT] ' + str(data))
+
+                elif data.get('msg') == 'alert':
                     PARAMETERS = {
                         "sensor_node_id": sensor_node_id,
                         "alert_text": data.get('text')
@@ -79,7 +84,7 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
 
             except json.decoder.JSONDecodeError:
                 # not a valid json string
-                pass
+                print('[STDOUT] ' + str(proc_text))
 
             if c2.poll(): # check for messages on c2 comms
                 msg = c2.recv() # get message
