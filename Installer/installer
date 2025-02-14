@@ -99,6 +99,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -214,15 +215,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_ubuntu20_04.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_ubuntu20_04.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -236,6 +228,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_ubuntu20_04.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -2250,6 +2251,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -2363,15 +2365,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_parrot_os_6_1.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_parrot_os_6_1.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -2385,6 +2378,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_parrot_os_6_1.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -4366,6 +4368,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -4479,15 +4482,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_ubuntu22_04.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_ubuntu22_04.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -4501,6 +4495,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_ubuntu22_04.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -6589,15 +6592,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_dragonOS_focalx.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_dragonOS_focalx.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -6611,6 +6605,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_dragonOS_focalx.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # # LimeSDR
@@ -8623,6 +8626,7 @@ sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y libzmq3-dev
 sudo apt-get install -y zstd
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -8741,15 +8745,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_kali.append(('Network Certificates (1.79 MB)',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_kali.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -8763,6 +8758,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_kali.append(('Network Certificates (1.79 MB)',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -10752,6 +10756,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -10864,15 +10869,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_backbox_linux_8.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_backbox_linux_8.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -10886,6 +10882,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_backbox_linux_8.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -12865,6 +12870,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -12984,15 +12990,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_raspberry_pi_os.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_raspberry_pi_os.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -13006,6 +13003,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_raspberry_pi_os.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -14983,6 +14989,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -15097,15 +15104,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_ubuntu22_04_arm.append(('Network Certificates',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_ubuntu22_04_arm.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -15119,6 +15117,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_ubuntu22_04_arm.append(('Network Certificates',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -17103,6 +17110,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -17216,15 +17224,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_ubuntu24_04.append(('Network Certificates (3.51 kB)',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_ubuntu24_04.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -17238,6 +17237,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_ubuntu24_04.append(('Network Certificates (3.51 kB)',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -19224,6 +19232,7 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -19337,15 +19346,6 @@ bash -c '
 '
 """,True,'Minimum Install'))
 
-# Network Certificates 
-programs_arch_linux.append(('Network Certificates (3.51 kB)',
-"""cd '""" + fissure_directory + """'
-export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 ./fissure/generate_certificates.py
-########## Verify ##########
-ls '""" + fissure_directory + """/certificates'
-""",True,'Minimum Install'))
-
 # Meshtastic
 programs_arch_linux.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
@@ -19359,6 +19359,15 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ########## Verify ##########
 python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
+# Network Certificates 
+programs_arch_linux.append(('Network Certificates (3.51 kB)',
+"""cd '""" + fissure_directory + """'
+export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 ./fissure/generate_certificates.py
+########## Verify ##########
+ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # LimeSDR

@@ -13,6 +13,7 @@ Networking and GPS updates, Meshtastic integration (Part 1)
 - IP/Serial option when connecting to a remote sensor node
 - Added serial_port, serial_baud_rate fields to sensor nodes in FISSURE config files
 - GPS acquisition options at sensor node using the config file, automatically on startup, and updates at a periodic interval
+- xdg-utils to the installer
 
 ### Changed
 
