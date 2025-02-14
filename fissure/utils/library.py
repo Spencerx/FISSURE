@@ -52,7 +52,7 @@ def openDatabaseConnection(retries=10, delay=2) -> connection:
     user = os.getenv('POSTGRES_USER')
     password = os.getenv('POSTGRES_PASSWORD')
     host = os.getenv('POSTGRES_HOST', 'localhost')
-    port = os.getenv('POSTGRES_PORT', '5432')
+    port = os.getenv('POSTGRES_EXTERNAL_PORT', '5431')
 
     for attempt in range(retries):
         try:
@@ -907,7 +907,7 @@ def addArchiveCollection(name, file_list, filepath, files, format, size, notes, 
         user = os.getenv('POSTGRES_USER'),
         password = os.getenv('POSTGRES_PASSWORD'),
         host = os.getenv('POSTGRES_HOST', 'localhost'),
-        port = os.getenv('POSTGRES_PORT', '5432')
+        port = os.getenv('POSTGRES_EXTERNAL_PORT', '5431')
     )
     cur = conn.cursor()
 
@@ -956,7 +956,7 @@ def addArchiveFavorite(file_name, date, format, modulation, notes, protocol, sam
         user=os.getenv('POSTGRES_USER'),
         password=os.getenv('POSTGRES_PASSWORD'),
         host=os.getenv('POSTGRES_HOST', 'localhost'),
-        port=os.getenv('POSTGRES_PORT', '5432')
+        port=os.getenv('POSTGRES_EXTERNAL_PORT', '5431')
     )
     cur = conn.cursor()
 
