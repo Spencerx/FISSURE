@@ -21,6 +21,7 @@ Networking and GPS updates, Meshtastic integration (Part 1)
 - HIPRFISR network nodes closed with new function instead of relying on \__del\__
 - Moved BANNED_MESSAGE_TYPES list to common.py
 - Removed local, remote example sensor node YAML configuration files, added more comments in default.yaml
+- Changing the database port to 5431 to avoid conflicts with other programs
 
 ### Fixed
 

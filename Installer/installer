@@ -197,11 +197,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -210,7 +210,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -2346,11 +2346,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -2359,7 +2359,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -4462,11 +4462,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -4475,7 +4475,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -6572,11 +6572,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -6585,7 +6585,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -8724,11 +8724,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -8737,7 +8737,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -10847,11 +10847,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -10860,7 +10860,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -12967,11 +12967,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -12980,7 +12980,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -15080,11 +15080,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -15093,7 +15093,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -17199,11 +17199,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -17212,7 +17212,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 
@@ -19320,11 +19320,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -19333,7 +19333,7 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
 """,True,'Minimum Install'))
 

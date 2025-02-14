@@ -15,24 +15,6 @@ from typing import List
 import time
 
 
-# def openDatabaseConnection() -> connection:
-#     """
-#     Connects to the FISSURE database at the HIPRFISR computer/network.
-#     """
-#     # Load environment variables from .env file
-#     load_dotenv(os.path.join(FISSURE_ROOT,".env"))
-
-#     # Connect to PostgreSQL database
-#     conn = psycopg2.connect(
-#         dbname = os.getenv('POSTGRES_DB'),
-#         user = os.getenv('POSTGRES_USER'),
-#         password = os.getenv('POSTGRES_PASSWORD'),
-#         host = os.getenv('POSTGRES_HOST', 'localhost'),
-#         port = os.getenv('POSTGRES_PORT', '5432')
-#     )
-#     return conn
-
-
 def openDatabaseConnection(retries=10, delay=2) -> connection:
     """
     Connects to the FISSURE database at the HIPRFISR computer/network.
