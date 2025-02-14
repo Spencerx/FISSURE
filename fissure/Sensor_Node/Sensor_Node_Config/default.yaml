@@ -4,7 +4,18 @@ Sensor Node:
      autorun: false
      autorun_delay_seconds: 3
      autorun_interval_seconds: 3
+     console_logging_level: 'INFO'     
      enabled_disabled: enabled
+     file_logging_level: 'DEBUG'
+     gps:
+          gps_autostart: false
+          gps_position:
+               latitude: 40.712776
+               longitude: -74.005974
+               altitude: 10.5
+          gps_source: gpsd  # gpsd or Meshtastic
+          gps_update_interval_seconds: 20  # 300
+     hb_port: '5051'     
      ip_address: '127.0.0.1'
      iq:
           0:
@@ -15,13 +26,15 @@ Sensor Node:
                serial: ''
                type: ''
                uid: ''
-     local_remote: local
+     local_remote: local  # Does not need to be set, updated during init
      location: fgh
-     nickname: Local Sensor Node
+     msg_port: '5052'
+     network_type: IP  # "IP" or "Meshtastic"
+     nickname: Local Sensor Node  # "Local Sensor Node" for local
      notes: fdh
      pd: ''
-     msg_port: '5052'
-     hb_port: '5051'
+     serial_port: '/dev/ttyACM1'
+     serial_baud_rate: '115200'
      tsi: ''
-     console_logging_level: 'INFO'
-     file_logging_level: 'DEBUG'
+
+

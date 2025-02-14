@@ -2075,6 +2075,7 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionGraphing_Calculator.triggered.connect(MenuBarSlots._slotMenuGraphingCalculatorClicked)
     dashboard.window.actionpgAdmin.triggered.connect(MenuBarSlots._slotMenuPgAdminClicked)
     dashboard.window.actionFIRMS.triggered.connect(MenuBarSlots._slotMenuFIRMS_Clicked)
+    dashboard.window.actionMeshMap.triggered.connect(MenuBarSlots._slotMenuMeshMapClicked)
     
     # Lessons Menu
     dashboard.window.actionLessonOpenBTS.triggered.connect(MenuBarSlots._slotMenuLessonOpenBTS_Clicked)

@@ -894,6 +894,11 @@ async def _slotLibraryBrowseDeleteRowClicked(dashboard: QtCore.QObject):
             ret = await fissure.Dashboard.UI_Components.Qt5.async_yes_no_dialog(dashboard, "Also delete filename: " + get_filename + "?")
             if ret == QtWidgets.QMessageBox.Yes:
                 delete_files = True
+        elif get_table_name == "attacks":
+            get_filename = str(dashboard.ui.tableWidget1_library_browse.item(current_row, 6).text())
+            ret = await fissure.Dashboard.UI_Components.Qt5.async_yes_no_dialog(dashboard, "Also delete filename: " + get_filename + "?")
+            if ret == QtWidgets.QMessageBox.Yes:
+                delete_files = True
 
         # Send Message to HIPRFISR/Protocol Discovery
         if get_row_id is not None:

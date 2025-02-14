@@ -12,6 +12,7 @@ def _slotLogRefreshClicked(dashboard: QtCore.QObject):
     bad_words = []
     if dashboard.ui.checkBox_log_heartbeats.isChecked():
         bad_words.append('Heartbeat')
+        bad_words.append('heartbeat')
     if dashboard.ui.checkBox_log_tsi.isChecked():
         bad_words.append('fissure.tsi')
     if dashboard.ui.checkBox_log_sensor_node.isChecked():
@@ -54,6 +55,7 @@ def _slotLogRefreshPermitClicked(dashboard: QtCore.QObject):
     good_words = []
     if dashboard.ui.checkBox_log_heartbeats_permit.isChecked():
         good_words.append('Heartbeat')
+        good_words.append('heartbeat')
     if dashboard.ui.checkBox_log_tsi_permit.isChecked():
         good_words.append('fissure.tsi')
     if dashboard.ui.checkBox_log_sensor_node_permit.isChecked():

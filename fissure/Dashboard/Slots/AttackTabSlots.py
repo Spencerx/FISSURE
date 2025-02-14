@@ -3362,6 +3362,9 @@ def _slotAttackLoadFromLibraryClicked(dashboard: QtCore.QObject, checked, fname=
     Loads an attack flow graph from a file. Not a slot.
     """
     file_dialog_used = False
+    print("loading attack!!")
+    print(fname)
+    
     if fname == "":
         # Look for the Flow Graph
         directory = os.path.join(fissure.utils.get_fg_library_dir(dashboard.backend.os_info), "Single-Stage Flow Graphs")  # Default Directory

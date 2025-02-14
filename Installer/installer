@@ -223,6 +223,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_ubuntu20_04.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_ubuntu20_04.append(('LimeSDR (407.9 MB)',
 """sudo add-apt-repository -y ppa:myriadrf/drivers
@@ -2357,6 +2372,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_parrot_os_6_1.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_parrot_os_6_1.append(('LimeSDR',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
@@ -4458,6 +4488,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_ubuntu22_04.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_ubuntu22_04.append(('LimeSDR (288.7 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
@@ -6551,6 +6596,21 @@ export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
 python3 ./fissure/generate_certificates.py
 ########## Verify ##########
 ls '""" + fissure_directory + """/certificates'
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_dragonOS_focalx.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # # LimeSDR
@@ -8690,6 +8750,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_kali.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_kali.append(('LimeSDR (712.39 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
@@ -10798,6 +10873,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_backbox_linux_8.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_backbox_linux_8.append(('LimeSDR (288.7 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
@@ -12903,6 +12993,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_raspberry_pi_os.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_raspberry_pi_os.append(('LimeSDR',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
@@ -14999,6 +15104,21 @@ export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
 python3 ./fissure/generate_certificates.py
 ########## Verify ##########
 ls '""" + fissure_directory + """/certificates'
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_ubuntu22_04_arm.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # LimeSDR
@@ -17105,6 +17225,21 @@ python3 ./fissure/generate_certificates.py
 ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
+# Meshtastic
+programs_ubuntu24_04.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
+""",True,'Minimum Install'))
+
 # LimeSDR
 programs_ubuntu24_04.append(('LimeSDR (417.08 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
@@ -19209,6 +19344,21 @@ export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
 python3 ./fissure/generate_certificates.py
 ########## Verify ##########
 ls '""" + fissure_directory + """/certificates'
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_arch_linux.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # LimeSDR

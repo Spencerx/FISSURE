@@ -302,6 +302,35 @@ async def componentConnected(component: object, component_name=""):
         component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id)
 
 
+async def componentConnectedSerial(component: object, component_name=""):
+    """
+    Update the Sensor Node Configuration window on connection to serial port but not the status bar until heartbeats arrive.
+    """
+    if component_name == fissure.comms.Identifiers.PD:
+        pass
+    elif component_name == fissure.comms.Identifiers.TSI:
+        pass
+    elif component_name == fissure.comms.Identifiers.DASHBOARD:
+        pass
+    else:
+        # Modify the Button/Stacked Widget
+        try:
+            sensor_node_id = int(component_name)
+        except:
+            return
+        if sensor_node_id == 0:
+            pass  # Future tasks?
+        elif sensor_node_id == 1:
+            pass
+        elif sensor_node_id == 2:
+            pass
+        elif sensor_node_id == 3:
+            pass
+        elif sensor_node_id == 4:
+            pass
+        component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id)
+
+
 async def bandID_Return(component: object, sensor_node_id=0, band_id=0, frequency=0):
     """ 
     Updates the search bands plot with the current band and center frequency of the detector.

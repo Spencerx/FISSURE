@@ -5801,3 +5801,11 @@ async def _slotMenuViewScaleFactorCustomClicked(dashboard: QtWidgets.QMainWindow
     dashboard.window.actionScaleFactor1_5x.setChecked(False)
     dashboard.window.actionScaleFactor2_0x.setChecked(False)
 
+
+@QtCore.pyqtSlot()
+def _slotMenuMeshMapClicked():
+    """
+    Opens MeshMap in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://meshmap.net/")

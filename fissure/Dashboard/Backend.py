@@ -465,13 +465,16 @@ class DashboardBackend:
         }
         launch_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNode",
+            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeIP",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
 
 
     async def connect_remote_sensor_node(self, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):
+        """
+        Sends message to HIPRFISR to establish IP based connection to a remote sensor node.
+        """
         PARAMETERS = {
             "sensor_node_id": str(sensor_node_id),
             "ip_address": ip_address,
@@ -481,7 +484,25 @@ class DashboardBackend:
         }
         launch_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNode",
+            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeIP",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
+
+
+    async def connectToSensorNodeMeshtastic(self, sensor_node_id, serial_port, serial_baud_rate, recall_settings):
+        """
+        Sends message to HIPRFISR to establish local serial connection to communicate with preconfigured remote sensor node.
+        """
+        PARAMETERS = {
+            "sensor_node_id": str(sensor_node_id),
+            "serial_port": serial_port,
+            "serial_baud_rate": serial_baud_rate,
+            "recall_settings": recall_settings,
+        }
+        launch_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeMeshtastic",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
@@ -511,6 +532,21 @@ class DashboardBackend:
         disconnect_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
             fissure.comms.MessageFields.MESSAGE_NAME: "disconnectFromSensorNode",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, disconnect_cmd)
+
+
+    async def disconnectFromMeshtastic(self, sensor_node_id):
+        """
+        Ends connections to local serial connection to Meshatastic.
+        """
+        PARAMETERS = {
+            "sensor_node_id": str(sensor_node_id),
+        }
+        disconnect_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "disconnectFromMeshtastic",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, disconnect_cmd)
@@ -1924,11 +1960,15 @@ class DashboardBackend:
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def findGPS_Coordinates(self, tab_index=0, format=""):
+    async def findGPS_Coordinates(self, tab_index=0, gps_source="", format=""):
         """
         Queries the remote sensor node for its GPS coordinates. 
         """
-        PARAMETERS = {"tab_index": tab_index, "format": format}
+        PARAMETERS = {
+            "tab_index": tab_index,
+            "gps_source": gps_source,
+            "format": format
+        }
         find_gps_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
             fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_Coordinates",

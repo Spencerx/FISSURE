@@ -21,7 +21,7 @@ import json
 
 from inspect import isfunction
 from types import ModuleType
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Callable, Optional
 
 import asyncio
 import fissure.callbacks
@@ -86,21 +86,53 @@ async def main(local_flag):
 
     # Start Heartbeat Loop
     heartbeat_task = asyncio.create_task(sensor_node.heartbeat_loop())
+
+    # Start GPS Loop
+    gps_task = None
+    gps_manager = None 
+    if sensor_node.gps_autostart == True:
+        gps_manager = GPSManager(
+            gps_update_interval_seconds=sensor_node.gps_update_interval_seconds,
+            gps_callback=sensor_node.gpsUpdate
+        )
+        if sensor_node.gps_source == "gpsd":
+            gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, None))
+        elif sensor_node.gps_source == "Meshtastic":
+            # Existing Serial Connection
+            if sensor_node.local_remote == "remote":
+                gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, sensor_node.hiprfisr_socket))
+            # Temporary Serial Connection
+            else:
+                gps_task = asyncio.create_task(gps_manager.periodic_gps_update("Meshtastic New Connection", sensor_node.serial_port))
     
     # Start Event Loop
-    await sensor_node.begin()
-
-    # Ensure the Heartbeat Loop is Stopped
-    heartbeat_task.cancel()
     try:
-        await heartbeat_task
-    except asyncio.CancelledError:
-        pass  # Heartbeat task was cancelled cleanly
+        await sensor_node.begin()
+    finally:
 
-    # Clean Up and Exit
-    print("[FISSURE][Sensor Node] end")
-    fissure.utils.zmq_cleanup()
-    sys.exit()
+        # Ensure the Heartbeat Loop is Stopped
+        heartbeat_task.cancel()
+        try:
+            await heartbeat_task
+        except asyncio.CancelledError:
+            pass  # Heartbeat task was cancelled cleanly
+
+        # Ensure GPS Task is Stopped
+        if gps_task:
+            gps_task.cancel()
+            try:
+                await gps_task
+            except asyncio.CancelledError:
+                pass  # GPS task was cancelled cleanly
+
+        # Stop GPS Manager if it exists
+        if gps_manager:
+            gps_manager.stop()  # Ensure GPS manager exits cleanly
+
+        # Clean Up and Exit
+        print("[FISSURE][Sensor Node] end")
+        fissure.utils.zmq_cleanup()
+        sys.exit()
 
 
 class SensorNode():
@@ -138,9 +170,19 @@ class SensorNode():
         with open(filename) as yaml_library_file:
             self.settings_dict = yaml.load(yaml_library_file, yaml.FullLoader)
         
+        # Main Networking Type to the HIPRFISR
+        if self.local_remote == "local":
+            self.network_type = "IP"
+        else:
+            self.network_type = str(self.settings_dict['Sensor Node']['network_type'])  # IP, Meshtastic, etc.
+        
         # Set Logging Levels
         fissure.utils.init_logging()
         self.updateLoggingLevels(self.settings_dict['Sensor Node']['console_logging_level'], self.settings_dict['Sensor Node']['file_logging_level'])  # Add these fields to the export, import, hardware configuration window
+
+        # Serial Values
+        self.serial_port = str(self.settings_dict['Sensor Node']['serial_port'])
+        self.serial_baud_rate = str(self.settings_dict['Sensor Node']['serial_baud_rate'])
 
         # Initialize Connection/Heartbeat Variables
         self.ip_address = str(self.settings_dict['Sensor Node']['ip_address'])
@@ -161,7 +203,7 @@ class SensorNode():
 
         self.triggers_running = False
         
-        ############ TSI ################
+        # TSI
         self.tsi_detector_socket = None
         #self.heartbeat_interval = 5
         #self.tsi_heartbeat_time = 0
@@ -172,13 +214,9 @@ class SensorNode():
         self.configuration_update = False
         self.detector_script_name = ""
 
-        ############# PD ################
+        # PD
         self.running_PD = False
         self.pd_bits_socket = None
-        
-
-        # # Create the Sensor Node ZMQ Sockets
-        # self.connect()
         
         # Check for Autorun
         if self.settings_dict['Sensor Node']['autorun'] == True:
@@ -195,47 +233,51 @@ class SensorNode():
 
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
-        self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)    
+        self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)
+
+        # Initialize GPS Coordinates
+        self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
+        self.gps_source = self.settings_dict['Sensor Node']['gps']['gps_source']
+        self.gps_update_interval_seconds = self.settings_dict['Sensor Node']['gps']['gps_update_interval_seconds']
+
+        if self.gps_autostart == False:
+            # From Config File
+            self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
+            # self.gps_position = {
+            #     "latitude": 40.712776,
+            #     "longitude": -74.005974,
+            #     "altitude": 10.5
+            # }
 
 
     def initialize_comms(self):
         """
+        Creates the network nodes for IP or serial connections at the Sensor Node that connect to the HIPRFISR.
         """
-        # To HIPRFISR
-        sensor_node_pair_port = str(self.settings_dict['Sensor Node']['msg_port'])
-        #sensor_node_hb_port = int(self.settings_dict['Sensor Node']['hb_port'])
-        
-        ################
-        # temp_settings = fissure.utils.get_fissure_config()
-        # comms_info = temp_settings.get("hiprfisr")
-        # print(comms_info)
-        # sensor_node_pair_address = fissure.comms.Address(address_config=comms_info.get("frontend"))
+        # IP
+        if self.network_type == "IP":
+            sensor_node_pair_port = str(self.settings_dict['Sensor Node']['msg_port'])
+            #sensor_node_hb_port = int(self.settings_dict['Sensor Node']['hb_port'])
+            
+            if self.local_remote == "local":
+                sensor_node_pair_address = fissure.comms.Address(protocol="ipc", address=self.ip_address, hb_channel="ipc:///tmp/zmq_ipc_heartbeat", msg_channel="ipc:///tmp/zmq_ipc_message")
+            else:
+                sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=5051, msg_channel=sensor_node_pair_port) 
 
-        if self.local_remote == "local":
-            sensor_node_pair_address = fissure.comms.Address(protocol="ipc", address=self.ip_address, hb_channel="ipc:///tmp/zmq_ipc_heartbeat", msg_channel="ipc:///tmp/zmq_ipc_message")
-        else:
-            sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=5051, msg_channel=sensor_node_pair_port)
+            self.hiprfisr_socket = fissure.comms.Server(
+                address=sensor_node_pair_address,
+                sock_type=zmq.PAIR,
+                name=f"{self.identifier}::sensor_node",
+            )
+            self.hiprfisr_socket.start()
 
-        # print(sensor_node_pair_address.get("address"))
-        # print(sensor_node_pair_address["frontend"]["address"])
+        # Serial
+        elif self.network_type == "Meshtastic":
+            if self.serial_port is None:
+                raise ValueError("Meshtastic connection requires a serial port and context")
 
-        # sensor_node_pair_address.address = self.ip_address
-        # sensor_node_pair_address.message_channel = sensor_node_pair_port
+            self.hiprfisr_socket = fissure.comms.FissureMeshtasticNode(self.serial_port, f"{self.identifier}::sensor_node", self)
 
-        # sensor_node_pair_address = "tcp://" + self.ip_address + ":" + sensor_node_pair_port  #comms_info.get("frontend_address"), tcp://0.0.0.0:5051
-        # {'backend': {'address': 'fissure-backend', 'protocol': 'ipc'}, 'frontend': {'address': '0.0.0.0', 'heartbeat_channel': 5051, 'message_channel': 5052, 'protocol': 'tcp'}}
-        # sensor_node_pair_address = {'frontend':{'address': self.ip_address, 'heartbeat_channel': 5051, 'message_channel': sensor_node_pair_port, 'protocol': 'tcp'}}
-        #ipc://fissure [-hb (hb), -msg (msg)]
-        #ipc://fissure-backend [-hb (hb), -msg (msg)]
-        # print(sensor_node_pair_address)
-        ################        
-
-        self.hiprfisr_socket = fissure.comms.Server(
-            address=sensor_node_pair_address,
-            sock_type=zmq.PAIR,
-            name=f"{self.identifier}::sensor_node",
-        )
-        self.hiprfisr_socket.start()
         
 
     def register_callbacks(self, ctx: ModuleType):
@@ -376,19 +418,20 @@ class SensorNode():
     async def check_heartbeats(self):
         """
         Check hearbeat and set connection flags accordingly
-        """        
-        current_time = time.time()
-        cutoff_interval = 15.0  #float(self.settings.get("failure_multiple")) * float(self.settings.get("heartbeat_interval"))
-        cutoff_time = current_time - cutoff_interval
+        """
+        if self.network_type == "IP":
+            current_time = time.time()
+            cutoff_interval = 15.0  #float(self.settings.get("failure_multiple")) * float(self.settings.get("heartbeat_interval"))
+            cutoff_time = current_time - cutoff_interval
 
-        if self.heartbeats.get(fissure.comms.Identifiers.HIPRFISR) > 0:
-            last_heartbeat = self.heartbeats.get(fissure.comms.Identifiers.HIPRFISR)
-            # Failed heartbeat check while previously connected
-            if self.hiprfisr_connected and (last_heartbeat < cutoff_time):
-                self.hiprfisr_connected = False
-            # Passed heartbeat check while previously disconnected
-            elif (not self.hiprfisr_connected) and (last_heartbeat > cutoff_time):
-                self.hiprfisr_connected = True
+            if self.heartbeats.get(fissure.comms.Identifiers.HIPRFISR) > 0:
+                last_heartbeat = self.heartbeats.get(fissure.comms.Identifiers.HIPRFISR)
+                # Failed heartbeat check while previously connected
+                if self.hiprfisr_connected and (last_heartbeat < cutoff_time):
+                    self.hiprfisr_connected = False
+                # Passed heartbeat check while previously disconnected
+                elif (not self.hiprfisr_connected) and (last_heartbeat > cutoff_time):
+                    self.hiprfisr_connected = True
 
 
     def updateLoggingLevels(self, new_console_level="", new_file_level=""):
@@ -2381,7 +2424,98 @@ class SensorNode():
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+    def gpsUpdate(self, gps_data):
+        """
+        Callback function to save GPS updates from Meshtastic node.
+        """
+        print(f"Updated GPS Position: {gps_data}")
+        self.gps_position = gps_data
+
     ########################################################################
+
+
+class GPSManager:
+    """
+    Manages periodic GPS updates from multiple sources.
+    """
+
+    def __init__(self, gps_update_interval_seconds: int, gps_callback: Callable[[Dict[str, float]], None]):
+        """
+        Args:
+            gps_update_interval_seconds (int): How often to check GPS (in seconds).
+            gps_callback (Callable): Function to call when GPS updates.
+        """
+        self.gps_update_interval_seconds = gps_update_interval_seconds
+        self.gps_callback = gps_callback  # Function to store GPS data
+        self.running = False  # Controls the GPS update loop
+
+
+    async def fetch_gps_from_meshtastic(self, meshtastic_node) -> Optional[Dict[str, float]]:
+        """
+        Fetch GPS data from an existing Meshtastic node.
+        """
+        try:
+            gps_data = await meshtastic_node.get_gps_position()
+            return gps_data
+        except Exception as e:
+            print(f"Error getting GPS from Meshtastic: {e}")
+            return None
+    
+    
+    async def fetch_gps_from_meshtastic_new_connection(self, serial_port) -> Optional[Dict[str, float]]:
+        """
+        Fetch GPS data from a new temporary Meshtastic serial connection.
+        """
+        try:
+            gps_data = await fissure.utils.hardware.probeMeshtasticGPS(serial_port, 10)
+            return gps_data
+        except Exception as e:
+            print(f"Error getting GPS from Meshtastic: {e}")
+            return None
+
+
+    async def fetch_gps_from_gpsd(self):
+        """
+        Fetch GPS data from a gpsd source.
+        """
+        try:
+            # Read gpsd
+            get_coordinates = fissure.utils.hardware.probe_gpsd("DD")
+            return get_coordinates
+        except Exception as e:
+            print(f"Error getting GPS from gpsd: {e}")
+            return None
+        
+
+    async def periodic_gps_update(self, gps_source, meshtastic_node):
+        """Periodically updates GPS position from available sources."""
+        self.running = True
+        while self.running:
+            gps_data = None
+
+            # Try Meshtastic first
+            if gps_source == "Meshtastic":
+                if meshtastic_node:
+                    gps_data = await self.fetch_gps_from_meshtastic(meshtastic_node)
+
+            elif gps_source == "Meshtastic New Connection":
+                if meshtastic_node:
+                    gps_data = await self.fetch_gps_from_meshtastic_new_connection(meshtastic_node)
+
+            # If Meshtastic failed, try an external GPS
+            elif gps_source == "gpsd":
+                gps_data = await self.fetch_gps_from_gpsd()
+
+            # Send new GPS data to the callback function
+            if gps_data:
+                self.gps_callback(gps_data)
+
+            await asyncio.sleep(self.gps_update_interval_seconds)
+
+
+    def stop(self):
+        """Stops GPS updates."""
+        self.running = False
 
 
 if __name__ == "__main__":

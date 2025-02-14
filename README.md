@@ -75,7 +75,7 @@ The deployment of multiple sensor nodes on the same network unlocks many geospat
 
 ![CTF](https://img.shields.io/badge/Event-CTF-purple) **January 20, 2025 (Runs Indefinitely)**: FISSURE Challenge. [Link](https://fissure.ainfosec.com/) (Now Live)
 
-![Career Fair](https://img.shields.io/badge/Event-Career%20Fair-green) **Thu. February 6, 2025**: Binghamton University Spring 2025 Job and Internship Fair - 1100-1500 EST
+![Career Fair](https://img.shields.io/badge/Event-Career%20Fair-darkgray) **Thu. February 6, 2025**: Binghamton University Spring 2025 Job and Internship Fair - 1100-1500 EST
 
 ## Documentation
 

@@ -130,6 +130,7 @@ async def addToLibrary(
                             demodulation_fg_data["hardware"],
                             demodulation_fg_data["filename"],
                             demodulation_fg_data["output_type"],
+                            fissure.utils.get_library_version()
                         )
 
                 # Add Attack
@@ -142,7 +143,8 @@ async def addToLibrary(
                         attack["hardware"],
                         attack["attack_type"],
                         attack["filename"],
-                        attack["category_name"]
+                        attack["category_name"],
+                        fissure.utils.get_library_version()
                     )
 
         # New Protocol
@@ -1422,7 +1424,7 @@ async def terminateSensorNode(component: object, sensor_node_id):
     # component.sensor_nodes[sensor_node_id] = None
 
 
-async def connectToSensorNode(component: object, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):
+async def connectToSensorNodeIP(component: object, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):
     """
     Connects the HIPRFISR to a sensor node.
     """
@@ -1437,7 +1439,7 @@ async def connectToSensorNode(component: object, sensor_node_id, ip_address, msg
         get_msg_port = str(msg_port)
 
         # Reset Listener for Local Connections since Local Sensor Node Shuts Down Completely on Disconnect
-        component.reset_sensor_node_listener(sensor_node_id)
+        await component.reset_sensor_node_listener(sensor_node_id, "IP")
 
     # Remote
     else:
@@ -1469,6 +1471,8 @@ async def connectToSensorNode(component: object, sensor_node_id, ip_address, msg
             await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
             return
 
+    if component.sensor_nodes[sensor_node_id] is None:
+        await component.reset_sensor_node_listener(sensor_node_id, connection_type="IP")
     connection_successful = await component.sensor_nodes[sensor_node_id].listener.connect(sensor_node_address, 15)
     component.sensor_nodes[sensor_node_id].terminated = False
 
@@ -1559,6 +1563,68 @@ async def disconnectFromSensorNode(component: object, sensor_node_id=0, ip_addre
     # await asyncio.sleep(1)
     # component.sensor_nodes[sensor_node_id].__del__()
     # component.sensor_nodes[sensor_node_id].__init__()
+
+
+async def disconnectFromMeshtastic(component: object, sensor_node_id=0):
+    """
+    Ends connections to local serial connection to Meshatastic.
+    """
+    sensor_node_id = int(sensor_node_id)
+
+    # Ensure the sensor node exists
+    if component.sensor_nodes[sensor_node_id] is None:
+        component.logger.warning(f"Sensor node {sensor_node_id} is not connected.")
+        return
+
+    # Disconnect
+    try:
+        await component.sensor_nodes[sensor_node_id].listener.disconnect()
+    except Exception as e:
+        component.logger.error(f"Error disconnecting local serial connection for Sensor Node {sensor_node_id}: {e}")        
+
+    # Set the node to None to fully remove it
+    component.sensor_nodes[sensor_node_id] = None
+    component.logger.info(f"Local serial connection for Sensor Node {sensor_node_id} successfully disconnected.")
+
+
+async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, serial_port, serial_baud_rate, recall_settings):
+    """
+    Connects the HIPRFISR to a local serial connection for a device using Meshtastic.
+    """
+    sensor_node_id = int(sensor_node_id)
+    context = component
+    name=f"{fissure.comms.Identifiers.HIPRFISR}::sensor_node"
+
+    # Initialize Meshtastic connection
+    component.logger.info(f"Connecting to sensor node {sensor_node_id} via Meshtastic on {serial_port}...")
+
+    try:
+        if component.sensor_nodes[sensor_node_id] is None:
+            await component.reset_sensor_node_listener(
+                sensor_node_id, "Meshtastic", serial_port=serial_port, name=name, context=context
+            )
+        component.logger.info(f"Connected to local serial port for communicating with Sensor node {sensor_node_id} via Meshtastic.")
+
+        # Optionally recall settings if required
+        if recall_settings == "True":
+            component.logger.info(f"Recalling settings for sensor node {sensor_node_id}...")
+            msg = {
+                fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "recallSettings",
+            }
+            await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+        # Send Connected Messages
+        PARAMETERS = {"component_name": sensor_node_id}
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "componentConnectedSerial",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        
+    except Exception as e:
+        component.logger.error(f"Failed to connect to sensor node {sensor_node_id} via Meshtastic: {e}")
 
 
 # ######################### From Sensor Node #############################
@@ -2113,11 +2179,11 @@ async def checkPlugin(component: object, sensor_node_id: int):
     sensor_node_id : int, optional
         Sensor node ID
     """
-    # get plugin names
+    # Get plugin names
     plugin_names = plugin.get_local_plugin_names()
 
     if sensor_node_id > -1:
-        # forward message to sensor node
+        # Forward message to sensor node
         PARAMETERS = {
             "sensor_node_id": sensor_node_id,
             "plugin_names": plugin_names
@@ -2129,8 +2195,8 @@ async def checkPlugin(component: object, sensor_node_id: int):
         }
         await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+    # Sensor node is local to HIPRFISR
     else:
-        # Sensor node is local to hiprfisr
         # Get status; deployed is N/A as it is local
         status = {}
         run_db_install = False
@@ -2386,7 +2452,7 @@ async def installPluginsDatabase(component: object, sensor_node_id: int, refresh
     # Update database cache and dashboard
     await retrieveDatabaseCache(component, refresh_frontend_widgets)
 
-    # Update plugin table\list
+    # Update plugin table list
     await checkPlugin(component, sensor_node_id)
 
 
@@ -2683,12 +2749,16 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def findGPS_Coordinates(component: object, tab_index=0, format=""):
+async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", format=""):
     """
     Queries the remote sensor node for its GPS coordinates. 
     """
     # Forward the Message
-    PARAMETERS = {"tab_index": tab_index, "format": format}
+    PARAMETERS = {
+        "tab_index": tab_index,
+        "gps_source": gps_source,
+        "format": format
+    }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_Coordinates",

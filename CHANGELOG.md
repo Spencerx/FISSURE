@@ -1,6 +1,33 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-13
+
+Networking and GPS updates, Meshtastic integration (Part 1)
+
+### Added
+
+- Meshtastic item to installer under Minimum Install
+- MeshMap link in Tools menu
+- GPS source option when acquiring location in Sensor Node Configuration
+- IP/Serial option when connecting to a remote sensor node
+- Added serial_port, serial_baud_rate fields to sensor nodes in FISSURE config files
+- GPS acquisition options at sensor node using the config file, automatically on startup, and updates at a periodic interval
+
+### Changed
+
+- Consolidating local(), remote() functions in HardwareSelectSlots.py
+- HIPRFISR network nodes initialized to None instead of SensorNode()
+- HIPRFISR network nodes closed with new function instead of relying on \__del\__
+- Moved BANNED_MESSAGE_TYPES list to common.py
+- Removed local, remote example sensor node YAML configuration files, added more comments in default.yaml
+
+### Fixed
+
+- Adding missing version parameters to addAttack and addDemodulationFlowGraph in HiprFisrCallbacks
+- Deleting (some of) the associated attack files when removing rows from the Browse "attacks" database table
+- Corrected for lower case heartbeat messages when filtering for heartbeats in Log tab
+
 ## 2025-2-03
 
 Kali/Kali Rolling installation fixes 2.

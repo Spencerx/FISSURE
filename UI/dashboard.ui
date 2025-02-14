@@ -38158,28 +38158,6 @@ p, li { white-space: pre-wrap; }
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label2_library_attacks_attack_template_name2">
-         <property name="geometry">
-          <rect>
-           <x>515</x>
-           <y>225</y>
-           <width>231</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-           <strikeout>false</strikeout>
-          </font>
-         </property>
-         <property name="text">
-          <string>(Protocol - AttackName)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-        </widget>
         <widget class="QComboBox" name="comboBox_library_attacks_attack_type">
          <property name="geometry">
           <rect>
