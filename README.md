@@ -138,7 +138,7 @@ The deployment of multiple sensor nodes on the same network unlocks many geospat
 
 ## Capabilities
 
-- [FISSURE Capabilities (Updated: 11Sep24)](/docs/Help/FISSURE_Capabilities.pdf)
+- [FISSURE Capabilities (Updated: 11Sep24)](https://docs.google.com/viewer?url=https://raw.githubusercontent.com/ainfosec/FISSURE/Python3/docs/Help/FISSURE_Capabilities.pdf)
 
 <table style="padding:10px">
   <tr>
@@ -266,7 +266,7 @@ Notes:
 - Periodically answer prompts regarding third-party software throughout the install. Use your best judgment, the answers will not likely impact FISSURE.
 
 <p align="center">
-<img src="/docs/Icons/README/install1.png" width="80%">
+<img src="/docs/Icons/README/install1.png" width="257" height="379">
 </p>
 
 It is recommended to install FISSURE on a clean operating system to avoid conflicts with existing software. Further efforts towards virtualization and dependency management will be continued. Notes on the installer:
