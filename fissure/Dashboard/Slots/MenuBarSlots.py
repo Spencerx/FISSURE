@@ -5809,3 +5809,13 @@ def _slotMenuMeshMapClicked():
     """
     # Open a Browser
     os.system("xdg-open https://meshmap.net/")
+
+
+@QtCore.pyqtSlot()
+def _slotMenuHelpFISSURE_CapabilitiesClicked():
+    """
+    Opens FISSURE Capabilities PDF.
+    """
+    # Open PDF
+    pdf_filepath = os.path.join(fissure.utils.FISSURE_ROOT, "docs", "Help", "FISSURE_Capabilities.pdf")
+    os.system("xdg-open " + pdf_filepath)

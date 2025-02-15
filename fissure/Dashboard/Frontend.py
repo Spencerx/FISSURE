@@ -2289,6 +2289,10 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionMenuHelpOperationStartUpProcedures.triggered.connect(
         MenuBarSlots._slotMenuHelpOperationStartUpProceduresClicked
     )
+    dashboard.window.actionFISSURE_Capabilities.triggered.connect(
+        MenuBarSlots._slotMenuHelpFISSURE_CapabilitiesClicked
+    )
+    
 
 
 def connect_automation_slots(dashboard: Dashboard):

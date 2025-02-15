@@ -138,6 +138,8 @@ The deployment of multiple sensor nodes on the same network unlocks many geospat
 
 ## Capabilities
 
+- [FISSURE Capabilities (Updated: 11Sep24)](/docs/Help/FISSURE_Capabilities.pdf)
+
 <table style="padding:10px">
   <tr>
     <td><img src="/docs/Icons/README/detector.png" align="center" width="200" height="165"><dt align="center"><small><i><b>Signal Detector</b></i></small></dt></td>
@@ -264,7 +266,7 @@ Notes:
 - Periodically answer prompts regarding third-party software throughout the install. Use your best judgment, the answers will not likely impact FISSURE.
 
 <p align="center">
-<img src="/docs/Icons/README/install1.png">
+<img src="/docs/Icons/README/install1.png" width="80%">
 </p>
 
 It is recommended to install FISSURE on a clean operating system to avoid conflicts with existing software. Further efforts towards virtualization and dependency management will be continued. Notes on the installer:
@@ -312,7 +314,7 @@ A local sensor node can be launched through the top buttons in the FISSURE Dashb
 
 If any of the programs freeze or hang on close, the following commands can be used to detect a problem or forcibly shut down:
 ```
-sudo ps -aux | grep python3
+sudo ps -aux | grep fissure
 sudo pkill python3
 sudo kill -9 <PID of __main__.py>
 ```

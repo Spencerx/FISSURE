@@ -9,6 +9,9 @@ import zipfile
 import shutil
 import pyzipper
 import json
+import asyncio
+from PyQt5.QtWidgets import QApplication
+import subprocess
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1079,12 +1082,112 @@ def _slotLibraryBrowseCopyClicked(dashboard: QtCore.QObject):
     target_table.resizeRowsToContents()
 
 
-@QtCore.pyqtSlot(QtCore.QObject)
-def _slotLibraryPluginImportClicked(dashboard: QtCore.QObject):
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotLibraryPluginImportClicked(dashboard: QtCore.QObject):
     """
-    Imports a plugin from a directory or zip file.
+    Imports a plugin from a ZIP file into the FISSURE system.
+
+    Steps:
+    1. Opens a file dialog for the user to select a ZIP file.
+    2. Checks if the selected ZIP file requires a password.
+       - If a password is required, prompts the user via a GUI input dialog.
+    3. Creates the plugin directory if it does not already exist.
+    4. Extracts the ZIP contents, handling password-protected archives.
+    5. Moves extracted files to the correct plugin directory.
+    6. Opens the plugin in the FISSURE system.
+    7. Prompts the user to apply changes to save the imported plugin.
     """
-    pass
+
+    # Select a .zip
+    file_path = await fissure.Dashboard.UI_Components.Qt5.async_open_file_dialog(dashboard, ".", "ZIP Files (*.zip)")
+    if not file_path:
+        return  # User canceled file selection
+
+    plugin_name = os.path.basename(file_path).replace(".zip", "")
+    plugins_root = os.path.join(fissure.utils.FISSURE_ROOT, "Plugins")
+    new_folder = os.path.join(plugins_root, plugin_name)
+
+    if os.path.exists(new_folder):
+        return  # Plugin folder already exists, do not proceed
+
+    # Step 1: Check if ZIP requires a password
+    password = None
+    test_cmd = ["7z", "t", file_path, "-p"]
+    
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *test_cmd,
+            stdout=asyncio.subprocess.DEVNULL,  # Suppress normal output
+            stderr=asyncio.subprocess.PIPE  # Capture errors only
+        )
+        _, stderr = await asyncio.wait_for(proc.communicate(), timeout=5)
+
+    except asyncio.TimeoutError:
+        return  # Exit if 7z test command hangs
+
+    # Check if the ZIP is password-protected
+    stderr_output = stderr.decode().strip()
+    if "Wrong password" in stderr_output or "Can not open encrypted archive" in stderr_output or "Data Error" in stderr_output:
+        password = await fissure.Dashboard.UI_Components.Qt5.async_input_dialog(dashboard, "Enter ZIP password:", "Password Required")
+        if not password:
+            return  # User canceled password input
+
+    # Step 2: Create the plugin directory in the system
+    dashboard.ui.comboBox_library_plugin_new_existing.setCurrentIndex(1)
+    dashboard.ui.textEdit_library_plugin_plugin_name.setPlainText(plugin_name)
+    await _slotLibraryPluginCreate(dashboard, open_after_create=False)
+
+    # Step 3: Extract ZIP after plugin creation
+    temp_extract_path = os.path.join(plugins_root, f"{plugin_name}_temp")
+    os.makedirs(temp_extract_path, exist_ok=True)
+
+    try:
+        extract_cmd = ["7z", "x", file_path, f"-o{temp_extract_path}", "-y"]
+        if password:
+            extract_cmd.append(f"-p{password}")
+
+        proc = await asyncio.create_subprocess_exec(
+            *extract_cmd,
+            stdout=asyncio.subprocess.DEVNULL,  # Suppress normal output
+            stderr=asyncio.subprocess.PIPE
+        )
+
+        _, stderr = await proc.communicate()
+        stderr_output = stderr.decode().strip()
+
+        if "Wrong password" in stderr_output or "Can not open encrypted archive" in stderr_output:
+            return  # Exit if incorrect password
+
+        # Step 4: Move extracted files to the plugin directory
+        extracted_folder = None
+        for root, dirs, _ in os.walk(temp_extract_path):
+            if "install_files" in dirs and "tables" in dirs:
+                extracted_folder = root
+                break
+
+        if extracted_folder:
+            for item in os.listdir(extracted_folder):
+                src_path = os.path.join(extracted_folder, item)
+                dest_path = os.path.join(new_folder, item)
+                if os.path.isdir(src_path):
+                    shutil.copytree(src_path, dest_path, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src_path, dest_path)
+        else:
+            return  # Exit if required folders are missing
+
+        shutil.rmtree(temp_extract_path)  # Remove temporary extraction folder
+
+    except asyncio.TimeoutError:
+        return  # Exit if 7z extraction times out
+    except Exception:
+        return  # Exit on unexpected extraction failure
+
+    # Step 5: Open the Plugin
+    await _slotLibraryPluginOpenClose(dashboard)
+
+    # Step 6: Prompt user to save changes
+    await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, 'Click "Apply Changes" to save to database.')
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1447,29 +1550,51 @@ def _slotLibraryPluginAppendClicked(dashboard: QtCore.QObject):
 
 
 @qasync.asyncSlot(QtCore.QObject)
-async def _slotLibraryPluginCreate(dashboard: QtCore.QObject):
-    # UI objects
-    textEdit_library_plugin_plugin_name: QtWidgets.QLineEdit = dashboard.ui.textEdit_library_plugin_plugin_name
-    comboBox_library_plugin_new_existing: QtWidgets.QComboBox = dashboard.ui.comboBox_library_plugin_new_existing
-    stackedWidget_library_plugin_selection: QtWidgets.QStackedWidget = dashboard.ui.stackedWidget_library_plugin_selection
-    pushButton_library_plugin_selection_open_close: QtWidgets.QPushButton = dashboard.ui.pushButton_library_plugin_selection_open_close
-
+async def _slotLibraryPluginCreate(dashboard: QtCore.QObject, open_after_create=True):
+    """
+    Creates a new empty plugin at the HIPRFISR and prepares the Plugin Editor for editing.
+    """
     # Get plugin name
-    plugin_name = textEdit_library_plugin_plugin_name.toPlainText()
+    plugin_name = dashboard.ui.textEdit_library_plugin_plugin_name.toPlainText()
 
     if len(plugin_name) > 0:
         # Open editor on hiprfisr to create plugin
         await dashboard.backend.openPluginHiprfisr(plugin_name)
 
-        # Switch to existing stacked widget page
-        comboBox_library_plugin_new_existing.setCurrentText("Existing")
-        stackedWidget_library_plugin_selection.setCurrentIndex(0)
+        # Refresh the List
+        await _slotLibraryPluginPluginRefresh(dashboard)
 
-        # Disable plugin selection boxes
-        comboBox_library_plugin_new_existing.setEnabled(False)
+        # Wait up to 5 seconds for the plugin to appear
+        comboBox = dashboard.ui.comboBox_library_plugin_selection
+        timeout = 5  # seconds
+        elapsed = 0
+        check_interval = 0.2  # seconds
+        timeout_triggered = False
 
-        # Change button text
-        pushButton_library_plugin_selection_open_close.setText("Close Plugin")
+        while elapsed < timeout:
+            QApplication.processEvents()  # Process UI updates
+            plugin_names = [comboBox.itemText(i) for i in range(comboBox.count())]
+
+            if plugin_name in plugin_names:
+                comboBox.setCurrentText(plugin_name)
+                break  # Exit loop once the plugin is found
+
+            await asyncio.sleep(check_interval)  # Wait before retrying
+            elapsed += check_interval
+
+        if elapsed >= timeout:
+            dashboard.logger.debug(f"Timeout: Plugin '{plugin_name}' not found after {timeout} seconds.")
+            timeout_triggered = True
+
+        # Switch UI to show existing plugin
+        dashboard.ui.textEdit_library_plugin_plugin_name.setPlainText("")
+        dashboard.ui.comboBox_library_plugin_new_existing.setCurrentText("Existing")
+        dashboard.ui.stackedWidget_library_plugin_selection.setCurrentIndex(0)
+
+        # Open Plugin
+        if timeout_triggered == False:
+            if open_after_create == True:
+                await _slotLibraryPluginOpenClose(dashboard)
 
 
 @qasync.asyncSlot(QtCore.QObject)

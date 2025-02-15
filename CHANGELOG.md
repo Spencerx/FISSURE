@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-14
+
+Plugin updates and FISSURE Capabilities document
+
+### Added
+
+- FISSURE Capabilities PDF (11Sep24) to Help menu and README
+- Plugin import function to load in ZIP file plugins with and without a password
+- Added p7zip-full to the installer
+
+### Changed
+
+- Resizing README install1.png image to be smaller
+
+### Fixed
+
+- Updating create plugin function to open the newly created plugin
+
 ## 2025-2-13
 
 Networking and GPS updates, Meshtastic integration (Part 1)

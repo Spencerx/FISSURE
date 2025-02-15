@@ -100,6 +100,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -2252,6 +2253,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -4369,6 +4371,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -8627,6 +8630,7 @@ sudo apt-get install -y debconf-utils
 sudo apt-get install -y libzmq3-dev
 sudo apt-get install -y zstd
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -10757,6 +10761,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -12871,6 +12876,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -14990,6 +14996,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -17111,6 +17118,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -19233,6 +19241,7 @@ sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 

@@ -204,6 +204,7 @@
     <addaction name="menuDevelopment_2"/>
     <addaction name="actionCredits"/>
     <addaction name="separator"/>
+    <addaction name="actionFISSURE_Capabilities"/>
     <addaction name="menuProtocol_Signal_References"/>
     <addaction name="separator"/>
     <addaction name="menuGitHub"/>
@@ -3497,6 +3498,11 @@
   <action name="actionMeshMap">
    <property name="text">
     <string>MeshMap</string>
+   </property>
+  </action>
+  <action name="actionFISSURE_Capabilities">
+   <property name="text">
+    <string>FISSURE Capabilities</string>
    </property>
   </action>
  </widget>
