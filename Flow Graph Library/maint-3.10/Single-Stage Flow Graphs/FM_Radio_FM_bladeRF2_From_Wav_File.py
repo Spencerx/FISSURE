@@ -55,9 +55,9 @@ class FM_Radio_FM_bladeRF2_From_Wav_File(gr.top_block):
                                   stream_args, tune_args, settings)
         self.soapy_bladerf_sink_0.set_sample_rate(0, sample_rate)
         self.soapy_bladerf_sink_0.set_bandwidth(0, 0.0)
-        self.soapy_bladerf_sink_0.set_frequency(0, tx_frequency)
+        self.soapy_bladerf_sink_0.set_frequency(0, float(tx_frequency))
         self.soapy_bladerf_sink_0.set_frequency_correction(0, 0)
-        self.soapy_bladerf_sink_0.set_gain(0, min(max(tx_gain, 17.0), 73.0))
+        self.soapy_bladerf_sink_0.set_gain(0, min(max(float(tx_gain), 17.0), 73.0))
         self.mmse_resampler_xx_0 = filter.mmse_resampler_ff(0, (audio_rate/sample_rate))
         self.blocks_wavfile_source_0 = blocks.wavfile_source(filepath, True)
         self.analog_wfm_tx_0 = analog.wfm_tx(
@@ -82,14 +82,14 @@ class FM_Radio_FM_bladeRF2_From_Wav_File(gr.top_block):
 
     def set_tx_gain(self, tx_gain):
         self.tx_gain = tx_gain
-        self.soapy_bladerf_sink_0.set_gain(0, min(max(self.tx_gain, 17.0), 73.0))
+        self.soapy_bladerf_sink_0.set_gain(0, min(max(float(self.tx_gain), 17.0), 73.0))
 
     def get_tx_frequency(self):
         return self.tx_frequency
 
     def set_tx_frequency(self, tx_frequency):
         self.tx_frequency = tx_frequency
-        self.soapy_bladerf_sink_0.set_frequency(0, self.tx_frequency)
+        self.soapy_bladerf_sink_0.set_frequency(0, float(self.tx_frequency))
 
     def get_serial(self):
         return self.serial

@@ -109,7 +109,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '30'
+    value: '60'
   states:
     bus_sink: false
     bus_source: false
@@ -399,7 +399,7 @@ blocks:
     bus_structure: null
     coordinate: [856, 100]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -594,9 +594,31 @@ blocks:
     coordinate: [1000, 387]
     rotation: 0
     state: disabled
+- name: soapy_bladerf_sink_0
+  id: soapy_bladerf_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: '0.0'
+    center_freq: float(tx_frequency)*1e6
+    comment: ''
+    dev_args: '"bladerf=" + str(serial)'
+    freq_correction: '0'
+    gain: float(tx_gain)
+    samp_rate: float(sample_rate)*1e6
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [640, 260.0]
+    rotation: 0
+    state: true
 
 connections:
 - [blocks_file_source_0, '0', osmosdr_sink_0, '0']
+- [blocks_file_source_0, '0', soapy_bladerf_sink_0, '0']
 
 metadata:
   file_format: 1
+  grc_version: 3.10.7.0

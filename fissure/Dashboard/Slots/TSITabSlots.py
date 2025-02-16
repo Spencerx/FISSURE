@@ -249,9 +249,14 @@ def _slotTSI_DetectorChanged(dashboard: QtCore.QObject):
         dashboard.ui.textEdit_tsi_detector_fg_sample_rate.setPlainText("20e6")
         dashboard.ui.spinBox_tsi_detector_fg_threshold.setValue(-70)
         dashboard.ui.comboBox_tsi_detector_fg_fft_size.setCurrentIndex(1)
-        dashboard.ui.spinBox_tsi_detector_fg_gain.setMaximum(40)
-        dashboard.ui.spinBox_tsi_detector_fg_gain.setMinimum(0)
-        dashboard.ui.spinBox_tsi_detector_fg_gain.setValue(10)
+        if fissure.utils.get_library_version() == "maint-3.8":
+            dashboard.ui.spinBox_tsi_detector_fg_gain.setMaximum(40)
+            dashboard.ui.spinBox_tsi_detector_fg_gain.setMinimum(0)
+            dashboard.ui.spinBox_tsi_detector_fg_gain.setValue(10)
+        else:
+            dashboard.ui.spinBox_tsi_detector_fg_gain.setMaximum(60)
+            dashboard.ui.spinBox_tsi_detector_fg_gain.setMinimum(-1)
+            dashboard.ui.spinBox_tsi_detector_fg_gain.setValue(50)
         dashboard.ui.comboBox_tsi_detector_fg_channel.clear()
         dashboard.ui.comboBox_tsi_detector_fg_channel.addItem("N/A")
         dashboard.ui.comboBox_tsi_detector_fg_channel.setCurrentIndex(0)

@@ -121,7 +121,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '25'
+    value: '50'
   states:
     bus_sink: false
     bus_source: false
@@ -168,7 +168,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 124]
+    coordinate: [1160, 140.0]
     rotation: 0
     state: enabled
 - name: blocks_head_0
@@ -186,7 +186,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [880, 140]
+    coordinate: [944, 156.0]
     rotation: 0
     state: enabled
 - name: blocks_keep_one_in_n_0
@@ -222,7 +222,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [616, 140]
+    coordinate: [720, 156.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -773,15 +773,39 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 68]
+    coordinate: [336, 12.0]
     rotation: 0
-    state: enabled
+    state: disabled
+- name: soapy_bladerf_source_0
+  id: soapy_bladerf_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: '0.0'
+    center_freq: float(rx_frequency)*1e6
+    comment: ''
+    dev_args: '"bladerf=" + str(serial)'
+    freq_correction: '0'
+    gain: float(rx_gain)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: float(sample_rate)*1e6
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 260.0]
+    rotation: 0
+    state: true
 
 connections:
 - [blocks_head_0, '0', blocks_file_sink_0, '0']
 - [blocks_keep_one_in_n_0, '0', qtgui_time_sink_x_0_0, '0']
 - [blocks_skiphead_0, '0', blocks_head_0, '0']
 - [rtlsdr_source_0_0, '0', blocks_skiphead_0, '0']
+- [soapy_bladerf_source_0, '0', blocks_skiphead_0, '0']
 
 metadata:
   file_format: 1
+  grc_version: 3.10.7.0

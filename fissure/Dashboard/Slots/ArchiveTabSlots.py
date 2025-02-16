@@ -220,7 +220,10 @@ def _slotArchiveReplayHardwareChanged(dashboard: QtCore.QObject):
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "bladeRF 2.0":
             get_combobox.addItem("")
-            gain_item = QtWidgets.QTableWidgetItem("20")
+            if fissure.utils.get_library_version() == "maint-3.8":
+                gain_item = QtWidgets.QTableWidgetItem("20")
+            else:
+                gain_item = QtWidgets.QTableWidgetItem("60")
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "USRP X410":
@@ -411,7 +414,10 @@ def _slotArchiveReplayAddClicked(dashboard: QtCore.QObject):
             elif get_hardware_type == "USRP N2xx":
                 gain_item = QtWidgets.QTableWidgetItem("30")
             elif get_hardware_type == "bladeRF 2.0":
-                gain_item = QtWidgets.QTableWidgetItem("20")
+                if fissure.utils.get_library_version() == "maint-3.8":
+                    gain_item = QtWidgets.QTableWidgetItem("20")
+                else:
+                    gain_item = QtWidgets.QTableWidgetItem("60")
             elif get_hardware_type == "USRP X410":
                 gain_item = QtWidgets.QTableWidgetItem("50")
             else:
@@ -556,7 +562,10 @@ def _slotArchiveReplayAddClicked(dashboard: QtCore.QObject):
     elif get_hardware_type == "USRP N2xx":
         gain_item = QtWidgets.QTableWidgetItem("30")
     elif get_hardware_type == "bladeRF 2.0":
-        gain_item = QtWidgets.QTableWidgetItem("20")
+        if fissure.utils.get_library_version() == "maint-3.8":
+            gain_item = QtWidgets.QTableWidgetItem("20")
+        else:
+            gain_item = QtWidgets.QTableWidgetItem("60")
     elif get_hardware_type == "USRP X410":
         gain_item = QtWidgets.QTableWidgetItem("50")
     else:

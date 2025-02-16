@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-16
+
+Updating bladeRF 2.0 flow graphs with Soapy blocks.
+
+### Changed
+
+- Default gain values for bladeRF2 for maint-3.10 flows graphs/operating systems in Dashboard
+
+### Fixed
+
+- bladeRF2 waterfall acquires the correct filename from the database
+- Updated bladeRF2 flow graphs with Soapy source/sink blocks
+
 ## 2025-2-14
 
 Plugin updates and FISSURE Capabilities document
