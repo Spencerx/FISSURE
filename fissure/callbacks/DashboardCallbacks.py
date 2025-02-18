@@ -1558,7 +1558,7 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     component.frontend.ui.textEdit2_sensor_nodes_alerts.setPlainText(updated_content)
     component.frontend.ui.textEdit2_sensor_nodes_alerts.verticalScrollBar().setValue(component.frontend.ui.textEdit2_sensor_nodes_alerts.verticalScrollBar().maximum())
 
-    # Update the Alerts Text
+    # Calculate Alert Total
     current_text = component.frontend.ui.tabWidget_sensor_nodes.tabBar().tabText(3)
     if "(" in current_text and ")" in current_text:
         base_text, count = current_text.rsplit("(", 1)
@@ -1573,7 +1573,12 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
 
     new_count = current_count + 1
     new_text = f"{base_text.strip()} ({new_count})"
+
+    # Update Alert Tab with Count
     component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(3, new_text)
+
+    # Update Sensor Nodes Tab with Count
+    component.frontend.ui.tabWidget.tabBar().setTabText(6, new_text.replace("Alerts", "Sensor Nodes"))
 
 
 async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):

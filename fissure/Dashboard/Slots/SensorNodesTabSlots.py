@@ -819,8 +819,11 @@ def _slotSensorNodesAlertsClearClicked(dashboard: QtCore.QObject):
     # Clear
     dashboard.ui.textEdit2_sensor_nodes_alerts.clear()
 
-    # Reset Tab Text
+    # Reset Alerts Tab Text
     dashboard.ui.tabWidget_sensor_nodes.tabBar().setTabText(3,"Alerts")
+
+    # Reset Sensor Nodes Tab Text
+    dashboard.ui.tabWidget.tabBar().setTabText(6,"Sensor Nodes")
 
 
 @QtCore.pyqtSlot(QtCore.QObject)

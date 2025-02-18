@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-18
+
+Merging and adjusting the pull request for alert updates.
+
+### Added
+
+- Calling attack scripts at the sensor node with the new alertSender class
+- Updating alertReturn() callback and adding takPlot() callback in HIPRFISR
+- Adding alert_sender.py to utils folder
+- TPMS receive scripts for testing alerts
+- Wi-Fi scanning script for testing alerts
+- Placing alert count in Sensor Nodes tab in addition to Alerts tab
+
 ## 2025-2-17
 
 Hardware utility functions for gain, antennas, and channels.
