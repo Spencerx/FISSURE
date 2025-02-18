@@ -176,6 +176,9 @@ async def archivePlaylistFinished(component: object, sensor_node_id=0):
     component.frontend.statusbar_text[sensor_node_id][5] = "Not Running"
     component.frontend.refreshStatusBarText()
 
+    # Enable the Controls
+    component.frontend.ui.frame_archive_replay_controls.setEnabled(True)
+
 
 async def hardwareGuessResults(component: object, tab_index=0, table_row=[], hardware_type="", scan_results="", new_guess_index=0):
     """

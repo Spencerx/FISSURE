@@ -488,16 +488,9 @@ def getAttackFilename(library, protocol, attack_name, modulation_type, hardware,
     """
     Returns the filename for an attack in the attacks table.
     """
-    print("In getAttackFilename")
-    print(protocol)
-    print(attack_name)
-    print(modulation_type)
-    print(hardware)
-    print(version)
     attack_name = attack_name.split(' - ')[-1].strip()  # Avoids "X10 - On" in attack tree when entered as "On" in attacks table
     attack_filename = next((row[6] for row in library["attacks"] if row[1] == protocol and row[2] == attack_name and row[3] == modulation_type and row[4] == hardware and row[8] == version), None)
-    print(attack_name)
-    print(attack_filename)
+
     return attack_filename
 
 

@@ -1,7 +1,7 @@
 import subprocess
 import time
 from gps import gps, WATCH_ENABLE
-from fissure.utils import format_coordinates
+from fissure.utils import format_coordinates, get_library_version
 import asyncio
 import meshtastic
 from meshtastic.serial_interface import SerialInterface
@@ -414,7 +414,7 @@ def checkFrequencyBounds(get_frequency, get_hardware, get_daughterboard):
 
     elif get_hardware == "bladeRF 2.0":
         # Frequency Limits
-        if (get_frequency >= 47) and (get_frequency <= 6000):
+        if (get_frequency >= 70) and (get_frequency <= 6000):  # Soapy blocks don't work below 70 MHz
             return True
 
     elif get_hardware == "USRP X410":
@@ -1271,3 +1271,291 @@ async def probeMeshtasticGPS(serial_port: str, timeout: int = 10) -> Optional[Di
     except Exception as e:
         print(f"Error creating temporary connection to {serial_port}: {e}")
         return None
+
+
+def getHardwareGain(hardware_type: str, tx_rx: str):
+    """ 
+    Returns (min, max, default) hardware gain values for transmit or receive.
+    """
+    # Transmit
+    gain_values = None
+    if tx_rx == "TX":
+        if hardware_type == "Computer":
+            gain_values = None
+        elif hardware_type == "USRP X3x0":
+            gain_values = [0, 34, 30]
+        elif hardware_type == "USRP B2x0":
+            gain_values = [0, 90, 70]
+        elif hardware_type == "HackRF":
+            gain_values = [0, 47, 40]
+        elif hardware_type == "RTL2832U":
+            gain_values = None
+        elif hardware_type == "802.11x Adapter":
+            gain_values = None
+        elif hardware_type == "USRP B20xmini":
+            gain_values = [0, 90, 70]
+        elif hardware_type == "LimeSDR":
+            gain_values = [0, 70, 50]
+        elif hardware_type == "bladeRF":
+            gain_values = [0, 47, 40]
+        elif hardware_type == "Open Sniffer":
+            gain_values = None
+        elif hardware_type == "PlutoSDR":
+            gain_values = [0, 71, 64]
+        elif hardware_type == "USRP2":
+            gain_values = [0, 34, 30]
+        elif hardware_type == "USRP N2xx":
+            gain_values = [0, 34, 30]
+        elif hardware_type == "bladeRF 2.0":
+            if get_library_version() == "maint-3.8":
+                gain_values = [0, 47, 40]
+            else:
+                gain_values = [17, 73, 60]
+        elif hardware_type == "USRP X410":
+            gain_values = [0, 60, 50]
+        elif hardware_type == "RSPduo":
+            gain_values = [0, 59, 0]  # attenuation, not gain
+        elif hardware_type == "RSPdx":
+            gain_values = [0, 59, 0]  # attenuation, not gain
+        elif hardware_type == "RSPdx R2":
+            gain_values = [0, 59, 0]  # attenuation, not gain
+        else:
+            gain_values = None
+
+    # Receive
+    elif tx_rx == "RX":
+        if hardware_type == "Computer":
+            gain_values = None
+        elif hardware_type == "USRP X3x0":
+            gain_values = [0, 34, 30]
+        elif hardware_type == "USRP B2x0":
+            gain_values = [0, 90, 70]
+        elif hardware_type == "HackRF":
+            gain_values = [0, 47, 40]
+        elif hardware_type == "RTL2832U":
+            gain_values = [0, 47, 40]
+        elif hardware_type == "802.11x Adapter":
+            gain_values = None
+        elif hardware_type == "USRP B20xmini":
+            gain_values = [0, 90, 70]
+        elif hardware_type == "LimeSDR":
+            gain_values = [0, 70, 50]
+        elif hardware_type == "bladeRF":
+            gain_values = [0, 47, 40]
+        elif hardware_type == "Open Sniffer":
+            gain_values = None
+        elif hardware_type == "PlutoSDR":
+            gain_values = [0, 71, 64]
+        elif hardware_type == "USRP2":
+            gain_values = [0, 34, 30]
+        elif hardware_type == "USRP N2xx":
+            gain_values = [0, 34, 30]
+        elif hardware_type == "bladeRF 2.0":
+            if get_library_version() == "maint-3.8":
+                gain_values = [0, 47, 40]
+            else:
+                gain_values = [-1, 60, 50]
+        elif hardware_type == "USRP X410":
+            gain_values = [0, 60, 50]
+        elif hardware_type == "RSPduo":
+            gain_values = [0, 59, 0]  # attenuation, not gain
+        elif hardware_type == "RSPdx":
+            gain_values = [0, 59, 0]  # attenuation, not gain
+        elif hardware_type == "RSPdx R2":
+            gain_values = [0, 59, 0]  # attenuation, not gain
+        else:
+            gain_values = None
+
+    return gain_values
+
+
+def getHardwareAntennas(hardware_type: str, tx_rx: str):
+    """ 
+    Returns a list of hardware antenna options for transmit or receive.
+    """
+    # Transmit
+    antenna_values = None
+    if tx_rx == "TX":
+        if hardware_type == "Computer":
+            antenna_values = None
+        elif hardware_type == "USRP X3x0":
+            antenna_values = ["TX/RX"]
+        elif hardware_type == "USRP B2x0":
+            antenna_values = ["TX/RX"]
+        elif hardware_type == "HackRF":
+            antenna_values = [""]
+        elif hardware_type == "RTL2832U":
+            antenna_values = None
+        elif hardware_type == "802.11x Adapter":
+            antenna_values = None
+        elif hardware_type == "USRP B20xmini":
+            antenna_values = ["TX/RX"]
+        elif hardware_type == "LimeSDR":
+            antenna_values = ["TX1", "TX2"]
+        elif hardware_type == "bladeRF":
+            antenna_values = ["", ""]
+        elif hardware_type == "Open Sniffer":
+            antenna_values = None
+        elif hardware_type == "PlutoSDR":
+            antenna_values = [""]
+        elif hardware_type == "USRP2":
+            antenna_values = ["J1", "J2"]
+        elif hardware_type == "USRP N2xx":
+            antenna_values = ["J1", "J2"]
+        elif hardware_type == "bladeRF 2.0":
+            if get_library_version() == "maint-3.8":
+                antenna_values = ["", ""]
+            else:
+                antenna_values = ["", ""]  # Will this be different?
+        elif hardware_type == "USRP X410":
+            antenna_values = ["TX/RX"]
+        elif hardware_type == "RSPduo":
+            antenna_values = None
+        elif hardware_type == "RSPdx":
+            antenna_values = None
+        elif hardware_type == "RSPdx R2":
+            antenna_values = None
+        else:
+            antenna_values = None
+
+    # Receive
+    elif tx_rx == "RX":
+        if hardware_type == "Computer":
+            antenna_values = None
+        elif hardware_type == "USRP X3x0":
+            antenna_values = ["TX/RX", "RX1", "RX2"]
+        elif hardware_type == "USRP B2x0":
+            antenna_values = ["TX/RX", "RX2"]
+        elif hardware_type == "HackRF":
+            antenna_values = [""]
+        elif hardware_type == "RTL2832U":
+            antenna_values = [""]
+        elif hardware_type == "802.11x Adapter":
+            antenna_values = None
+        elif hardware_type == "USRP B20xmini":
+            antenna_values = ["TX/RX", "RX2"]
+        elif hardware_type == "LimeSDR":
+            antenna_values = ["RX1", "RX2"]
+        elif hardware_type == "bladeRF":
+            antenna_values = ["", ""]
+        elif hardware_type == "Open Sniffer":
+            antenna_values = None
+        elif hardware_type == "PlutoSDR":
+            antenna_values = [""]
+        elif hardware_type == "USRP2":
+            antenna_values = ["J1", "J2"]
+        elif hardware_type == "USRP N2xx":
+            antenna_values = ["J1", "J2"]
+        elif hardware_type == "bladeRF 2.0":
+            if get_library_version() == "maint-3.8":
+                antenna_values = ["", ""]
+            else:
+                antenna_values = ["", ""]
+        elif hardware_type == "USRP X410":
+            antenna_values = ["TX/RX", "RX1", "RX2"]
+        elif hardware_type == "RSPduo":
+            antenna_values = ["1", "2"]
+        elif hardware_type == "RSPdx":
+            antenna_values = ["A", "B", "C"]
+        elif hardware_type == "RSPdx R2":
+            antenna_values = ["A", "B", "C"]
+        else:
+            antenna_values = None
+
+    return antenna_values
+
+
+def getHardwareChannels(hardware_type: str, tx_rx: str):
+    """ 
+    Returns a list of hardware channels options for transmit or receive.
+    """
+    # Transmit
+    channel_values = None
+    if tx_rx == "TX":
+        if hardware_type == "Computer":
+            channel_values = None
+        elif hardware_type == "USRP X3x0":
+            channel_values = ["A:0", "B:0"]
+        elif hardware_type == "USRP B2x0":
+            channel_values = ["A:A", "A:B"]
+        elif hardware_type == "HackRF":
+            channel_values = [""]
+        elif hardware_type == "RTL2832U":
+            channel_values = None
+        elif hardware_type == "802.11x Adapter":
+            channel_values = None
+        elif hardware_type == "USRP B20xmini":
+            channel_values = ["A:A", "A:B"]
+        elif hardware_type == "LimeSDR":
+            channel_values = ["A", "B"]
+        elif hardware_type == "bladeRF":
+            channel_values = ["", ""]
+        elif hardware_type == "Open Sniffer":
+            channel_values = None
+        elif hardware_type == "PlutoSDR":
+            channel_values = [""]
+        elif hardware_type == "USRP2":
+            channel_values = ["A:0", "B:0", "A:AB", "A:BA", "A:A", "A:B", "B:AB", "B:BA", "B:A", "B:B"]
+        elif hardware_type == "USRP N2xx":
+            channel_values = ["A:0", "B:0", "A:AB", "A:BA", "A:A", "A:B", "B:AB", "B:BA", "B:A", "B:B"]
+        elif hardware_type == "bladeRF 2.0":
+            if get_library_version() == "maint-3.8":
+                channel_values = ["", ""]
+            else:
+                channel_values = ["", ""]  # Will this be different?
+        elif hardware_type == "USRP X410":
+            channel_values = ["A:0", "B:0"]
+        elif hardware_type == "RSPduo":
+            channel_values = None
+        elif hardware_type == "RSPdx":
+            channel_values = None
+        elif hardware_type == "RSPdx R2":
+            channel_values = None
+        else:
+            channel_values = None
+
+    # Receive
+    elif tx_rx == "RX":
+        if hardware_type == "Computer":
+            channel_values = None
+        elif hardware_type == "USRP X3x0":
+            channel_values = ["A:0", "B:0"]
+        elif hardware_type == "USRP B2x0":
+            channel_values = ["A:A", "A:B"]
+        elif hardware_type == "HackRF":
+            channel_values = [""]
+        elif hardware_type == "RTL2832U":
+            channel_values = [""]
+        elif hardware_type == "802.11x Adapter":
+            channel_values = None
+        elif hardware_type == "USRP B20xmini":
+            channel_values = ["A:A", "A:B"]
+        elif hardware_type == "LimeSDR":
+            channel_values = ["A", "B"]
+        elif hardware_type == "bladeRF":
+            channel_values = ["", ""]
+        elif hardware_type == "Open Sniffer":
+            channel_values = None
+        elif hardware_type == "PlutoSDR":
+            channel_values = [""]
+        elif hardware_type == "USRP2":
+            channel_values = ["A:0", "B:0", "A:AB", "A:BA", "A:A", "A:B", "B:AB", "B:BA", "B:A", "B:B"]
+        elif hardware_type == "USRP N2xx":
+            channel_values = ["A:0", "B:0", "A:AB", "A:BA", "A:A", "A:B", "B:AB", "B:BA", "B:A", "B:B"]
+        elif hardware_type == "bladeRF 2.0":
+            if get_library_version() == "maint-3.8":
+                channel_values = ["", ""]
+            else:
+                channel_values = ["", ""]  # Will this be different?
+        elif hardware_type == "USRP X410":
+            channel_values = ["A:0", "B:0"]
+        elif hardware_type == "RSPduo":
+            channel_values = [""]
+        elif hardware_type == "RSPdx":
+            channel_values = [""]
+        elif hardware_type == "RSPdx R2":
+            channel_values = [""]
+        else:
+            channel_values = None
+
+    return channel_values

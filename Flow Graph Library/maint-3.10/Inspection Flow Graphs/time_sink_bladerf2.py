@@ -106,7 +106,7 @@ class time_sink_bladerf2(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._rx_frequency_range = Range(50, 3800, .1, 2412, 200)
+        self._rx_frequency_range = Range(70, 6000, .1, 2412, 200)
         self._rx_frequency_win = RangeWidget(self._rx_frequency_range, self.set_rx_frequency, " Freq. (MHz):", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._rx_frequency_win, 2, 0, 1, 4)
         for r in range(2, 3):

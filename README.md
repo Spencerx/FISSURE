@@ -243,7 +243,7 @@ Note: Certain software tools do not work for every OS. Refer to [Known Conflicts
 
 **Installation** 
 
-For adding SSH keys to GitHub:
+For adding SSH keys to GitHub and cloning with SSH (needed for contributing):
 ```
 ssh-keygen -t ed25519
 cat ~/.ssh/id_ed25519.pub
@@ -251,10 +251,15 @@ Paste text into "Settings" > "SSH and GPG keys" > "New SSH Key"
 git clone git@github.com:ainfosec/FISSURE.git 
 ```
 
+For cloning with https:
 ```
 git clone https://github.com/ainfosec/FISSURE.git
+```
+
+Preparing the installer:
+```
 cd FISSURE
-git checkout Python3  # or Python2_maint-3.7
+git checkout Python3  # or Python2_maint-3.7 for legacy third-party tools
 git submodule update --init
 ./install
 ```
@@ -302,7 +307,7 @@ The remote sensor node acts as a server and must have a set of valid certificate
 
 **Local Dashboard Usage**
 
-Open a terminal and enter:
+Open a new terminal after installation and enter:
 
 ```
 fissure
@@ -509,7 +514,7 @@ Special thanks to Dr. Samuel Mantravadi and Joseph Reith for their contributions
 <img src="/docs/Icons/README/logo1.png">
 
 ## Assured Information Security
-Like working with signals, reverse engineering, or other realms in cybersecurity? Browse our [current openings](https://recruiting.paylocity.com/recruiting/jobs/All/4cc515ee-a8ad-4e3a-ac7d-c105c5d24074/ASSURED-INFORMATION-SECURITY-INC) or join our [talent community](https://www.ainfosec.com/careers/#talent-community) for future consideration. 
+Like working with signals, reverse engineering, or other realms in cybersecurity? Browse our [current openings](https://recruiting.paylocity.com/recruiting/jobs/All/4cc515ee-a8ad-4e3a-ac7d-c105c5d24074/ASSURED-INFORMATION-SECURITY-INC) or join our [talent community](https://recruiting.paylocity.com/Recruiting/PublicLeads/New/4cc515ee-a8ad-4e3a-ac7d-c105c5d24074) for future consideration. 
 
 If you have an interest in hacking, check out our [Can You Hack It?®](https://www.canyouhackit.com) challenge and test your skills! Submit your score to show us what you’ve got. AIS has a national footprint with offices and remote employees across the U.S. We offer competitive pay and outstanding benefits. Join a team that is not only committed to the future of cyberspace, but to our employee’s success as well.
 

@@ -139,6 +139,11 @@ def _slotArchiveReplayHardwareChanged(dashboard: QtCore.QObject):
     get_current_hardware = str(dashboard.ui.comboBox_archive_replay_hardware.currentText())
     get_hardware_type, get_hardware_uid, get_hardware_radio_name, get_hardware_serial, get_hardware_interface, get_hardware_ip, get_hardware_daughterboard = fissure.utils.hardware.hardwareDisplayNameLookup(dashboard, get_current_hardware, 'archive')
     
+    # Hardware Utility Functions
+    get_gain = fissure.utils.hardware.getHardwareGain(get_hardware_type, "TX")
+    get_channels = fissure.utils.hardware.getHardwareChannels(get_hardware_type, "TX")
+    get_antennas = fissure.utils.hardware.getHardwareAntennas(get_hardware_type, "TX")
+
     # Adjust Existing Channel ComboBoxes and Gain in Replay Tab
     for n in range(0, dashboard.ui.tableWidget_archive_replay.rowCount()):
         get_combobox = dashboard.ui.tableWidget_archive_replay.cellWidget(n,6)
@@ -146,20 +151,18 @@ def _slotArchiveReplayHardwareChanged(dashboard: QtCore.QObject):
         if get_hardware_type == "Computer":
             get_combobox.addItem("")
         elif get_hardware_type == "USRP X3x0":
-            get_combobox.addItem("A:0")
-            get_combobox.addItem("B:0")
-            gain_item = QtWidgets.QTableWidgetItem("30")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "USRP B2x0":
-            get_combobox.addItem("A:A")
-            get_combobox.addItem("A:B")
-            gain_item = QtWidgets.QTableWidgetItem("60")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "HackRF":
-            get_combobox.addItem("")
-            gain_item = QtWidgets.QTableWidgetItem("20")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "RTL2832U":
@@ -167,73 +170,55 @@ def _slotArchiveReplayHardwareChanged(dashboard: QtCore.QObject):
         elif get_hardware_type == "802.11x Adapter":
             get_combobox.addItem("")
         elif get_hardware_type == "USRP B20xmini":
-            get_combobox.addItem("A:A")
-            get_combobox.addItem("A:B")
-            gain_item = QtWidgets.QTableWidgetItem("60")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "LimeSDR":
-            get_combobox.addItem("A")
-            get_combobox.addItem("B")
-            gain_item = QtWidgets.QTableWidgetItem("55")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "bladeRF":
-            get_combobox.addItem("")
-            gain_item = QtWidgets.QTableWidgetItem("20")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "Open Sniffer":
             get_combobox.addItem("")
         elif get_hardware_type == "PlutoSDR":
-            get_combobox.addItem("")
-            gain_item = QtWidgets.QTableWidgetItem("64")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "USRP2":
-            get_combobox.addItem("A:0")
-            get_combobox.addItem("B:0")
-            get_combobox.addItem("A:AB")
-            get_combobox.addItem("A:BA")
-            get_combobox.addItem("A:A")
-            get_combobox.addItem("A:B")
-            get_combobox.addItem("B:AB")
-            get_combobox.addItem("B:BA")
-            get_combobox.addItem("B:A")
-            get_combobox.addItem("B:B")
-            gain_item = QtWidgets.QTableWidgetItem("30")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "USRP N2xx":
-            get_combobox.addItem("A:0")
-            get_combobox.addItem("B:0")
-            get_combobox.addItem("A:AB")
-            get_combobox.addItem("A:BA")
-            get_combobox.addItem("A:A")
-            get_combobox.addItem("A:B")
-            get_combobox.addItem("B:AB")
-            get_combobox.addItem("B:BA")
-            get_combobox.addItem("B:A")
-            get_combobox.addItem("B:B")
-            gain_item = QtWidgets.QTableWidgetItem("30")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "bladeRF 2.0":
-            get_combobox.addItem("")
-            if fissure.utils.get_library_version() == "maint-3.8":
-                gain_item = QtWidgets.QTableWidgetItem("20")
-            else:
-                gain_item = QtWidgets.QTableWidgetItem("60")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         elif get_hardware_type == "USRP X410":
-            get_combobox.addItem("A:0")
-            get_combobox.addItem("B:0")
-            gain_item = QtWidgets.QTableWidgetItem("50")
+            get_combobox.addItems(get_channels)
+            gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
             dashboard.ui.tableWidget_archive_replay.setItem(n,7,gain_item)
         else:
             get_combobox.addItem("")
+
+    # Disable Start Button if Receive-Only
+    if get_antennas:
+        dashboard.ui.pushButton_archive_replay_start.setEnabled(True)
+    else:
+        dashboard.ui.pushButton_archive_replay_start.setEnabled(False)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -283,6 +268,11 @@ def _slotArchiveReplayAddClicked(dashboard: QtCore.QObject):
     
     get_hardware_type = str(dashboard.ui.comboBox_archive_replay_hardware.currentText()).split(' - ')[0]
 
+    # Hardware Utility Functions
+    get_gain = fissure.utils.hardware.getHardwareGain(get_hardware_type, "TX")
+    get_channels = fissure.utils.hardware.getHardwareChannels(get_hardware_type, "TX")
+
+    # Check Archive Favorites in Database
     for n in range(0,len(get_archives)):
         # Get File Info
         get_file = str(get_archives[n][1])
@@ -328,98 +318,16 @@ def _slotArchiveReplayAddClicked(dashboard: QtCore.QObject):
             # Channel
             new_combobox1 = QtWidgets.QComboBox(dashboard, objectName='comboBox2_')
             dashboard.ui.tableWidget_archive_replay.setCellWidget(dashboard.ui.tableWidget_archive_replay.rowCount()-1,6,new_combobox1)
-            if get_hardware_type == "Computer":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "USRP X3x0":
-                new_combobox1.addItem("A:0")
-                new_combobox1.addItem("B:0")
-            elif get_hardware_type == "USRP B2x0":
-                new_combobox1.addItem("A:A")
-                new_combobox1.addItem("A:B")
-            elif get_hardware_type == "HackRF":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "RTL2832U":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "802.11x Adapter":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "USRP B20xmini":
-                new_combobox1.addItem("A:A")
-                new_combobox1.addItem("A:B")
-            elif get_hardware_type == "LimeSDR":
-                new_combobox1.addItem("A")
-                new_combobox1.addItem("B")
-            elif get_hardware_type == "bladeRF":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "Open Sniffer":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "PlutoSDR":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "USRP2":
-                new_combobox1.addItem("A:0")
-                new_combobox1.addItem("B:0")
-                new_combobox1.addItem("A:AB")
-                new_combobox1.addItem("A:BA")
-                new_combobox1.addItem("A:A")
-                new_combobox1.addItem("A:B")
-                new_combobox1.addItem("B:AB")
-                new_combobox1.addItem("B:BA")
-                new_combobox1.addItem("B:A")
-                new_combobox1.addItem("B:B")
-            elif get_hardware_type == "USRP N2xx":
-                new_combobox1.addItem("A:0")
-                new_combobox1.addItem("B:0")
-                new_combobox1.addItem("A:AB")
-                new_combobox1.addItem("A:BA")
-                new_combobox1.addItem("A:A")
-                new_combobox1.addItem("A:B")
-                new_combobox1.addItem("B:AB")
-                new_combobox1.addItem("B:BA")
-                new_combobox1.addItem("B:A")
-                new_combobox1.addItem("B:B")
-            elif get_hardware_type == "bladeRF 2.0":
-                new_combobox1.addItem("")
-            elif get_hardware_type == "USRP X410":
-                new_combobox1.addItem("A:0")
-                new_combobox1.addItem("B:0")
+            if get_channels:
+                new_combobox1.addItems(get_channels)
             else:
                 new_combobox1.addItem("")
             new_combobox1.setFixedSize(67,24)
             new_combobox1.setCurrentIndex(0)
 
             # Gain
-            if get_hardware_type == "Computer":
-                gain_item = QtWidgets.QTableWidgetItem("")
-            elif get_hardware_type == "USRP X3x0":
-                gain_item = QtWidgets.QTableWidgetItem("30")
-            elif get_hardware_type == "USRP B2x0":
-                gain_item = QtWidgets.QTableWidgetItem("60")
-            elif get_hardware_type == "HackRF":
-                gain_item = QtWidgets.QTableWidgetItem("20")
-            elif get_hardware_type == "RTL2832U":
-                gain_item = QtWidgets.QTableWidgetItem("")
-            elif get_hardware_type == "802.11x Adapter":
-                gain_item = QtWidgets.QTableWidgetItem("")
-            elif get_hardware_type == "USRP B20xmini":
-                gain_item = QtWidgets.QTableWidgetItem("60")
-            elif get_hardware_type == "LimeSDR":
-                gain_item = QtWidgets.QTableWidgetItem("55")
-            elif get_hardware_type == "bladeRF":
-                gain_item = QtWidgets.QTableWidgetItem("20")
-            elif get_hardware_type == "Open Sniffer":
-                gain_item = QtWidgets.QTableWidgetItem("")
-            elif get_hardware_type == "PlutoSDR":
-                gain_item = QtWidgets.QTableWidgetItem("64")
-            elif get_hardware_type == "USRP2":
-                gain_item = QtWidgets.QTableWidgetItem("30")
-            elif get_hardware_type == "USRP N2xx":
-                gain_item = QtWidgets.QTableWidgetItem("30")
-            elif get_hardware_type == "bladeRF 2.0":
-                if fissure.utils.get_library_version() == "maint-3.8":
-                    gain_item = QtWidgets.QTableWidgetItem("20")
-                else:
-                    gain_item = QtWidgets.QTableWidgetItem("60")
-            elif get_hardware_type == "USRP X410":
-                gain_item = QtWidgets.QTableWidgetItem("50")
+            if get_gain:
+                gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
             else:
                 gain_item = QtWidgets.QTableWidgetItem("")
             gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
@@ -476,98 +384,16 @@ def _slotArchiveReplayAddClicked(dashboard: QtCore.QObject):
     # Channel
     new_combobox1 = QtWidgets.QComboBox(dashboard, objectName='comboBox2_')
     dashboard.ui.tableWidget_archive_replay.setCellWidget(dashboard.ui.tableWidget_archive_replay.rowCount()-1,6,new_combobox1)
-    if get_hardware_type == "Computer":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "USRP X3x0":
-        new_combobox1.addItem("A:0")
-        new_combobox1.addItem("B:0")
-    elif get_hardware_type == "USRP B2x0":
-        new_combobox1.addItem("A:A")
-        new_combobox1.addItem("A:B")
-    elif get_hardware_type == "HackRF":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "RTL2832U":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "802.11x Adapter":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "USRP B20xmini":
-        new_combobox1.addItem("A:A")
-        new_combobox1.addItem("A:B")
-    elif get_hardware_type == "LimeSDR":
-        new_combobox1.addItem("A")
-        new_combobox1.addItem("B")
-    elif get_hardware_type == "bladeRF":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "Open Sniffer":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "PlutoSDR":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "USRP2":
-        new_combobox1.addItem("A:0")
-        new_combobox1.addItem("B:0")
-        new_combobox1.addItem("A:AB")
-        new_combobox1.addItem("A:BA")
-        new_combobox1.addItem("A:A")
-        new_combobox1.addItem("A:B")
-        new_combobox1.addItem("B:AB")
-        new_combobox1.addItem("B:BA")
-        new_combobox1.addItem("B:A")
-        new_combobox1.addItem("B:B")
-    elif get_hardware_type == "USRP N2xx":
-        new_combobox1.addItem("A:0")
-        new_combobox1.addItem("B:0")
-        new_combobox1.addItem("A:AB")
-        new_combobox1.addItem("A:BA")
-        new_combobox1.addItem("A:A")
-        new_combobox1.addItem("A:B")
-        new_combobox1.addItem("B:AB")
-        new_combobox1.addItem("B:BA")
-        new_combobox1.addItem("B:A")
-        new_combobox1.addItem("B:B")
-    elif get_hardware_type == "bladeRF 2.0":
-        new_combobox1.addItem("")
-    elif get_hardware_type == "USRP X410":
-        new_combobox1.addItem("A:0")
-        new_combobox1.addItem("B:0")
+    if get_channels:
+        new_combobox1.addItems(get_channels)
     else:
         new_combobox1.addItem("")
     new_combobox1.setFixedSize(67,24)
     new_combobox1.setCurrentIndex(0)
 
     # Gain
-    if get_hardware_type == "Computer":
-        gain_item = QtWidgets.QTableWidgetItem("")
-    elif get_hardware_type == "USRP X3x0":
-        gain_item = QtWidgets.QTableWidgetItem("30")
-    elif get_hardware_type == "USRP B2x0":
-        gain_item = QtWidgets.QTableWidgetItem("60")
-    elif get_hardware_type == "HackRF":
-        gain_item = QtWidgets.QTableWidgetItem("20")
-    elif get_hardware_type == "RTL2832U":
-        gain_item = QtWidgets.QTableWidgetItem("")
-    elif get_hardware_type == "802.11x Adapter":
-        gain_item = QtWidgets.QTableWidgetItem("")
-    elif get_hardware_type == "USRP B20xmini":
-        gain_item = QtWidgets.QTableWidgetItem("60")
-    elif get_hardware_type == "LimeSDR":
-        gain_item = QtWidgets.QTableWidgetItem("55")
-    elif get_hardware_type == "bladeRF":
-        gain_item = QtWidgets.QTableWidgetItem("20")
-    elif get_hardware_type == "Open Sniffer":
-        gain_item = QtWidgets.QTableWidgetItem("")
-    elif get_hardware_type == "PlutoSDR":
-        gain_item = QtWidgets.QTableWidgetItem("")
-    elif get_hardware_type == "USRP2":
-        gain_item = QtWidgets.QTableWidgetItem("30")
-    elif get_hardware_type == "USRP N2xx":
-        gain_item = QtWidgets.QTableWidgetItem("30")
-    elif get_hardware_type == "bladeRF 2.0":
-        if fissure.utils.get_library_version() == "maint-3.8":
-            gain_item = QtWidgets.QTableWidgetItem("20")
-        else:
-            gain_item = QtWidgets.QTableWidgetItem("60")
-    elif get_hardware_type == "USRP X410":
-        gain_item = QtWidgets.QTableWidgetItem("50")
+    if get_gain:
+        gain_item = QtWidgets.QTableWidgetItem(str(get_gain[2]))
     else:
         gain_item = QtWidgets.QTableWidgetItem("")
     gain_item.setTextAlignment(QtCore.Qt.AlignCenter)
@@ -1432,6 +1258,9 @@ async def _slotArchiveReplayStartClicked(dashboard: QtCore.QObject):
         # Update the Status Label
         dashboard.ui.label2_archive_replay_status.setVisible(False)
 
+        # Enable the Controls
+        dashboard.ui.frame_archive_replay_controls.setEnabled(True)
+
     # Reset to Last Known Flow Graph Configuration (Flow Graph Currently Stopped: Starting)
     elif dashboard.ui.pushButton_archive_replay_start.text() == "Start":
         # Return if no Sensor Node Selected
@@ -1557,6 +1386,9 @@ async def _slotArchiveReplayStartClicked(dashboard: QtCore.QObject):
 
             # Update the Status Label
             dashboard.ui.label2_archive_replay_status.setVisible(True)
+
+            # Disable the Controls
+            dashboard.ui.frame_archive_replay_controls.setEnabled(False)
 
         # Error
         else:

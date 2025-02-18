@@ -1,6 +1,29 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-17
+
+Hardware utility functions for gain, antennas, and channels.
+
+### Added
+
+- Disabling Archive>Playback Start button when no transmit antenna is available
+- Toggling Archive>Playback enable controls during operation
+- Adding utility functions in hardware.py: getHardwareAntennas(), getHardwareChannels(), getHardwareGain()
+
+### Changed
+
+- Acquiring hardware gain, antenna, channel values from utility functions
+- Changing bladeRF 2.0 frequency range to 70-6000 MHz
+- README cloning instructions updated for clarity
+
+### Fixed
+
+- Disabling playback for SDRplay SDRs
+- Selecting receive-only hardware in Playback tab no longer disables hardware selection combobox
+- Removed some of the debug prints in the library functions
+- Updating AIS talent community link in README
+
 ## 2025-2-16
 
 Updating bladeRF 2.0 flow graphs with Soapy blocks.
