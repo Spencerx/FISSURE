@@ -2778,3 +2778,32 @@ async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
+    print(alert_text)
+    # forward to dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "alert_text": alert_text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+    # TODO: send to TAK; forward to dashboard for testing
+    alert_text = time + ' - ' + uid + ': ' + str(lat) + ', ' + str(lon) + ', ' + str(alt) + ', remarks: ' + remarks
+    PARAMETERS = {
+        "sensor_node_id": 0,
+        "alert_text": alert_text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
