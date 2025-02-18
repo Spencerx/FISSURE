@@ -186,9 +186,9 @@ blocks:
     min_len: '200'
     orient: QtCore.Qt.Horizontal
     rangeType: float
-    start: '0'
+    start: '-1'
     step: '1'
-    stop: '40'
+    stop: '60'
     value: float(gain_default)
     widget: counter_slider
   states:
@@ -547,7 +547,7 @@ blocks:
     label: gain_default
     short_id: ''
     type: str
-    value: '10'
+    value: '50'
   states:
     bus_sink: false
     bus_source: false
@@ -990,7 +990,7 @@ blocks:
     bus_structure: null
     coordinate: [56, 516.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_vector_sink_f_0
   id: qtgui_vector_sink_f
   parameters:
@@ -1281,6 +1281,28 @@ blocks:
     coordinate: [1104, 668.0]
     rotation: 0
     state: true
+- name: soapy_bladerf_source_0
+  id: soapy_bladerf_source
+  parameters:
+    affinity: ''
+    alias: ''
+    bandwidth: '0.0'
+    center_freq: float(rx_freq)*1e6
+    comment: ''
+    dev_args: '"bladerf=" + str(serial)'
+    freq_correction: '0'
+    gain: float(rx_gain)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: float(samp_rate)
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 532.0]
+    rotation: 0
+    state: true
 - name: threshold_default
   id: parameter
   parameters:
@@ -1315,6 +1337,7 @@ connections:
 - [logpwrfft_x_0, '0', blocks_add_const_vxx_0, '0']
 - [logpwrfft_x_0, '0', qtgui_vector_sink_f_0, '0']
 - [osmosdr_source_0, '0', logpwrfft_x_0, '0']
+- [soapy_bladerf_source_0, '0', logpwrfft_x_0, '0']
 
 metadata:
   file_format: 1

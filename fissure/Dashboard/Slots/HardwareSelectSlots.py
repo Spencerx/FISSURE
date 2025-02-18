@@ -9,7 +9,7 @@ import yaml
 import asyncio
 import tempfile
 import subprocess
-
+import serial.tools.list_ports
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1488,235 +1488,88 @@ def more(HWSelect: QtCore.QObject):
 @QtCore.pyqtSlot(QtCore.QObject)
 def local(HWSelect: QtCore.QObject, tab_index=0):
     """
-    Switch to Local Sensor Node configuration page
-
-    TODO: Fix this
+    Switch to the Local Sensor Node configuration page dynamically.
     """
-    # node_idx = HWSelect.tabWidget_nodes.currentIndex() + 1
-    # page_widget: QtWidgets.QStackedWidget = getattr(HWSelect, f"stackedWidget_local_remote_{node_idx}")
-    # target_widget: QtWidgets.QWidget = getattr(HWSelect, f"page_local_{node_idx}")
-    # page_widget.setCurrentWidget(target_widget)
+    index = tab_index + 1  # Since UI elements are indexed from 1
 
-    # Local
-    if tab_index == 0:
-        HWSelect.textEdit_ip_addr_1.setEnabled(False)
-        HWSelect.textEdit_msg_port_1.setEnabled(False)
-        HWSelect.textEdit_hb_port_1.setEnabled(False)
-        HWSelect.pushButton_ping_1.setEnabled(False)
-        HWSelect.pushButton_connect_1.setEnabled(False)
-        HWSelect.label2_ip_addr_1.setEnabled(False)
-        HWSelect.label2_msg_port_1.setEnabled(False)
-        HWSelect.label2_hb_port_1.setEnabled(False)
-        HWSelect.checkBox_recall_settings_remote_1.setEnabled(False)
-        HWSelect.label2_nickname_1.setEnabled(False)
-        HWSelect.textEdit_nickname_1.setEnabled(False)
-        HWSelect.textEdit_nickname_1.setPlainText("Local Sensor Node")
-        # HWSelect.label2_location_1.setEnabled(False)
-        # HWSelect.textEdit_location_1.setEnabled(False)
-        # HWSelect.label2_notes_1.setEnabled(False)
-        # HWSelect.textEdit_notes_1.setEnabled(False)
-        # HWSelect.line1_remote_details.setEnabled(False)
-        if HWSelect.stackedWidget_local_remote_1.currentIndex() == 1:
-            HWSelect.stackedWidget_local_remote_1.setCurrentIndex(0)
-    elif tab_index == 1:
-        HWSelect.textEdit_ip_addr_2.setEnabled(False)
-        HWSelect.textEdit_msg_port_2.setEnabled(False)
-        HWSelect.textEdit_hb_port_2.setEnabled(False)
-        HWSelect.pushButton_ping_2.setEnabled(False)
-        HWSelect.pushButton_connect_2.setEnabled(False)
-        HWSelect.label2_ip_addr_2.setEnabled(False)
-        HWSelect.label2_msg_port_2.setEnabled(False)
-        HWSelect.label2_hb_port_2.setEnabled(False)
-        HWSelect.checkBox_recall_settings_remote_2.setEnabled(False)
-        HWSelect.label2_nickname_2.setEnabled(False)
-        HWSelect.textEdit_nickname_2.setEnabled(False)
-        HWSelect.textEdit_nickname_2.setPlainText("Local Sensor Node")
-        # HWSelect.label2_location_2.setEnabled(False)
-        # HWSelect.textEdit_location_2.setEnabled(False)
-        # HWSelect.label2_notes_2.setEnabled(False)
-        # HWSelect.textEdit_notes_2.setEnabled(False)
-        # HWSelect.line1_remote_details1.setEnabled(False)
-        if HWSelect.stackedWidget_local_remote_2.currentIndex() == 1:
-            HWSelect.stackedWidget_local_remote_2.setCurrentIndex(0)
-    elif tab_index == 2:
-        HWSelect.textEdit_ip_addr_3.setEnabled(False)
-        HWSelect.textEdit_msg_port_3.setEnabled(False)
-        HWSelect.textEdit_hb_port_3.setEnabled(False)
-        HWSelect.pushButton_ping_3.setEnabled(False)
-        HWSelect.pushButton_connect_3.setEnabled(False)
-        HWSelect.label2_ip_addr_3.setEnabled(False)
-        HWSelect.label2_msg_port_3.setEnabled(False)
-        HWSelect.label2_hb_port_3.setEnabled(False)
-        HWSelect.checkBox_recall_settings_remote_3.setEnabled(False)
-        HWSelect.label2_nickname_3.setEnabled(False)
-        HWSelect.textEdit_nickname_3.setEnabled(False)
-        HWSelect.textEdit_nickname_3.setPlainText("Local Sensor Node")
-        # HWSelect.label2_location_3.setEnabled(False)
-        # HWSelect.textEdit_location_3.setEnabled(False)
-        # HWSelect.label2_notes_3.setEnabled(False)
-        # HWSelect.textEdit_notes_3.setEnabled(False)
-        # HWSelect.line1_remote_details2.setEnabled(False)
-        if HWSelect.stackedWidget_local_remote_3.currentIndex() == 1:
-            HWSelect.stackedWidget_local_remote_3.setCurrentIndex(0)
-    elif tab_index == 3:
-        HWSelect.textEdit_ip_addr_4.setEnabled(False)
-        HWSelect.textEdit_msg_port_4.setEnabled(False)
-        HWSelect.textEdit_hb_port_4.setEnabled(False)
-        HWSelect.pushButton_ping_4.setEnabled(False)
-        HWSelect.pushButton_connect_4.setEnabled(False)
-        HWSelect.label2_ip_addr_4.setEnabled(False)
-        HWSelect.label2_msg_port_4.setEnabled(False)
-        HWSelect.label2_hb_port_4.setEnabled(False)
-        HWSelect.checkBox_recall_settings_remote_4.setEnabled(False)
-        HWSelect.label2_nickname_4.setEnabled(False)
-        HWSelect.textEdit_nickname_4.setEnabled(False)
-        HWSelect.textEdit_nickname_4.setPlainText("Local Sensor Node")
-        # HWSelect.label2_location_4.setEnabled(False)
-        # HWSelect.textEdit_location_4.setEnabled(False)
-        # HWSelect.label2_notes_4.setEnabled(False)
-        # HWSelect.textEdit_notes_4.setEnabled(False)
-        # HWSelect.line1_remote_details3.setEnabled(False)
-        if HWSelect.stackedWidget_local_remote_4.currentIndex() == 1:
-            HWSelect.stackedWidget_local_remote_4.setCurrentIndex(0)
-    elif tab_index == 4:
-        HWSelect.textEdit_ip_addr_5.setEnabled(False)
-        HWSelect.textEdit_msg_port_5.setEnabled(False)
-        HWSelect.textEdit_hb_port_5.setEnabled(False)
-        HWSelect.pushButton_ping_5.setEnabled(False)
-        HWSelect.pushButton_connect_5.setEnabled(False)
-        HWSelect.label2_ip_addr_5.setEnabled(False)
-        HWSelect.label2_msg_port_5.setEnabled(False)
-        HWSelect.label2_hb_port_5.setEnabled(False)
-        HWSelect.checkBox_recall_settings_remote_5.setEnabled(False)
-        HWSelect.label2_nickname_5.setEnabled(False)
-        HWSelect.textEdit_nickname_5.setEnabled(False)
-        HWSelect.textEdit_nickname_5.setPlainText("Local Sensor Node")
-        # HWSelect.label2_location_5.setEnabled(False)
-        # HWSelect.textEdit_location_5.setEnabled(False)
-        # HWSelect.label2_notes_5.setEnabled(False)
-        # HWSelect.textEdit_notes_5.setEnabled(False)
-        # HWSelect.line1_remote_details4.setEnabled(False)
-        if HWSelect.stackedWidget_local_remote_5.currentIndex() == 1:
-            HWSelect.stackedWidget_local_remote_5.setCurrentIndex(0)
+    # List of widgets to disable
+    disable_widgets = [
+        "textEdit_ip_addr", "textEdit_msg_port", "textEdit_hb_port",
+        "pushButton_ping", "pushButton_connect",
+        "label2_ip_addr", "label2_msg_port", "label2_hb_port",
+        "checkBox_recall_settings_remote", "label2_nickname", "textEdit_nickname"
+    ]
+
+    # List of widgets to hide
+    hide_widgets = [
+        "label2_network_type", "comboBox_network_type"
+    ]
+
+    # Disable all relevant widgets dynamically
+    for widget in disable_widgets:
+        element = getattr(HWSelect, f"{widget}_{index}", None)
+        if element:
+            element.setEnabled(False)
+
+    # Hide only the required widgets
+    for widget in hide_widgets:
+        element = getattr(HWSelect, f"{widget}_{index}", None)
+        if element:
+            element.setVisible(False)
+
+    # Set nickname text field to "Local Sensor Node"
+    text_nickname = getattr(HWSelect, f"textEdit_nickname_{index}", None)
+    if text_nickname:
+        text_nickname.setPlainText("Local Sensor Node")
+
+    # Handle Stacked Widget Switching
+    stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{index}", None)
+    if (stacked_widget and stacked_widget.currentIndex() == 1) or (stacked_widget and stacked_widget.currentIndex() == 3):
+        stacked_widget.setCurrentIndex(0)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def remote(HWSelect: QtCore.QObject, tab_index=0):
     """
-    Switch to Local Sensor Node configuration page
-
-    TODO: Fix this
+    Switch to the Remote Sensor Node configuration page dynamically.
     """
-    # node_idx = HWSelect.tabWidget_nodes.currentIndex() + 1
-    # page_widget: QtWidgets.QStackedWidget = getattr(HWSelect, f"stackedWidget_local_remote_{node_idx}")
-    # target_widget: QtWidgets.QWidget = getattr(HWSelect, f"page_remote_{node_idx}")
-    # HWSelect.dashboard.logger.info(f"page = {page_widget}, target = {target_widget}")
-    # page_widget.setCurrentWidget(target_widget)
-    # remote_widget = page_widget.widget(1)
-    # remote_widget.show()
-    # HWSelect.dashboard.logger.info(f"remote = {remote_widget}")
+    index = tab_index + 1  # Since UI elements are indexed from 1
 
-    # Remote
-    if tab_index == 0:
-        HWSelect.textEdit_ip_addr_1.setEnabled(True)
-        HWSelect.textEdit_msg_port_1.setEnabled(True)
-        HWSelect.textEdit_hb_port_1.setEnabled(True)
-        HWSelect.pushButton_ping_1.setEnabled(True)
-        HWSelect.pushButton_connect_1.setEnabled(True)
-        HWSelect.label2_ip_addr_1.setEnabled(True)
-        HWSelect.label2_msg_port_1.setEnabled(True)
-        HWSelect.label2_hb_port_1.setEnabled(True)
-        HWSelect.checkBox_recall_settings_remote_1.setEnabled(True)
-        HWSelect.label2_nickname_1.setEnabled(True)
-        HWSelect.textEdit_nickname_1.setEnabled(True)
-        HWSelect.textEdit_nickname_1.setPlainText("")
-        HWSelect.label2_location_1.setEnabled(True)
-        HWSelect.textEdit_location_1.setEnabled(True)
-        HWSelect.label2_notes_1.setEnabled(True)
-        HWSelect.textEdit_notes_1.setEnabled(True)
-        # HWSelect.line1_remote_details.setEnabled(True)
-        if HWSelect.stackedWidget_local_remote_1.currentIndex() == 0:  # Change on local clicked, not on import/recall/disconnect
-            HWSelect.stackedWidget_local_remote_1.setCurrentIndex(1)
-    elif tab_index == 1:
-        HWSelect.textEdit_ip_addr_2.setEnabled(True)
-        HWSelect.textEdit_msg_port_2.setEnabled(True)
-        HWSelect.textEdit_hb_port_2.setEnabled(True)
-        HWSelect.pushButton_ping_2.setEnabled(True)
-        HWSelect.pushButton_connect_2.setEnabled(True)
-        HWSelect.label2_ip_addr_2.setEnabled(True)
-        HWSelect.label2_msg_port_2.setEnabled(True)
-        HWSelect.label2_hb_port_2.setEnabled(True)
-        HWSelect.checkBox_recall_settings_remote_2.setEnabled(True)
-        HWSelect.label2_nickname_2.setEnabled(True)
-        HWSelect.textEdit_nickname_2.setEnabled(True)
-        HWSelect.textEdit_nickname_2.setPlainText("")
-        HWSelect.label2_location_2.setEnabled(True)
-        HWSelect.textEdit_location_2.setEnabled(True)
-        HWSelect.label2_notes_2.setEnabled(True)
-        HWSelect.textEdit_notes_2.setEnabled(True)
-        # HWSelect.line1_remote_details1.setEnabled(True)
-        if HWSelect.stackedWidget_local_remote_2.currentIndex() == 0:
-            HWSelect.stackedWidget_local_remote_2.setCurrentIndex(1)
-    elif tab_index == 2:
-        HWSelect.textEdit_ip_addr_3.setEnabled(True)
-        HWSelect.textEdit_msg_port_3.setEnabled(True)
-        HWSelect.textEdit_hb_port_3.setEnabled(True)
-        HWSelect.pushButton_ping_3.setEnabled(True)
-        HWSelect.pushButton_connect_3.setEnabled(True)
-        HWSelect.label2_ip_addr_3.setEnabled(True)
-        HWSelect.label2_msg_port_3.setEnabled(True)
-        HWSelect.label2_hb_port_3.setEnabled(True)
-        HWSelect.checkBox_recall_settings_remote_3.setEnabled(True)
-        HWSelect.label2_nickname_3.setEnabled(True)
-        HWSelect.textEdit_nickname_3.setEnabled(True)
-        HWSelect.textEdit_nickname_3.setPlainText("")
-        HWSelect.label2_location_3.setEnabled(True)
-        HWSelect.textEdit_location_3.setEnabled(True)
-        HWSelect.label2_notes_3.setEnabled(True)
-        HWSelect.textEdit_notes_3.setEnabled(True)
-        # HWSelect.line1_remote_details2.setEnabled(True)
-        if HWSelect.stackedWidget_local_remote_3.currentIndex() == 0:
-            HWSelect.stackedWidget_local_remote_3.setCurrentIndex(1)
-    elif tab_index == 3:
-        HWSelect.textEdit_ip_addr_4.setEnabled(True)
-        HWSelect.textEdit_msg_port_4.setEnabled(True)
-        HWSelect.textEdit_hb_port_4.setEnabled(True)
-        HWSelect.pushButton_ping_4.setEnabled(True)
-        HWSelect.pushButton_connect_4.setEnabled(True)
-        HWSelect.label2_ip_addr_4.setEnabled(True)
-        HWSelect.label2_msg_port_4.setEnabled(True)
-        HWSelect.label2_hb_port_4.setEnabled(True)
-        HWSelect.checkBox_recall_settings_remote_4.setEnabled(True)
-        HWSelect.label2_nickname_4.setEnabled(True)
-        HWSelect.textEdit_nickname_4.setEnabled(True)
-        HWSelect.textEdit_nickname_4.setPlainText("")
-        HWSelect.label2_location_4.setEnabled(True)
-        HWSelect.textEdit_location_4.setEnabled(True)
-        HWSelect.label2_notes_4.setEnabled(True)
-        HWSelect.textEdit_notes_4.setEnabled(True)
-        # HWSelect.line1_remote_details3.setEnabled(True)
-        if HWSelect.stackedWidget_local_remote_4.currentIndex() == 0:
-            HWSelect.stackedWidget_local_remote_4.setCurrentIndex(1)
-    elif tab_index == 4:
-        HWSelect.textEdit_ip_addr_5.setEnabled(True)
-        HWSelect.textEdit_msg_port_5.setEnabled(True)
-        HWSelect.textEdit_hb_port_5.setEnabled(True)
-        HWSelect.pushButton_ping_5.setEnabled(True)
-        HWSelect.pushButton_connect_5.setEnabled(True)
-        HWSelect.label2_ip_addr_5.setEnabled(True)
-        HWSelect.label2_msg_port_5.setEnabled(True)
-        HWSelect.label2_hb_port_5.setEnabled(True)
-        HWSelect.checkBox_recall_settings_remote_5.setEnabled(True)
-        HWSelect.label2_nickname_5.setEnabled(True)
-        HWSelect.textEdit_nickname_5.setEnabled(True)
-        HWSelect.textEdit_nickname_5.setPlainText("")
-        HWSelect.label2_location_5.setEnabled(True)
-        HWSelect.textEdit_location_5.setEnabled(True)
-        HWSelect.label2_notes_5.setEnabled(True)
-        HWSelect.textEdit_notes_5.setEnabled(True)
-        # HWSelect.line1_remote_details4.setEnabled(True)
-        if HWSelect.stackedWidget_local_remote_5.currentIndex() == 0:
-            HWSelect.stackedWidget_local_remote_5.setCurrentIndex(1)
+    # List of widgets to enable
+    enable_widgets = [
+        "textEdit_ip_addr", "textEdit_msg_port", "textEdit_hb_port",
+        "pushButton_ping", "pushButton_connect",
+        "label2_ip_addr", "label2_msg_port", "label2_hb_port",
+        "checkBox_recall_settings_remote", "label2_nickname", "textEdit_nickname",
+        "label2_location", "textEdit_location", "label2_notes", "textEdit_notes"
+    ]
+
+    # List of widgets to set as visible (only these two)
+    visible_widgets = [
+        "label2_network_type", "comboBox_network_type"
+    ]
+
+    # Enable all relevant widgets dynamically
+    for widget in enable_widgets:
+        element = getattr(HWSelect, f"{widget}_{index}", None)
+        if element:
+            element.setEnabled(True)
+
+    # Set only the required widgets to visible
+    for widget in visible_widgets:
+        element = getattr(HWSelect, f"{widget}_{index}", None)
+        if element:
+            element.setVisible(True)
+
+    # Clear nickname text field
+    text_nickname = getattr(HWSelect, f"textEdit_nickname_{index}", None)
+    if text_nickname:
+        text_nickname.setPlainText("")
+
+    # Handle Stacked Widget Switching
+    stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{index}", None)
+    if stacked_widget and stacked_widget.currentIndex() == 0:
+        stacked_widget.setCurrentIndex(1)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -1836,49 +1689,8 @@ async def connect(HWSelect: QtCore.QObject):
     hb_port_widgets[tab_index].setEnabled(False)
     QtWidgets.QApplication.processEvents()
 
-    # # Dashboard SUB to Sensor Node TSI Detector Flow Graph PUB
-    # try:
-    # HWSelect.parent.dashboard_sub_listener.initialize_port(get_ip,int(HWSelect.dashboard.backend.settings['tsi_hb_port_id']))
-    # except:
-    # print("Unable to subscribe Dashboard SUB to TSI Detector Flow Graph PUB")
-
-    # # Dashboard SUB to Sensor Node PUB
-    # try:
-    # HWSelect.parent.dashboard_sub_listener.initialize_port(get_ip,get_hb_port)
-    # except:
-    # print("Unable to subscribe Dashboard SUB to Sensor Node PUB")
-
     # Send Message for HIPRFISR to Sensor Node Connections
     await HWSelect.dashboard.backend.connect_remote_sensor_node(str(tab_index), get_ip, get_msg_port, get_hb_port, get_recall_settings)
-
-    # # Check for Connection
-    # click_time = time.time()
-    # while time.time() - click_time < 10:
-    #     if tab_index == 0:
-    #         if HWSelect.dashboard.statusBar().sensor_nodes[0].text() == "SN1: OK":
-    #             return
-    #     elif tab_index == 1:
-    #         if HWSelect.dashboard.statusBar().sensor_nodes[1].text() == "SN2: OK":
-    #             return
-    #     elif tab_index == 2:
-    #         if HWSelect.dashboard.statusBar().sensor_nodes[2].text() == "SN3: OK":
-    #             return
-    #     elif tab_index == 3:
-    #         if HWSelect.dashboard.statusBar().sensor_nodes[3].text() == "SN4: OK":
-    #             return
-    #     elif tab_index == 4:
-    #         if HWSelect.dashboard.statusBar().sensor_nodes[4].text() == "SN5: OK":
-    #             return
-    #     time.sleep(0.1)
-    #     QtWidgets.QApplication.processEvents()
-
-    # # Enable Buttons after Timeout
-    # print("TIMEOUT")
-    # connect_widgets[tab_index].setEnabled(True)
-    # recall_settings_widgets[tab_index].setEnabled(True)
-    # ip_widgets[tab_index].setEnabled(True)
-    # msg_port_widgets[tab_index].setEnabled(True)
-    # hb_port_widgets[tab_index].setEnabled(True)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -1904,6 +1716,13 @@ async def disconnect(HWSelect: QtCore.QObject, delete_node=False):
         HWSelect.radioButton_local_4,
         HWSelect.radioButton_local_5,
     ]
+    network_type_widgets = [
+        HWSelect.comboBox_network_type_1,
+        HWSelect.comboBox_network_type_2,
+        HWSelect.comboBox_network_type_3,
+        HWSelect.comboBox_network_type_4,
+        HWSelect.comboBox_network_type_5,
+    ]
 
     # Local
     if local_buttons[tab_index].isChecked():
@@ -1912,62 +1731,44 @@ async def disconnect(HWSelect: QtCore.QObject, delete_node=False):
 
     # Remote
     else:
-        ip_widgets = [
-            HWSelect.textEdit_ip_addr_1,
-            HWSelect.textEdit_ip_addr_2,
-            HWSelect.textEdit_ip_addr_3,
-            HWSelect.textEdit_ip_addr_4,
-            HWSelect.textEdit_ip_addr_5
-        ]
-        msg_port_widgets = [
-            HWSelect.textEdit_msg_port_1,
-            HWSelect.textEdit_msg_port_2,
-            HWSelect.textEdit_msg_port_3,
-            HWSelect.textEdit_msg_port_4,
-            HWSelect.textEdit_msg_port_5,
-        ]
-        hb_port_widgets = [
-            HWSelect.textEdit_hb_port_1,
-            HWSelect.textEdit_hb_port_2,
-            HWSelect.textEdit_hb_port_3,
-            HWSelect.textEdit_hb_port_4,
-            HWSelect.textEdit_hb_port_5,
-        ]
+        if str(network_type_widgets[tab_index].currentText()) == "IP":
+            ip_widgets = [
+                HWSelect.textEdit_ip_addr_1,
+                HWSelect.textEdit_ip_addr_2,
+                HWSelect.textEdit_ip_addr_3,
+                HWSelect.textEdit_ip_addr_4,
+                HWSelect.textEdit_ip_addr_5
+            ]
+            msg_port_widgets = [
+                HWSelect.textEdit_msg_port_1,
+                HWSelect.textEdit_msg_port_2,
+                HWSelect.textEdit_msg_port_3,
+                HWSelect.textEdit_msg_port_4,
+                HWSelect.textEdit_msg_port_5,
+            ]
+            hb_port_widgets = [
+                HWSelect.textEdit_hb_port_1,
+                HWSelect.textEdit_hb_port_2,
+                HWSelect.textEdit_hb_port_3,
+                HWSelect.textEdit_hb_port_4,
+                HWSelect.textEdit_hb_port_5,
+            ]
 
-        get_ip = str(ip_widgets[tab_index].toPlainText())
-        get_msg_port = str(msg_port_widgets[tab_index].toPlainText())
-        get_hb_port = str(hb_port_widgets[tab_index].toPlainText())
+            get_ip = str(ip_widgets[tab_index].toPlainText())
+            get_msg_port = str(msg_port_widgets[tab_index].toPlainText())
+            get_hb_port = str(hb_port_widgets[tab_index].toPlainText())
 
-        stacked_widgets[tab_index].setCurrentIndex(1)
+            stacked_widgets[tab_index].setCurrentIndex(1)
 
-        # # Disconnect Dashboard SUB from Sensor Node PUB
-        # try:
-        # HWSelect.parent.dashboard_sub_listener.disconnect_port(get_ip,get_hb_port)
-        # except:
-        # pass
+            # Send Message for HIPRFISR to Sensor Node Connections
+            await HWSelect.dashboard.backend.disconnect_remote_sensor_node(str(tab_index), get_ip, get_msg_port, get_hb_port, delete_node)
 
-        # # Disconnect Dashboard SUB from Sensor Node TSI Flow Graph PUB
-        # try:
-        # HWSelect.parent.dashboard_sub_listener.disconnect_port(get_ip,HWSelect.dashboard.backend.settings['tsi_hb_port_id'])
-        # except:
-        # pass
+        elif str(network_type_widgets[tab_index].currentText()) == "Meshtastic":
 
-        # # Send Message to HIPRFISR
-        # PARAMETERS = {
-        #     "sensor_node_id": str(tab_index),
-        #     "ip_address": get_ip,
-        #     "hb_port": get_hb_port,
-        #     "delete_node": delete_node,
-        # }
-        # msg = {
-        #     fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-        #     fissure.comms.MessageFields.MESSAGE_NAME: "Disconnect from Sensor Node",
-        #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        # }
-        # HWSelect.parent.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+            stacked_widgets[tab_index].setCurrentIndex(3)
 
-        # Send Message for HIPRFISR to Sensor Node Connections
-        await HWSelect.dashboard.backend.disconnect_remote_sensor_node(str(tab_index), get_ip, get_msg_port, get_hb_port, delete_node)
+            # Send Message for HIPRFISR to end Meshtastic Serial Connection
+            await HWSelect.dashboard.backend.disconnectFromMeshtastic(str(tab_index))
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -2490,7 +2291,22 @@ async def find(HWSelect: QtCore.QObject):
     ]
     if local_remote_stacked_widgets[tab_index].currentIndex() == 2:
         # Send the Message
-        await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_format)
+        gps_source_widgets = [
+            HWSelect.comboBox_gps_source_1,
+            HWSelect.comboBox_gps_source_1,
+            HWSelect.comboBox_gps_source_1,
+            HWSelect.comboBox_gps_source_1,
+            HWSelect.comboBox_gps_source_1
+        ]
+        get_gps_source = str(gps_source_widgets[tab_index].currentText())
+        if get_gps_source == "gpsd":
+            await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
+        elif get_gps_source == "Meshtastic":
+            await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
+        elif get_gps_source == "Saved":
+            await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)            
+        else:
+            return
 
         # Disable the Find Button
         find_widgets = [
@@ -2575,3 +2391,108 @@ def map(HWSelect: QtCore.QObject):
 
     # Open the file using xdg-open (respects user's default KML viewer)
     subprocess.run(["xdg-open", temp_kml_path], check=False)
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def network_type_changed(HWSelect: QtCore.QObject):
+    """ 
+    Changes the stacked widget of connection controls for different network types (IP, Meshtastic, etc.).
+    """
+    # Handle Stacked Widget Switching
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index + 1}", None)
+    network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index + 1}", None)
+    if str(network_type_widget.currentText()) == "IP":
+        stacked_widget.setCurrentIndex(1)
+    elif str(network_type_widget.currentText()) == "Meshtastic":
+        stacked_widget.setCurrentIndex(3)
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def meshtastic_refresh(HWSelect: QtCore.QObject):
+    """ 
+    Refreshes the list of potential serial ports in the combobox.
+    """
+    # Move Page to the Right
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    serial_port_widgets = [
+        HWSelect.comboBox_meshtastic_port_1, 
+        HWSelect.comboBox_meshtastic_port_2, 
+        HWSelect.comboBox_meshtastic_port_3, 
+        HWSelect.comboBox_meshtastic_port_4, 
+        HWSelect.comboBox_meshtastic_port_5
+    ]
+    ports = [port.device for port in serial.tools.list_ports.comports()]
+    serial_port_widgets[tab_index].clear()
+    serial_port_widgets[tab_index].addItems(ports if ports else ["No ports found"])
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_info(HWSelect: QtCore.QObject):
+    """ 
+    Opens a pop up with serial port and device information.
+    """
+    # Issue the Command
+    path = "/dev/serial/by-id/"
+    if os.path.exists(path):
+        output_text = os.popen(f"ls -l {path}").read()
+    else:
+        output_text = "No serial devices found"
+
+    # Open a Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect.dashboard, output_text)
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_connect(HWSelect: QtCore.QObject):
+    """
+    Connects to the local serial connection that is preconfigured to talk to the remote node.
+    """
+    # Connect
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    serial_port = [
+        HWSelect.comboBox_meshtastic_port_1, 
+        HWSelect.comboBox_meshtastic_port_2, 
+        HWSelect.comboBox_meshtastic_port_3, 
+        HWSelect.comboBox_meshtastic_port_4, 
+        HWSelect.comboBox_meshtastic_port_5
+    ]
+    serial_baud_rate = [
+        HWSelect.comboBox_meshtastic_baud_rate_1,
+        HWSelect.comboBox_meshtastic_baud_rate_2,
+        HWSelect.comboBox_meshtastic_baud_rate_3,
+        HWSelect.comboBox_meshtastic_baud_rate_4,
+        HWSelect.comboBox_meshtastic_baud_rate_5,
+    ]
+    recall_settings_widgets = [
+        HWSelect.checkBox_meshtastic_recall_settings_1,
+        HWSelect.checkBox_meshtastic_recall_settings_2,
+        HWSelect.checkBox_meshtastic_recall_settings_3,
+        HWSelect.checkBox_meshtastic_recall_settings_4,
+        HWSelect.checkBox_meshtastic_recall_settings_5,
+    ]    
+    local_remote_stacked_widgets = [
+        HWSelect.stackedWidget_local_remote_1,
+        HWSelect.stackedWidget_local_remote_2,
+        HWSelect.stackedWidget_local_remote_3,
+        HWSelect.stackedWidget_local_remote_4,
+        HWSelect.stackedWidget_local_remote_5,
+    ]
+
+    get_serial_port = str(serial_port[tab_index].currentText())
+    get_serial_baud_rate = str(serial_baud_rate[tab_index].currentText())
+    get_recall_settings = str(recall_settings_widgets[tab_index].isChecked())
+
+    # Check Existing IPs
+    get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]
+    for n in range(0, len(get_sensor_node)):
+        if (get_serial_port == HWSelect.dashboard.backend.settings[get_sensor_node[n]]["serial_port"]) and (n != tab_index):
+            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect.dashboard, "Serial port is already in use.")
+            return
+
+    # Disable Buttons
+    local_remote_stacked_widgets[tab_index].setEnabled(False)
+    QtWidgets.QApplication.processEvents()
+
+    # Send Message for HIPRFISR to Create Sensor Node Connection
+    await HWSelect.dashboard.backend.connectToSensorNodeMeshtastic(str(tab_index), get_serial_port, get_serial_baud_rate, get_recall_settings)

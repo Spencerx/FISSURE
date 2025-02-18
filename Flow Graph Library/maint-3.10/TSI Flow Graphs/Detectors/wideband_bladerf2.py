@@ -20,9 +20,8 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+from gnuradio import soapy
 import gnuradio.ainfosec as ainfosec
-import osmosdr
-import time
 
 
 
@@ -40,7 +39,7 @@ class wideband_bladerf2(gr.top_block):
         self.sample_rate = sample_rate = 20000000
         self.rx_freq = rx_freq = 1200e6
         self.ip_address = ip_address = "N/A"
-        self.gain = gain = 20
+        self.gain = gain = 50
         self.fft_size = fft_size = 512*1
         self.channel = channel = "N/A"
         self.antenna = antenna = "N/A"
@@ -49,21 +48,19 @@ class wideband_bladerf2(gr.top_block):
         # Blocks
         ##################################################
 
-        self.osmosdr_source_0 = osmosdr.source(
-            args="numchan=" + str(1) + " " + "bladerf=" + str(serial)
-        )
-        self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
-        self.osmosdr_source_0.set_sample_rate(sample_rate)
-        self.osmosdr_source_0.set_center_freq(rx_freq, 0)
-        self.osmosdr_source_0.set_freq_corr(0, 0)
-        self.osmosdr_source_0.set_dc_offset_mode(2, 0)
-        self.osmosdr_source_0.set_iq_balance_mode(1, 0)
-        self.osmosdr_source_0.set_gain_mode(False, 0)
-        self.osmosdr_source_0.set_gain(10, 0)
-        self.osmosdr_source_0.set_if_gain(gain, 0)
-        self.osmosdr_source_0.set_bb_gain(20, 0)
-        self.osmosdr_source_0.set_antenna('', 0)
-        self.osmosdr_source_0.set_bandwidth(0, 0)
+        self.soapy_bladerf_source_0 = None
+        dev = 'driver=bladerf'
+        stream_args = ''
+        tune_args = ['']
+        settings = ['']
+
+        self.soapy_bladerf_source_0 = soapy.source(dev, "fc32", 1, "bladerf=" + str(serial),
+                                  stream_args, tune_args, settings)
+        self.soapy_bladerf_source_0.set_sample_rate(0, float(sample_rate))
+        self.soapy_bladerf_source_0.set_bandwidth(0, 0.0)
+        self.soapy_bladerf_source_0.set_frequency(0, float(rx_freq))
+        self.soapy_bladerf_source_0.set_frequency_correction(0, 0)
+        self.soapy_bladerf_source_0.set_gain(0, min(max(float(gain), -1.0), 60.0))
         self.fft_vxx_0 = fft.fft_vcc(fft_size, True, window.blackmanharris(fft_size), True, 1)
         self.dc_blocker_xx_0 = filter.dc_blocker_cc(32, False)
         self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_gr_complex*1, fft_size)
@@ -84,7 +81,7 @@ class wideband_bladerf2(gr.top_block):
         self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_complex_to_mag_squared_0, 0))
         self.connect((self.dc_blocker_xx_0, 0), (self.analog_pwr_squelch_xx_0, 0))
         self.connect((self.fft_vxx_0, 0), (self.blocks_vector_to_stream_0, 0))
-        self.connect((self.osmosdr_source_0, 0), (self.dc_blocker_xx_0, 0))
+        self.connect((self.soapy_bladerf_source_0, 0), (self.dc_blocker_xx_0, 0))
 
 
     def get_threshold(self):
@@ -105,7 +102,7 @@ class wideband_bladerf2(gr.top_block):
     def set_sample_rate(self, sample_rate):
         self.sample_rate = sample_rate
         self.ainfosec_wideband_detector1_0.set_sample_rate(self.sample_rate)
-        self.osmosdr_source_0.set_sample_rate(self.sample_rate)
+        self.soapy_bladerf_source_0.set_sample_rate(0, float(self.sample_rate))
 
     def get_rx_freq(self):
         return self.rx_freq
@@ -113,7 +110,7 @@ class wideband_bladerf2(gr.top_block):
     def set_rx_freq(self, rx_freq):
         self.rx_freq = rx_freq
         self.ainfosec_wideband_detector1_0.set_rx_freq(self.rx_freq)
-        self.osmosdr_source_0.set_center_freq(self.rx_freq, 0)
+        self.soapy_bladerf_source_0.set_frequency(0, float(self.rx_freq))
 
     def get_ip_address(self):
         return self.ip_address
@@ -126,7 +123,7 @@ class wideband_bladerf2(gr.top_block):
 
     def set_gain(self, gain):
         self.gain = gain
-        self.osmosdr_source_0.set_if_gain(self.gain, 0)
+        self.soapy_bladerf_source_0.set_gain(0, min(max(float(self.gain), -1.0), 60.0))
 
     def get_fft_size(self):
         return self.fft_size

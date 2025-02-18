@@ -1,6 +1,89 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-17
+
+Hardware utility functions for gain, antennas, and channels.
+
+### Added
+
+- Disabling Archive>Playback Start button when no transmit antenna is available
+- Toggling Archive>Playback enable controls during operation
+- Adding utility functions in hardware.py: getHardwareAntennas(), getHardwareChannels(), getHardwareGain()
+
+### Changed
+
+- Acquiring hardware gain, antenna, channel values from utility functions
+- Changing bladeRF 2.0 frequency range to 70-6000 MHz
+- README cloning instructions updated for clarity
+
+### Fixed
+
+- Disabling playback for SDRplay SDRs
+- Selecting receive-only hardware in Playback tab no longer disables hardware selection combobox
+- Removed some of the debug prints in the library functions
+- Updating AIS talent community link in README
+
+## 2025-2-16
+
+Updating bladeRF 2.0 flow graphs with Soapy blocks.
+
+### Changed
+
+- Default gain values for bladeRF2 for maint-3.10 flows graphs/operating systems in Dashboard
+
+### Fixed
+
+- bladeRF2 waterfall acquires the correct filename from the database
+- Updated bladeRF2 flow graphs with Soapy source/sink blocks
+
+## 2025-2-14
+
+Plugin updates and FISSURE Capabilities document
+
+### Added
+
+- FISSURE Capabilities PDF (11Sep24) to Help menu and README
+- Plugin import function to load in ZIP file plugins with and without a password
+- Added p7zip-full to the installer
+
+### Changed
+
+- Resizing README install1.png image to be smaller
+
+### Fixed
+
+- Updating create plugin function to open the newly created plugin
+
+## 2025-2-13
+
+Networking and GPS updates, Meshtastic integration (Part 1)
+
+### Added
+
+- Meshtastic item to installer under Minimum Install
+- MeshMap link in Tools menu
+- GPS source option when acquiring location in Sensor Node Configuration
+- IP/Serial option when connecting to a remote sensor node
+- Added serial_port, serial_baud_rate fields to sensor nodes in FISSURE config files
+- GPS acquisition options at sensor node using the config file, automatically on startup, and updates at a periodic interval
+- xdg-utils to the installer
+
+### Changed
+
+- Consolidating local(), remote() functions in HardwareSelectSlots.py
+- HIPRFISR network nodes initialized to None instead of SensorNode()
+- HIPRFISR network nodes closed with new function instead of relying on \__del\__
+- Moved BANNED_MESSAGE_TYPES list to common.py
+- Removed local, remote example sensor node YAML configuration files, added more comments in default.yaml
+- Changing the database port to 5431 to avoid conflicts with other programs
+
+### Fixed
+
+- Adding missing version parameters to addAttack and addDemodulationFlowGraph in HiprFisrCallbacks
+- Deleting (some of) the associated attack files when removing rows from the Browse "attacks" database table
+- Corrected for lower case heartbeat messages when filtering for heartbeats in Log tab
+
 ## 2025-2-03
 
 Kali/Kali Rolling installation fixes 2.

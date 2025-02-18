@@ -75,6 +75,8 @@ sensor_node1:
   nickname: ''
   notes: ''
   pd: ''
+  serial_baud_rate: ''
+  serial_port: ''
   tsi: ''
 sensor_node2:
   archive: ''
@@ -92,6 +94,8 @@ sensor_node2:
   nickname: ''
   notes: ''
   pd: ''
+  serial_baud_rate: ''
+  serial_port: ''
   tsi: ''
 sensor_node3:
   archive: ''
@@ -109,6 +113,8 @@ sensor_node3:
   nickname: ''
   notes: ''
   pd: ''
+  serial_baud_rate: ''
+  serial_port: ''
   tsi: ''
 sensor_node4:
   archive: ''
@@ -126,6 +132,8 @@ sensor_node4:
   nickname: ''
   notes: ''
   pd: ''
+  serial_baud_rate: ''
+  serial_port: ''
   tsi: ''
 sensor_node5:
   archive: ''
@@ -143,6 +151,8 @@ sensor_node5:
   nickname: ''
   notes: ''
   pd: ''
+  serial_baud_rate: ''
+  serial_port: ''
   tsi: ''
 sensor_node_hiprfisr_dealer_port: 5053
 sensor_node_pub_port: 5061

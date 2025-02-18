@@ -15,24 +15,6 @@ from typing import List
 import time
 
 
-# def openDatabaseConnection() -> connection:
-#     """
-#     Connects to the FISSURE database at the HIPRFISR computer/network.
-#     """
-#     # Load environment variables from .env file
-#     load_dotenv(os.path.join(FISSURE_ROOT,".env"))
-
-#     # Connect to PostgreSQL database
-#     conn = psycopg2.connect(
-#         dbname = os.getenv('POSTGRES_DB'),
-#         user = os.getenv('POSTGRES_USER'),
-#         password = os.getenv('POSTGRES_PASSWORD'),
-#         host = os.getenv('POSTGRES_HOST', 'localhost'),
-#         port = os.getenv('POSTGRES_PORT', '5432')
-#     )
-#     return conn
-
-
 def openDatabaseConnection(retries=10, delay=2) -> connection:
     """
     Connects to the FISSURE database at the HIPRFISR computer/network.
@@ -52,7 +34,7 @@ def openDatabaseConnection(retries=10, delay=2) -> connection:
     user = os.getenv('POSTGRES_USER')
     password = os.getenv('POSTGRES_PASSWORD')
     host = os.getenv('POSTGRES_HOST', 'localhost')
-    port = os.getenv('POSTGRES_PORT', '5432')
+    port = os.getenv('POSTGRES_EXTERNAL_PORT', '5431')
 
     for attempt in range(retries):
         try:
@@ -900,7 +882,7 @@ def addArchiveCollection(name, file_list, filepath, files, format, size, notes, 
         user = os.getenv('POSTGRES_USER'),
         password = os.getenv('POSTGRES_PASSWORD'),
         host = os.getenv('POSTGRES_HOST', 'localhost'),
-        port = os.getenv('POSTGRES_PORT', '5432')
+        port = os.getenv('POSTGRES_EXTERNAL_PORT', '5431')
     )
     cur = conn.cursor()
 
@@ -949,7 +931,7 @@ def addArchiveFavorite(file_name, date, format, modulation, notes, protocol, sam
         user=os.getenv('POSTGRES_USER'),
         password=os.getenv('POSTGRES_PASSWORD'),
         host=os.getenv('POSTGRES_HOST', 'localhost'),
-        port=os.getenv('POSTGRES_PORT', '5432')
+        port=os.getenv('POSTGRES_EXTERNAL_PORT', '5431')
     )
     cur = conn.cursor()
 
@@ -1262,12 +1244,6 @@ def removeFromTable(conn, table_name, row_id, delete_files, os_version):
     try:
         cur = conn.cursor()
 
-        # Use parameterized query to prevent SQL injection
-        query = f"DELETE FROM {table_name} WHERE id = %s;"
-        cur.execute(query, (row_id,))
-        conn.commit()
-        print(f"Row with ID {row_id} deleted from {table_name}.")
-
         # Remove Files
         if delete_files == True:
             if table_name == "demodulation_flow_graphs":
@@ -1278,9 +1254,19 @@ def removeFromTable(conn, table_name, row_id, delete_files, os_version):
                 
                 # If the row exists, fetch the filename, delete the file
                 if result:
-                    get_filename = result[0]
+                    get_filename = result[0]  # Not the column value. Returns a tuple (filename,)
                     get_filepath = os.path.join(get_fg_library_dir(os_version), "PD Flow Graphs", get_filename)
-                    os.system('rm "' + get_filepath + '"' )
+                    if os.path.exists(get_filepath):
+                        os.remove(get_filepath)
+                        print(f"Deleted: {get_filepath}")
+                    else:
+                        print(f"File not found: {get_filepath}")
+                    grc_filepath = get_filepath.replace(".py",".grc")
+                    if os.path.exists(grc_filepath):
+                        os.remove(grc_filepath)
+                        print(f"Deleted: {grc_filepath}")
+                    else:
+                        print(f"File not found: {grc_filepath}")
 
             elif table_name == "inspection_flow_graphs":
                 # Use parameterized query to prevent SQL injection
@@ -1292,9 +1278,18 @@ def removeFromTable(conn, table_name, row_id, delete_files, os_version):
                 if result:
                     get_filename = result[0]
                     get_filepath = os.path.join(get_fg_library_dir(os_version), "Inspection Flow Graphs", get_filename)
-                    os.system('rm "' + get_filepath + '"' )
-                    os.system('rm "' + get_filepath.replace(".py",".grc") + '"' )
-
+                    if os.path.exists(get_filepath):
+                        os.remove(get_filepath)
+                        print(f"Deleted: {get_filepath}")
+                    else:
+                        print(f"File not found: {get_filepath}")
+                    grc_filepath = get_filepath.replace(".py",".grc")
+                    if os.path.exists(grc_filepath):
+                        os.remove(grc_filepath)
+                        print(f"Deleted: {grc_filepath}")
+                    else:
+                        print(f"File not found: {grc_filepath}")
+                    
             elif table_name == "soi_data":
                 pass  # Delete IQ files
 
@@ -1308,7 +1303,44 @@ def removeFromTable(conn, table_name, row_id, delete_files, os_version):
                 if result:
                     get_filename = result[0]
                     get_filepath = os.path.join(get_fg_library_dir(os_version), "Triggers", get_filename)
-                    os.system('rm "' + get_filepath + '"' )
+                    if os.path.exists(get_filepath):
+                        os.remove(get_filepath)
+                        print(f"Deleted: {get_filepath}")
+                    else:
+                        print(f"File not found: {get_filepath}")
+
+            elif table_name == "attacks":
+                # Use parameterized query to prevent SQL injection
+                query = f"SELECT filename FROM {table_name} WHERE id = %s;"
+                cur.execute(query, (row_id,))
+                result = cur.fetchone()
+
+                query = f"SELECT attack_type FROM {table_name} WHERE id = %s;"
+                cur.execute(query, (row_id,))
+                type_result = cur.fetchone()
+                
+                # If the row exists, fetch the filename, delete the file
+                if result:
+                    get_filename = result[0]
+                    get_filepath = os.path.join(get_fg_library_dir(os_version), "Single-Stage Flow Graphs", get_filename)
+                    if os.path.exists(get_filepath):
+                        os.remove(get_filepath)
+                        print(f"Deleted: {get_filepath}")
+                    else:
+                        print(f"File not found: {get_filepath}")
+                    if type_result[0] == "Flow Graph":
+                        grc_filepath = get_filepath.replace(".py",".grc")
+                        if os.path.exists(grc_filepath):
+                            os.remove(grc_filepath)
+                            print(f"Deleted: {grc_filepath}")
+                        else:
+                            print(f"File not found: {grc_filepath}")
+
+        # Use parameterized query to prevent SQL injection
+        query = f"DELETE FROM {table_name} WHERE id = %s;"
+        cur.execute(query, (row_id,))
+        conn.commit()
+        print(f"Row with ID {row_id} deleted from {table_name}.")
 
     except Exception as e:
         print(f"Error: {e}")

@@ -801,6 +801,7 @@ async def recallSettings(component: object):
         fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
+    # print(msg)
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
@@ -1436,12 +1437,39 @@ async def removePlugin(component: object, sensor_node_id: int, plugin_name: str)
         plugin.remove(plugin_name)
 
 
-async def findGPS_Coordinates(component: object, tab_index=0, format=""):
+async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", format=""):
     """
     Find the sensor node GPS coordinates using gpsd and return the information.
     """
     # Retrieve Coordinates
-    get_coordinates = fissure.utils.hardware.probe_gpsd(format)
+    if gps_source == "gpsd":
+        get_coordinates = fissure.utils.hardware.probe_gpsd(format)
+    elif gps_source == "Meshtastic":
+        # Use Existing Serial Connection
+        if component.local_remote == "remote":
+            gps_data = await component.hiprfisr_socket.get_gps_position()
+            get_coordinates = fissure.utils.format_coordinates(
+                gps_data['latitude'], 
+                gps_data['longitude'],
+                format
+            )
+        # Establish Serial Connection
+        else:
+            gps_data = await fissure.utils.hardware.probeMeshtasticGPS(component.serial_port, 10)
+            get_coordinates = fissure.utils.format_coordinates(
+                gps_data['latitude'], 
+                gps_data['longitude'],
+                format
+            )
+
+    elif gps_source == "Saved":
+        get_coordinates = fissure.utils.format_coordinates(
+            component.gps_position['latitude'], 
+            component.gps_position['longitude'], 
+            format
+        )
+    else:
+        get_coordinates = "Invalid GPS Source"
 
     # Return the Text
     if get_coordinates:

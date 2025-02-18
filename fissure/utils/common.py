@@ -59,6 +59,22 @@ DATABASE_TABLE_HEADERS = {
     "triggers": ["id", "category", "trigger_name", "default_settings", "filename", "file_type", "version"]
 }
 
+# Commands Banned from Logging the Parameters Values in Console and File (messages with a lot of data)
+BANNED_MESSAGE_NAMES = [
+    "demodFG_LibrarySearchReturn",
+    "findEntropyReturn",
+    "findPreamblesReturn",
+    "overwriteDefaultAutorunPlaylist",
+    "pdBitsReturn",
+    "recallSettingsReturn",
+    "retrieveDatabaseCacheReturn",
+    "retrieveDatabaseCacheReturnPD",
+    "saveFile",
+    "searchLibraryReturn",
+    "sliceByPreambleReturn",
+    "transferSensorNodeFile",
+]
+
 
 class FissureUtilObjects:
     config: Dict = None

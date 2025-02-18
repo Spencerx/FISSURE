@@ -204,6 +204,7 @@
     <addaction name="menuDevelopment_2"/>
     <addaction name="actionCredits"/>
     <addaction name="separator"/>
+    <addaction name="actionFISSURE_Capabilities"/>
     <addaction name="menuProtocol_Signal_References"/>
     <addaction name="separator"/>
     <addaction name="menuGitHub"/>
@@ -864,6 +865,12 @@
      </property>
      <addaction name="actiontpms_rx"/>
     </widget>
+    <widget class="QMenu" name="menuLoRa">
+     <property name="title">
+      <string>LoRa</string>
+     </property>
+     <addaction name="actionMeshMap"/>
+    </widget>
     <addaction name="menu433_MHz"/>
     <addaction name="menu802_11_Tools_2"/>
     <addaction name="menuAircraft"/>
@@ -880,6 +887,7 @@
     <addaction name="menuHam_Radio"/>
     <addaction name="menuHardware_2"/>
     <addaction name="menuHD_Radio"/>
+    <addaction name="menuLoRa"/>
     <addaction name="menuLTE"/>
     <addaction name="menuM17"/>
     <addaction name="menuMapping"/>
@@ -3485,6 +3493,16 @@
    </property>
    <property name="text">
     <string>Custom</string>
+   </property>
+  </action>
+  <action name="actionMeshMap">
+   <property name="text">
+    <string>MeshMap</string>
+   </property>
+  </action>
+  <action name="actionFISSURE_Capabilities">
+   <property name="text">
+    <string>FISSURE Capabilities</string>
    </property>
   </action>
  </widget>

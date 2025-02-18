@@ -352,6 +352,10 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             scan_button: QtWidgets.QPushButton = getattr(self, f"pushButton_scan_{node_idx}")
             probe_button: QtWidgets.QPushButton = getattr(self, f"pushButton_scan_results_probe_{node_idx}")
             guess_button: QtWidgets.QPushButton = getattr(self, f"pushButton_scan_results_guess_{node_idx}")
+            network_type_combobox: QtWidgets.QComboBox = getattr(self, f"comboBox_network_type_{node_idx}")
+            meshtastic_refresh_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_refresh_{node_idx}")
+            meshtastic_info_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_info_{node_idx}")
+            meshtastic_connect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_connect_{node_idx}")
 
             local_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.local(self, tab_index=idx - 1))
             remote_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.remote(self, tab_index=idx - 1))
@@ -380,6 +384,10 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             scan_button.clicked.connect(lambda: HardwareSelectSlots.scan(self))
             probe_button.clicked.connect(lambda: HardwareSelectSlots.probe(self))
             guess_button.clicked.connect(lambda: HardwareSelectSlots.guess(self))
+            network_type_combobox.currentIndexChanged.connect(lambda: HardwareSelectSlots.network_type_changed(self))
+            meshtastic_refresh_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_refresh(self))
+            meshtastic_info_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_info(self))
+            meshtastic_connect_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_connect(self))
 
         # Connect general slots
         self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict=""))
@@ -737,6 +745,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             self.pushButton_find_5,
         ]
         stacked_widgets[tab_index].setCurrentIndex(2)
+        stacked_widgets[tab_index].setEnabled(True)
         bottom_stacked_widgets[tab_index].setCurrentIndex(0)
         scan_pushbuttons[tab_index].setEnabled(True)
         local_buttons[tab_index].setEnabled(False)
@@ -811,11 +820,32 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             self.pushButton_find_4,
             self.pushButton_find_5,
         ]
+        network_type_label_widgets = [
+            self.label2_network_type_1,
+            self.label2_network_type_2,
+            self.label2_network_type_3,
+            self.label2_network_type_4,
+            self.label2_network_type_5,
+        ]
+        network_type_combobox_widgets = [
+            self.comboBox_network_type_1,
+            self.comboBox_network_type_2,
+            self.comboBox_network_type_3,
+            self.comboBox_network_type_4,
+            self.comboBox_network_type_5,
+        ]        
 
         if local_buttons[tab_index].isChecked():
             stacked_widgets[tab_index].setCurrentIndex(0)
+            network_type_label_widgets[tab_index].setVisible(False)
+            network_type_combobox_widgets[tab_index].setVisible(False)
         else:
-            stacked_widgets[tab_index].setCurrentIndex(1)
+            if network_type_combobox_widgets[tab_index].currentText() == "IP":
+                stacked_widgets[tab_index].setCurrentIndex(1)
+            elif network_type_combobox_widgets[tab_index].currentText() == "Serial":
+                stacked_widgets[tab_index].setCurrentIndex(3)
+            network_type_label_widgets[tab_index].setVisible(True)
+            network_type_combobox_widgets[tab_index].setVisible(True)
         bottom_stacked_widgets[tab_index].setCurrentIndex(1)
         scan_pushbuttons[tab_index].setEnabled(True)
         local_buttons[tab_index].setEnabled(True)

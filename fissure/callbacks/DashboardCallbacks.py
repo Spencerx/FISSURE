@@ -176,6 +176,9 @@ async def archivePlaylistFinished(component: object, sensor_node_id=0):
     component.frontend.statusbar_text[sensor_node_id][5] = "Not Running"
     component.frontend.refreshStatusBarText()
 
+    # Enable the Controls
+    component.frontend.ui.frame_archive_replay_controls.setEnabled(True)
+
 
 async def hardwareGuessResults(component: object, tab_index=0, table_row=[], hardware_type="", scan_results="", new_guess_index=0):
     """
@@ -299,6 +302,35 @@ async def componentConnected(component: object, component_name=""):
         elif sensor_node_id == 4:
             component.frontend.signals.ComponentStatus.emit("Sensor Node 4", True, component.frontend.statusBar())
             component.sensor_node_connected[4] = True
+        component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id)
+
+
+async def componentConnectedSerial(component: object, component_name=""):
+    """
+    Update the Sensor Node Configuration window on connection to serial port but not the status bar until heartbeats arrive.
+    """
+    if component_name == fissure.comms.Identifiers.PD:
+        pass
+    elif component_name == fissure.comms.Identifiers.TSI:
+        pass
+    elif component_name == fissure.comms.Identifiers.DASHBOARD:
+        pass
+    else:
+        # Modify the Button/Stacked Widget
+        try:
+            sensor_node_id = int(component_name)
+        except:
+            return
+        if sensor_node_id == 0:
+            pass  # Future tasks?
+        elif sensor_node_id == 1:
+            pass
+        elif sensor_node_id == 2:
+            pass
+        elif sensor_node_id == 3:
+            pass
+        elif sensor_node_id == 4:
+            pass
         component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id)
 
 

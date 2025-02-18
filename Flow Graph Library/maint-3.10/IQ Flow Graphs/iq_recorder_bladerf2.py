@@ -17,8 +17,7 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-import osmosdr
-import time
+from gnuradio import soapy
 
 
 
@@ -33,7 +32,7 @@ class iq_recorder_bladerf2(gr.top_block):
         ##################################################
         self.serial = serial = "0"
         self.sample_rate = sample_rate = 1
-        self.rx_gain = rx_gain = 25
+        self.rx_gain = rx_gain = 50
         self.rx_frequency = rx_frequency = 2412
         self.rx_channel = rx_channel = ""
         self.rx_antenna = rx_antenna = ""
@@ -44,21 +43,19 @@ class iq_recorder_bladerf2(gr.top_block):
         # Blocks
         ##################################################
 
-        self.rtlsdr_source_0_0 = osmosdr.source(
-            args="numchan=" + str(1) + " " + "bladerf=" + str(serial)
-        )
-        self.rtlsdr_source_0_0.set_time_unknown_pps(osmosdr.time_spec_t())
-        self.rtlsdr_source_0_0.set_sample_rate((float(sample_rate)*1e6))
-        self.rtlsdr_source_0_0.set_center_freq((rx_frequency*1e6), 0)
-        self.rtlsdr_source_0_0.set_freq_corr(0, 0)
-        self.rtlsdr_source_0_0.set_dc_offset_mode(0, 0)
-        self.rtlsdr_source_0_0.set_iq_balance_mode(0, 0)
-        self.rtlsdr_source_0_0.set_gain_mode(False, 0)
-        self.rtlsdr_source_0_0.set_gain(10, 0)
-        self.rtlsdr_source_0_0.set_if_gain(rx_gain, 0)
-        self.rtlsdr_source_0_0.set_bb_gain(20, 0)
-        self.rtlsdr_source_0_0.set_antenna('', 0)
-        self.rtlsdr_source_0_0.set_bandwidth(0, 0)
+        self.soapy_bladerf_source_0 = None
+        dev = 'driver=bladerf'
+        stream_args = ''
+        tune_args = ['']
+        settings = ['']
+
+        self.soapy_bladerf_source_0 = soapy.source(dev, "fc32", 1, "bladerf=" + str(serial),
+                                  stream_args, tune_args, settings)
+        self.soapy_bladerf_source_0.set_sample_rate(0, float(sample_rate)*1e6)
+        self.soapy_bladerf_source_0.set_bandwidth(0, 0.0)
+        self.soapy_bladerf_source_0.set_frequency(0, (float(rx_frequency)*1e6))
+        self.soapy_bladerf_source_0.set_frequency_correction(0, 0)
+        self.soapy_bladerf_source_0.set_gain(0, min(max(float(rx_gain), -1.0), 60.0))
         self.blocks_skiphead_0 = blocks.skiphead(gr.sizeof_gr_complex*1, 200000)
         self.blocks_head_0 = blocks.head(gr.sizeof_gr_complex*1, file_length)
         self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, filepath, False)
@@ -70,7 +67,7 @@ class iq_recorder_bladerf2(gr.top_block):
         ##################################################
         self.connect((self.blocks_head_0, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.blocks_skiphead_0, 0), (self.blocks_head_0, 0))
-        self.connect((self.rtlsdr_source_0_0, 0), (self.blocks_skiphead_0, 0))
+        self.connect((self.soapy_bladerf_source_0, 0), (self.blocks_skiphead_0, 0))
 
 
     def get_serial(self):
@@ -84,21 +81,21 @@ class iq_recorder_bladerf2(gr.top_block):
 
     def set_sample_rate(self, sample_rate):
         self.sample_rate = sample_rate
-        self.rtlsdr_source_0_0.set_sample_rate((float(self.sample_rate)*1e6))
+        self.soapy_bladerf_source_0.set_sample_rate(0, float(self.sample_rate)*1e6)
 
     def get_rx_gain(self):
         return self.rx_gain
 
     def set_rx_gain(self, rx_gain):
         self.rx_gain = rx_gain
-        self.rtlsdr_source_0_0.set_if_gain(self.rx_gain, 0)
+        self.soapy_bladerf_source_0.set_gain(0, min(max(float(self.rx_gain), -1.0), 60.0))
 
     def get_rx_frequency(self):
         return self.rx_frequency
 
     def set_rx_frequency(self, rx_frequency):
         self.rx_frequency = rx_frequency
-        self.rtlsdr_source_0_0.set_center_freq((self.rx_frequency*1e6), 0)
+        self.soapy_bladerf_source_0.set_frequency(0, (float(self.rx_frequency)*1e6))
 
     def get_rx_channel(self):
         return self.rx_channel

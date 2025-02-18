@@ -20,22 +20,6 @@ CLIENTS = "clients"
 
 POLL_TIMEOUT = 50
 
-# Commands Banned from Logging the Parameters Values in Console and File (messages with a lot of data)
-BANNED_MESSAGE_NAMES = [
-    "demodFG_LibrarySearchReturn",
-    "findEntropyReturn",
-    "findPreamblesReturn",
-    "overwriteDefaultAutorunPlaylist",
-    "pdBitsReturn",
-    "recallSettingsReturn",
-    "retrieveDatabaseCacheReturn",
-    "retrieveDatabaseCacheReturnPD",
-    "saveFile",
-    "searchLibraryReturn",
-    "sliceByPreambleReturn",
-    "transferSensorNodeFile",
-]
-
 
 class FissureZMQNode(ABC):
     """Fissure ZMQ Node Base Class"""
@@ -141,7 +125,7 @@ class FissureZMQNode(ABC):
 
                     # Ignore Message Parameters in Logging
                     if msg_type == "Commands":
-                        if msg["MessageName"] in BANNED_MESSAGE_NAMES:
+                        if msg["MessageName"] in fissure.utils.BANNED_MESSAGE_NAMES:
                             log_message = msg.copy()
                             log_message.pop("Parameters", None)
                         else:
@@ -173,7 +157,7 @@ class FissureZMQNode(ABC):
 
             # Ignore Message Parameters in Logging
             if msg_type == "Commands":
-                if msg["MessageName"] in BANNED_MESSAGE_NAMES:
+                if msg["MessageName"] in fissure.utils.BANNED_MESSAGE_NAMES:
                     log_message = msg.copy()
                     log_message.pop("Parameters", None)
                 else:
@@ -246,7 +230,7 @@ class FissureZMQNode(ABC):
                     msgrcvd["callback"] = cb
 
                     # Ignore Message Parameters in Logging
-                    if cb in BANNED_MESSAGE_NAMES:
+                    if cb in fissure.utils.BANNED_MESSAGE_NAMES:
                         log_message = msgrcvd.copy()
                         log_message.pop("Parameters", None)
                     else:
@@ -299,7 +283,7 @@ class FissureZMQNode(ABC):
         params = parsed_command.get("Parameters")
 
         # Ignore Message Parameters in Logging
-        if cb_name in BANNED_MESSAGE_NAMES:
+        if cb_name in fissure.utils.BANNED_MESSAGE_NAMES:
             self.logger.debug(f"executing callback: {cb_name}")
         else:
             self.logger.debug(f"executing callback: {cb_name} with parameters: {params}")

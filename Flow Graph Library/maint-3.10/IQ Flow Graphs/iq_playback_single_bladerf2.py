@@ -18,8 +18,7 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-import osmosdr
-import time
+from gnuradio import soapy
 
 
 
@@ -32,7 +31,7 @@ class iq_playback_single_bladerf2(gr.top_block):
         ##################################################
         # Variables
         ##################################################
-        self.tx_gain = tx_gain = 30
+        self.tx_gain = tx_gain = 60
         self.tx_frequency = tx_frequency = 2425.715
         self.tx_channel = tx_channel = ""
         self.serial = serial = "0"
@@ -44,18 +43,19 @@ class iq_playback_single_bladerf2(gr.top_block):
         # Blocks
         ##################################################
 
-        self.osmosdr_sink_0 = osmosdr.sink(
-            args="numchan=" + str(1) + " " + "bladerf=" + str(serial)
-        )
-        self.osmosdr_sink_0.set_time_unknown_pps(osmosdr.time_spec_t())
-        self.osmosdr_sink_0.set_sample_rate((float(sample_rate)*1e6))
-        self.osmosdr_sink_0.set_center_freq((tx_frequency*1e6), 0)
-        self.osmosdr_sink_0.set_freq_corr(0, 0)
-        self.osmosdr_sink_0.set_gain(10, 0)
-        self.osmosdr_sink_0.set_if_gain(tx_gain, 0)
-        self.osmosdr_sink_0.set_bb_gain(20, 0)
-        self.osmosdr_sink_0.set_antenna('', 0)
-        self.osmosdr_sink_0.set_bandwidth(0, 0)
+        self.soapy_bladerf_sink_0 = None
+        dev = 'driver=bladerf'
+        stream_args = ''
+        tune_args = ['']
+        settings = ['']
+
+        self.soapy_bladerf_sink_0 = soapy.sink(dev, "fc32", 1, "bladerf=" + str(serial),
+                                  stream_args, tune_args, settings)
+        self.soapy_bladerf_sink_0.set_sample_rate(0, float(sample_rate)*1e6)
+        self.soapy_bladerf_sink_0.set_bandwidth(0, 0.0)
+        self.soapy_bladerf_sink_0.set_frequency(0, (float(tx_frequency)*1e6))
+        self.soapy_bladerf_sink_0.set_frequency_correction(0, 0)
+        self.soapy_bladerf_sink_0.set_gain(0, min(max(float(tx_gain), 17.0), 73.0))
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, filepath, False, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
 
@@ -63,7 +63,7 @@ class iq_playback_single_bladerf2(gr.top_block):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.blocks_file_source_0, 0), (self.osmosdr_sink_0, 0))
+        self.connect((self.blocks_file_source_0, 0), (self.soapy_bladerf_sink_0, 0))
 
 
     def get_tx_gain(self):
@@ -71,14 +71,14 @@ class iq_playback_single_bladerf2(gr.top_block):
 
     def set_tx_gain(self, tx_gain):
         self.tx_gain = tx_gain
-        self.osmosdr_sink_0.set_if_gain(self.tx_gain, 0)
+        self.soapy_bladerf_sink_0.set_gain(0, min(max(float(self.tx_gain), 17.0), 73.0))
 
     def get_tx_frequency(self):
         return self.tx_frequency
 
     def set_tx_frequency(self, tx_frequency):
         self.tx_frequency = tx_frequency
-        self.osmosdr_sink_0.set_center_freq((self.tx_frequency*1e6), 0)
+        self.soapy_bladerf_sink_0.set_frequency(0, (float(self.tx_frequency)*1e6))
 
     def get_tx_channel(self):
         return self.tx_channel
@@ -97,7 +97,7 @@ class iq_playback_single_bladerf2(gr.top_block):
 
     def set_sample_rate(self, sample_rate):
         self.sample_rate = sample_rate
-        self.osmosdr_sink_0.set_sample_rate((float(self.sample_rate)*1e6))
+        self.soapy_bladerf_sink_0.set_sample_rate(0, float(self.sample_rate)*1e6)
 
     def get_ip_address(self):
         return self.ip_address

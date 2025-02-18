@@ -24,21 +24,21 @@ from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+from gnuradio import soapy
 from gnuradio.fft import logpwrfft
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
 import fixed_threshold_bladerf2_epy_block_0 as epy_block_0  # embedded python block
 import numpy as np
-import osmosdr
-import time
 import random
 import sip
+import time
 
 
 
 class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
 
-    def __init__(self, antenna_default='', channel_default='', gain_default='10', ip_address='', rx_freq_default='2412', sample_rate_default='20e6', sensor_node_ip_address="127.0.0.1", serial="0", threshold_default='0'):
+    def __init__(self, antenna_default='', channel_default='', gain_default='50', ip_address='', rx_freq_default='2412', sample_rate_default='20e6', sensor_node_ip_address="127.0.0.1", serial="0", threshold_default='0'):
         gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
         Qt.QWidget.__init__(self)
         self.setWindowTitle("Not titled yet")
@@ -139,7 +139,7 @@ class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self._rx_gain_range = Range(0, 40, 1, float(gain_default), 200)
+        self._rx_gain_range = Range(-1, 60, 1, float(gain_default), 200)
         self._rx_gain_win = RangeWidget(self._rx_gain_range, self.set_rx_gain, "              Gain:", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_grid_layout.addWidget(self._rx_gain_win, 2, 0, 1, 4)
         for r in range(2, 3):
@@ -160,6 +160,19 @@ class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.soapy_bladerf_source_0 = None
+        dev = 'driver=bladerf'
+        stream_args = ''
+        tune_args = ['']
+        settings = ['']
+
+        self.soapy_bladerf_source_0 = soapy.source(dev, "fc32", 1, "bladerf=" + str(serial),
+                                  stream_args, tune_args, settings)
+        self.soapy_bladerf_source_0.set_sample_rate(0, float(samp_rate))
+        self.soapy_bladerf_source_0.set_bandwidth(0, 0.0)
+        self.soapy_bladerf_source_0.set_frequency(0, (float(rx_freq)*1e6))
+        self.soapy_bladerf_source_0.set_frequency_correction(0, 0)
+        self.soapy_bladerf_source_0.set_gain(0, min(max(float(rx_gain), -1.0), 60.0))
         self.qtgui_vector_sink_f_0 = qtgui.vector_sink_f(
             fft_size,
             0,
@@ -199,21 +212,6 @@ class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
 
         self._qtgui_vector_sink_f_0_win = sip.wrapinstance(self.qtgui_vector_sink_f_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_vector_sink_f_0_win)
-        self.osmosdr_source_0 = osmosdr.source(
-            args="numchan=" + str(1) + " " + "bladerf=" + str(serial)
-        )
-        self.osmosdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
-        self.osmosdr_source_0.set_sample_rate(samp_rate)
-        self.osmosdr_source_0.set_center_freq((rx_freq*1e6), 0)
-        self.osmosdr_source_0.set_freq_corr(0, 0)
-        self.osmosdr_source_0.set_dc_offset_mode(2, 0)
-        self.osmosdr_source_0.set_iq_balance_mode(1, 0)
-        self.osmosdr_source_0.set_gain_mode(False, 0)
-        self.osmosdr_source_0.set_gain(10, 0)
-        self.osmosdr_source_0.set_if_gain(rx_gain, 0)
-        self.osmosdr_source_0.set_bb_gain(20, 0)
-        self.osmosdr_source_0.set_antenna('', 0)
-        self.osmosdr_source_0.set_bandwidth(0, 0)
         self.logpwrfft_x_0 = logpwrfft.logpwrfft_c(
             sample_rate=samp_rate,
             fft_size=fft_size,
@@ -244,7 +242,7 @@ class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_vector_source_x_0_1, 0), (self.qtgui_vector_sink_f_0, 2))
         self.connect((self.logpwrfft_x_0, 0), (self.blocks_add_const_vxx_0, 0))
         self.connect((self.logpwrfft_x_0, 0), (self.qtgui_vector_sink_f_0, 0))
-        self.connect((self.osmosdr_source_0, 0), (self.logpwrfft_x_0, 0))
+        self.connect((self.soapy_bladerf_source_0, 0), (self.logpwrfft_x_0, 0))
 
 
     def closeEvent(self, event):
@@ -390,14 +388,14 @@ class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
         self._samp_rate_callback(self.samp_rate)
         self.epy_block_0.sample_rate = self.samp_rate
         self.logpwrfft_x_0.set_sample_rate(self.samp_rate)
-        self.osmosdr_source_0.set_sample_rate(self.samp_rate)
+        self.soapy_bladerf_source_0.set_sample_rate(0, float(self.samp_rate))
 
     def get_rx_gain(self):
         return self.rx_gain
 
     def set_rx_gain(self, rx_gain):
         self.rx_gain = rx_gain
-        self.osmosdr_source_0.set_if_gain(self.rx_gain, 0)
+        self.soapy_bladerf_source_0.set_gain(0, min(max(float(self.rx_gain), -1.0), 60.0))
 
     def get_rx_freq(self):
         return self.rx_freq
@@ -405,7 +403,7 @@ class fixed_threshold_bladerf2(gr.top_block, Qt.QWidget):
     def set_rx_freq(self, rx_freq):
         self.rx_freq = rx_freq
         self.epy_block_0.rx_freq_mhz = self.rx_freq
-        self.osmosdr_source_0.set_center_freq((self.rx_freq*1e6), 0)
+        self.soapy_bladerf_source_0.set_frequency(0, (float(self.rx_freq)*1e6))
 
     def get_low_bound_vec_top_half(self):
         return self.low_bound_vec_top_half
@@ -446,8 +444,8 @@ def argument_parser():
         "--channel-default", dest="channel_default", type=str, default='',
         help="Set channel_default [default=%(default)r]")
     parser.add_argument(
-        "--gain-default", dest="gain_default", type=str, default='10',
-        help="Set 10 [default=%(default)r]")
+        "--gain-default", dest="gain_default", type=str, default='50',
+        help="Set 50 [default=%(default)r]")
     parser.add_argument(
         "--ip-address", dest="ip_address", type=str, default='',
         help="Set ip_address [default=%(default)r]")

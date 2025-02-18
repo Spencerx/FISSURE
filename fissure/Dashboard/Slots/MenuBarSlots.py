@@ -5801,3 +5801,21 @@ async def _slotMenuViewScaleFactorCustomClicked(dashboard: QtWidgets.QMainWindow
     dashboard.window.actionScaleFactor1_5x.setChecked(False)
     dashboard.window.actionScaleFactor2_0x.setChecked(False)
 
+
+@QtCore.pyqtSlot()
+def _slotMenuMeshMapClicked():
+    """
+    Opens MeshMap in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://meshmap.net/")
+
+
+@QtCore.pyqtSlot()
+def _slotMenuHelpFISSURE_CapabilitiesClicked():
+    """
+    Opens FISSURE Capabilities PDF.
+    """
+    # Open PDF
+    pdf_filepath = os.path.join(fissure.utils.FISSURE_ROOT, "docs", "Help", "FISSURE_Capabilities.pdf")
+    os.system("xdg-open " + pdf_filepath)

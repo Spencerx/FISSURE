@@ -453,11 +453,11 @@ blocks:
     affinity: ''
     alias: ''
     bandwidth: '0.0'
-    center_freq: tx_frequency
+    center_freq: float(tx_frequency)
     comment: ''
     dev_args: '"bladerf=" + str(serial)'
     freq_correction: '0'
-    gain: tx_gain
+    gain: float(tx_gain)
     samp_rate: sample_rate
     type: fc32
   states:
@@ -476,4 +476,4 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.4.0
+  grc_version: 3.10.7.0

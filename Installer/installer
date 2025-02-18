@@ -99,6 +99,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -197,11 +199,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -210,8 +212,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_ubuntu20_04.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -2235,6 +2252,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -2331,11 +2350,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -2344,8 +2363,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_parrot_os_6_1.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -4336,6 +4370,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -4432,11 +4468,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -4445,8 +4481,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_ubuntu22_04.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -6527,11 +6578,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -6540,8 +6591,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_dragonOS_focalx.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -8563,6 +8629,8 @@ sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y libzmq3-dev
 sudo apt-get install -y zstd
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -8664,11 +8732,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -8677,8 +8745,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_kali.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -10677,6 +10760,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -10772,11 +10857,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -10785,8 +10870,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_backbox_linux_8.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -12775,6 +12875,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -12877,11 +12979,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -12890,8 +12992,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_raspberry_pi_os.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -14878,6 +14995,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -14975,11 +15094,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -14988,8 +15107,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_ubuntu22_04_arm.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -16983,6 +17117,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -17079,11 +17215,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -17092,8 +17228,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_ubuntu24_04.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
@@ -19089,6 +19240,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y xdg-utils
+sudo apt-get install -y p7zip-full
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -19185,11 +19338,11 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_PORT; do
+    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
         echo "Waiting for PostgreSQL to be ready..."
         sleep 2
     done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -v db/fissure_db_dump.sql
+    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
 '
 ########## Verify ##########
 bash -c '
@@ -19198,8 +19351,23 @@ bash -c '
     set +o allexport
     export PGPASSWORD=$POSTGRES_PASSWORD
     sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_PORT -c "SELECT COUNT(*) FROM pg_tables;"
+    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
 '
+""",True,'Minimum Install'))
+
+# Meshtastic
+programs_arch_linux.append(('Meshtastic',
+"""sudo apt-get install -y python3-serial
+sudo apt-get install -y python3-protobuf
+sudo apt-get install -y python3-pyserial
+sudo python3 -m pip install meshtastic --break-system-packages
+sudo usermod -aG dialout $USER  # log out & in/reboot
+sudo usermod -aG tty $USER
+echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+########## Verify ##########
+python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
