@@ -53,7 +53,7 @@ def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
                 'lon': '%(longitude)f',
                 'alt': '%(altitude)f',
                 'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                'remarks': json.dumps(data)
+                'remarks': json.dumps(data, separators=(',', ':'))
             }) + '\n')
             sys.stdout.flush()
     except Exception as e:
