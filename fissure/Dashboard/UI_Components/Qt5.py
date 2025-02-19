@@ -43,34 +43,6 @@ async def async_save_file_dialog(parent, directory, default_suffix, name_filter)
     return future.result()
 
 
-async def async_open_file_dialog(parent, directory, name_filter):
-    """
-    Asynchronous QFileDialog for opening a file, used to select a file without blocking the event loop.
-    """
-    dialog = QtWidgets.QFileDialog(parent)
-    dialog.setDirectory(directory)
-    dialog.setNameFilters([name_filter])
-    dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
-    dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-    dialog.setFilter(dialog.filter() | QtCore.QDir.Hidden)
-
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-
-    def on_finished():
-        if dialog.result() == QtWidgets.QDialog.Accepted:
-            future.set_result(dialog.selectedFiles()[0])
-        else:
-            future.set_result("")
-
-    dialog.finished.connect(on_finished)
-    dialog.show()
-
-    await future
-
-    return future.result()
-
-
 def errorMessage(message_text):
     """
     Creates a popup window with an error message for synchronous functions.
@@ -229,33 +201,6 @@ async def async_listwidget_dialog(parent, title, label, options):
 
     # Show dialog and wait for the result
     dialog.show()
-    await future
-    return future.result()
-
-
-async def async_input_dialog(parent, title, label):
-    """
-    Asynchronous input dialog for entering text (e.g., passwords).
-    """
-    dialog = QtWidgets.QInputDialog(parent)
-    dialog.setWindowTitle(title)
-    dialog.setLabelText(label)
-    dialog.setTextEchoMode(QtWidgets.QLineEdit.EchoMode.Password)  # Hide input for passwords
-    dialog.setOkButtonText("OK")
-    dialog.setCancelButtonText("Cancel")
-
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-
-    def on_finished():
-        if dialog.result() == QtWidgets.QDialog.DialogCode.Accepted:
-            future.set_result(dialog.textValue())  # Return entered text
-        else:
-            future.set_result("")  # Return empty if canceled
-
-    dialog.finished.connect(on_finished)
-    dialog.show()
-
     await future
     return future.result()
 
@@ -962,26 +907,28 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
             self.listWidget_options.setCurrentRow(0)
         elif opening_tab == "TSI":
             self.listWidget_options.setCurrentRow(1)
-        elif opening_tab == "PD":
+        elif opening_tab == "TAK":
             self.listWidget_options.setCurrentRow(2)
-        elif opening_tab == "Attack":
+        elif opening_tab == "PD":
             self.listWidget_options.setCurrentRow(3)
-        elif opening_tab == "IQ Data":
+        elif opening_tab == "Attack":
             self.listWidget_options.setCurrentRow(4)
-        elif opening_tab == "Archive":
+        elif opening_tab == "IQ Data":
             self.listWidget_options.setCurrentRow(5)
-        elif opening_tab == "Sensor Nodes":
+        elif opening_tab == "Archive":
             self.listWidget_options.setCurrentRow(6)
-        elif opening_tab == "Library":
+        elif opening_tab == "Sensor Nodes":
             self.listWidget_options.setCurrentRow(7)
-        elif opening_tab == "Log":
+        elif opening_tab == "Library":
             self.listWidget_options.setCurrentRow(8)
-        else:
+        elif opening_tab == "Log":
             self.listWidget_options.setCurrentRow(9)
+        else:
+            self.listWidget_options.setCurrentRow(10)
         self._slotOptionsListWidgetChanged()
 
         # Populate the Tables
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
+        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_tak, self.tableWidget_options_pd, self.tableWidget_options_attack,
             self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
             self.tableWidget_options_log, self.tableWidget_options_other]
         for n in range(0,len(tables)):
@@ -1020,7 +967,7 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         The Apply button is clicked in the options dialog.
         """
         # Retrieve Values from Options Dialog
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
+        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_tak, self.tableWidget_options_pd, self.tableWidget_options_attack,
             self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
             self.tableWidget_options_log, self.tableWidget_options_other]
         variable_names = []
