@@ -1082,7 +1082,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>600</x>
+          <x>645</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -1158,7 +1158,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>245</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -1174,7 +1174,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>330</x>
+          <x>15</x>
           <y>155</y>
           <width>99</width>
           <height>27</height>
@@ -1211,14 +1211,14 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>115</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add to All</string>
+         <string>Row → All</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_attack_1">
@@ -1227,7 +1227,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>445</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -1243,7 +1243,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>500</x>
+          <x>545</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -1259,7 +1259,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>300</x>
+          <x>345</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -1315,6 +1315,38 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Probe</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_rows_to_all_1">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>200</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rows → All</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_scan_results_remove_all_1">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>115</x>
+          <y>155</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Remove All</string>
         </property>
        </widget>
       </widget>
@@ -3070,7 +3102,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>600</x>
+          <x>645</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -3146,7 +3178,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>245</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -3162,7 +3194,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>330</x>
+          <x>15</x>
           <y>155</y>
           <width>99</width>
           <height>27</height>
@@ -3199,14 +3231,14 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>115</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add to All</string>
+         <string>Row → All</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_attack_2">
@@ -3215,7 +3247,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>445</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -3231,7 +3263,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>500</x>
+          <x>545</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -3247,7 +3279,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>300</x>
+          <x>345</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -3303,6 +3335,38 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Probe</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_rows_to_all_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>200</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rows → All</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_scan_results_remove_all_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>115</x>
+          <y>155</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Remove All</string>
         </property>
        </widget>
       </widget>
@@ -5093,7 +5157,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>600</x>
+          <x>645</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -5169,7 +5233,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>245</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -5185,7 +5249,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>330</x>
+          <x>15</x>
           <y>155</y>
           <width>99</width>
           <height>27</height>
@@ -5222,14 +5286,14 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>115</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add to All</string>
+         <string>Row → All</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_attack_3">
@@ -5238,7 +5302,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>445</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -5254,7 +5318,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>500</x>
+          <x>545</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -5270,7 +5334,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>300</x>
+          <x>345</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -5326,6 +5390,38 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Probe</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_rows_to_all_3">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>200</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rows → All</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_scan_results_remove_all_3">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>115</x>
+          <y>155</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Remove All</string>
         </property>
        </widget>
       </widget>
@@ -7122,7 +7218,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>600</x>
+          <x>645</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -7198,7 +7294,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>245</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -7214,7 +7310,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>330</x>
+          <x>15</x>
           <y>155</y>
           <width>99</width>
           <height>27</height>
@@ -7251,14 +7347,14 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>115</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add to All</string>
+         <string>Row → All</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_attack_4">
@@ -7267,7 +7363,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>445</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -7283,7 +7379,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>500</x>
+          <x>545</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -7299,7 +7395,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>300</x>
+          <x>345</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -7355,6 +7451,38 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Probe</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_rows_to_all_4">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>200</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rows → All</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_scan_results_remove_all_4">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>115</x>
+          <y>155</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Remove All</string>
         </property>
        </widget>
       </widget>
@@ -9129,7 +9257,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>600</x>
+          <x>645</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -9205,7 +9333,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>200</x>
+          <x>245</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -9221,7 +9349,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>330</x>
+          <x>15</x>
           <y>155</y>
           <width>99</width>
           <height>27</height>
@@ -9258,14 +9386,14 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>115</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Add to All</string>
+         <string>Row → All</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_attack_5">
@@ -9274,7 +9402,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>445</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -9290,7 +9418,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>500</x>
+          <x>545</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -9306,7 +9434,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>300</x>
+          <x>345</x>
           <y>200</y>
           <width>99</width>
           <height>27</height>
@@ -9362,6 +9490,38 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Probe</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_rows_to_all_5">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>200</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Rows → All</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_scan_results_remove_all_5">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>115</x>
+          <y>155</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Remove All</string>
         </property>
        </widget>
       </widget>

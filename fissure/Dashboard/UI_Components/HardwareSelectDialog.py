@@ -337,7 +337,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             map_button: QtWidgets.QPushButton = getattr(self, f"pushButton_map_{node_idx}")
             manual_button: QtWidgets.QPushButton = getattr(self, f"pushButton_manual_{node_idx}")
             scan_results_remove_button: QtWidgets.QPushButton = getattr(self, f"pushButton_scan_results_remove_{node_idx}")
+            scan_results_remove_all_button: QtWidgets.QPushButton = getattr(self, f"pushButton_scan_results_remove_all_{node_idx}")
             add_to_all_button: QtWidgets.QPushButton = getattr(self, f"pushButton_add_to_all_{node_idx}")
+            rows_to_all_button: QtWidgets.QPushButton = getattr(self, f"pushButton_rows_to_all_{node_idx}")
             tsi_button: QtWidgets.QPushButton = getattr(self, f"pushButton_tsi_{node_idx}")
             pd_button: QtWidgets.QPushButton = getattr(self, f"pushButton_pd_{node_idx}")
             attack_button: QtWidgets.QPushButton = getattr(self, f"pushButton_attack_{node_idx}")
@@ -369,7 +371,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             map_button.clicked.connect(lambda: HardwareSelectSlots.map(self))
             manual_button.clicked.connect(lambda: HardwareSelectSlots.manual(self))
             scan_results_remove_button.clicked.connect(lambda: HardwareSelectSlots.scan_results_remove(self))
+            scan_results_remove_all_button.clicked.connect(lambda: HardwareSelectSlots.scan_results_remove_all(self))
             add_to_all_button.clicked.connect(lambda: HardwareSelectSlots.add_to_all(self))
+            rows_to_all_button.clicked.connect(lambda: HardwareSelectSlots.rows_to_all(self))
             tsi_button.clicked.connect(lambda: HardwareSelectSlots.tsi(self))
             pd_button.clicked.connect(lambda: HardwareSelectSlots.pd(self))
             attack_button.clicked.connect(lambda: HardwareSelectSlots.attack(self))
@@ -399,107 +403,50 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
 
     def scanReturn(self, tab_index, all_scan_results):
         """Populates the scan results table with the results of the hardware scan."""
-        # Retrieve Widgets in Current Tab
-        tab_index = int(tab_index)
-        if tab_index == 0:
-            # get_listWidget = self.listWidget_scan_1
-            get_tableWidget = self.tableWidget_scan_results_1
-            get_pushButton_add_to_all = self.pushButton_add_to_all_1
-            get_pushButton_tsi = self.pushButton_tsi_1
-            get_pushButton_pd = self.pushButton_pd_1
-            get_pushButton_attack = self.pushButton_attack_1
-            get_pushButton_iq = self.pushButton_iq_1
-            get_pushButton_archive = self.pushButton_archive_1
-            get_pushButton_scan_results_remove = self.pushButton_scan_results_remove_1
-            get_pushButton_scan_results_probe = self.pushButton_scan_results_probe_1
-            get_pushButton_scan_results_guess = self.pushButton_scan_results_guess_1
-            get_tableWidget_scan_results = self.tableWidget_scan_results_1
-            get_line3_scan_results = self.line3_scan_results_1
-        elif tab_index == 1:
-            # get_listWidget = self.listWidget_scan_2
-            get_tableWidget = self.tableWidget_scan_results_2
-            get_pushButton_add_to_all = self.pushButton_add_to_all_2
-            get_pushButton_tsi = self.pushButton_tsi_2
-            get_pushButton_pd = self.pushButton_pd_2
-            get_pushButton_attack = self.pushButton_attack_2
-            get_pushButton_iq = self.pushButton_iq_2
-            get_pushButton_archive = self.pushButton_archive_2
-            get_pushButton_scan_results_remove = self.pushButton_scan_results_remove_2
-            get_pushButton_scan_results_probe = self.pushButton_scan_results_probe_2
-            get_pushButton_scan_results_guess = self.pushButton_scan_results_guess_2
-            get_tableWidget_scan_results = self.tableWidget_scan_results_2
-            get_line3_scan_results = self.line3_scan_results_2
-        elif tab_index == 2:
-            # get_listWidget = self.listWidget_scan_3
-            get_tableWidget = self.tableWidget_scan_results_3
-            get_pushButton_add_to_all = self.pushButton_add_to_all_3
-            get_pushButton_tsi = self.pushButton_tsi_3
-            get_pushButton_pd = self.pushButton_pd_3
-            get_pushButton_attack = self.pushButton_attack_3
-            get_pushButton_iq = self.pushButton_iq_3
-            get_pushButton_archive = self.pushButton_archive_3
-            get_pushButton_scan_results_remove = self.pushButton_scan_results_remove_3
-            get_pushButton_scan_results_probe = self.pushButton_scan_results_probe_3
-            get_pushButton_scan_results_guess = self.pushButton_scan_results_guess_3
-            get_tableWidget_scan_results = self.tableWidget_scan_results_3
-            get_line3_scan_results = self.line3_scan_results_3
-        elif tab_index == 3:
-            # get_listWidget = self.listWidget_scan_4
-            get_tableWidget = self.tableWidget_scan_results_4
-            get_pushButton_add_to_all = self.pushButton_add_to_all_4
-            get_pushButton_tsi = self.pushButton_tsi_4
-            get_pushButton_pd = self.pushButton_pd_4
-            get_pushButton_attack = self.pushButton_attack_4
-            get_pushButton_iq = self.pushButton_iq_4
-            get_pushButton_archive = self.pushButton_archive_4
-            get_pushButton_scan_results_remove = self.pushButton_scan_results_remove_4
-            get_pushButton_scan_results_probe = self.pushButton_scan_results_probe_4
-            get_pushButton_scan_results_guess = self.pushButton_scan_results_guess_4
-            get_tableWidget_scan_results = self.tableWidget_scan_results_4
-            get_line3_scan_results = self.line3_scan_results_4
-        elif tab_index == 4:
-            # get_listWidget = self.listWidget_scan_5
-            get_tableWidget = self.tableWidget_scan_results_5
-            get_pushButton_add_to_all = self.pushButton_add_to_all_5
-            get_pushButton_tsi = self.pushButton_tsi_5
-            get_pushButton_pd = self.pushButton_pd_5
-            get_pushButton_attack = self.pushButton_attack_5
-            get_pushButton_iq = self.pushButton_iq_5
-            get_pushButton_archive = self.pushButton_archive_5
-            get_pushButton_scan_results_remove = self.pushButton_scan_results_remove_5
-            get_pushButton_scan_results_probe = self.pushButton_scan_results_probe_5
-            get_pushButton_scan_results_guess = self.pushButton_scan_results_guess_5
-            get_tableWidget_scan_results = self.tableWidget_scan_results_5
-            get_line3_scan_results = self.line3_scan_results_5
+        tab_index = int(tab_index) + 1  # +1 to match widget numbering
+
+        # Dynamically retrieve widgets based on tab index
+        get_tableWidget = getattr(self, f"tableWidget_scan_results_{tab_index}")
+        get_tableWidget_scan_results = get_tableWidget  # Alias for clarity
+        get_line3_scan_results = getattr(self, f"line3_scan_results_{tab_index}")
+
+        # Get all relevant push buttons dynamically
+        push_button_names = [
+            "pushButton_add_to_all",
+            "pushButton_rows_to_all",
+            "pushButton_tsi",
+            "pushButton_pd",
+            "pushButton_attack",
+            "pushButton_iq",
+            "pushButton_archive",
+            "pushButton_scan_results_remove",
+            "pushButton_scan_results_remove_all",
+            "pushButton_scan_results_probe",
+            "pushButton_scan_results_guess",
+        ]
+        get_pushButtons = [getattr(self, f"{name}_{tab_index}") for name in push_button_names]
 
         # Add to Scan Results Table
-        for n in range(0, len(all_scan_results)):
+        for row_data in all_scan_results:
             rows = get_tableWidget.rowCount()
             get_tableWidget.setRowCount(rows + 1)
-            for m in range(0, len(all_scan_results[n])):
-                table_item = QtWidgets.QTableWidgetItem(all_scan_results[n][m])
+            for col, cell_value in enumerate(row_data):
+                table_item = QtWidgets.QTableWidgetItem(cell_value)
                 table_item.setTextAlignment(QtCore.Qt.AlignCenter)
-                get_tableWidget.setItem(rows, m, table_item)
+                get_tableWidget.setItem(rows, col, table_item)
             self.highlight_hardware_id(get_tableWidget, rows)
 
+        # Update UI
         get_tableWidget.setCurrentCell(get_tableWidget.rowCount() - 1, 0)
-
         get_tableWidget.resizeColumnsToContents()
         get_tableWidget.resizeRowsToContents()
         get_tableWidget.horizontalHeader().setStretchLastSection(False)
         get_tableWidget.horizontalHeader().setStretchLastSection(True)
 
-        # Enable Push Buttons
+        # Enable relevant buttons if there are rows in the table
         if get_tableWidget.rowCount() > 0:
-            get_pushButton_add_to_all.setEnabled(True)
-            get_pushButton_tsi.setEnabled(True)
-            get_pushButton_pd.setEnabled(True)
-            get_pushButton_attack.setEnabled(True)
-            get_pushButton_iq.setEnabled(True)
-            get_pushButton_archive.setEnabled(True)
-            get_pushButton_scan_results_remove.setEnabled(True)
-            get_pushButton_scan_results_probe.setEnabled(True)
-            get_pushButton_scan_results_guess.setEnabled(True)
+            for btn in get_pushButtons:
+                btn.setEnabled(True)
             get_tableWidget_scan_results.setEnabled(True)
             get_line3_scan_results.setEnabled(True)
 
@@ -652,112 +599,39 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
 
     def sensorNodeConnected(self, tab_index=0):
         """Updates widgets for a sensor node once it is connected to the rest of FISSURE."""
-        # Adjust the Widgets
-        stacked_widgets = [
-            self.stackedWidget_local_remote_1,
-            self.stackedWidget_local_remote_2,
-            self.stackedWidget_local_remote_3,
-            self.stackedWidget_local_remote_4,
-            self.stackedWidget_local_remote_5,
-        ]
-        bottom_stacked_widgets = [
-            self.stackedWidget_bottom_1,
-            self.stackedWidget_bottom_2,
-            self.stackedWidget_bottom_3,
-            self.stackedWidget_bottom_4,
-            self.stackedWidget_bottom_5,
-        ]
-        scan_pushbuttons = [
-            self.pushButton_scan_1,
-            self.pushButton_scan_2,
-            self.pushButton_scan_3,
-            self.pushButton_scan_4,
-            self.pushButton_scan_5,
-        ]
-        local_buttons = [
-            self.radioButton_local_1,
-            self.radioButton_local_2,
-            self.radioButton_local_3,
-            self.radioButton_local_4,
-            self.radioButton_local_5,
-        ]
-        remote_buttons = [
-            self.radioButton_remote_1,
-            self.radioButton_remote_2,
-            self.radioButton_remote_3,
-            self.radioButton_remote_4,
-            self.radioButton_remote_5,
-        ]
-        recall_settings_local_widgets = [
-            self.checkBox_recall_settings_local_1,
-            self.checkBox_recall_settings_local_2,
-            self.checkBox_recall_settings_local_3,
-            self.checkBox_recall_settings_local_4,
-            self.checkBox_recall_settings_local_5,
-        ]
-        recall_settings_widgets = [
-            self.checkBox_recall_settings_remote_1,
-            self.checkBox_recall_settings_remote_2,
-            self.checkBox_recall_settings_remote_3,
-            self.checkBox_recall_settings_remote_4,
-            self.checkBox_recall_settings_remote_5,
-        ]
-        launch_widgets = [
-            self.pushButton_launch_1,
-            self.pushButton_launch_2,
-            self.pushButton_launch_3,
-            self.pushButton_launch_4,
-            self.pushButton_launch_5,
-        ]
-        connect_widgets = [
-            self.pushButton_connect_1,
-            self.pushButton_connect_2,
-            self.pushButton_connect_3,
-            self.pushButton_connect_4,
-            self.pushButton_connect_5,
-        ]
-        ip_widgets = [
-            self.textEdit_ip_addr_1, 
-            self.textEdit_ip_addr_2, 
-            self.textEdit_ip_addr_3, 
-            self.textEdit_ip_addr_4, 
-            self.textEdit_ip_addr_5
-        ]
-        msg_port_widgets = [
-            self.textEdit_msg_port_1,
-            self.textEdit_msg_port_2,
-            self.textEdit_msg_port_3,
-            self.textEdit_msg_port_4,
-            self.textEdit_msg_port_5,
-        ]
-        hb_port_widgets = [
-            self.textEdit_hb_port_1,
-            self.textEdit_hb_port_2,
-            self.textEdit_hb_port_3,
-            self.textEdit_hb_port_4,
-            self.textEdit_hb_port_5,
-        ]
-        find_widgets = [
-            self.pushButton_find_1,
-            self.pushButton_find_2,
-            self.pushButton_find_3,
-            self.pushButton_find_4,
-            self.pushButton_find_5,
-        ]
-        stacked_widgets[tab_index].setCurrentIndex(2)
-        stacked_widgets[tab_index].setEnabled(True)
-        bottom_stacked_widgets[tab_index].setCurrentIndex(0)
-        scan_pushbuttons[tab_index].setEnabled(True)
-        local_buttons[tab_index].setEnabled(False)
-        remote_buttons[tab_index].setEnabled(False)
-        launch_widgets[tab_index].setEnabled(True)
-        recall_settings_local_widgets[tab_index].setEnabled(True)
-        recall_settings_widgets[tab_index].setEnabled(True)
-        connect_widgets[tab_index].setEnabled(True)
-        ip_widgets[tab_index].setEnabled(True)
-        msg_port_widgets[tab_index].setEnabled(True)
-        hb_port_widgets[tab_index].setEnabled(True)
-        find_widgets[tab_index].setEnabled(True)
+        # Adjust the tab index to match widget numbering
+        tab_index += 1
+
+        # Dynamically retrieve widgets
+        stacked_widget = getattr(self, f"stackedWidget_local_remote_{tab_index}")
+        bottom_stacked_widget = getattr(self, f"stackedWidget_bottom_{tab_index}")
+        scan_pushbutton = getattr(self, f"pushButton_scan_{tab_index}")
+        local_button = getattr(self, f"radioButton_local_{tab_index}")
+        remote_button = getattr(self, f"radioButton_remote_{tab_index}")
+        recall_settings_local_widget = getattr(self, f"checkBox_recall_settings_local_{tab_index}")
+        recall_settings_widget = getattr(self, f"checkBox_recall_settings_remote_{tab_index}")
+        launch_widget = getattr(self, f"pushButton_launch_{tab_index}")
+        connect_widget = getattr(self, f"pushButton_connect_{tab_index}")
+        ip_widget = getattr(self, f"textEdit_ip_addr_{tab_index}")
+        msg_port_widget = getattr(self, f"textEdit_msg_port_{tab_index}")
+        hb_port_widget = getattr(self, f"textEdit_hb_port_{tab_index}")
+        find_widget = getattr(self, f"pushButton_find_{tab_index}")
+
+        # Update widget states
+        stacked_widget.setCurrentIndex(2)
+        stacked_widget.setEnabled(True)
+        bottom_stacked_widget.setCurrentIndex(0)
+        scan_pushbutton.setEnabled(True)
+        local_button.setEnabled(False)
+        remote_button.setEnabled(False)
+        launch_widget.setEnabled(True)
+        recall_settings_local_widget.setEnabled(True)
+        recall_settings_widget.setEnabled(True)
+        connect_widget.setEnabled(True)
+        ip_widget.setEnabled(True)
+        msg_port_widget.setEnabled(True)
+        hb_port_widget.setEnabled(True)
+        find_widget.setEnabled(True)
 
 
     def importResults(self, settings_dict=""):
@@ -770,95 +644,46 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
 
     def sensorNodeDisconnected(self, tab_index=0):
         """Updates widgets for a sensor node once it is disconnected from the rest of FISSURE."""
-        # Adjust the Widgets
-        stacked_widgets = [
-            self.stackedWidget_local_remote_1,
-            self.stackedWidget_local_remote_2,
-            self.stackedWidget_local_remote_3,
-            self.stackedWidget_local_remote_4,
-            self.stackedWidget_local_remote_5,
-        ]
-        bottom_stacked_widgets = [
-            self.stackedWidget_bottom_1,
-            self.stackedWidget_bottom_2,
-            self.stackedWidget_bottom_3,
-            self.stackedWidget_bottom_4,
-            self.stackedWidget_bottom_5,
-        ]
-        scan_pushbuttons = [
-            self.pushButton_scan_1,
-            self.pushButton_scan_2,
-            self.pushButton_scan_3,
-            self.pushButton_scan_4,
-            self.pushButton_scan_5,
-        ]
-        local_buttons = [
-            self.radioButton_local_1,
-            self.radioButton_local_2,
-            self.radioButton_local_3,
-            self.radioButton_local_4,
-            self.radioButton_local_5,
-        ]
-        remote_buttons = [
-            self.radioButton_remote_1,
-            self.radioButton_remote_2,
-            self.radioButton_remote_3,
-            self.radioButton_remote_4,
-            self.radioButton_remote_5,
-        ]
-        details_stacked_widgets = [
-            self.stackedWidget_details_1,
-            self.stackedWidget_details_2,
-            self.stackedWidget_details_3,
-            self.stackedWidget_details_4,
-            self.stackedWidget_details_5,
-        ]
-        find_widgets = [
-            self.pushButton_find_1,
-            self.pushButton_find_2,
-            self.pushButton_find_3,
-            self.pushButton_find_4,
-            self.pushButton_find_5,
-        ]
-        network_type_label_widgets = [
-            self.label2_network_type_1,
-            self.label2_network_type_2,
-            self.label2_network_type_3,
-            self.label2_network_type_4,
-            self.label2_network_type_5,
-        ]
-        network_type_combobox_widgets = [
-            self.comboBox_network_type_1,
-            self.comboBox_network_type_2,
-            self.comboBox_network_type_3,
-            self.comboBox_network_type_4,
-            self.comboBox_network_type_5,
-        ]        
+        # Adjust the tab index to match widget numbering
+        tab_index += 1
 
-        if local_buttons[tab_index].isChecked():
-            stacked_widgets[tab_index].setCurrentIndex(0)
-            network_type_label_widgets[tab_index].setVisible(False)
-            network_type_combobox_widgets[tab_index].setVisible(False)
+        # Dynamically retrieve widgets
+        stacked_widget = getattr(self, f"stackedWidget_local_remote_{tab_index}")
+        bottom_stacked_widget = getattr(self, f"stackedWidget_bottom_{tab_index}")
+        scan_pushbutton = getattr(self, f"pushButton_scan_{tab_index}")
+        local_button = getattr(self, f"radioButton_local_{tab_index}")
+        remote_button = getattr(self, f"radioButton_remote_{tab_index}")
+        details_stacked_widget = getattr(self, f"stackedWidget_details_{tab_index}")
+        find_widget = getattr(self, f"pushButton_find_{tab_index}")
+        network_type_label = getattr(self, f"label2_network_type_{tab_index}")
+        network_type_combobox = getattr(self, f"comboBox_network_type_{tab_index}")
+
+        # Handle widget state based on connection type
+        if local_button.isChecked():
+            stacked_widget.setCurrentIndex(0)
+            network_type_label.setVisible(False)
+            network_type_combobox.setVisible(False)
         else:
-            if network_type_combobox_widgets[tab_index].currentText() == "IP":
-                stacked_widgets[tab_index].setCurrentIndex(1)
-            elif network_type_combobox_widgets[tab_index].currentText() == "Serial":
-                stacked_widgets[tab_index].setCurrentIndex(3)
-            network_type_label_widgets[tab_index].setVisible(True)
-            network_type_combobox_widgets[tab_index].setVisible(True)
-        bottom_stacked_widgets[tab_index].setCurrentIndex(1)
-        scan_pushbuttons[tab_index].setEnabled(True)
-        local_buttons[tab_index].setEnabled(True)
-        remote_buttons[tab_index].setEnabled(True)
-        details_stacked_widgets[tab_index].setCurrentIndex(0)
-        find_widgets[tab_index].setEnabled(False)
+            if network_type_combobox.currentText() == "IP":
+                stacked_widget.setCurrentIndex(1)
+            elif network_type_combobox.currentText() == "Serial":
+                stacked_widget.setCurrentIndex(3)
+            network_type_label.setVisible(True)
+            network_type_combobox.setVisible(True)
+
+        bottom_stacked_widget.setCurrentIndex(1)
+        scan_pushbutton.setEnabled(True)
+        local_button.setEnabled(True)
+        remote_button.setEnabled(True)
+        details_stacked_widget.setCurrentIndex(0)
+        find_widget.setEnabled(False)
 
         # Support Only One Local Sensor Node
-        get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]
-        for n in range(0, 5):
-            if str(self.dashboard.backend.settings[get_sensor_node[n]]["local_remote"]) == "local":
+        for n in range(1, 6):  # Loop from 1 to 5 (matching widget numbering)
+            sensor_node = f"sensor_node{n}"
+            if str(self.dashboard.backend.settings[sensor_node]["local_remote"]) == "local":
                 if n != tab_index:
-                    local_buttons[tab_index].setEnabled(False)
+                    local_button.setEnabled(False)
 
 
     def highlight_hardware_id(self, table_widget, row):

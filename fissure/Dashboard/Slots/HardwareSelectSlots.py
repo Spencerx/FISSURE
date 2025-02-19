@@ -1250,110 +1250,117 @@ def add_to_all(HWSelect: QtCore.QObject):
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
-def scan_results_remove(HWSelect: QtCore.QObject):
+def rows_to_all(HWSelect: QtCore.QObject):
     """
-    Removes a row from the scan results table.
+    Adds the all the rows in the scan results table to all the tables.
     """
-    # Remove Row
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    add_to_all_buttons = [
-        HWSelect.pushButton_add_to_all_1,
-        HWSelect.pushButton_add_to_all_2,
-        HWSelect.pushButton_add_to_all_3,
-        HWSelect.pushButton_add_to_all_4,
-        HWSelect.pushButton_add_to_all_5,
-    ]
-    tsi_buttons = [
-        HWSelect.pushButton_tsi_1,
-        HWSelect.pushButton_tsi_2,
-        HWSelect.pushButton_tsi_3,
-        HWSelect.pushButton_tsi_4,
-        HWSelect.pushButton_tsi_5,
-    ]
-    pd_buttons = [
-        HWSelect.pushButton_pd_1,
-        HWSelect.pushButton_pd_2,
-        HWSelect.pushButton_pd_3,
-        HWSelect.pushButton_pd_4,
-        HWSelect.pushButton_pd_5,
-    ]
-    attack_buttons = [
-        HWSelect.pushButton_attack_1,
-        HWSelect.pushButton_attack_2,
-        HWSelect.pushButton_attack_3,
-        HWSelect.pushButton_attack_4,
-        HWSelect.pushButton_attack_5,
-    ]
-    iq_buttons = [
-        HWSelect.pushButton_iq_1,
-        HWSelect.pushButton_iq_2,
-        HWSelect.pushButton_iq_3,
-        HWSelect.pushButton_iq_4,
-        HWSelect.pushButton_iq_5,
-    ]
-    archive_buttons = [
-        HWSelect.pushButton_archive_1,
-        HWSelect.pushButton_archive_2,
-        HWSelect.pushButton_archive_3,
-        HWSelect.pushButton_archive_4,
-        HWSelect.pushButton_archive_5,
-    ]
-    scan_results_remove_buttons = [
-        HWSelect.pushButton_scan_results_remove_1,
-        HWSelect.pushButton_scan_results_remove_2,
-        HWSelect.pushButton_scan_results_remove_3,
-        HWSelect.pushButton_scan_results_remove_4,
-        HWSelect.pushButton_scan_results_remove_5,
-    ]
-    scan_results_probe_buttons = [
-        HWSelect.pushButton_scan_results_probe_1,
-        HWSelect.pushButton_scan_results_probe_2,
-        HWSelect.pushButton_scan_results_probe_3,
-        HWSelect.pushButton_scan_results_probe_4,
-        HWSelect.pushButton_scan_results_probe_5,
-    ]
-    scan_results_guess_buttons = [
-        HWSelect.pushButton_scan_results_guess_1,
-        HWSelect.pushButton_scan_results_guess_2,
-        HWSelect.pushButton_scan_results_guess_3,
-        HWSelect.pushButton_scan_results_guess_4,
-        HWSelect.pushButton_scan_results_guess_5,
-    ]
-    scan_results_tables = [
+    scan_results_widgets = [
         HWSelect.tableWidget_scan_results_1,
         HWSelect.tableWidget_scan_results_2,
         HWSelect.tableWidget_scan_results_3,
         HWSelect.tableWidget_scan_results_4,
         HWSelect.tableWidget_scan_results_5,
     ]
-    scan_results_lines = [
-        HWSelect.line3_scan_results_1,
-        HWSelect.line3_scan_results_2,
-        HWSelect.line3_scan_results_3,
-        HWSelect.line3_scan_results_4,
-        HWSelect.line3_scan_results_5,
+
+    scan_results_table = scan_results_widgets[tab_index]
+    total_rows = scan_results_table.rowCount()
+
+    for row in range(total_rows):
+        scan_results_widgets[tab_index].setCurrentCell(row,0)  # Set the current row to simulate selection
+        tsi(HWSelect, True)
+        pd(HWSelect, True)
+        attack(HWSelect, True)
+        iq(HWSelect, True)
+        archive(HWSelect, False)  # False allows error message to show up once
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def scan_results_remove(HWSelect: QtCore.QObject):
+    """
+    Removes a row from the scan results table.
+    """
+    # Get current tab index (0-based, so add 1 to match widget numbering)
+    tab_index = HWSelect.tabWidget_nodes.currentIndex() + 1
+
+    # Dynamically retrieve widgets
+    get_tableWidget = getattr(HWSelect, f"tableWidget_scan_results_{tab_index}")
+    get_line3_scan_results = getattr(HWSelect, f"line3_scan_results_{tab_index}")
+
+    # List of push button names
+    button_names = [
+        "pushButton_add_to_all",
+        "pushButton_rows_to_all",
+        "pushButton_tsi",
+        "pushButton_pd",
+        "pushButton_attack",
+        "pushButton_iq",
+        "pushButton_archive",
+        "pushButton_scan_results_remove",
+        "pushButton_scan_results_remove_all",
+        "pushButton_scan_results_probe",
+        "pushButton_scan_results_guess",
+    ]
+    
+    # Dynamically retrieve all relevant push buttons
+    push_buttons = [getattr(HWSelect, f"{name}_{tab_index}") for name in button_names]
+
+    # Remove the selected row
+    get_row = get_tableWidget.currentRow()
+    get_tableWidget.removeRow(get_row)
+
+    # Select a new row after deletion
+    if get_tableWidget.rowCount() > 0:
+        new_row = min(get_row, get_tableWidget.rowCount() - 1)  # Ensure valid row index
+        get_tableWidget.setCurrentCell(new_row, 0)
+
+    # Disable buttons if table is empty
+    if get_tableWidget.rowCount() == 0:
+        for btn in push_buttons:
+            btn.setEnabled(False)
+        get_tableWidget.setEnabled(False)
+        get_line3_scan_results.setEnabled(False)
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def scan_results_remove_all(HWSelect: QtCore.QObject):
+    """
+    Removes all rows from the scan results table.
+    """
+    # Get current tab index (0-based, so add 1 to match widget numbering)
+    tab_index = HWSelect.tabWidget_nodes.currentIndex() + 1
+
+    # Dynamically retrieve table and line widget
+    get_tableWidget = getattr(HWSelect, f"tableWidget_scan_results_{tab_index}")
+    get_line3_scan_results = getattr(HWSelect, f"line3_scan_results_{tab_index}")
+
+    # List of push button names
+    button_names = [
+        "pushButton_add_to_all",
+        "pushButton_rows_to_all",
+        "pushButton_tsi",
+        "pushButton_pd",
+        "pushButton_attack",
+        "pushButton_iq",
+        "pushButton_archive",
+        "pushButton_scan_results_remove",
+        "pushButton_scan_results_remove_all",
+        "pushButton_scan_results_probe",
+        "pushButton_scan_results_guess",
     ]
 
-    get_row = scan_results_tables[tab_index].currentRow()
-    scan_results_tables[tab_index].removeRow(get_row)
-    if get_row == scan_results_tables[tab_index].rowCount():
-        scan_results_tables[tab_index].setCurrentCell(scan_results_tables[tab_index].rowCount() - 1, 0)
-    elif get_row >= 0:
-        scan_results_tables[tab_index].setCurrentCell(get_row, 0)
+    # Dynamically retrieve all relevant push buttons
+    push_buttons = [getattr(HWSelect, f"{name}_{tab_index}") for name in button_names]
 
-    # Disable Push Buttons
-    if scan_results_tables[tab_index].rowCount() == 0:
-        add_to_all_buttons[tab_index].setEnabled(False)
-        tsi_buttons[tab_index].setEnabled(False)
-        pd_buttons[tab_index].setEnabled(False)
-        attack_buttons[tab_index].setEnabled(False)
-        iq_buttons[tab_index].setEnabled(False)
-        archive_buttons[tab_index].setEnabled(False)
-        scan_results_remove_buttons[tab_index].setEnabled(False)
-        scan_results_probe_buttons[tab_index].setEnabled(False)
-        scan_results_guess_buttons[tab_index].setEnabled(False)
-        scan_results_tables[tab_index].setEnabled(False)
-        scan_results_lines[tab_index].setEnabled(False)
+    # Remove all rows
+    get_tableWidget.setRowCount(0)
+
+    # Disable buttons when table is empty
+    for btn in push_buttons:
+        btn.setEnabled(False)
+    
+    get_tableWidget.setEnabled(False)
+    get_line3_scan_results.setEnabled(False)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1361,110 +1368,58 @@ def manual(HWSelect: QtCore.QObject):
     """
     Manually adds the checked hardware to the scan results table.
     """
-    # Retrieve Widgets in Current Tab
-    if HWSelect.tabWidget_nodes.currentIndex() == 0:
-        get_listWidget = HWSelect.listWidget_scan_1
-        get_tableWidget = HWSelect.tableWidget_scan_results_1
-        get_pushButton_add_to_all = HWSelect.pushButton_add_to_all_1
-        get_pushButton_tsi = HWSelect.pushButton_tsi_1
-        get_pushButton_pd = HWSelect.pushButton_pd_1
-        get_pushButton_attack = HWSelect.pushButton_attack_1
-        get_pushButton_iq = HWSelect.pushButton_iq_1
-        get_pushButton_archive = HWSelect.pushButton_archive_1
-        get_pushButton_scan_results_remove = HWSelect.pushButton_scan_results_remove_1
-        get_pushButton_scan_results_probe = HWSelect.pushButton_scan_results_probe_1
-        get_pushButton_scan_results_guess = HWSelect.pushButton_scan_results_guess_1
-        get_tableWidget_scan_results = HWSelect.tableWidget_scan_results_1
-        get_line3_scan_results = HWSelect.line3_scan_results_1
-    elif HWSelect.tabWidget_nodes.currentIndex() == 1:
-        get_listWidget = HWSelect.listWidget_scan_2
-        get_tableWidget = HWSelect.tableWidget_scan_results_2
-        get_pushButton_add_to_all = HWSelect.pushButton_add_to_all_2
-        get_pushButton_tsi = HWSelect.pushButton_tsi_2
-        get_pushButton_pd = HWSelect.pushButton_pd_2
-        get_pushButton_attack = HWSelect.pushButton_attack_2
-        get_pushButton_iq = HWSelect.pushButton_iq_2
-        get_pushButton_archive = HWSelect.pushButton_archive_2
-        get_pushButton_scan_results_remove = HWSelect.pushButton_scan_results_remove_2
-        get_pushButton_scan_results_probe = HWSelect.pushButton_scan_results_probe_2
-        get_pushButton_scan_results_guess = HWSelect.pushButton_scan_results_guess_2
-        get_tableWidget_scan_results = HWSelect.tableWidget_scan_results_2
-        get_line3_scan_results = HWSelect.line3_scan_results_2
-    elif HWSelect.tabWidget_nodes.currentIndex() == 2:
-        get_listWidget = HWSelect.listWidget_scan_3
-        get_tableWidget = HWSelect.tableWidget_scan_results_3
-        get_pushButton_add_to_all = HWSelect.pushButton_add_to_all_3
-        get_pushButton_tsi = HWSelect.pushButton_tsi_3
-        get_pushButton_pd = HWSelect.pushButton_pd_3
-        get_pushButton_attack = HWSelect.pushButton_attack_3
-        get_pushButton_iq = HWSelect.pushButton_iq_3
-        get_pushButton_archive = HWSelect.pushButton_archive_3
-        get_pushButton_scan_results_remove = HWSelect.pushButton_scan_results_remove_3
-        get_pushButton_scan_results_probe = HWSelect.pushButton_scan_results_probe_3
-        get_pushButton_scan_results_guess = HWSelect.pushButton_scan_results_guess_3
-        get_tableWidget_scan_results = HWSelect.tableWidget_scan_results_3
-        get_line3_scan_results = HWSelect.line3_scan_results_3
-    elif HWSelect.tabWidget_nodes.currentIndex() == 3:
-        get_listWidget = HWSelect.listWidget_scan_4
-        get_tableWidget = HWSelect.tableWidget_scan_results_4
-        get_pushButton_add_to_all = HWSelect.pushButton_add_to_all_4
-        get_pushButton_tsi = HWSelect.pushButton_tsi_4
-        get_pushButton_pd = HWSelect.pushButton_pd_4
-        get_pushButton_attack = HWSelect.pushButton_attack_4
-        get_pushButton_iq = HWSelect.pushButton_iq_4
-        get_pushButton_archive = HWSelect.pushButton_archive_4
-        get_pushButton_scan_results_remove = HWSelect.pushButton_scan_results_remove_4
-        get_pushButton_scan_results_probe = HWSelect.pushButton_scan_results_probe_4
-        get_pushButton_scan_results_guess = HWSelect.pushButton_scan_results_guess_4
-        get_tableWidget_scan_results = HWSelect.tableWidget_scan_results_4
-        get_line3_scan_results = HWSelect.line3_scan_results_4
-    elif HWSelect.tabWidget_nodes.currentIndex() == 4:
-        get_listWidget = HWSelect.listWidget_scan_5
-        get_tableWidget = HWSelect.tableWidget_scan_results_5
-        get_pushButton_add_to_all = HWSelect.pushButton_add_to_all_5
-        get_pushButton_tsi = HWSelect.pushButton_tsi_5
-        get_pushButton_pd = HWSelect.pushButton_pd_5
-        get_pushButton_attack = HWSelect.pushButton_attack_5
-        get_pushButton_iq = HWSelect.pushButton_iq_5
-        get_pushButton_archive = HWSelect.pushButton_archive_5
-        get_pushButton_scan_results_remove = HWSelect.pushButton_scan_results_remove_5
-        get_pushButton_scan_results_probe = HWSelect.pushButton_scan_results_probe_5
-        get_pushButton_scan_results_guess = HWSelect.pushButton_scan_results_guess_5
-        get_tableWidget_scan_results = HWSelect.tableWidget_scan_results_5
-        get_line3_scan_results = HWSelect.line3_scan_results_5
+        # Retrieve current tab index (0-based)
+    tab_index = HWSelect.tabWidget_nodes.currentIndex() + 1  # +1 to match widget numbering
+
+    # Dynamically retrieve widgets based on tab index
+    get_listWidget = getattr(HWSelect, f"listWidget_scan_{tab_index}")
+    get_tableWidget = getattr(HWSelect, f"tableWidget_scan_results_{tab_index}")
+    get_line3_scan_results = getattr(HWSelect, f"line3_scan_results_{tab_index}")
+
+    # Get all relevant push buttons
+    push_button_names = [
+        "pushButton_add_to_all",
+        "pushButton_rows_to_all",
+        "pushButton_tsi",
+        "pushButton_pd",
+        "pushButton_attack",
+        "pushButton_iq",
+        "pushButton_archive",
+        "pushButton_scan_results_remove",
+        "pushButton_scan_results_remove_all",
+        "pushButton_scan_results_probe",
+        "pushButton_scan_results_guess",
+    ]
+    get_pushButtons = [getattr(HWSelect, f"{name}_{tab_index}") for name in push_button_names]
 
     # Fill Scan Results Table with Checked Items
-    for n in range(0, get_listWidget.count()):
+    for n in range(get_listWidget.count()):
         if get_listWidget.item(n).checkState() == QtCore.Qt.Checked:
             rows = get_tableWidget.rowCount()
             get_tableWidget.setRowCount(rows + 1)
             table_item = QtWidgets.QTableWidgetItem(str(get_listWidget.item(n).text()))
             table_item.setTextAlignment(QtCore.Qt.AlignCenter)
             get_tableWidget.setItem(rows, 0, table_item)
+            
             for m in range(1, get_tableWidget.columnCount()):
                 empty_table_item = QtWidgets.QTableWidgetItem("")
                 empty_table_item.setTextAlignment(QtCore.Qt.AlignCenter)
                 get_tableWidget.setItem(rows, m, empty_table_item)
+
             HWSelect.highlight_hardware_id(get_tableWidget, rows)
 
+    # Update UI
     get_tableWidget.setCurrentCell(get_tableWidget.rowCount() - 1, 0)
     get_tableWidget.resizeColumnsToContents()
     get_tableWidget.resizeRowsToContents()
     get_tableWidget.horizontalHeader().setStretchLastSection(False)
     get_tableWidget.horizontalHeader().setStretchLastSection(True)
 
-    # Enable Push Buttons
+    # Enable relevant buttons if there are rows in the table
     if get_tableWidget.rowCount() > 0:
-        get_pushButton_add_to_all.setEnabled(True)
-        get_pushButton_tsi.setEnabled(True)
-        get_pushButton_pd.setEnabled(True)
-        get_pushButton_attack.setEnabled(True)
-        get_pushButton_iq.setEnabled(True)
-        get_pushButton_archive.setEnabled(True)
-        get_pushButton_scan_results_remove.setEnabled(True)
-        get_pushButton_scan_results_probe.setEnabled(True)
-        get_pushButton_scan_results_guess.setEnabled(True)
-        get_tableWidget_scan_results.setEnabled(True)
+        for btn in get_pushButtons:
+            btn.setEnabled(True)
+        get_tableWidget.setEnabled(True)
         get_line3_scan_results.setEnabled(True)
 
 

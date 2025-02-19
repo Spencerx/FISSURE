@@ -1,6 +1,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-19
+
+Adjusting Sensor Node Configuration dialog buttons and code.
+
+### Added
+
+- "Rows → All" button in Sensor Node Configuration dialog
+- Merging changes for "Update options.ui" pull request
+- Merging changes for "Tpms hackrf recieve no sudo" pull request
+
+### Changed
+
+- "Add to All" button renamed to "Row → All"
+- Consolidating HardwareSelectSlots.py and HardwareSelectDialog.py functions to use less code
+
 ## 2025-2-18
 
 Merging and adjusting the pull request for alert updates.
