@@ -61,7 +61,6 @@ moving_avg_points: 5
 pd_bits_port: 5066
 pd_hiprfisr_dealer_port: 5054
 pd_pub_port: 5063
-qt_scale_factor: 1.0
 remember_configuration: false
 sensor_node1:
   archive: ''
@@ -75,8 +74,6 @@ sensor_node1:
   nickname: ''
   notes: ''
   pd: ''
-  serial_baud_rate: ''
-  serial_port: ''
   tsi: ''
 sensor_node2:
   archive: ''
@@ -94,8 +91,6 @@ sensor_node2:
   nickname: ''
   notes: ''
   pd: ''
-  serial_baud_rate: ''
-  serial_port: ''
   tsi: ''
 sensor_node3:
   archive: ''
@@ -113,8 +108,6 @@ sensor_node3:
   nickname: ''
   notes: ''
   pd: ''
-  serial_baud_rate: ''
-  serial_port: ''
   tsi: ''
 sensor_node4:
   archive: ''
@@ -132,8 +125,6 @@ sensor_node4:
   nickname: ''
   notes: ''
   pd: ''
-  serial_baud_rate: ''
-  serial_port: ''
   tsi: ''
 sensor_node5:
   archive: ''
@@ -151,8 +142,6 @@ sensor_node5:
   nickname: ''
   notes: ''
   pd: ''
-  serial_baud_rate: ''
-  serial_port: ''
   tsi: ''
 sensor_node_hiprfisr_dealer_port: 5053
 sensor_node_pub_port: 5061
@@ -165,3 +154,8 @@ tsi_hiprfisr_dealer_port: 5052
 tsi_pub_port: 5059
 tsi_pub_port_classification: 5065
 tsi_pub_port_id: 5060
+ip_addr : localhost
+port: 5432
+webadmin_cert: ''
+cert: ''
+key: ''
