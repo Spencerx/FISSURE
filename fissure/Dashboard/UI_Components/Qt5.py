@@ -43,6 +43,34 @@ async def async_save_file_dialog(parent, directory, default_suffix, name_filter)
     return future.result()
 
 
+async def async_open_file_dialog(parent, directory, name_filter):
+    """
+    Asynchronous QFileDialog for opening a file, used to select a file without blocking the event loop.
+    """
+    dialog = QtWidgets.QFileDialog(parent)
+    dialog.setDirectory(directory)
+    dialog.setNameFilters([name_filter])
+    dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
+    dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+    dialog.setFilter(dialog.filter() | QtCore.QDir.Hidden)
+
+    loop = asyncio.get_event_loop()
+    future = loop.create_future()
+
+    def on_finished():
+        if dialog.result() == QtWidgets.QDialog.Accepted:
+            future.set_result(dialog.selectedFiles()[0])
+        else:
+            future.set_result("")
+
+    dialog.finished.connect(on_finished)
+    dialog.show()
+
+    await future
+
+    return future.result()
+
+
 def errorMessage(message_text):
     """
     Creates a popup window with an error message for synchronous functions.
@@ -201,6 +229,33 @@ async def async_listwidget_dialog(parent, title, label, options):
 
     # Show dialog and wait for the result
     dialog.show()
+    await future
+    return future.result()
+
+
+async def async_input_dialog(parent, title, label):
+    """
+    Asynchronous input dialog for entering text (e.g., passwords).
+    """
+    dialog = QtWidgets.QInputDialog(parent)
+    dialog.setWindowTitle(title)
+    dialog.setLabelText(label)
+    dialog.setTextEchoMode(QtWidgets.QLineEdit.EchoMode.Password)  # Hide input for passwords
+    dialog.setOkButtonText("OK")
+    dialog.setCancelButtonText("Cancel")
+
+    loop = asyncio.get_event_loop()
+    future = loop.create_future()
+
+    def on_finished():
+        if dialog.result() == QtWidgets.QDialog.DialogCode.Accepted:
+            future.set_result(dialog.textValue())  # Return entered text
+        else:
+            future.set_result("")  # Return empty if canceled
+
+    dialog.finished.connect(on_finished)
+    dialog.show()
+
     await future
     return future.result()
 
@@ -908,7 +963,7 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         elif opening_tab == "TSI":
             self.listWidget_options.setCurrentRow(1)
         elif opening_tab == "TAK":
-            self.listWidget_options.setCurrentRow(2)
+			self.listWidget_options.setCurrentRow(2)
         elif opening_tab == "PD":
             self.listWidget_options.setCurrentRow(3)
         elif opening_tab == "Attack":
