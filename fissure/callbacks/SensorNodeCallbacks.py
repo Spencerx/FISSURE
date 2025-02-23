@@ -227,6 +227,15 @@ async def autorunPlaylistStart(component: object, sensor_node_id=0, playlist_dic
     # component.autorunPlaylistStart(sensor_node_id, playlist_dict, trigger_values)
 
 
+async def autorunPlaylistExecute(component: object, sensor_node_id=0, playlist_filename=""):
+    """
+    Starts a new thread for loading and cycling through the autorun playlist.
+    """
+    # Run Event and Do Not Block
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, component.autorunPlaylistExecute, sensor_node_id, playlist_filename)
+
+
 async def autorunPlaylistStop(component: object, sensor_node_id=0):
     """
     Stops an autorun playlist already in progress.

@@ -101,6 +101,9 @@ sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog
+sudo python3 -m pip install aiohttp
+sudo python3 -m pip install paho-mqtt
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -2254,6 +2257,9 @@ sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog --break-system-packages
+sudo python3 -m pip install aiohttp --break-system-packages
+sudo python3 -m pip install paho-mqtt --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -4372,6 +4378,9 @@ sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog
+sudo python3 -m pip install aiohttp
+sudo python3 -m pip install paho-mqtt
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -6478,6 +6487,9 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
+sudo python3 -m pip install watchdog
+sudo python3 -m pip install aiohttp
+sudo python3 -m pip install paho-mqtt
 . ~/.bashrc
 """, True, "Minimum Install"))
 
@@ -8631,6 +8643,9 @@ sudo apt-get install -y libzmq3-dev
 sudo apt-get install -y zstd
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog --break-system-packages
+sudo python3 -m pip install aiohttp --break-system-packages
+sudo python3 -m pip install paho-mqtt --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -10762,6 +10777,9 @@ sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog
+sudo python3 -m pip install aiohttp
+sudo python3 -m pip install paho-mqtt
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -12877,6 +12895,9 @@ sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog --break-system-packages
+sudo python3 -m pip install aiohttp --break-system-packages
+sudo python3 -m pip install paho-mqtt --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -14997,6 +15018,9 @@ sudo python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog
+sudo python3 -m pip install aiohttp
+sudo python3 -m pip install paho-mqtt
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -17119,6 +17143,9 @@ sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog --break-system-packages
+sudo python3 -m pip install aiohttp --break-system-packages
+sudo python3 -m pip install paho-mqtt --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -19242,6 +19269,9 @@ sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
+sudo python3 -m pip install watchdog --break-system-packages
+sudo python3 -m pip install aiohttp --break-system-packages
+sudo python3 -m pip install paho-mqtt --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 

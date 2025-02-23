@@ -7,6 +7,7 @@ from ..UI_Components import TriggersDialog
 import qasync
 import time
 import asyncio
+import ast
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -541,65 +542,77 @@ async def _slotSensorNodesAutorunStartStopClicked(dashboard: QtCore.QObject):
     if dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.text() == "Start":
         # Error with no Sensor Node Selected
         if dashboard.active_sensor_node == -1:
-            fissure.Dashboard.UI_Components.Qt5.errorMessage("Select an active sensor node.")
+            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Select an active sensor node.")
             return
 
-        # Retrieve Playlist
-        playlist_dict = {}
-        playlist_dict['delay_start'] = str(dashboard.ui.checkBox_sensor_nodes_autorun_delay.isChecked())
-        playlist_dict['delay_start_time'] = str(dashboard.ui.dateTimeEdit_sensor_nodes_autorun.dateTime().toString('yyyy-MM-dd hh:mm:ss'))  #.toPyDateTime())  # '2024-01-24 14:08:47.182000'
-        playlist_dict['repetition_interval_seconds'] = str(dashboard.ui.textEdit_sensor_nodes_autorun_repetition_interval.toPlainText())
-        for n in range(0,dashboard.ui.tableWidget_sensor_nodes_autorun.rowCount()):
-            row_dict = {}      
-            try:
-                row_dict['type'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,0).text())
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Type")
+        # Run As Stored
+        if dashboard.ui.checkBox_sensor_nodes_autorun_run_as_stored.isChecked() == True:
+            get_filename = str(dashboard.ui.textEdit_sensor_nodes_autorun_playlist_filename.toPlainText())
+            if get_filename.strip() == "":
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Enter playlist filename.")
                 return
-            try:
-                row_dict['repeat'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,1).currentText())
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Repeat Value")
-                return
-            try:
-                row_dict['timeout_seconds'] = str(int(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,2).text()))
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Timeout Value")
-                return
-            try:
-                row_dict['delay'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,3).isChecked())
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Delay Value")
-                return
-            try:
-                row_dict['start_time'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,4).time().toString('hh:mm:ss'))
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Start Time Value")
-                return                      
-            try:
-                row_dict['details'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,5).text())
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Details Value")
-                return
-            try:
-                row_dict['variable_names'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,6).text())
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Variable Names Value")
-                return
-            try:
-                row_dict['variable_values'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,7).text())
-            except:
-                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid Variable Values Value")
-                return
-            playlist_dict[n] = row_dict
+            
+            # Send the Message
+            await dashboard.backend.autorunPlaylistExecute(dashboard.active_sensor_node, get_filename)            
+
+        # Transfer Playlist to Sensor Node
+        else:
+            # Retrieve Playlist
+            playlist_dict = {}
+            playlist_dict['delay_start'] = str(dashboard.ui.checkBox_sensor_nodes_autorun_delay.isChecked())
+            playlist_dict['delay_start_time'] = str(dashboard.ui.dateTimeEdit_sensor_nodes_autorun.dateTime().toString('yyyy-MM-dd hh:mm:ss'))  #.toPyDateTime())  # '2024-01-24 14:08:47.182000'
+            playlist_dict['repetition_interval_seconds'] = str(dashboard.ui.textEdit_sensor_nodes_autorun_repetition_interval.toPlainText())
+            for n in range(0,dashboard.ui.tableWidget_sensor_nodes_autorun.rowCount()):
+                row_dict = {}      
+                try:
+                    row_dict['type'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,0).text())
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Type")
+                    return
+                try:
+                    row_dict['repeat'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,1).currentText())
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Repeat Value")
+                    return
+                try:
+                    row_dict['timeout_seconds'] = str(int(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,2).text()))
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Timeout Value")
+                    return
+                try:
+                    row_dict['delay'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,3).isChecked())
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Delay Value")
+                    return
+                try:
+                    row_dict['start_time'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,4).time().toString('hh:mm:ss'))
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Start Time Value")
+                    return                      
+                try:
+                    row_dict['details'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,5).text())
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Details Value")
+                    return
+                try:
+                    row_dict['variable_names'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,6).text())
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Variable Names Value")
+                    return
+                try:
+                    row_dict['variable_values'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,7).text())
+                except:
+                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Variable Values Value")
+                    return
+                playlist_dict[n] = row_dict
+            
+            # Trigger Parameters
+            trigger_values = []
+            for row in range(0, dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.rowCount()):
+                trigger_values.append([str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,0).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,1).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,2).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,3).text())])
         
-        # Trigger Parameters
-        trigger_values = []
-        for row in range(0, dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.rowCount()):
-            trigger_values.append([str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,0).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,1).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,2).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,3).text())])
-    
-        # Send the Message
-        await dashboard.backend.autorunPlaylistStart(dashboard.active_sensor_node, playlist_dict, trigger_values)
+            # Send the Message
+            await dashboard.backend.autorunPlaylistStart(dashboard.active_sensor_node, playlist_dict, trigger_values)
 
         # Toggle the Text
         dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.setText("Stop")
@@ -861,3 +874,350 @@ def _slotSensorNodesAlertsSaveClicked(dashboard: QtCore.QObject):
         print("File save dialog was canceled.")
 
 
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodeAutorunRunAsStoredChecked(dashboard: QtCore.QObject):
+    """ 
+    Enables/Disables the Autorun controls.
+    """
+    # Checked
+    if dashboard.ui.checkBox_sensor_nodes_autorun_run_as_stored.isChecked():
+        dashboard.ui.frame_sensor_nodes_autorun_controls.setEnabled(False)
+        dashboard.ui.label2_sensor_nodes_autorun_playlist_filename.setEnabled(True)
+        dashboard.ui.textEdit_sensor_nodes_autorun_playlist_filename.setEnabled(True)
+    
+    # Unchecked
+    else:
+        dashboard.ui.frame_sensor_nodes_autorun_controls.setEnabled(True)
+        dashboard.ui.label2_sensor_nodes_autorun_playlist_filename.setEnabled(False)
+        dashboard.ui.textEdit_sensor_nodes_autorun_playlist_filename.setEnabled(False)
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesListenersMeshtasticInfoClicked(dashboard: QtCore.QObject):
+    """ 
+    Opens a dialog of potential serial ports.
+    """
+    # Issue the Command
+    path = "/dev/serial/by-id/"
+    if os.path.exists(path):
+        output_text = os.popen(f"ls -l {path}").read()
+    else:
+        output_text = "No serial devices found"
+
+    # Open a Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, output_text)
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesListenersSaveClicked(dashboard: QtCore.QObject):
+    """ 
+    Transfers the listener information to the table.
+    """
+    # Save by Type
+    status = "Disabled"
+    get_type = str(dashboard.ui.comboBox_sensor_nodes_listeners_type.currentText())
+    get_name = str(dashboard.ui.textEdit_sensor_nodes_listeners_name.toPlainText()).strip()
+    get_parameters = {}
+
+    if not get_name:
+        fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter listener name.")
+        return
+
+    if get_type == "Meshtastic":
+        get_parameters["serial_port"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_meshtastic_serial_port.toPlainText())
+        get_parameters["baud_rate"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_meshtastic_baud_rate.toPlainText())
+
+        if not get_parameters["serial_port"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter serial port (e.g. /dev/ttyACM0).")
+            return
+
+        if not get_parameters["baud_rate"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter baud rate.")
+            return
+        
+    elif get_type == "ZMQ SUB":
+        get_parameters["ip_address"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_zmq_ip_address.toPlainText())
+        get_parameters["port"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_zmq_port.toPlainText())
+        get_parameters["topic_filter"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_zmq_topic.toPlainText())
+
+        if not get_parameters["ip_address"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter IP address.")
+            return
+
+        if not get_parameters["port"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter port.")
+            return
+                
+    elif get_type == "Website Poller":
+        get_parameters["url"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_website_url.toPlainText())
+        get_parameters["check_interval"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_website_interval.toPlainText())
+
+        if not get_parameters["url"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter URL.")
+            return
+
+        if not get_parameters["check_interval"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter check interval.")
+            return
+        
+    elif get_type == "Serial Port":
+        get_parameters["serial_port"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_serial_serial_port.toPlainText())
+        get_parameters["baud_rate"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_serial_baud_rate.toPlainText())
+
+        if not get_parameters["serial_port"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter serial port (e.g. /dev/ttyACM0).")
+            return
+
+        if not get_parameters["baud_rate"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter baud rate.")
+            return
+        
+    elif get_type == "TCP/UDP":
+        get_parameters["protocol"] = str(dashboard.ui.comboBox_sensor_nodes_listeners_tcp_udp_protocol.currentText())
+        get_parameters["ip_address"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_tcp_udp_ip_address.toPlainText())
+        get_parameters["port"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_tcp_udp_port.toPlainText())
+
+        if not get_parameters["ip_address"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter IP address.")
+            return
+
+        if not get_parameters["port"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter port.")
+            return
+        
+    elif get_type == "Filesystem":
+        get_filesystem_type = str(dashboard.ui.comboBox_sensor_nodes_listeners_filesystem_type.currentText())
+        if get_filesystem_type == "New Files":
+            get_parameters["folder"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_filesytem_folder.toPlainText()).strip()
+            get_parameters["file_pattern"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_filesystem_pattern.toPlainText())
+
+            if not get_parameters["folder"]:
+                fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter folder location.")
+                return
+            
+        elif get_filesystem_type == "File Changes":
+            get_parameters["filepath"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_filesystem_filepath.toPlainText()).strip()
+
+            if not get_parameters["filepath"]:
+                fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter filepath location.")
+                return
+
+    elif get_type == "MQTT":
+        get_parameters["broker_address"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_broker_address.toPlainText())
+        get_parameters["port"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_port.toPlainText())
+        get_parameters["topic"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_topic.toPlainText())
+        get_parameters["username"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_username.toPlainText())
+        get_parameters["password"] = str(dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_password.toPlainText())
+
+        if not get_parameters["broker_address"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter broker address.")
+            return
+        
+        if not get_parameters["port"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter port.")
+            return
+        
+        if not get_parameters["topic"]:
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Enter topic.")
+            return        
+
+    # Reference to the table widget
+    table = dashboard.ui.tableWidget_sensor_nodes_listeners
+
+    # Check if the listener with the same name already exists
+    existing_row = None
+    for row in range(table.rowCount()):
+        if table.item(row, 2) and table.item(row, 2).text() == get_name:  # Column 2 is "Name"
+            existing_row = row
+            break
+
+    if existing_row is not None:
+        # Check if the existing listener is disabled
+        current_status = table.item(existing_row, 0).text()  # Status is in column 0
+        if current_status.lower() != "disabled":
+            # Show a popup informing the user to disable the listener first
+            fissure.Dashboard.UI_Components.Qt5.errorMessage(f"Listener '{get_name}' must be disabled before editing.")
+            return
+        row = existing_row
+    else:
+        # Add a new row to the table
+        row = table.rowCount()
+        table.insertRow(row)
+
+    # Create table items with alignment
+    status_item = QtWidgets.QTableWidgetItem(status)
+    status_item.setTextAlignment(QtCore.Qt.AlignCenter)
+
+    type_item = QtWidgets.QTableWidgetItem(get_type)
+    type_item.setTextAlignment(QtCore.Qt.AlignCenter)
+
+    name_item = QtWidgets.QTableWidgetItem(get_name)
+    name_item.setTextAlignment(QtCore.Qt.AlignCenter)
+
+    parameters_item = QtWidgets.QTableWidgetItem(str(get_parameters))
+    parameters_item.setTextAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+    # Populate the row with the listener data
+    table.setItem(row, 0, status_item)      # Status Column (Centered)
+    table.setItem(row, 1, type_item)        # Type Column (Centered)
+    table.setItem(row, 2, name_item)        # Name Column (Centered)
+    table.setItem(row, 3, parameters_item)  # Parameters Column (Left-Aligned)
+
+    # Automatically scroll to the new/updated row
+    table.scrollToItem(table.item(row, 0))
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesListenersEditClicked(dashboard: QtCore.QObject):
+    """ 
+    Copies information from the table into the New Listener section.
+    """
+    table = dashboard.ui.tableWidget_sensor_nodes_listeners
+    selected_items = table.selectedItems()
+
+    if not selected_items:
+        fissure.Dashboard.UI_Components.Qt5.errorMessage(f"Please select a listener to edit.")
+        return
+
+    # Get the selected row index
+    selected_row = selected_items[0].row()
+
+    # Extract data from the selected row
+    # status = table.item(selected_row, 0).text()
+    listener_type = table.item(selected_row, 1).text()
+    listener_name = table.item(selected_row, 2).text()
+    parameters_text = table.item(selected_row, 3).text()
+    parameters = ast.literal_eval(parameters_text)
+
+    # Update the UI elements with the extracted values
+    dashboard.ui.comboBox_sensor_nodes_listeners_type.setCurrentText(listener_type)
+    dashboard.ui.textEdit_sensor_nodes_listeners_name.setPlainText(listener_name)
+
+    # Populate parameter fields based on the listener type
+    if listener_type == "Meshtastic":
+        dashboard.ui.textEdit_sensor_nodes_listeners_meshtastic_serial_port.setPlainText(parameters.get("serial_port", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_meshtastic_baud_rate.setPlainText(parameters.get("baud_rate", ""))
+    elif listener_type == "ZMQ SUB":
+        dashboard.ui.textEdit_sensor_nodes_listeners_zmq_ip_address.setPlainText(parameters.get("ip_address", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_zmq_port.setPlainText(parameters.get("port", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_zmq_topic.setPlainText(parameters.get("topic_filter", ""))
+    elif listener_type == "Website Poller":
+        dashboard.ui.textEdit_sensor_nodes_listeners_website_url.setPlainText(parameters.get("url", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_website_interval.setPlainText(parameters.get("check_interval", ""))
+    elif listener_type == "Serial Port":
+        dashboard.ui.textEdit_sensor_nodes_listeners_serial_serial_port.setPlainText(parameters.get("serial_port", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_serial_baud_rate.setPlainText(parameters.get("baud_rate", ""))
+    elif listener_type == "TCP/UDP":
+        dashboard.ui.comboBox_sensor_nodes_listeners_tcp_udp_protocol.setCurrentText(parameters.get("protocol", "TCP"))
+        dashboard.ui.textEdit_sensor_nodes_listeners_tcp_udp_ip_address.setPlainText(parameters.get("ip_address", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_tcp_udp_port.setPlainText(parameters.get("port", ""))
+    elif listener_type == "Filesystem":
+        dashboard.ui.textEdit_sensor_nodes_listeners_filesytem_folder.setPlainText(parameters.get("folder", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_filesystem_pattern.setPlainText(parameters.get("file_pattern", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_filesystem_filepath.setPlainText(parameters.get("filepath", ""))
+
+        filepath = parameters.get("filepath", "")
+        if filepath:
+            dashboard.ui.comboBox_sensor_nodes_listeners_filesystem_type.setCurrentText("File Changes")
+        else:
+            dashboard.ui.comboBox_sensor_nodes_listeners_filesystem_type.setCurrentText("New Files")
+    elif listener_type == "MQTT":
+        dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_broker_address.setPlainText(parameters.get("broker_address", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_port.setPlainText(parameters.get("port", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_topic.setPlainText(parameters.get("topic", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_username.setPlainText(parameters.get("username", ""))
+        dashboard.ui.textEdit_sensor_nodes_listeners_mqtt_password.setPlainText(parameters.get("password", ""))
+
+    
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesListenersDeleteClicked(dashboard: QtCore.QObject):
+    """ 
+    Deletes the selected row in the table and sends a message to the HIPRFISR to delete the listener.
+    """
+    table = dashboard.ui.tableWidget_sensor_nodes_listeners
+    selected_items = table.selectedItems()
+
+    if not selected_items:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Please select a listener to delete.")
+        return
+
+    # Get the selected row index
+    selected_row = selected_items[0].row()
+    listener_name = table.item(selected_row, 2).text()  # Assuming 'Name' is in column 2
+
+    # Confirmation dialog before deletion
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_yes_no_dialog(dashboard, f"Are you sure you want to delete listener '{listener_name}'?")
+    if ret == QtWidgets.QMessageBox.No:
+        return
+
+    # Send the Message
+    await dashboard.backend.deleteListener(listener_name)
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesListenersEnableDisableClicked(dashboard: QtCore.QObject):
+    """ 
+    Opens a dialog of potential serial ports.
+    """
+    table = dashboard.ui.tableWidget_sensor_nodes_listeners
+    selected_items = table.selectedItems()
+
+    if not selected_items:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Please select a listener to enable/disable.")
+        return
+
+    # Get the selected row index
+    selected_row = selected_items[0].row()
+
+    # Extract data from the selected row
+    # status = table.item(selected_row, 0).text()
+    listener_type = table.item(selected_row, 1).text()
+    listener_name = table.item(selected_row, 2).text()
+    parameters_text = table.item(selected_row, 3).text()
+    parameters = ast.literal_eval(parameters_text)
+
+    # Send the Message
+    await dashboard.backend.enableDisableListener(listener_type, listener_name, parameters) 
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesListenersFilesystemFolderBrowseClicked(dashboard: QtCore.QObject):
+    """ 
+    Chooses a folder to monitor.
+    """
+    # Select a Directory
+    dialog = QtWidgets.QFileDialog(dashboard)
+    dialog.setFileMode(QtWidgets.QFileDialog.Directory)
+    dialog.setOption(QtWidgets.QFileDialog.ShowDirsOnly, True)
+
+    if dialog.exec_():
+        for d in dialog.selectedFiles():
+            folder = d
+    try:
+        dashboard.ui.textEdit_sensor_nodes_listeners_filesytem_folder.setText(folder)
+    except:
+        pass
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesListenersFilesystemFilepathBrowseClicked(dashboard: QtCore.QObject):
+    """ 
+    Chooses a file to monitor.
+    """
+    # Select a File
+    dialog = QtWidgets.QFileDialog(dashboard)
+    directory = fissure.utils.FISSURE_ROOT  # Default Directory
+    dialog.setDirectory(directory)
+    # dialog.setNameFilters(['IQ/Misc. (*.iq *.dat)','IQ Recordings (*.iq)','Misc. (*.dat)'])
+
+    if dialog.exec_():
+        for d in dialog.selectedFiles():
+            folder = d
+    try:
+        dashboard.ui.textEdit_sensor_nodes_listeners_filesystem_filepath.setPlainText(folder)
+    except:
+        pass
+
+
+    
+    

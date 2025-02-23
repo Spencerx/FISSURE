@@ -3772,6 +3772,9 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.checkBox_sensor_nodes_autorun_delay.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodeAutorunDelayChecked(dashboard)
     )
+    dashboard.ui.checkBox_sensor_nodes_autorun_run_as_stored.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodeAutorunRunAsStoredChecked(dashboard)
+    )
 
     # Combo Box
     dashboard.ui.comboBox_sensor_nodes_autorun.currentIndexChanged.connect(
@@ -3782,6 +3785,12 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     )
     dashboard.ui.comboBox_sensor_nodes_fn_folder.currentIndexChanged.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesFileNavigationFolderChanged(dashboard)
+    )
+    dashboard.ui.comboBox_sensor_nodes_listeners_type.currentIndexChanged.connect(
+        dashboard.ui.stackedWidget_sensor_nodes_listeners.setCurrentIndex
+    )
+    dashboard.ui.comboBox_sensor_nodes_listeners_filesystem_type.currentIndexChanged.connect(
+        dashboard.ui.stackedWidget_sensor_nodes_listeners_filesytem.setCurrentIndex
     )
 
     # Push Button
@@ -3842,6 +3851,31 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_sensor_nodes_alerts_save.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesAlertsSaveClicked(dashboard)
     )
+    dashboard.ui.pushButton_sensor_nodes_listeners_meshtastic_info.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersMeshtasticInfoClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_save.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersSaveClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_edit.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersEditClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_delete.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersDeleteClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_enable_disable.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersEnableDisableClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_filesystem_folder_browse.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersFilesystemFolderBrowseClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_filesytem_filepath_browse.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersFilesystemFilepathBrowseClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_listeners_serial_info.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesListenersMeshtasticInfoClicked(dashboard)  # Reuse function
+    )
+    
 
     # create connections for sensor nodes pluginsList tab
     SensorNodesPluginsTabSlots.connect_plugins_slots(dashboard)

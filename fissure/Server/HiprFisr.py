@@ -116,6 +116,7 @@ class HiprFisr:
     heartbeats: Dict[str, Union[float, Dict[int, float]]]  # {name: time, name: time, ... sensor_nodes: {node_id: time}}
     callbacks: Dict = {}
     shutdown: bool
+    alert_listeners: Dict = {}
 
 
     def __init__(self, address: fissure.comms.Address):

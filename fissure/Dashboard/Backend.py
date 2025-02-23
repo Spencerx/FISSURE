@@ -777,7 +777,7 @@ class DashboardBackend:
 
     async def autorunPlaylistStart(self, sensor_node_id, playlist_dict, trigger_values):
         """
-        Sends a message to stop a multi-stage attack.
+        Sends a message to transfer and start an autorun playlist.
         """
         # Send the Message
         if self.hiprfisr_connected is True:
@@ -794,9 +794,27 @@ class DashboardBackend:
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+    async def autorunPlaylistExecute(self, sensor_node_id=0, playlist_filename=""):
+        """
+        Sends a message to execute an autorun playlist already located on the sensor node.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+                "playlist_filename": playlist_filename,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistExecute",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
     async def autorunPlaylistStop(self, sensor_node_id=0):
         """
-        Sends a message to stop a multi-stage attack.
+        Sends a message to stop the running autorun playlist.
         """
         # Send the Message
         if self.hiprfisr_connected is True:
@@ -1975,3 +1993,33 @@ class DashboardBackend:
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, find_gps_cmd)
+
+
+    async def enableDisableListener(self, listener_type="", listener_name="", parameters={}):
+        """
+        Creates a listener if it does not exist and then toggles its enable/disable status.
+        """
+        PARAMETERS = {
+            "listener_type": listener_type,
+            "listener_name": listener_name,
+            "parameters": parameters
+        }
+        listener_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "enableDisableListener",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, listener_cmd)
+
+
+    async def deleteListener(self, listener_name=""):
+        """
+        Deletes an existing listener.
+        """
+        PARAMETERS = {"listener_name": listener_name}
+        listener_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "deleteListener",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, listener_cmd)

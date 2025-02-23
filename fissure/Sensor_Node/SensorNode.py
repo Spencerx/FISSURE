@@ -221,6 +221,7 @@ class SensorNode():
         self.pd_bits_socket = None
         
         # Check for Autorun
+        self.autorun_playlist_thread = None
         if self.settings_dict['Sensor Node']['autorun'] == True:
             # Read the Autorun Playlist File
             filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Autorun_Playlists", "default.yaml")
@@ -1497,8 +1498,8 @@ class SensorNode():
                 
                 # Make a New Thread
                 self.autorun_playlist_stop_event = threading.Event()
-                autorun_playlist_thread = threading.Thread(target=self.autorunPlaylistThreadStart, args=[sensor_node_id, playlist_dict])
-                autorun_playlist_thread.start()
+                self.autorun_playlist_thread = threading.Thread(target=self.autorunPlaylistThreadStart, args=[sensor_node_id, playlist_dict])
+                self.autorun_playlist_thread.start()
                 
 
     async def autorunPlaylistStarted(self, sensor_node_id):
@@ -2228,6 +2229,11 @@ class SensorNode():
         # Use the Function that is Called Frequently in SensorNode.py
         if len(trigger_values) == 0:
             self.logger.info("START!")
+
+            # Check if the thread is already running
+            if self.autorun_playlist_thread and self.autorun_playlist_thread.is_alive():
+                self.logger.info("Autorun Playlist is already running. Ignoring duplicate request.")
+                return  # Prevent starting another instance
             
             # Passed in from the Dashboard
             if sensor_node_id != '':
@@ -2236,8 +2242,8 @@ class SensorNode():
             
             # Make a New Thread
             self.autorun_playlist_stop_event = threading.Event()
-            autorun_playlist_thread = threading.Thread(target=self.autorunPlaylistThreadStart, args=[sensor_node_id, playlist_dict])
-            autorun_playlist_thread.start()
+            self.autorun_playlist_thread = threading.Thread(target=self.autorunPlaylistThreadStart, args=[sensor_node_id, playlist_dict])
+            self.autorun_playlist_thread.start()
         else:            
             # Make a new Trigger Thread
             if self.settings_dict['Sensor Node']['autorun'] == True:
@@ -2249,6 +2255,24 @@ class SensorNode():
             c_thread = threading.Thread(target=self.triggerStart, args=(trigger_values, "Autorun Playlist", fissure_event_values, autorun_index))
             c_thread.daemon = True
             c_thread.start()
+
+
+    def autorunPlaylistExecute(self, sensor_node_id=0, playlist_filename=""):
+        """ 
+        Starts a new thread for cycling through the autorun playlist.
+        """
+        # Check if the autorun playlist thread is already running
+        if self.autorun_playlist_thread and self.autorun_playlist_thread.is_alive():
+            self.logger.info("Autorun Playlist is already running. Ignoring duplicate execute request.")
+            return
+    
+        # Read the Autorun Playlist File
+        filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Autorun_Playlists", playlist_filename)
+        if os.path.isfile(filename):
+            with open(filename) as yaml_library_file:
+                playlist_dict = yaml.load(yaml_library_file, yaml.FullLoader)
+                trigger_dict = playlist_dict['trigger_values']
+            self.autorunPlaylistStart('', playlist_dict, trigger_dict)
 
 
     def autorunPlaylistThreadStart(self, sensor_node_id, playlist_dict):

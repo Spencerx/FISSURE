@@ -1604,3 +1604,55 @@ async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates
         component.frontend.popups["HardwareSelectDialog"].pushButton_find_5
     ]
     find_widgets[int(tab_index)].setEnabled(True)
+
+
+async def enableDisableListenerReturn(component: object, listener_name="", status=""):
+    """
+    Sets the new status for the listener with a matching name in the table.
+    """
+    # Access the table widget
+    table = component.frontend.ui.tableWidget_sensor_nodes_listeners
+    name_column_index = 2  # Assuming "Name" is in column 2 (index 2)
+    status_column_index = 0  # Assuming "Status" is in column 0 (index 0)
+
+    # Find the row with the matching name
+    for row in range(table.rowCount()):
+        item = table.item(row, name_column_index)
+        if item and item.text() == listener_name:
+            status_item = QtWidgets.QTableWidgetItem(status)
+            status_item.setTextAlignment(QtCore.Qt.AlignCenter)
+            
+            # Set the status in the "Status" column
+            table.setItem(row, status_column_index, status_item)
+            # print(f"Updated status for '{listener_name}' to '{status}' in row {row}.")
+            break
+    else:
+        component.logger.error(f"No matching listener found for name '{listener_name}'.")
+
+
+async def deleteListenerReturn(component: object, listener_name=""):
+    """
+    Sets the new status for the listener with a matching name in the table.
+    """
+    # Access the table widget
+    table = component.frontend.ui.tableWidget_sensor_nodes_listeners
+    name_column_index = 2  # Assuming "Name" is in column 2 (index 2)
+
+    # Find and remove the row with the matching name
+    for row in range(table.rowCount()):
+        item = table.item(row, name_column_index)
+        if item and item.text() == listener_name:
+            # Remove row, select the next row, if available
+            selected_items = table.selectedItems()
+            selected_row = selected_items[0].row()
+
+            table.removeRow(row)
+
+            new_row_count = table.rowCount()
+            if new_row_count > 0:
+                # Select the next row, or the last row if at the end
+                new_row = min(selected_row, new_row_count - 1)
+                table.selectRow(new_row)
+            break
+    else:
+        component.logger.error(f"No matching listener found in the table for name '{listener_name}'.")

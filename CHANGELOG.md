@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-23
+
+Listeners tab for alerts, run autorun playlists as stored.
+
+### Added
+
+- Created widgets and messaging to run autorun playlists as stored on the sensor node from the Autorun tab
+- Added "Sensor Nodes > Listeners" tab to enable alternative communication channels for receiving alerts at the HIPRFISR, supporting Meshtastic, ZMQ SUB, Website Poller, Serial Port, TCP/UDP, Filesystem, and MQTT listeners
+- Added python packages to Misc. Dependencies throughout the installer: watchdog, aiohttp, paho-mqtt
+- Added alert listener test scripts in Tools folder
+- SOF Week to upcoming events in README
+
+### Changed
+
+- Repositioned functions in HiprFisrCallbacks.py
+
+### Fixed
+
+- Adding scrollbars to alerts table
+- Changing synchronous error messages to asynchronous in _slotSensorNodesAutorunStartStopClicked()
+
 ## 2025-2-19
 
 Adjusting Sensor Node Configuration dialog buttons and code.

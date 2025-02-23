@@ -16,14 +16,24 @@ import yaml
 import asyncio
 import socket
 import shutil
+from fissure.Listeners import (
+    MeshtasticListener,
+    FilesystemListener,
+    ZMQSubscriberListener,
+    WebsitePollerListener,
+    SerialPortListener,
+    TCPUDPListener,
+    MQTTListener
+)
 
 """ HiprFisr Specific Callback Functions """
 
 DELAY_SHORT = 0.25  # seconds
 
 
-
-############################### From Dashboard ####################################
+##########################################################################
+########################### For HIPRFISR #################################
+##########################################################################
 
 async def retrieveDatabaseCache(component: object, refresh_frontend_widgets=False):
     """
@@ -257,8 +267,94 @@ async def clearWidebandList(component: object):
     component.wideband_list = []
 
 
-# #################### To Multiple Components ############################
+async def enableDisableListener(component: object, listener_type="", listener_name="", parameters={}):
+    """
+    Creates a listener if it does not exist and then toggles its enable/disable status.
+    """
+    loop = asyncio.get_running_loop()
 
+    if listener_type == "Meshtastic":
+        ListenerClass = MeshtasticListener
+    elif listener_type == "Filesystem":
+        ListenerClass = FilesystemListener
+    elif listener_type == "ZMQ SUB":
+        ListenerClass = ZMQSubscriberListener
+    elif listener_type == "Website Poller":
+        ListenerClass = WebsitePollerListener
+    elif listener_type == "Serial Port":
+        ListenerClass = SerialPortListener
+    elif listener_type == "TCP/UDP":
+        ListenerClass = TCPUDPListener
+    elif listener_type == "MQTT":
+        ListenerClass = MQTTListener        
+    else:
+        component.logger.error(f"Unknown listener type '{listener_type}'")
+        return
+
+    if listener_name not in component.alert_listeners:
+        # Create a new Listener if it does not exist
+        listener = ListenerClass(
+            component, 
+            listener_name, 
+            parameters, 
+            loop, 
+            alert_callback=alertReturn
+        )
+        component.alert_listeners[listener_name] = listener
+        component.logger.info(f"Created new {listener_type} Listener: {listener_name}")
+    else:
+        listener = component.alert_listeners[listener_name]
+
+    # Toggle enable/disable status
+    if listener.is_active():
+        listener.disable()
+        component.logger.info(f"Listener '{listener_name}' disabled.")
+        status = "Disabled"
+    else:
+        listener.enable()
+        component.logger.info(f"Listener '{listener_name}' enabled.")
+        status = "Enabled"
+
+    # Send Status to Dashboard
+    PARAMETERS = {
+        "listener_name": listener_name,
+        "status": status,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "enableDisableListenerReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def deleteListener(component: object, listener_name=""):
+    """
+    Deletes an existing listener.
+    """
+    # Delete the Listener
+    if listener_name in component.alert_listeners:
+        # Stop and delete the listener
+        listener = component.alert_listeners[listener_name]
+        listener.disable()
+        del component.alert_listeners[listener_name]
+        component.logger.info(f"Listener '{listener_name}' deleted and stopped.")
+    else:
+        component.logger.error(f"No listener found with name '{listener_name}' to delete.")
+
+    # Update Dashboard
+    PARAMETERS = {"listener_name": listener_name}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "deleteListenerReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+##########################################################################
+###################### To Multiple Components ############################
+##########################################################################
 
 async def updateFISSURE_Configuration(component: object, settings_dict={}):
     """Reload fissure_config.yaml after changes."""
@@ -284,11 +380,15 @@ async def updateLoggingLevels(component: object, new_console_level="", new_file_
     # Update New Levels for the HIPRFISR
     await component.updateLoggingLevels(new_console_level, new_file_level)
 
+##########################################################################
+##################### From Multiple Components ##########################
+##########################################################################
 
-# #################### From Multiple Components ##########################
 
 
-# ############################# To PD ####################################
+##########################################################################
+############################## To PD ####################################
+##########################################################################
 
 
 async def startPD(component: object, sensor_node_id=0):
@@ -480,7 +580,9 @@ async def removePubSocket(component: object, address=""):
     await component.backend_router.send_msg(fissure.comms.MessageTypes.COMMANDS, msg, target_ids=[component.pd_id])
 
 
-# ############################### From PD ################################
+##########################################################################
+################################ From PD ################################
+##########################################################################
 
 async def retrieveDatabaseCachePD(component: object):
     """
@@ -747,7 +849,9 @@ async def tsiFE_Finished(component: object, table_strings=[]):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-# ########################## To Sensor Node ##############################
+##########################################################################
+############################ To Sensor Node ##############################
+##########################################################################
 
 
 async def scanHardware(component: object, tab_index=0, hardware_list=[]):
@@ -915,6 +1019,18 @@ async def autorunPlaylistStart(component: object, sensor_node_id=0, playlist_dic
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStart",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def autorunPlaylistExecute(component: object, sensor_node_id=0, playlist_filename=""):
+    """Signals to sensor node to start autorun playlist already located on the sensor node."""
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id, "playlist_filename": playlist_filename}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistExecute",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
@@ -1627,7 +1743,28 @@ async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, seria
         component.logger.error(f"Failed to connect to sensor node {sensor_node_id} via Meshtastic: {e}")
 
 
-# ######################### From Sensor Node #############################
+async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", format=""):
+    """
+    Queries the remote sensor node for its GPS coordinates. 
+    """
+    # Forward the Message
+    PARAMETERS = {
+        "tab_index": tab_index,
+        "gps_source": gps_source,
+        "format": format
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_Coordinates",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+##########################################################################
+########################### From Sensor Node #############################
+##########################################################################
+
 async def refreshSensorNodeFilesResults(
     component: object, sensor_node_id=0, filepaths=[], file_sizes=[], file_types=[], modified_dates=[]
 ):
@@ -2013,7 +2150,57 @@ async def saveFile(component: object, sensor_node_id=0, operation="", filepath="
             await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-# ##################### Outdated/Incomplete/Unused #######################
+async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):
+    """
+    Forwards the GPS coordinate results message to the Dashboard.
+    """
+    PARAMETERS = {"tab_index": tab_index, "coordinates": coordinates}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
+    """
+    Forwards alertReturn Message to the Dashboard.
+    """
+    print(alert_text)
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "alert_text": alert_text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+    """
+    Forwards TAK formatted alert messages.
+    """
+    # TODO: send to TAK; forward to dashboard for testing
+    alert_text = time + ' - ' + uid + ': ' + str(lat) + ', ' + str(lon) + ', ' + str(alt) + ', remarks: ' + remarks
+    PARAMETERS = {
+        "sensor_node_id": 0,
+        "alert_text": alert_text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+##########################################################################
+####################### Outdated/Incomplete/Unused #######################
+##########################################################################
 
 
 async def setTargetSOI(
@@ -2748,62 +2935,3 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
-
-async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", format=""):
-    """
-    Queries the remote sensor node for its GPS coordinates. 
-    """
-    # Forward the Message
-    PARAMETERS = {
-        "tab_index": tab_index,
-        "gps_source": gps_source,
-        "format": format
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_Coordinates",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):
-    """
-    Forwards the GPS coordinate results message to the Dashboard.
-    """
-    PARAMETERS = {"tab_index": tab_index, "coordinates": coordinates}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
-    print(alert_text)
-    # forward to dashboard
-    PARAMETERS = {
-        "sensor_node_id": sensor_node_id,
-        "alert_text": alert_text,
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
-    # TODO: send to TAK; forward to dashboard for testing
-    alert_text = time + ' - ' + uid + ': ' + str(lat) + ', ' + str(lon) + ', ' + str(alt) + ', remarks: ' + remarks
-    PARAMETERS = {
-        "sensor_node_id": 0,
-        "alert_text": alert_text,
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
