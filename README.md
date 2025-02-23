@@ -77,7 +77,7 @@ The deployment of multiple sensor nodes on the same network unlocks many geospat
 
 ![Career Fair](https://img.shields.io/badge/Event-Career%20Fair-darkgray) **Thu. February 6, 2025**: Binghamton University Spring 2025 Job and Internship Fair - 1100-1500 EST
 
-![Exhibition](https://img.shields.io/badge/Event-Exhibition%20Fair-green) **May 5-8, 2025**: SOF Week - Assured Information Security, Inc. (AIS) table
+![Exhibition](https://img.shields.io/badge/Event-Exhibition-green) **May 5-8, 2025**: SOF Week - Assured Information Security, Inc. (AIS) table
 
 ## Documentation
 
