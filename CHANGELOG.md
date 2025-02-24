@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 ## 2025-2-23
 
+Merging pull requests #71 (Tak server options) and #72 (Alert sender updated to use gpsd).
+
+### Changed
+
+- Updated config files and options dialog with TAK settings from pull request #71 "Tak server options"
+- Updating sensor node code and alert utilities to work better with gpsd from pull request #72 "Alert sender updated to use gpsd"
+
+## 2025-2-23
+
 Listeners tab for alerts, run autorun playlists as stored.
 
 ### Added
