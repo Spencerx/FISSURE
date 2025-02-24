@@ -94,6 +94,7 @@ async def main(local_flag):
     gps_manager = None 
     if sensor_node.gps_autostart == True:
         gps_manager = GPSManager(
+            sensor_node.logger,
             gps_update_interval_seconds=sensor_node.gps_update_interval_seconds,
             gps_callback=sensor_node.gpsUpdate
         )
@@ -246,11 +247,8 @@ class SensorNode():
         if self.gps_autostart == False:
             # From Config File
             self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
-            # self.gps_position = {
-            #     "latitude": 40.712776,
-            #     "longitude": -74.005974,
-            #     "altitude": 10.5
-            # }
+        else:
+            self.gps_position = {"latitude": None, "longitude": None, "altitude": None}
 
 
     def initialize_comms(self):
@@ -716,7 +714,7 @@ class SensorNode():
 
                 # In New Terminal
                 if trigger_action == False:
-                    _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket)
+                    _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger)
                     
                     # In FISSURE Dashboard
                     #proc = subprocess.Popen(osCommandString + " &", shell=True)#, stderr=subprocess.PIPE)
@@ -2454,7 +2452,7 @@ class SensorNode():
         """
         Callback function to save GPS updates from Meshtastic node.
         """
-        print(f"Updated GPS Position: {gps_data}")
+        self.logger.info(f"Updated GPS Position: {gps_data}")
         self.gps_position = gps_data
 
     ########################################################################
@@ -2465,15 +2463,17 @@ class GPSManager:
     Manages periodic GPS updates from multiple sources.
     """
 
-    def __init__(self, gps_update_interval_seconds: int, gps_callback: Callable[[Dict[str, float]], None]):
+    def __init__(self, logger: logging.Logger, gps_update_interval_seconds: int, gps_callback: Callable[[Dict[str, float]], None], gps_data: dict={"latitude": None, "longitude": None, "altitude": None}):
         """
         Args:
             gps_update_interval_seconds (int): How often to check GPS (in seconds).
             gps_callback (Callable): Function to call when GPS updates.
         """
+        self.logger = logger
         self.gps_update_interval_seconds = gps_update_interval_seconds
         self.gps_callback = gps_callback  # Function to store GPS data
         self.running = False  # Controls the GPS update loop
+        self.gps_data = gps_data
 
 
     async def fetch_gps_from_meshtastic(self, meshtastic_node) -> Optional[Dict[str, float]]:
@@ -2484,7 +2484,7 @@ class GPSManager:
             gps_data = await meshtastic_node.get_gps_position()
             return gps_data
         except Exception as e:
-            print(f"Error getting GPS from Meshtastic: {e}")
+            self.logger.error(f"Error getting GPS from Meshtastic: {e}")
             return None
     
     
@@ -2496,7 +2496,7 @@ class GPSManager:
             gps_data = await fissure.utils.hardware.probeMeshtasticGPS(serial_port, 10)
             return gps_data
         except Exception as e:
-            print(f"Error getting GPS from Meshtastic: {e}")
+            self.logger.error(f"Error getting GPS from Meshtastic: {e}")
             return None
 
 
@@ -2506,10 +2506,10 @@ class GPSManager:
         """
         try:
             # Read gpsd
-            get_coordinates = fissure.utils.hardware.probe_gpsd("DD")
+            get_coordinates = fissure.utils.hardware.probe_gpsd(self.logger, "DD")
             return get_coordinates
         except Exception as e:
-            print(f"Error getting GPS from gpsd: {e}")
+            self.logger.error(f"Error getting GPS from gpsd: {e}")
             return None
         
 
@@ -2534,7 +2534,11 @@ class GPSManager:
 
             # Send new GPS data to the callback function
             if gps_data:
-                self.gps_callback(gps_data)
+                for key in ['latitude', 'longitude', 'altitude']:
+                    value = gps_data.get(key)
+                    if not value is None:
+                        self.gps_data[key] = value
+                self.gps_callback(self.gps_data)
 
             await asyncio.sleep(self.gps_update_interval_seconds)
 

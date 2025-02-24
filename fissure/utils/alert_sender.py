@@ -7,8 +7,9 @@ import asyncio
 import subprocess
 import fissure.comms
 import json
+import logging
 
-def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server):
+def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger):
     """Run Command and Capture stdout for Alerts
 
     Run command, capture stdout and send by to HIPRFISR as alertReturn command. Will stop capturing when `QUIT` is received on `c2`.
@@ -25,34 +26,32 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
         Sensor node ID
     hiprfisr_socket : fissure.comms.Server
         HIPRFISR socker
+    gps_position : dict
+        Dictionary with gps position
+    logger : logging.Logger
+        Sensor node logger
     """
     # run command
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True)
-
-    # TODO: initialize fields with fixed position until sensor node GPS is available
-    fields = {
-        "latitude": 40.712776,
-        "longitude": -74.005974,
-        "altitude": 10.5
-    }
 
     # monitor for alerts
     stop = False
     while not stop and proc.poll() is None:
         for proc_text in proc.stdout:
-            # replace any fields in text
-            proc_text = proc_text % fields
+
+            # replace any gps fields in text
+            proc_text = proc_text % gps_position
 
             try:
                 data = json.loads(proc_text)
 
                 if not data.__class__ is dict:
-                    # not within the scope of alert messaging; print to stdout
-                    print('[STDOUT] ' + str(data))
+                    # not within the scope of alert messaging; log as info
+                    logger.info(str(data))
 
                 elif not 'msg' in list(data.keys()):
-                    # not within the scope of alert messaging; print to stdout
-                    print('[STDOUT] ' + str(data))
+                    # not within the scope of alert messaging; log as info
+                    logger.info(str(data))
 
                 elif data.get('msg') == 'alert':
                     PARAMETERS = {
@@ -84,18 +83,17 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
 
             except json.decoder.JSONDecodeError:
                 # not a valid json string
-                print('[STDOUT] ' + str(proc_text))
+                logger.info(str(proc_text))
 
             if c2.poll(): # check for messages on c2 comms
                 msg = c2.recv() # get message
                 if msg == 'QUIT':
                     stop = True # stop alert monitoring
                     break # break out of for loop
-                # TODO: when GPS is available check for updates, e.g. "FIELD latitude=41.5"
     proc.wait() # wait for process to end
 
 class alertSender(object):
-    def __init__(self, cmd: str, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server):
+    def __init__(self, cmd: str, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger):
         """Run Command and Capture stdout for Alerts
 
         Run command, capture stdout and send by to HIPRFISR as alertReturn command
@@ -110,9 +108,13 @@ class alertSender(object):
             Sensor node ID
         hiprfisr_socket : fissure.comms.Server
             HIPRFISR socker
+        gps_position : dict
+            Dictionary with gps position
+        logger : logging.Logger
+            Sensor node logger
         """
         (self.conn1, conn2) = Pipe()
-        _alert_sender(cmd, conn2, identifier, sensor_node_id, hiprfisr_socket)
+        _alert_sender(cmd, conn2, identifier, sensor_node_id, hiprfisr_socket, gps_position, logger)
 
     def stop(self):
         """Stop capture and wait for process to finished

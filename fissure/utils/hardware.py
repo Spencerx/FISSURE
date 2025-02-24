@@ -1,5 +1,6 @@
 import subprocess
 import time
+import logging
 from gps import gps, WATCH_ENABLE
 from fissure.utils import format_coordinates, get_library_version
 import asyncio
@@ -1184,7 +1185,7 @@ def findRSPdxR2(guess_serial="", guess_index=0):
     return scan_results, guess_index
 
 
-def probe_gpsd(format=""):
+def probe_gpsd(logger: logging.Logger, format=""):
     """ 
     Probes GPS devices using gpsd and returns the coordinates.
     """
@@ -1203,15 +1204,19 @@ def probe_gpsd(format=""):
 
                 if lat is not None and lon is not None:
                     get_coordinates = format_coordinates(lat, lon, format)
-                    print(f"✅ GPS Data Received: {get_coordinates}")  # Debugging output
-                    return get_coordinates  # Exit loop once we have valid coordinates
+                    logger.debug(f"✅ GPS Data Received: {get_coordinates}")  # Debugging output
+                    return {
+                        "latitude": lat,
+                        "longitude": lon,
+                        "altitude": getattr(report, 'alt', None)
+                    } # Exit loop once we have valid coordinates
 
             if time.time() - start_time > timeout:
-                print("❌ GPS timeout: No valid data received.")
+                logger.debug("❌ GPS timeout: No valid data received.")
                 return None
 
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error(f"Error: {e}")
         return
     
 
