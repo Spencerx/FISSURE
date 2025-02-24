@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## 2025-2-23
+## 2025-2-24
 
 Merging pull requests #71 (Tak server options) and #72 (Alert sender updated to use gpsd).
 

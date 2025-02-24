@@ -1022,9 +1022,9 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         The Apply button is clicked in the options dialog.
         """
         # Retrieve Values from Options Dialog
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_tak, self.tableWidget_options_pd, self.tableWidget_options_attack,
+        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
             self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
-            self.tableWidget_options_log, self.tableWidget_options_other]
+            self.tableWidget_options_log, self.tableWidget_options_tak, self.tableWidget_options_other]
         variable_names = []
         variable_values = []
         for n in range(0,len(tables)):
