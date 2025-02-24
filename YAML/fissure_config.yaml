@@ -165,3 +165,8 @@ tsi_hiprfisr_dealer_port: 5052
 tsi_pub_port: 5059
 tsi_pub_port_classification: 5065
 tsi_pub_port_id: 5060
+ip_addr : localhost
+port: 5432
+webadmin_cert: ''
+cert: ''
+key: ''

@@ -76,7 +76,7 @@ sensor_node1:
   notes: ''
   pd: ''
   serial_baud_rate: ''
-  serial_port: ''
+  serial_port: ''  
   tsi: ''
 sensor_node2:
   archive: ''
@@ -165,3 +165,8 @@ tsi_hiprfisr_dealer_port: 5052
 tsi_pub_port: 5059
 tsi_pub_port_classification: 5065
 tsi_pub_port_id: 5060
+ip_addr : localhost
+port: 5432
+webadmin_cert: ''
+cert: ''
+key: ''

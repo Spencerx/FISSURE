@@ -962,26 +962,28 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
             self.listWidget_options.setCurrentRow(0)
         elif opening_tab == "TSI":
             self.listWidget_options.setCurrentRow(1)
+        elif opening_tab == "TAK":
+			self.listWidget_options.setCurrentRow(2)
         elif opening_tab == "PD":
-            self.listWidget_options.setCurrentRow(2)
-        elif opening_tab == "Attack":
             self.listWidget_options.setCurrentRow(3)
-        elif opening_tab == "IQ Data":
+        elif opening_tab == "Attack":
             self.listWidget_options.setCurrentRow(4)
-        elif opening_tab == "Archive":
+        elif opening_tab == "IQ Data":
             self.listWidget_options.setCurrentRow(5)
-        elif opening_tab == "Sensor Nodes":
+        elif opening_tab == "Archive":
             self.listWidget_options.setCurrentRow(6)
-        elif opening_tab == "Library":
+        elif opening_tab == "Sensor Nodes":
             self.listWidget_options.setCurrentRow(7)
-        elif opening_tab == "Log":
+        elif opening_tab == "Library":
             self.listWidget_options.setCurrentRow(8)
-        else:
+        elif opening_tab == "Log":
             self.listWidget_options.setCurrentRow(9)
+        else:
+            self.listWidget_options.setCurrentRow(10)
         self._slotOptionsListWidgetChanged()
 
         # Populate the Tables
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
+        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_tak, self.tableWidget_options_pd, self.tableWidget_options_attack,
             self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
             self.tableWidget_options_log, self.tableWidget_options_other]
         for n in range(0,len(tables)):
@@ -1020,7 +1022,7 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         The Apply button is clicked in the options dialog.
         """
         # Retrieve Values from Options Dialog
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
+        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_tak, self.tableWidget_options_pd, self.tableWidget_options_attack,
             self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
             self.tableWidget_options_log, self.tableWidget_options_other]
         variable_names = []
