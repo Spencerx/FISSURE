@@ -4381,6 +4381,7 @@ sudo apt-get install -y p7zip-full
 sudo python3 -m pip install watchdog
 sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -17166,6 +17167,7 @@ sudo apt-get install -y p7zip-full
 sudo python3 -m pip install watchdog --break-system-packages
 sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,"Minimum Install"))
 
