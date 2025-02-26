@@ -5,7 +5,7 @@ set lon [lindex $argv 2];
 set alt [lindex $argv 3];
 set time [lindex $argv 4];
 set remarks [lindex $argv 5];
-spawn python3 /home/user/FISSURE/fissure/callbacks/tak_send.py $uid $lat $lon $alt $time $remarks
+spawn python3 ~/FISSURE/fissure/callbacks/tak_send.py $uid $lat $lon $alt $time $remarks
 sleep 1
 expect "Enter PEM pass phrase:"
 sleep 1
