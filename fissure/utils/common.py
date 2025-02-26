@@ -32,8 +32,8 @@ CLASSIFIER_DIR: os.PathLike = os.path.join(FISSURE_ROOT, "Classifier")
 PLUGIN_DIR: os.PathLike = os.path.join(FISSURE_ROOT, "Plugins")
 
 
-FISSURE_CONFIG_FILE = "fissure_config.yaml"
-FISSURE_CONFIG_DEFAULT = os.path.join("User Configs", "default.yaml")
+FISSURE_CONFIG_FILE = os.path.join(YAML_DIR, "fissure_config.yaml")
+FISSURE_CONFIG_DEFAULT = os.path.join(YAML_DIR, "User Configs", "default.yaml")
 LOG_CONFIG_FILE = "logging.yaml"
 
 OS_3_8_KEYWORDS = ["DragonOS Focal", "Ubuntu 20.04"]
