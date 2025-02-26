@@ -35,8 +35,24 @@ def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
 
     # create message parser
     try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        client_socket.bind(('localhost', 1514))
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            client_socket.bind(('localhost', 1514))
+        except OSError as e:
+            if 'Errno 98' in str(e): # address already in use
+                subprocess.run(['fuser', '-k', '1514/udp']) # kill as user
+                try:
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    client_socket.bind(('localhost', 1514))
+                except OSError as e:
+                    if 'Errno 98' in str(e): # address already in use
+                        subprocess.run(['sudo', 'fuser', '-k', '1514/udp']) # kill as sudo
+                        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                        client_socket.bind(('localhost', 1514))
+                    else:
+                        raise OSError(e)
+            else:
+                raise OSError(e)
         while True:
             time.sleep(0.1)
             data = client_socket.recvfrom(512)
@@ -44,8 +60,16 @@ def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
             data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
             if 'id' in data.keys():
                 id = data.pop('id')
+                if 'pressure_PSI' in data.keys():
+                    sys.stdout.write(json.dumps({
+                        'msg': 'alert',
+                        'text': f"TPMS id={id} PSI={data.get('pressure_PSI')}",
+                    }) + '\n')
+                    sys.stdout.flush()
             else:
                 id = ''
+            if 'time' in data.keys():
+                _ = data.pop('time')
             sys.stdout.write(json.dumps({
                 'msg': 'tak',
                 'uid': id,
@@ -53,11 +77,10 @@ def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
                 'lon': '%(longitude)f',
                 'alt': '%(altitude)f',
                 'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                'remarks': json.dumps(data, separators=(',', ':'))
+                'remarks': '"' + json.dumps(data, separators=(',', ':')) + '"'
             }) + '\n')
             sys.stdout.flush()
-    except Exception as e:
-        print('ERROR:' + e)
+    finally:
         client_socket.close()
         p.terminate()
 
