@@ -167,6 +167,7 @@ tsi_pub_port_classification: 5065
 tsi_pub_port_id: 5060
 tak:
   ip_addr : localhost
+  tak_on_startup: 'False'
   port: 5432
   webadmin_cert: ''
   cert: ''
