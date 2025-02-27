@@ -2176,10 +2176,11 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     """
     Forwards the GPS coordinate results message to Tak.
     """
-
     time = time.replace(" ", "T")
-    os.system(f"expect /home/user/FISSURE/fissure/callbacks/tak.exp {uid} {lat} {lon} {alt} {time} {remarks}")
-    
+    tak_exp_path = os.path.join(fissure.utils.FISSURE_ROOT, "fissure", "callbacks", "tak.exp")
+    os.system(f"expect {tak_exp_path} {uid} {lat} {lon} {alt} {time} {remarks}")
+
+
 ##########################################################################
 ####################### Outdated/Incomplete/Unused #######################
 ##########################################################################

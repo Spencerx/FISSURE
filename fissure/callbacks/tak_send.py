@@ -2,6 +2,8 @@ import socket
 import eventlet.green.ssl as ssl
 import time
 import argparse
+import fissure.utils
+
 
 # Instantiate the parser
 parser = argparse.ArgumentParser()
@@ -13,10 +15,18 @@ parser.add_argument('time', type=str)
 parser.add_argument('remarks', type=str)
 args = parser.parse_args()
 
+# Get Tak server settings
+settings: dict = fissure.utils.get_fissure_config()
+tak_info = settings.get("tak")
+s_addr = tak_info.get("ip_addr")
+s_port = tak_info.get("port")
+tak_cert = tak_info.get("cert")
+tak_key = tak_info.get("key") 
+
 # Client configuration
-server_address = ('172.22.0.3', 8089)
-certfile = '/var/lib/sss/takserver-docker-5.3-RELEASE-24/tak/certs/files/user-XPS-13-9360.pem'  # Path to your client certificate
-keyfile = '/var/lib/sss/takserver-docker-5.3-RELEASE-24/tak/certs/files/user-XPS-13-9360_nopassword.key'  # Path to your client private key
+server_address = (s_addr, s_port)
+certfile = tak_cert  # Path to your client certificate
+keyfile = tak_key  # Path to your client private key
 client_socket = socket.create_connection(server_address)
 # Wrap the socket with SSL using the client certificate
 # Connect to the server
@@ -46,5 +56,6 @@ message = cot_msg.encode('utf-8')
 
 # Send data securely
 ssl_client_socket.sendall(message)
+
 # Close the connection
 ssl_client_socket.close()
