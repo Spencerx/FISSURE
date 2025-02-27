@@ -176,8 +176,6 @@ class HiprFisr:
 
         # Start the Database Docker Container (if not running)
         self.start_database_docker_container()
-        # Start the Database Docker Container (if not running)
-        self.start_database_docker_container()
         tak_info = self.settings.get("tak")
         run_tak = tak_info.get("tak_on_startup")
         if run_tak == 'True':
