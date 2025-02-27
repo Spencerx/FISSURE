@@ -2174,21 +2174,12 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
 
 async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
     """
-    Forwards TAK formatted alert messages.
+    Forwards the GPS coordinate results message to Tak.
     """
-    # TODO: send to TAK; forward to dashboard for testing
-    alert_text = time + ' - ' + uid + ': ' + str(lat) + ', ' + str(lon) + ', ' + str(alt) + ', remarks: ' + remarks
-    PARAMETERS = {
-        "sensor_node_id": 0,
-        "alert_text": alert_text,
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+    time = time.replace(" ", "T")
+    os.system(f"expect /home/user/FISSURE/fissure/callbacks/tak.exp {uid} {lat} {lon} {alt} {time} {remarks}")
+    
 ##########################################################################
 ####################### Outdated/Incomplete/Unused #######################
 ##########################################################################

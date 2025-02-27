@@ -4405,6 +4405,7 @@ sudo apt-get install -y p7zip-full
 sudo python3 -m pip install watchdog
 sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
+sudo apt install -y python3-eventlet
 sudo python3 -m pip install msgpack
 . ~/.bashrc
 """,True,"Minimum Install"))
@@ -6450,6 +6451,26 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_ubuntu22_04.append(('TAK',
+"""if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+./installTAK Tools/Tak/takserver-docker-5.3-RELEASE-24.zip
+########## Verify ##########
+locate webadmin.p12
+""",True,'Mapping'))
 
 ########################################################################
 ########################## DragonOS FocalX #############################
@@ -17242,6 +17263,7 @@ sudo apt-get install -y p7zip-full
 sudo python3 -m pip install watchdog --break-system-packages
 sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
+sudo apt install -y python3-eventlet
 sudo python3 -m pip install msgpack --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
@@ -19291,6 +19313,26 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_ubuntu24_04.append(('TAK',
+"""if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+./installTAK Tools/Tak/takserver-docker-5.3-RELEASE-24.zip
+########## Verify ##########
+locate webadmin.p12
+""",True,'Mapping'))
 
 ########################################################################
 ############################ Arch Linux ################################
