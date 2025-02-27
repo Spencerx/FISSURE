@@ -114,6 +114,7 @@ class DashboardBackend:
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.DashboardCallbacks)
+        self.register_callbacks(fissure.callbacks.DashboardCallbacksLT)
 
         self.logger.info("=== READY ===")
 
@@ -485,24 +486,6 @@ class DashboardBackend:
         launch_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
             fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeIP",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
-
-
-    async def connectToSensorNodeMeshtastic(self, sensor_node_id, serial_port, serial_baud_rate, recall_settings):
-        """
-        Sends message to HIPRFISR to establish local serial connection to communicate with preconfigured remote sensor node.
-        """
-        PARAMETERS = {
-            "sensor_node_id": str(sensor_node_id),
-            "serial_port": serial_port,
-            "serial_baud_rate": serial_baud_rate,
-            "recall_settings": recall_settings,
-        }
-        launch_cmd = {
-            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeMeshtastic",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
@@ -2023,3 +2006,69 @@ class DashboardBackend:
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, listener_cmd)
+
+
+    async def connectToSensorNodeMeshtastic(self, sensor_node_id, serial_port, serial_baud_rate):
+        """
+        Sends message to HIPRFISR to establish local serial connection to communicate with preconfigured remote sensor node.
+        """
+        PARAMETERS = {
+            "sensor_node_id": str(sensor_node_id),
+            "serial_port": serial_port,
+            "serial_baud_rate": serial_baud_rate,
+        }
+        launch_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeMeshtastic",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
+
+#######################################################################################
+############################## Low Throughput Messages ################################
+#######################################################################################
+
+
+    async def recallInfoMeshtasticLT(self, tab_index=""):
+        """
+        Sends message to HIPRFISR to recall sensor node config file information.
+        """
+        PARAMETERS = {
+            "tab_index": tab_index,
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "recallInfoMeshtasticLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def recallHardwareMeshtasticLT(self, tab_index=""):
+        """
+        Sends message to HIPRFISR to recall sensor node config file information.
+        """
+        PARAMETERS = {
+            "tab_index": tab_index,
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "recallHardwareMeshtasticLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        
+
+    async def recallStatusMeshtasticLT(self, tab_index=""):
+        """
+        Sends message to HIPRFISR to recall sensor node status information.
+        """
+        PARAMETERS = {
+            "tab_index": tab_index,
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "recallStatusMeshtasticLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

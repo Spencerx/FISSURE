@@ -328,10 +328,10 @@ sudo kill -9 <PID of __main__.py>
 
 **Remote Sensor Node Usage**
 
-After configuring the sensor node config file (see above), the code can be run using this command from the root directory:
+After configuring the sensor node config file (see above), the sensor node code can be run using this command in a terminal:
 
 ```
-python3 ./fissure/Sensor_Node/SensorNode.py
+fissure-sensor-node
 ```
 
 The sensor node code will stay active until ctrl+c is applied. Connecting to the remote sensor node is performed through the top buttons of the FISSURE Dashboard. Right-clicking the top buttons will select an active sensor node to perform operations. Future operations that utilize more than one node at a time will be handled on a case-by-case basis within the individual tabs.

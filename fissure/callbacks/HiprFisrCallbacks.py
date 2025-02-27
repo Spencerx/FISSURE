@@ -1703,7 +1703,7 @@ async def disconnectFromMeshtastic(component: object, sensor_node_id=0):
     component.logger.info(f"Local serial connection for Sensor Node {sensor_node_id} successfully disconnected.")
 
 
-async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, serial_port, serial_baud_rate, recall_settings):
+async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, serial_port, serial_baud_rate):
     """
     Connects the HIPRFISR to a local serial connection for a device using Meshtastic.
     """
@@ -1720,15 +1720,6 @@ async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, seria
                 sensor_node_id, "Meshtastic", serial_port=serial_port, name=name, context=context
             )
         component.logger.info(f"Connected to local serial port for communicating with Sensor node {sensor_node_id} via Meshtastic.")
-
-        # Optionally recall settings if required
-        if recall_settings == "True":
-            component.logger.info(f"Recalling settings for sensor node {sensor_node_id}...")
-            msg = {
-                fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-                fissure.comms.MessageFields.MESSAGE_NAME: "recallSettings",
-            }
-            await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
         # Send Connected Messages
         PARAMETERS = {"component_name": sensor_node_id}

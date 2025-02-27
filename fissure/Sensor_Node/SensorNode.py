@@ -238,6 +238,7 @@ class SensorNode():
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)
+        self.register_callbacks(fissure.callbacks.SensorNodeCallbacksLT)
 
         # Initialize GPS Coordinates
         self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
@@ -279,7 +280,6 @@ class SensorNode():
 
             self.hiprfisr_socket = fissure.comms.FissureMeshtasticNode(self.serial_port, f"{self.identifier}::sensor_node", self)
 
-        
 
     def register_callbacks(self, ctx: ModuleType):
         """
@@ -403,17 +403,18 @@ class SensorNode():
         """
         Send Heartbeat Message
         """
-        last_heartbeart = self.heartbeats[self.identifier]
-        now = time.time()
-        if (now - last_heartbeart) >= self.heartbeat_interval:
-            heartbeat = {
-                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                fissure.comms.MessageFields.MESSAGE_NAME: fissure.comms.MessageFields.HEARTBEAT,
-                fissure.comms.MessageFields.TIME: now,
-                fissure.comms.MessageFields.IP: self.ip_address,
-            }
-            await self.hiprfisr_socket.send_heartbeat(heartbeat)
-            self.heartbeats[self.identifier] = now
+        if self.network_type == "IP":
+            last_heartbeart = self.heartbeats[self.identifier]
+            now = time.time()
+            if (now - last_heartbeart) >= self.heartbeat_interval:
+                heartbeat = {
+                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: fissure.comms.MessageFields.HEARTBEAT,
+                    fissure.comms.MessageFields.TIME: now,
+                    fissure.comms.MessageFields.IP: self.ip_address,
+                }
+                await self.hiprfisr_socket.send_heartbeat(heartbeat)
+                self.heartbeats[self.identifier] = now
 
 
     async def check_heartbeats(self):

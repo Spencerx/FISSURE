@@ -100,6 +100,7 @@ class HiprFisr:
 
     settings: Dict
     identifier: str = fissure.comms.Identifiers.HIPRFISR
+    identifierLT: str = fissure.comms.Identifiers.HIPRFISR_LT
     # logger: logging.Logger = fissure.utils.get_logger(fissure.comms.Identifiers.HIPRFISR)
     ip_address: str
     session_active: bool
@@ -186,6 +187,7 @@ class HiprFisr:
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.HiprFisrCallbacks)
+        self.register_callbacks(fissure.callbacks.HiprFisrCallbacksLT)
 
         self.logger.info("=== READY ===")
         self.logger.info(f"Server listening @ {listen_addr}")

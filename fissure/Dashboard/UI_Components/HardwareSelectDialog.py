@@ -358,6 +358,10 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_refresh_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_refresh_{node_idx}")
             meshtastic_info_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_info_{node_idx}")
             meshtastic_connect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_connect_{node_idx}")
+            meshtastic_disconnect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_disconnect_{node_idx}")
+            meshtastic_recall_info_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_recall_info_{node_idx}")
+            meshtastic_recall_hardware_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_recall_hardware_{node_idx}")
+            meshtastic_recall_status_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_recall_status_{node_idx}")
 
             local_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.local(self, tab_index=idx - 1))
             remote_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.remote(self, tab_index=idx - 1))
@@ -392,6 +396,10 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_refresh_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_refresh(self))
             meshtastic_info_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_info(self))
             meshtastic_connect_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_connect(self))
+            meshtastic_disconnect_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_disconnect(self))
+            meshtastic_recall_info_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_info(self))
+            meshtastic_recall_hardware_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_hardware(self))
+            meshtastic_recall_status_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_status(self))
 
         # Connect general slots
         self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict=""))
@@ -597,7 +605,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         scan_results_tables[tab_index].horizontalHeader().setStretchLastSection(True)
 
 
-    def sensorNodeConnected(self, tab_index=0):
+    def sensorNodeConnected(self, tab_index=0, serial=False):
         """Updates widgets for a sensor node once it is connected to the rest of FISSURE."""
         # Adjust the tab index to match widget numbering
         tab_index += 1
@@ -618,7 +626,10 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         find_widget = getattr(self, f"pushButton_find_{tab_index}")
 
         # Update widget states
-        stacked_widget.setCurrentIndex(2)
+        if serial == True:
+            stacked_widget.setCurrentIndex(4)
+        else:
+            stacked_widget.setCurrentIndex(2)
         stacked_widget.setEnabled(True)
         bottom_stacked_widget.setCurrentIndex(0)
         scan_pushbutton.setEnabled(True)
