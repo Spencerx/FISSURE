@@ -799,19 +799,19 @@ async def recallSettings(component: object):
     # Recall Default Settings Saved Locally
     component.logger.info("Recall Settings")
 
-    filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Sensor_Node_Config", "default.yaml")
-    with open(filename) as yaml_library_file:
-        settings_dict = yaml.load(yaml_library_file, yaml.FullLoader)
+    # filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Sensor_Node_Config", "default.yaml")
+    # with open(filename) as yaml_library_file:
+    #     settings_dict = yaml.load(yaml_library_file, yaml.FullLoader)
 
-    # Send the Message
-    PARAMETERS = {"settings_dict": settings_dict}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    # print(msg)
-    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    # # Send the Message
+    # PARAMETERS = {"settings_dict": settings_dict}
+    # msg = {
+    #     fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+    #     fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
+    #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    # }
+    # # print(msg)
+    # await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def probeHardware(component: object, tab_index=0, table_row_text=[]):

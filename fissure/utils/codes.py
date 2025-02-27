@@ -1,0 +1,14 @@
+# Message code mappings for low-throughput messaging
+MESSAGE_CODE_MAP = {
+    "A1": "recallInfoMeshtasticLT",
+    "A2": "recallInfoMeshtasticReturnLT",
+    "B1": "recallHardwareMeshtasticLT",
+    "B2": "recallHardwareMeshtasticReturnLT",
+    "C1": "recallStatusMeshtasticLT",
+    "C2": "recallStatusMeshtasticReturnLT",    
+
+    
+}
+
+# Reverse mapping for sending messages
+MESSAGE_NAME_TO_CODE = {v: k for k, v in MESSAGE_CODE_MAP.items()}

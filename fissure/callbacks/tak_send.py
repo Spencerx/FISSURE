@@ -4,6 +4,7 @@ import time
 import argparse
 import fissure.utils
 
+
 # Instantiate the parser
 parser = argparse.ArgumentParser()
 parser.add_argument('uid', type=str)
@@ -55,5 +56,6 @@ message = cot_msg.encode('utf-8')
 
 # Send data securely
 ssl_client_socket.sendall(message)
+
 # Close the connection
 ssl_client_socket.close()

@@ -460,17 +460,80 @@ p, li { white-space: pre-wrap; }
          <string>Info</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBox_meshtastic_recall_settings_1">
+      </widget>
+      <widget class="QWidget" name="page_41">
+       <widget class="QPushButton" name="pushButton_meshtastic_disconnect_1">
         <property name="geometry">
          <rect>
-          <x>100</x>
-          <y>65</y>
-          <width>210</width>
-          <height>23</height>
+          <x>155</x>
+          <y>75</y>
+          <width>99</width>
+          <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Recall Settings on Connect</string>
+         <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_info_1">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Info</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_1">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Hardware</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_recall_1">
+        <property name="geometry">
+         <rect>
+          <x>-15</x>
+          <y>10</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Recall:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_status_1">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status</string>
         </property>
        </widget>
       </widget>
@@ -2485,17 +2548,80 @@ p, li { white-space: pre-wrap; }
          <string>Info</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBox_meshtastic_recall_settings_2">
+      </widget>
+      <widget class="QWidget" name="page_42">
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_info_2">
         <property name="geometry">
          <rect>
-          <x>100</x>
-          <y>65</y>
-          <width>210</width>
-          <height>23</height>
+          <x>70</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Recall Settings on Connect</string>
+         <string>Info</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_disconnect_2">
+        <property name="geometry">
+         <rect>
+          <x>155</x>
+          <y>75</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_recall_2">
+        <property name="geometry">
+         <rect>
+          <x>-15</x>
+          <y>10</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Recall:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_2">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Hardware</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_status_2">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status</string>
         </property>
        </widget>
       </widget>
@@ -4521,17 +4647,80 @@ p, li { white-space: pre-wrap; }
          <string>Info</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBox_meshtastic_recall_settings_3">
+      </widget>
+      <widget class="QWidget" name="page_43">
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_info_3">
         <property name="geometry">
          <rect>
-          <x>100</x>
-          <y>65</y>
-          <width>210</width>
-          <height>23</height>
+          <x>70</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Recall Settings on Connect</string>
+         <string>Info</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_disconnect_3">
+        <property name="geometry">
+         <rect>
+          <x>155</x>
+          <y>75</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_recall_3">
+        <property name="geometry">
+         <rect>
+          <x>-15</x>
+          <y>10</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Recall:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_3">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Hardware</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_status_3">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status</string>
         </property>
        </widget>
       </widget>
@@ -6560,17 +6749,80 @@ p, li { white-space: pre-wrap; }
          <string>Info</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBox_meshtastic_recall_settings_4">
+      </widget>
+      <widget class="QWidget" name="page_44">
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_info_4">
         <property name="geometry">
          <rect>
-          <x>100</x>
-          <y>65</y>
-          <width>210</width>
-          <height>23</height>
+          <x>70</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Recall Settings on Connect</string>
+         <string>Info</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_disconnect_4">
+        <property name="geometry">
+         <rect>
+          <x>155</x>
+          <y>75</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_recall_4">
+        <property name="geometry">
+         <rect>
+          <x>-15</x>
+          <y>10</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Recall:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_4">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Hardware</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_status_4">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status</string>
         </property>
        </widget>
       </widget>
@@ -8621,17 +8873,80 @@ p, li { white-space: pre-wrap; }
          <string>Info</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="checkBox_meshtastic_recall_settings_5">
+      </widget>
+      <widget class="QWidget" name="page_45">
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_info_5">
         <property name="geometry">
          <rect>
-          <x>100</x>
-          <y>65</y>
-          <width>210</width>
-          <height>23</height>
+          <x>70</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
          </rect>
         </property>
         <property name="text">
-         <string>Recall Settings on Connect</string>
+         <string>Info</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_disconnect_5">
+        <property name="geometry">
+         <rect>
+          <x>155</x>
+          <y>75</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_recall_5">
+        <property name="geometry">
+         <rect>
+          <x>-15</x>
+          <y>10</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>Recall:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_5">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Hardware</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_recall_status_5">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>10</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Status</string>
         </property>
        </widget>
       </widget>
