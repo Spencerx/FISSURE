@@ -1055,7 +1055,7 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
             self.tableWidget_options_sensor_nodes,
             self.tableWidget_options_library,
             self.tableWidget_options_log,
-            self.tableWidget_options_tak,  # TAK table
+            self.tableWidget_options_tak,
             self.tableWidget_options_other
         ]
         
@@ -1133,105 +1133,6 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         # Return Something
         self.return_value = "Ok"
         self.close()
-
-    # @qasync.asyncSlot()
-    # async def _slotOptionsApplyClicked(self):
-    #     """ 
-    #     The Apply button is clicked in the options dialog.
-    #     """
-    #     # Retrieve Values from Options Dialog
-    #     tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
-    #         self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
-    #         self.tableWidget_options_log, self.tableWidget_options_tak, self.tableWidget_options_other]
-    #     variable_names = []
-    #     variable_values = []
-    #     for n in range(0,len(tables)):
-    #         for get_row in range(0,tables[n].rowCount()):
-    #             no_row = False
-    #             try:
-    #                 if len(str(tables[n].verticalHeaderItem(get_row).text())) > 0:
-    #                     variable_names.append(str(tables[n].verticalHeaderItem(get_row).text()))
-    #                 else:
-    #                     no_row = True
-    #             except:
-    #                 no_row = True
-    #             if no_row == False:
-    #                 try:
-    #                     if len(str(tables[n].item(get_row,0).text())) > 0:
-    #                         variable_values.append(str(tables[n].item(get_row,0).text()))
-    #                     else:
-    #                         variable_values.append('')
-    #                 except:
-    #                     variable_values.append('')
-
-    #     # Update Dictionary
-    #     new_console_logging_level = None
-    #     new_file_logging_level = None        
-    #     if len(variable_names) == len(variable_values):
-    #         for n in range(0,len(variable_names)):
-    #             # Make Exceptions for Lists
-    #             if variable_names[n] == "disabled_running_flow_graph_variables":
-    #                 self.settings_dictionary[variable_names[n]] = ast.literal_eval(variable_values[n])
-
-    #             # Otherwise Saved as Strings
-    #             else:
-    #                 # Check for Changes with Certain Variables
-    #                 if variable_names[n] == "console_logging_level":
-    #                     if variable_values[n].strip() != self.settings_dictionary[variable_names[n]].strip():
-    #                         if variable_values[n].upper() == "DEBUG":
-    #                             new_console_logging_level = "DEBUG"
-    #                             variable_values[n] = "DEBUG"
-    #                         elif variable_values[n].upper() == "INFO":
-    #                             new_console_logging_level = "INFO"
-    #                             variable_values[n] = "INFO"
-    #                         elif variable_values[n].upper() == "WARNING":
-    #                             new_console_logging_level = "WARNING"
-    #                             variable_values[n] = "WARNING"
-    #                         elif variable_values[n].upper() == "ERROR":
-    #                             new_console_logging_level = "ERROR"
-    #                             variable_values[n] = "ERROR"
-    #                         else:
-    #                             new_console_logging_level = None
-    #                             variable_values[n] = self.settings_dictionary[variable_names[n]]
-    #                             fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid console logging level. New console level will not be saved. Valid levels are: DEBUG, INFO, WARNING, or ERROR.")
-    #                 elif variable_names[n] == "file_logging_level":
-    #                     if variable_values[n].strip() != self.settings_dictionary[variable_names[n]].strip():
-    #                         if variable_values[n].upper() == "DEBUG":
-    #                             new_file_logging_level = "DEBUG"
-    #                             variable_values[n] = "DEBUG"
-    #                         elif variable_values[n].upper() == "INFO":
-    #                             new_file_logging_level = "INFO"
-    #                             variable_values[n] = "INFO"
-    #                         elif variable_values[n].upper() == "WARNING":
-    #                             new_file_logging_level = "WARNING"
-    #                             variable_values[n] = "WARNING"
-    #                         elif variable_values[n].upper() == "ERROR":
-    #                             new_file_logging_level = "ERROR"
-    #                             variable_values[n] = "ERROR"
-    #                         else:
-    #                             new_file_logging_level = None
-    #                             variable_values[n] = self.settings_dictionary[variable_names[n]]
-    #                             fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid file logging level. New file level will not be saved. Valid levels are: DEBUG, INFO, WARNING, or ERROR.")
-
-    #                 # Save to Current Settings
-    #                 self.settings_dictionary[variable_names[n]] = variable_values[n]              
-
-    #     # Dump Dictionary to File
-    #     stream = open(os.path.join(fissure.utils.YAML_DIR, "fissure_config.yaml"), 'w')
-    #     yaml.dump(self.settings_dictionary, stream, default_flow_style=False, indent=5)
-
-    #     # Save the Dictionary
-    #     self.parent.backend.settings = self.settings_dictionary
-
-    #     # Send Update Messages
-    #     if (new_console_logging_level != None) or (new_file_logging_level != None):
-    #         await self.parent.backend.updateLoggingLevels(new_console_logging_level, new_file_logging_level)
-
-    #     await self.parent.backend.updateFISSURE_Configuration(self.parent.backend.settings)
-
-    #     # Return Something
-    #     self.return_value = "Ok"
-    #     self.close()
 
 
     def _slotOptionsCancelClicked(self):

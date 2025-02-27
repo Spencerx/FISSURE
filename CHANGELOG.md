@@ -22,6 +22,7 @@ Adding sensor node command to installer; Merging pull requests #73, #74, #76.
 ### Fixed
 
 - Fixed broken link for Sanitized IEEE OUI Data
+- Changing IQEngine local docker port to 3001 to avoid conflicts with pgAdmin 4
 
 ## 2025-2-24
 

@@ -3878,7 +3878,7 @@ def _slotMenuIQEngineLocalClicked(dashboard: QtWidgets.QMainWindow):
 
             # Start the Container
             expect_script_filepath = os.path.join(fissure.utils.TOOLS_DIR, "expect_script")
-            start_command = """docker run --env-file .env -v \\\"""" + os.path.join(fissure.utils.FISSURE_ROOT, 'IQ Recordings') + """\\\":/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre"""
+            start_command = """docker run --env-file .env -v \\\"""" + os.path.join(fissure.utils.FISSURE_ROOT, 'IQ Recordings') + """\\\":/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre"""
             iq_engine_directory = os.path.expanduser("~/Installed_by_FISSURE/IQEngine/")
             if fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "gnome-terminal":
                 proc = subprocess.Popen("gnome-terminal -- " + expect_script_filepath + ' "' + start_command + '"', shell=True, cwd=iq_engine_directory)
@@ -3888,7 +3888,7 @@ def _slotMenuIQEngineLocalClicked(dashboard: QtWidgets.QMainWindow):
                 proc = subprocess.Popen('lxterminal -e ' + expect_script_filepath + ' "' + start_command + '"', shell=True, cwd=iq_engine_directory)
 
         # Open a Browser
-        os.system("xdg-open http://localhost:3000/browser")
+        os.system("xdg-open http://localhost:3001/browser")
 
     except Exception as e:
         dashboard.logger.error(f"Error: {e}")
