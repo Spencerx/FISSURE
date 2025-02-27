@@ -12,6 +12,7 @@ class MessageTypes:
 
 class Identifiers:
     HIPRFISR = "HiprFisr"
+    HIPRFISR_LT = "H"
     DASHBOARD = "Dashboard"
     PD = "PD"
     TSI = "TSI"
@@ -27,6 +28,8 @@ class MessageFields:
     # Generic
     IDENTIFIER = "Identifier"
     MESSAGE_NAME = "MessageName"
+    SOURCE = "Source"
+    DESTINATION = "Destination"
 
     # Heartbeats
     HEARTBEAT = "Heartbeat"

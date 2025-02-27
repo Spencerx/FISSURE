@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-27
+
+Adding sensor node command to installer; Merging pull requests #73, #74, #76.
+
+### Added
+
+- fissure-sensor-node command to the installer for launching the remote sensor node code on a computer
+- IEEE OUI List in tools menu
+- msgpack to the installer
+- #74: Adding TAK to installer
+
+### Changed
+
+- Updating FissureMeshtasticNode.py code still under test
+- Changing sensor node command in README
+- #73: TAK startup options in config files, function in Hiprfisr.py for starting TAK docker container
+- #76: Updating TAK attack scripts and TAK related callbacks
+
+### Fixed
+
+- Fixed broken link for Sanitized IEEE OUI Data
+
 ## 2025-2-24
 
 Merging pull requests #71 (Tak server options) and #72 (Alert sender updated to use gpsd).

@@ -3087,7 +3087,14 @@ def _slotMenuTrackjackerClicked(dashboard: QtWidgets.QMainWindow):
 def _slotMenuSanitizedIEEE_OUI_DataClicked():
     """Open a browser to download updated OUI lists."""
     # Open a Browser
-    os.system("xdg-open https://linuxnet.ca/ieee/oui/")
+    os.system("xdg-open https://web.archive.org/web/20230326131829/https://linuxnet.ca/ieee/oui/")  # Formerly https://linuxnet.ca/ieee/oui/
+
+
+@QtCore.pyqtSlot()
+def _slotMenuIEEE_OUI_ListClicked():
+    """Open a browser to view IEEE OUI lists."""
+    # Open a Browser
+    os.system("xdg-open https://standards-oui.ieee.org/")
 
 
 @QtCore.pyqtSlot()

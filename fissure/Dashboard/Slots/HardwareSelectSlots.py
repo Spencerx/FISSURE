@@ -2418,14 +2418,7 @@ async def meshtastic_connect(HWSelect: QtCore.QObject):
         HWSelect.comboBox_meshtastic_baud_rate_3,
         HWSelect.comboBox_meshtastic_baud_rate_4,
         HWSelect.comboBox_meshtastic_baud_rate_5,
-    ]
-    recall_settings_widgets = [
-        HWSelect.checkBox_meshtastic_recall_settings_1,
-        HWSelect.checkBox_meshtastic_recall_settings_2,
-        HWSelect.checkBox_meshtastic_recall_settings_3,
-        HWSelect.checkBox_meshtastic_recall_settings_4,
-        HWSelect.checkBox_meshtastic_recall_settings_5,
-    ]    
+    ]   
     local_remote_stacked_widgets = [
         HWSelect.stackedWidget_local_remote_1,
         HWSelect.stackedWidget_local_remote_2,
@@ -2436,7 +2429,6 @@ async def meshtastic_connect(HWSelect: QtCore.QObject):
 
     get_serial_port = str(serial_port[tab_index].currentText())
     get_serial_baud_rate = str(serial_baud_rate[tab_index].currentText())
-    get_recall_settings = str(recall_settings_widgets[tab_index].isChecked())
 
     # Check Existing IPs
     get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]
@@ -2450,4 +2442,55 @@ async def meshtastic_connect(HWSelect: QtCore.QObject):
     QtWidgets.QApplication.processEvents()
 
     # Send Message for HIPRFISR to Create Sensor Node Connection
-    await HWSelect.dashboard.backend.connectToSensorNodeMeshtastic(str(tab_index), get_serial_port, get_serial_baud_rate, get_recall_settings)
+    await HWSelect.dashboard.backend.connectToSensorNodeMeshtastic(str(tab_index), get_serial_port, get_serial_baud_rate)
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_disconnect(HWSelect: QtCore.QObject):
+    """
+    Disconnect local serial connection and remove saved network connection from HIPRFISR.
+    """
+    # Disconnect
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    stacked_widgets = [
+        HWSelect.stackedWidget_local_remote_1,
+        HWSelect.stackedWidget_local_remote_2,
+        HWSelect.stackedWidget_local_remote_3,
+        HWSelect.stackedWidget_local_remote_4,
+        HWSelect.stackedWidget_local_remote_5,
+    ]
+
+    stacked_widgets[tab_index].setCurrentIndex(3)
+
+    # Send Message for HIPRFISR to end Meshtastic Serial Connection
+    await HWSelect.dashboard.backend.disconnectFromMeshtastic(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_recall_info(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve sensor node information from its config file.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.recallInfoMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_recall_hardware(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve sensor node information from its config file.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.recallHardwareMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_recall_status(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve sensor node status.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.recallStatusMeshtasticLT(str(tab_index))

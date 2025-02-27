@@ -430,6 +430,7 @@
      <addaction name="actionWikiDevi"/>
      <addaction name="actionTrackerjacker"/>
      <addaction name="actionSanitized_IEEE_OUI_Data"/>
+     <addaction name="actionIEEE_OUI_List"/>
      <addaction name="actionAirgeddon"/>
      <addaction name="menuwhoishere_py"/>
     </widget>
@@ -3503,6 +3504,11 @@
   <action name="actionFISSURE_Capabilities">
    <property name="text">
     <string>FISSURE Capabilities</string>
+   </property>
+  </action>
+  <action name="actionIEEE_OUI_List">
+   <property name="text">
+    <string>IEEE OUI List</string>
    </property>
   </action>
  </widget>
