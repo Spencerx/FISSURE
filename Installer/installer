@@ -2166,7 +2166,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -4317,7 +4317,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -6445,7 +6445,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -8622,7 +8622,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -10775,7 +10775,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -12898,7 +12898,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -15037,7 +15037,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -17166,7 +17166,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -19307,7 +19307,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
@@ -21463,7 +21463,7 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/IQEngine/IQEngine.git
 cd ~/Installed_by_FISSURE/IQEngine
 cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
+docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
 docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 ########## Verify ##########
 sudo docker run hello-world
