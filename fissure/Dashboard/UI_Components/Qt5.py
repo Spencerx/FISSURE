@@ -983,17 +983,40 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         self._slotOptionsListWidgetChanged()
 
         # Populate the Tables
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
-            self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
-            self.tableWidget_options_log, self.tableWidget_options_tak, self.tableWidget_options_other]
-        for n in range(0,len(tables)):
-            for get_row in range(0,tables[n].rowCount()):
+        tables = [
+            self.tableWidget_options_automation,
+            self.tableWidget_options_tsi,
+            self.tableWidget_options_pd,
+            self.tableWidget_options_attack,
+            self.tableWidget_options_iq,
+            self.tableWidget_options_archive,
+            self.tableWidget_options_sensor_nodes,
+            self.tableWidget_options_library,
+            self.tableWidget_options_log,
+            self.tableWidget_options_tak,
+            self.tableWidget_options_other
+        ]
+
+        for n, table in enumerate(tables):
+            for row in range(table.rowCount()):
                 try:
-                    get_variable = str(tables[n].verticalHeaderItem(get_row).text())
-                    if len(get_variable) > 0:
-                        get_value = str(self.settings_dictionary[get_variable])
-                        tables[n].setItem(0, get_row, QtWidgets.QTableWidgetItem(get_value))
-                except:
+                    variable_name = str(table.verticalHeaderItem(row).text())
+                    
+                    # Special handling for the TAK tab (index 9 in the list)
+                    if n == 9 and 'tak' in self.settings_dictionary:
+                        # Handle nested TAK options
+                        if variable_name in self.settings_dictionary['tak']:
+                            value = str(self.settings_dictionary['tak'][variable_name])
+                            table.setItem(0, row, QtWidgets.QTableWidgetItem(value))
+                    
+                    else:
+                        # Standard dictionary access for other tabs
+                        if variable_name in self.settings_dictionary:
+                            value = str(self.settings_dictionary[variable_name])
+                            table.setItem(0, row, QtWidgets.QTableWidgetItem(value))
+                            
+                except Exception as e:
+                    print(f"Error populating table {n}, row {row}: {e}")
                     pass
 
 
@@ -1022,91 +1045,87 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         The Apply button is clicked in the options dialog.
         """
         # Retrieve Values from Options Dialog
-        tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
-            self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
-            self.tableWidget_options_log, self.tableWidget_options_tak, self.tableWidget_options_other]
+        tables = [
+            self.tableWidget_options_automation,
+            self.tableWidget_options_tsi,
+            self.tableWidget_options_pd,
+            self.tableWidget_options_attack,
+            self.tableWidget_options_iq,
+            self.tableWidget_options_archive,
+            self.tableWidget_options_sensor_nodes,
+            self.tableWidget_options_library,
+            self.tableWidget_options_log,
+            self.tableWidget_options_tak,  # TAK table
+            self.tableWidget_options_other
+        ]
+        
+        # Initialize collections
         variable_names = []
         variable_values = []
-        for n in range(0,len(tables)):
-            for get_row in range(0,tables[n].rowCount()):
-                no_row = False
+        
+        for n, table in enumerate(tables):
+            for row in range(table.rowCount()):
                 try:
-                    if len(str(tables[n].verticalHeaderItem(get_row).text())) > 0:
-                        variable_names.append(str(tables[n].verticalHeaderItem(get_row).text()))
-                    else:
-                        no_row = True
-                except:
-                    no_row = True
-                if no_row == False:
-                    try:
-                        if len(str(tables[n].item(get_row,0).text())) > 0:
-                            variable_values.append(str(tables[n].item(get_row,0).text()))
+                    variable_name = str(table.verticalHeaderItem(row).text()).strip()
+                    if variable_name:
+                        variable_names.append((n, variable_name))  # Include the table index
+                        variable_value = table.item(row, 0)
+                        if variable_value and variable_value.text():
+                            variable_values.append(str(variable_value.text()).strip())
                         else:
-                            variable_values.append('')
-                    except:
-                        variable_values.append('')
+                            variable_values.append("")
+                except Exception as e:
+                    print(f"Error processing row {row} in table {n}: {e}")
+                    continue
 
         # Update Dictionary
         new_console_logging_level = None
-        new_file_logging_level = None        
+        new_file_logging_level = None
+        
         if len(variable_names) == len(variable_values):
-            for n in range(0,len(variable_names)):
-                # Make Exceptions for Lists
-                if variable_names[n] == "disabled_running_flow_graph_variables":
-                    self.settings_dictionary[variable_names[n]] = ast.literal_eval(variable_values[n])
+            for i, (table_index, var_name) in enumerate(variable_names):
+                value = variable_values[i]
 
-                # Otherwise Saved as Strings
+                # Special handling for nested TAK options (table index 9)
+                if table_index == 9:
+                    if "tak" not in self.settings_dictionary:
+                        self.settings_dictionary["tak"] = {}
+                    self.settings_dictionary["tak"][var_name] = value
+
+                # Handle list parsing for specific settings
+                elif var_name == "disabled_running_flow_graph_variables":
+                    self.settings_dictionary[var_name] = ast.literal_eval(value)
+
+                # Handle logging level updates with validation
+                elif var_name in ["console_logging_level", "file_logging_level"]:
+                    old_value = self.settings_dictionary.get(var_name, "").strip()
+                    if value.strip() != old_value:
+                        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
+                        if value.upper() in valid_levels:
+                            if var_name == "console_logging_level":
+                                new_console_logging_level = value.upper()
+                            elif var_name == "file_logging_level":
+                                new_file_logging_level = value.upper()
+                            self.settings_dictionary[var_name] = value.upper()
+                        else:
+                            fissure.Dashboard.UI_Components.Qt5.errorMessage(
+                                f"Invalid {var_name} level. Valid levels are: {', '.join(valid_levels)}."
+                            )
+
+                # Standard string assignments
                 else:
-                    # Check for Changes with Certain Variables
-                    if variable_names[n] == "console_logging_level":
-                        if variable_values[n].strip() != self.settings_dictionary[variable_names[n]].strip():
-                            if variable_values[n].upper() == "DEBUG":
-                                new_console_logging_level = "DEBUG"
-                                variable_values[n] = "DEBUG"
-                            elif variable_values[n].upper() == "INFO":
-                                new_console_logging_level = "INFO"
-                                variable_values[n] = "INFO"
-                            elif variable_values[n].upper() == "WARNING":
-                                new_console_logging_level = "WARNING"
-                                variable_values[n] = "WARNING"
-                            elif variable_values[n].upper() == "ERROR":
-                                new_console_logging_level = "ERROR"
-                                variable_values[n] = "ERROR"
-                            else:
-                                new_console_logging_level = None
-                                variable_values[n] = self.settings_dictionary[variable_names[n]]
-                                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid console logging level. New console level will not be saved. Valid levels are: DEBUG, INFO, WARNING, or ERROR.")
-                    elif variable_names[n] == "file_logging_level":
-                        if variable_values[n].strip() != self.settings_dictionary[variable_names[n]].strip():
-                            if variable_values[n].upper() == "DEBUG":
-                                new_file_logging_level = "DEBUG"
-                                variable_values[n] = "DEBUG"
-                            elif variable_values[n].upper() == "INFO":
-                                new_file_logging_level = "INFO"
-                                variable_values[n] = "INFO"
-                            elif variable_values[n].upper() == "WARNING":
-                                new_file_logging_level = "WARNING"
-                                variable_values[n] = "WARNING"
-                            elif variable_values[n].upper() == "ERROR":
-                                new_file_logging_level = "ERROR"
-                                variable_values[n] = "ERROR"
-                            else:
-                                new_file_logging_level = None
-                                variable_values[n] = self.settings_dictionary[variable_names[n]]
-                                fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid file logging level. New file level will not be saved. Valid levels are: DEBUG, INFO, WARNING, or ERROR.")
-
-                    # Save to Current Settings
-                    self.settings_dictionary[variable_names[n]] = variable_values[n]              
+                    self.settings_dictionary[var_name] = value
 
         # Dump Dictionary to File
-        stream = open(os.path.join(fissure.utils.YAML_DIR, "fissure_config.yaml"), 'w')
-        yaml.dump(self.settings_dictionary, stream, default_flow_style=False, indent=5)
+        config_path = os.path.join(fissure.utils.YAML_DIR, "fissure_config.yaml")
+        with open(config_path, 'w') as stream:
+            yaml.dump(self.settings_dictionary, stream, default_flow_style=False, indent=5)
 
         # Save the Dictionary
         self.parent.backend.settings = self.settings_dictionary
 
-        # Send Update Messages
-        if (new_console_logging_level != None) or (new_file_logging_level != None):
+        # Send Update Messages if logging levels changed
+        if new_console_logging_level or new_file_logging_level:
             await self.parent.backend.updateLoggingLevels(new_console_logging_level, new_file_logging_level)
 
         await self.parent.backend.updateFISSURE_Configuration(self.parent.backend.settings)
@@ -1114,6 +1133,105 @@ class OptionsDialog(QtWidgets.QDialog, UI_Types.Options):
         # Return Something
         self.return_value = "Ok"
         self.close()
+
+    # @qasync.asyncSlot()
+    # async def _slotOptionsApplyClicked(self):
+    #     """ 
+    #     The Apply button is clicked in the options dialog.
+    #     """
+    #     # Retrieve Values from Options Dialog
+    #     tables = [self.tableWidget_options_automation, self.tableWidget_options_tsi, self.tableWidget_options_pd, self.tableWidget_options_attack,
+    #         self.tableWidget_options_iq, self.tableWidget_options_archive, self.tableWidget_options_sensor_nodes, self.tableWidget_options_library,
+    #         self.tableWidget_options_log, self.tableWidget_options_tak, self.tableWidget_options_other]
+    #     variable_names = []
+    #     variable_values = []
+    #     for n in range(0,len(tables)):
+    #         for get_row in range(0,tables[n].rowCount()):
+    #             no_row = False
+    #             try:
+    #                 if len(str(tables[n].verticalHeaderItem(get_row).text())) > 0:
+    #                     variable_names.append(str(tables[n].verticalHeaderItem(get_row).text()))
+    #                 else:
+    #                     no_row = True
+    #             except:
+    #                 no_row = True
+    #             if no_row == False:
+    #                 try:
+    #                     if len(str(tables[n].item(get_row,0).text())) > 0:
+    #                         variable_values.append(str(tables[n].item(get_row,0).text()))
+    #                     else:
+    #                         variable_values.append('')
+    #                 except:
+    #                     variable_values.append('')
+
+    #     # Update Dictionary
+    #     new_console_logging_level = None
+    #     new_file_logging_level = None        
+    #     if len(variable_names) == len(variable_values):
+    #         for n in range(0,len(variable_names)):
+    #             # Make Exceptions for Lists
+    #             if variable_names[n] == "disabled_running_flow_graph_variables":
+    #                 self.settings_dictionary[variable_names[n]] = ast.literal_eval(variable_values[n])
+
+    #             # Otherwise Saved as Strings
+    #             else:
+    #                 # Check for Changes with Certain Variables
+    #                 if variable_names[n] == "console_logging_level":
+    #                     if variable_values[n].strip() != self.settings_dictionary[variable_names[n]].strip():
+    #                         if variable_values[n].upper() == "DEBUG":
+    #                             new_console_logging_level = "DEBUG"
+    #                             variable_values[n] = "DEBUG"
+    #                         elif variable_values[n].upper() == "INFO":
+    #                             new_console_logging_level = "INFO"
+    #                             variable_values[n] = "INFO"
+    #                         elif variable_values[n].upper() == "WARNING":
+    #                             new_console_logging_level = "WARNING"
+    #                             variable_values[n] = "WARNING"
+    #                         elif variable_values[n].upper() == "ERROR":
+    #                             new_console_logging_level = "ERROR"
+    #                             variable_values[n] = "ERROR"
+    #                         else:
+    #                             new_console_logging_level = None
+    #                             variable_values[n] = self.settings_dictionary[variable_names[n]]
+    #                             fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid console logging level. New console level will not be saved. Valid levels are: DEBUG, INFO, WARNING, or ERROR.")
+    #                 elif variable_names[n] == "file_logging_level":
+    #                     if variable_values[n].strip() != self.settings_dictionary[variable_names[n]].strip():
+    #                         if variable_values[n].upper() == "DEBUG":
+    #                             new_file_logging_level = "DEBUG"
+    #                             variable_values[n] = "DEBUG"
+    #                         elif variable_values[n].upper() == "INFO":
+    #                             new_file_logging_level = "INFO"
+    #                             variable_values[n] = "INFO"
+    #                         elif variable_values[n].upper() == "WARNING":
+    #                             new_file_logging_level = "WARNING"
+    #                             variable_values[n] = "WARNING"
+    #                         elif variable_values[n].upper() == "ERROR":
+    #                             new_file_logging_level = "ERROR"
+    #                             variable_values[n] = "ERROR"
+    #                         else:
+    #                             new_file_logging_level = None
+    #                             variable_values[n] = self.settings_dictionary[variable_names[n]]
+    #                             fissure.Dashboard.UI_Components.Qt5.errorMessage("Invalid file logging level. New file level will not be saved. Valid levels are: DEBUG, INFO, WARNING, or ERROR.")
+
+    #                 # Save to Current Settings
+    #                 self.settings_dictionary[variable_names[n]] = variable_values[n]              
+
+    #     # Dump Dictionary to File
+    #     stream = open(os.path.join(fissure.utils.YAML_DIR, "fissure_config.yaml"), 'w')
+    #     yaml.dump(self.settings_dictionary, stream, default_flow_style=False, indent=5)
+
+    #     # Save the Dictionary
+    #     self.parent.backend.settings = self.settings_dictionary
+
+    #     # Send Update Messages
+    #     if (new_console_logging_level != None) or (new_file_logging_level != None):
+    #         await self.parent.backend.updateLoggingLevels(new_console_logging_level, new_file_logging_level)
+
+    #     await self.parent.backend.updateFISSURE_Configuration(self.parent.backend.settings)
+
+    #     # Return Something
+    #     self.return_value = "Ok"
+    #     self.close()
 
 
     def _slotOptionsCancelClicked(self):
