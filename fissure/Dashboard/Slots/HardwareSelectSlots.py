@@ -190,8 +190,12 @@ def importClicked(HWSelect, settings_dict=""):
             remote(HWSelect, tab_index=n)
 
         # Nickname
-        nickname_widgets[n].setPlainText(settings_dict["Sensor Node " + str(n + 1)]["nickname"])
-        HWSelect.tabWidget_nodes.setTabText(n, settings_dict["Sensor Node " + str(n + 1)]["nickname"])
+        if local_widgets[n].isChecked() == True:
+            nickname_widgets[n].setPlainText("Local Sensor Node")
+            HWSelect.tabWidget_nodes.setTabText(n, "Local Sensor Node")
+        else:
+            nickname_widgets[n].setPlainText(settings_dict["Sensor Node " + str(n + 1)]["nickname"])
+            HWSelect.tabWidget_nodes.setTabText(n, settings_dict["Sensor Node " + str(n + 1)]["nickname"])
         if ignore_nickname is True:
             HWSelect.tabWidget_nodes.setTabText(n, "")
 
@@ -1534,8 +1538,20 @@ async def launch(HWSelect: QtCore.QObject):
     """
     # Get Widgets and Values
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    recall_settings_widgets = [HWSelect.checkBox_recall_settings_local_1,HWSelect.checkBox_recall_settings_local_2,HWSelect.checkBox_recall_settings_local_3,HWSelect.checkBox_recall_settings_local_4,HWSelect.checkBox_recall_settings_local_5]
-    launch_widgets = [HWSelect.pushButton_launch_1,HWSelect.pushButton_launch_2,HWSelect.pushButton_launch_3,HWSelect.pushButton_launch_4,HWSelect.pushButton_launch_5]
+    recall_settings_widgets = [
+        HWSelect.checkBox_recall_settings_local_1,
+        HWSelect.checkBox_recall_settings_local_2,
+        HWSelect.checkBox_recall_settings_local_3,
+        HWSelect.checkBox_recall_settings_local_4,
+        HWSelect.checkBox_recall_settings_local_5
+    ]
+    launch_widgets = [
+        HWSelect.pushButton_launch_1,
+        HWSelect.pushButton_launch_2,
+        HWSelect.pushButton_launch_3,
+        HWSelect.pushButton_launch_4,
+        HWSelect.pushButton_launch_5
+    ]
     get_ip = 'ipc'
     get_msg_port = "ipc:///tmp/zmq_ipc_message"
     get_hb_port = "ipc:///tmp/zmq_ipc_heartbeat"
@@ -1554,6 +1570,9 @@ async def launch(HWSelect: QtCore.QObject):
  
     # Send Message for HIPRFISR to Sensor Node Connections
     await HWSelect.dashboard.backend.launch_local_sensor_node(str(tab_index), get_ip, get_msg_port, get_hb_port, get_recall_settings)
+
+    # Set the New Connection Flag for the Warning on Cancel
+    HWSelect.new_local_connection[tab_index] = True
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -1683,6 +1702,9 @@ async def disconnect(HWSelect: QtCore.QObject, delete_node=False):
     if local_buttons[tab_index].isChecked():
         stacked_widgets[tab_index].setCurrentIndex(0)
         await HWSelect.dashboard.backend.disconnect_local_sensor_node(str(tab_index))
+
+        # Set the New Connection Flag for the Warning on Cancel
+        HWSelect.new_local_connection[tab_index] = False
 
     # Remote
     else:
@@ -1924,6 +1946,12 @@ def cancel(HWSelect: QtCore.QObject):
     """
     Close the HW Select window without saving changes
     """
+    # Detect Connect without Saving
+    if any(HWSelect.new_local_connection):
+        fissure.Dashboard.UI_Components.Qt5.errorMessage("Click Apply or disconnect from local sensor node before cancelling.")
+        return
+
+    # Close Window
     HWSelect.accept()
 
 
@@ -2244,15 +2272,26 @@ async def find(HWSelect: QtCore.QObject):
         HWSelect.stackedWidget_local_remote_4,
         HWSelect.stackedWidget_local_remote_5
     ]
+
+    # Send the Message
+    gps_source_widgets = [
+        HWSelect.comboBox_gps_source_1,
+        HWSelect.comboBox_gps_source_1,
+        HWSelect.comboBox_gps_source_1,
+        HWSelect.comboBox_gps_source_1,
+        HWSelect.comboBox_gps_source_1
+    ]
+
+    find_widgets = [
+        HWSelect.pushButton_find_1,
+        HWSelect.pushButton_find_2,
+        HWSelect.pushButton_find_3,
+        HWSelect.pushButton_find_4,
+        HWSelect.pushButton_find_5
+    ]
+
+    # Local, Connected: IP
     if local_remote_stacked_widgets[tab_index].currentIndex() == 2:
-        # Send the Message
-        gps_source_widgets = [
-            HWSelect.comboBox_gps_source_1,
-            HWSelect.comboBox_gps_source_1,
-            HWSelect.comboBox_gps_source_1,
-            HWSelect.comboBox_gps_source_1,
-            HWSelect.comboBox_gps_source_1
-        ]
         get_gps_source = str(gps_source_widgets[tab_index].currentText())
         if get_gps_source == "gpsd":
             await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
@@ -2264,14 +2303,23 @@ async def find(HWSelect: QtCore.QObject):
             return
 
         # Disable the Find Button
-        find_widgets = [
-            HWSelect.pushButton_find_1,
-            HWSelect.pushButton_find_2,
-            HWSelect.pushButton_find_3,
-            HWSelect.pushButton_find_4,
-            HWSelect.pushButton_find_5
-        ]
         find_widgets[tab_index].setEnabled(False)
+
+    # Remote, Connected: Meshtastic
+    elif local_remote_stacked_widgets[tab_index].currentIndex() == 4:
+        # Send the Message
+        get_gps_source = str(gps_source_widgets[tab_index].currentText())
+        if get_gps_source == "gpsd":
+            await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)
+        elif get_gps_source == "Meshtastic":
+            await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)
+        elif get_gps_source == "Saved":
+            await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)            
+        else:
+            return
+
+        # Disable the Find Button
+        # find_widgets[tab_index].setEnabled(False)
     else:
         HWSelect.dashboard.logger.error("Sensor node not connected. Unable to retrieve GPS location.")
 

@@ -1452,7 +1452,7 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
     """
     # Retrieve Coordinates
     if gps_source == "gpsd":
-        get_coordinates = fissure.utils.hardware.probe_gpsd(component.logger, format)
+        get_coordinates = fissure.utils.hardware.probe_gpsd(component.logger, format, component.gpsd_serial_port, False)
     elif gps_source == "Meshtastic":
         # Use Existing Serial Connection
         if component.local_remote == "remote":
@@ -1464,7 +1464,7 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
             )
         # Establish Serial Connection
         else:
-            gps_data = await fissure.utils.hardware.probeMeshtasticGPS(component.serial_port, 10)
+            gps_data = await fissure.utils.hardware.probeMeshtasticGPS(component.meshtastic_serial_port, 10)
             get_coordinates = fissure.utils.format_coordinates(
                 gps_data['latitude'], 
                 gps_data['longitude'],
@@ -1482,6 +1482,7 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
 
     # Return the Text
     if get_coordinates:
+        # Only return lat, lon
         PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,

@@ -50,6 +50,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         for n in range(0, 5):
             if str(self.dashboard.backend.settings[get_sensor_node[n]]["local_remote"]) == "local":
                 local_assigned = True
+        
+        # Detect Connecting to Local Sensor Node without Saving
+        self.new_local_connection = [False, False, False, False, False]
 
         # Hide Temporary Text
         self.label2_scan_results_probe_1.setVisible(False)

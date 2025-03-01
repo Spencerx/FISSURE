@@ -30,12 +30,43 @@ from fissure.Listeners import (
 
 # DELAY_SHORT = 0.25  # seconds
 
+async def findGPS_CoordinatesLT(component: object, tab_index=0, gps_source="", format=""):
+    """
+    Queries the remote sensor node for its GPS coordinates. 
+    """
+    # Forward the Message
+    PARAMETERS = {
+        "tab_index": tab_index,
+        "gps_source": gps_source,
+        "format": format
+    }
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: tab_index,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+
+    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def findGPS_CoordinatesResultsLT(component: object, tab_index=0, coordinates=""):
+    """
+    Forwards the GPS coordinate results message to the Dashboard.
+    """
+    PARAMETERS = {"tab_index": tab_index, "coordinates": coordinates}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResultsLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
 async def recallInfoMeshtasticReturnLT(component: object, tab_index="", nickname="", location="", notes=""):
     """
     Returns the recalled sensor node settings to the Dashboard.
     """
-    print("MADE IT TO HIPRFISR CALLBACKS")
-    
     # Send the Message
     PARAMETERS = {
         "tab_index": tab_index,

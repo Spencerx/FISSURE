@@ -5826,3 +5826,22 @@ def _slotMenuHelpFISSURE_CapabilitiesClicked():
     # Open PDF
     pdf_filepath = os.path.join(fissure.utils.FISSURE_ROOT, "docs", "Help", "FISSURE_Capabilities.pdf")
     os.system("xdg-open " + pdf_filepath)
+
+
+@QtCore.pyqtSlot()
+def _slotMenuLessonTestMeasurementFundamentalsClicked():
+    """
+    Opens Test & Measurement Fundamentals YouTube playlist from Rohde & Schwarz in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://www.youtube.com/playlist?list=PLKxVoO5jUTlvsVtDcqrVn0ybqBVlLj2z8")
+
+
+@QtCore.pyqtSlot()
+def _slotMenuACARS_HubClicked():
+    """
+    Opens ACARS Hub live map in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://tbgacarshub.airframes.io/adsb")
+

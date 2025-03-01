@@ -50,11 +50,8 @@ async def recallInfoMeshtasticReturnLT(component: object, tab_index="", nickname
     """
     Populates the HardwareSelectDialog with the sensor node settings on connect.
     """
-    print("AT THE DASHBOARD CALLBACK!!")
-    print(tab_index)
     if tab_index and 0 <= int(tab_index) < 5:
         # Dynamically retrieve all relevant widgets
-        print("INFO RETURN@!!!!@#@!#@!@!")
         widget_number = str(int(tab_index)+1)
         nickname_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_nickname_{widget_number}")
         location_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_location_{widget_number}")
@@ -86,6 +83,32 @@ async def recallStatusMeshtasticReturnLT(component: object, tab_index="", status
     if tab_index and 0 <= int(tab_index) < 5:
         # Dynamically retrieve all relevant widgets
         print("Status RETURN@!!!!@#@!#@!@!")
+
+
+async def findGPS_CoordinatesResultsLT(component: object, tab_index=0, coordinates=""):
+    """
+    Returns the GPS coordinate results to the HardwareSelectDialog.
+    """
+    # Populate Location
+    location_widget = [
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_1,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_2,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_3,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_4,
+        component.frontend.popups["HardwareSelectDialog"].textEdit_location_5
+    ]
+    location_widget[int(tab_index)].setPlainText(str(coordinates))
+
+    # Enable the Find Button
+    find_widgets = [
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_1,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_2,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_3,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_4,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_find_5
+    ]
+    # find_widgets[int(tab_index)].setEnabled(True)
+
 
 ##################################################################
 ####################### Original #################################

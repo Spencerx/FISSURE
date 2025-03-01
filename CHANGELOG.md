@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-2-28
+
+Fixing GPS acquisition, adding password prompt exceptions.
+
+### Added
+
+- Password Prompt Exceptions to the installer to ignore prompts at remote sensor nodes
+- password_prompt_exceptions.txt in the Installer folder, gets copied to /etc/sudoers.d/fissure
+- Test & Measurement Fundamentals YouTube playlist from Rohde & Schwarz to Lessons menu
+- ACARS Hub live map to Tools>Aircraft>Trackers menu
+- Adding Alert Listeners to News in README
+
+### Changed
+
+- FissureMeshtasticNode.py updates to support GPS acquisition
+
+### Fixed
+
+- Finding GPS in sensor node configuration returns 2D lat, lon values for all formats and methods
+- Nickname from sensor node config file no longer shows up for a local sensor node
+- Launching, disconnecting, repeat for local sensor nodes now shuts down HIPRFISR connections
+
 ## 2025-2-27
 
 Adding sensor node command to installer; Merging pull requests #73, #74, #76.

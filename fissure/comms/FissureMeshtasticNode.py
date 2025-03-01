@@ -44,18 +44,20 @@ class FissureMeshtasticNode:
         """Places received messages into the async queue."""
         try:
             await self.message_queue.put(message)
-            self.logger.info(f"Message enqueued: {message}")
-            self.logger.info(f"Queue size after put: {self.message_queue.qsize()}")
+            # self.logger.info(f"Message enqueued: {message}")
+            # self.logger.info(f"Queue size after put: {self.message_queue.qsize()}")
         except Exception as e:
             self.logger.warning(f"⚠️ Failed to enqueue message: {e}")
 
     async def recv_msg(self) -> Optional[Dict]:
         try:
-            print(f"Queue size before get: {self.message_queue.qsize()}")
-            msgrcvd = await self.message_queue.get()
-            print(f"Queue size after get: {self.message_queue.qsize()}")
-            self.logger.info(f"Message received: {msgrcvd}")
-            return msgrcvd
+            if self.message_queue.qsize() > 0:
+                msgrcvd = await self.message_queue.get()
+                self.logger.info(f"Message received: {msgrcvd}")
+                return msgrcvd
+            else:
+                # self.logger.info("Message queue is empty, no message to receive.")
+                return None
         except Exception as e:
             self.logger.warning(f"⚠️ Error while receiving message: {e}")
             return None
@@ -63,23 +65,18 @@ class FissureMeshtasticNode:
     async def process_messages(self):
         """Continuously processes messages from the queue using `run_callback`."""
         while self.running:
-            # Log the status of the process task
-            self.logger.debug(f"Process task running: {self.process_task and not self.process_task.done()}")
+            # self.logger.debug(f"Process task running: {self.process_task and not self.process_task.done()}")
 
-            msg = await self.recv_msg()
-            
-            print("Received Message in Process Messages:", msg)
-            print("Type of Message:", type(msg))
-            print("Message Evaluates to:", bool(msg))
-            
-            if msg:
-                print("RUNNING CALLBACK")
-                print("Context:", self.context)
-                print("Message:", msg)
-                self.logger.info(f"Preparing to execute callback for message: {msg}")
-                await self.run_callback(self.context, msg)
+            if not self.process_task.done():
+                msg = await self.recv_msg()
+                if msg:
+                    # self.logger.info(f"Preparing to execute callback for message: {msg}")
+                    await self.run_callback(self.context, msg)
+                else:
+                    pass
+                    # self.logger.warning("Received an empty or invalid message from the queue.")
             else:
-                self.logger.warning("Received an empty or invalid message from the queue.")
+                self.logger.error("Process task is not running as expected!")
             
             await asyncio.sleep(0.2)
 
@@ -96,14 +93,16 @@ class FissureMeshtasticNode:
     def add_message_id(self, msg_id: str):
         """Add a message ID to the cache and clean up expired IDs."""
         self.cleanup_expired_message_ids()
-        self.recent_message_ids.append((msg_id, time.time()))
+        if msg_id not in [stored_id for stored_id, _ in self.recent_message_ids]:
+            self.recent_message_ids.append((msg_id, time.time()))
+        # self.logger.debug(f"Message ID Cache after adding {msg_id}: {self.recent_message_ids}")
 
     async def send_msg(self, msg_type: str, msg: Dict):
         msg_id = self.generate_short_uuid(4)  # Generate a 4-character short UUID
 
-        print("In the SEND!!")
-        print("Message Type:", msg_type)
-        print("Message Payload:", msg)
+        # print("In the SEND!!")
+        # print("Message Type:", msg_type)
+        # print("Message Payload:", msg)
 
         source = msg.get(MessageFields.SOURCE, "U")  # Default source to 'U' for unknown
         destination = msg.get(MessageFields.DESTINATION, "0")  # Default destination to '0'
@@ -111,7 +110,7 @@ class FissureMeshtasticNode:
         parameters = msg.get(MessageFields.PARAMETERS, {})
 
         msg_code = fissure.utils.MESSAGE_NAME_TO_CODE.get(msg_name, None)
-        print("Message Code:", msg_code)
+        # print("Message Code:", msg_code)
 
         if not msg_code:
             self.logger.error(f"No message code mapping found for {msg_name}")
@@ -130,7 +129,7 @@ class FissureMeshtasticNode:
         self.add_message_id(msg_id)  # Store the ID to avoid processing if it bounces back
         await asyncio.get_running_loop().run_in_executor(None, self.interface.sendText, message)
 
-        self.logger.info(f"Sent message with short UUID: {message}")
+        self.logger.info(f"Raw message sent: {message}")
 
     def _handle_message(self, packet, interface=None):
         """Handles incoming messages and decodes binary parameters if needed."""
@@ -156,12 +155,12 @@ class FissureMeshtasticNode:
                 self.add_message_id(msg_id)
 
                 # Map the message code back to the appropriate callback name
-                print("AT THE HANDLE MESSAGE")
-                print("Message Code:", msg_code)
+                # print("AT THE HANDLE MESSAGE")
+                # print("Message Code:", msg_code)
                 msg_name = fissure.utils.MESSAGE_CODE_MAP.get(msg_code, "unknownMessage")
-                print("Message Name:", msg_name)
+                # print("Message Name:", msg_name)
 
-                self.logger.info(f"Processing received message: {raw_text}")
+                # self.logger.info(f"Processing received message: {raw_text}")
 
                 # Decode binary payload from hex to original dictionary
                 parsed_parameters = {}
@@ -199,7 +198,7 @@ class FissureMeshtasticNode:
         :return: result of the executed callback
         :rtype: any
         """
-        print("In the CALLBACK!")
+        print("In the run_callback of fissuremeshtasticnode!")
         print("Context:", context)
         print("Parsed Command:", parsed_command)
 
@@ -259,14 +258,14 @@ class FissureMeshtasticNode:
         while not self.message_queue.empty():
             try:
                 msg = self.message_queue.get_nowait()
-                self.logger.debug(f"Cleared message from queue during disconnect: {msg}")
+                # self.logger.debug(f"Cleared message from queue during disconnect: {msg}")
             except Exception as e:
                 self.logger.warning(f"Failed to clear message queue: {e}")
 
         # Unsubscribe from Meshtastic events
         try:
             pub.unsubscribe(self._handle_message, "meshtastic.receive.text")
-            self.logger.info("Unsubscribed from Meshtastic receive events.")
+            # self.logger.info("Unsubscribed from Meshtastic receive events.")
         except Exception as e:
             self.logger.warning(f"Failed to unsubscribe from Meshtastic events: {e}")
 
@@ -275,7 +274,7 @@ class FissureMeshtasticNode:
             if self.interface:
                 self.interface.close()
                 self.interface = None  # Remove reference
-                self.logger.info("Meshtastic serial connection closed.")
+                # self.logger.info("Meshtastic serial connection closed.")
             else:
                 self.logger.warning("No valid Meshtastic serial interface found during disconnect.")
         except Exception as e:
@@ -284,3 +283,23 @@ class FissureMeshtasticNode:
         # Cleanup message ID cache
         self.recent_message_ids.clear()
         self.logger.info(f"Meshtastic node [{self.name}] disconnected and cleaned up.")
+
+
+    async def get_gps_position(self, timeout: int = 10) -> Optional[Dict[str, float]]:
+        try:
+            start_time = asyncio.get_running_loop().time()
+            while asyncio.get_running_loop().time() - start_time < timeout:
+                node_info = self.interface.getMyNodeInfo()
+                if node_info and "position" in node_info:
+                    position = node_info["position"]
+                    if "latitudeI" in position and "longitudeI" in position:
+                        latitude = round(position["latitudeI"] / 1e7, 6)
+                        longitude = round(position["longitudeI"] / 1e7, 6)
+                        altitude = position.get("altitude", 0.0)
+                        return {"latitude": latitude, "longitude": longitude, "altitude": altitude}
+                await asyncio.sleep(1)
+            print("GPS data not available within timeout.")
+            return None
+        except Exception as e:
+            print(f"Error accessing Meshtastic GPS: {e}")
+            return None

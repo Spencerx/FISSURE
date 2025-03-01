@@ -106,7 +106,7 @@ async def main(local_flag):
                 gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, sensor_node.hiprfisr_socket))
             # Temporary Serial Connection
             else:
-                gps_task = asyncio.create_task(gps_manager.periodic_gps_update("Meshtastic New Connection", sensor_node.serial_port))
+                gps_task = asyncio.create_task(gps_manager.periodic_gps_update("Meshtastic New Connection", sensor_node.meshtastic_serial_port))
     
     # Start Event Loop
     try:
@@ -184,8 +184,9 @@ class SensorNode():
         self.updateLoggingLevels(self.settings_dict['Sensor Node']['console_logging_level'], self.settings_dict['Sensor Node']['file_logging_level'])  # Add these fields to the export, import, hardware configuration window
 
         # Serial Values
-        self.serial_port = str(self.settings_dict['Sensor Node']['serial_port'])
-        self.serial_baud_rate = str(self.settings_dict['Sensor Node']['serial_baud_rate'])
+        self.gpsd_serial_port = str(self.settings_dict['Sensor Node']['gps']['gpsd_serial_port'])
+        self.meshtastic_serial_port = str(self.settings_dict['Sensor Node']['meshtastic_serial_port'])
+        self.meshtastic_serial_baud_rate = str(self.settings_dict['Sensor Node']['meshtastic_serial_baud_rate'])
 
         # Initialize Connection/Heartbeat Variables
         self.ip_address = str(self.settings_dict['Sensor Node']['ip_address'])
@@ -275,10 +276,10 @@ class SensorNode():
 
         # Serial
         elif self.network_type == "Meshtastic":
-            if self.serial_port is None:
+            if self.meshtastic_serial_port is None:
                 raise ValueError("Meshtastic connection requires a serial port and context")
 
-            self.hiprfisr_socket = fissure.comms.FissureMeshtasticNode(self.serial_port, f"{self.identifier}::sensor_node", self)
+            self.hiprfisr_socket = fissure.comms.FissureMeshtasticNode(self.meshtastic_serial_port, f"{self.identifier}::sensor_node", self)
 
 
     def register_callbacks(self, ctx: ModuleType):
@@ -2507,7 +2508,7 @@ class GPSManager:
         """
         try:
             # Read gpsd
-            get_coordinates = fissure.utils.hardware.probe_gpsd(self.logger, "DD")
+            get_coordinates = fissure.utils.hardware.probe_gpsd(self.logger, "DD", self.gpsd_serial_port, True)
             return get_coordinates
         except Exception as e:
             self.logger.error(f"Error getting GPS from gpsd: {e}")

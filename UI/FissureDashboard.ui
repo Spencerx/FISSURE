@@ -551,6 +551,7 @@
       <addaction name="actionacars_adsbexchange"/>
       <addaction name="actionAirframes"/>
       <addaction name="actionPlane_Sailing"/>
+      <addaction name="actionACARS_Hub"/>
      </widget>
      <addaction name="actionDump1090"/>
      <addaction name="actionGr_air_modes"/>
@@ -939,6 +940,7 @@
     <addaction name="actionHideo_Okawara"/>
     <addaction name="actionThe_Signal_Path"/>
     <addaction name="actionHamSCI_Resources"/>
+    <addaction name="actionTest_Measurement_Fundamentals"/>
    </widget>
    <widget class="QMenu" name="menuDemo">
     <property name="title">
@@ -3509,6 +3511,16 @@
   <action name="actionIEEE_OUI_List">
    <property name="text">
     <string>IEEE OUI List</string>
+   </property>
+  </action>
+  <action name="actionTest_Measurement_Fundamentals">
+   <property name="text">
+    <string>Test &amp;&amp; Measurement Fundamentals</string>
+   </property>
+  </action>
+  <action name="actionACARS_Hub">
+   <property name="text">
+    <string>ACARS Hub</string>
    </property>
   </action>
  </widget>

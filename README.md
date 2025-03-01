@@ -24,6 +24,10 @@ FISSURE is particularly effective in two key domains: 1) it provides hooks for R
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
 
+**Alert Listeners** for creating backchannels that accept alerts. Includes: folder/file changes, Meshtastic, MQTT, serial, TCP/UDP, website polling, and ZMQ SUB.
+
+![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
+
 **GPS Acquisition and Mapping** in sensor node configuration.
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 

@@ -24,13 +24,13 @@ async def recallInfoMeshtasticLT(component: object, tab_index=""):
     If the total payload exceeds 200 bytes when including 'notes', 'notes' is excluded.
     """
     # Recall Default Settings Saved Locally
-    component.logger.info("Recall Info LT")
+    # component.logger.info("Recall Info LT")
 
     filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Sensor_Node_Config", "default.yaml")
     with open(filename) as yaml_library_file:
         settings_dict = yaml.load(yaml_library_file, yaml.FullLoader)
 
-    print(settings_dict)
+    # print(settings_dict)
     
     # Extract only the essential fields for low-throughput messaging
     essential_fields = {
@@ -41,7 +41,7 @@ async def recallInfoMeshtasticLT(component: object, tab_index=""):
     }
 
     # Prepare the payload including the 'notes' field initially
-    payload = {
+    PARAMETERS = {
         'tab_index': essential_fields['tab_index'],
         'nickname': essential_fields['nickname'],
         'location': essential_fields['location'],
@@ -49,24 +49,25 @@ async def recallInfoMeshtasticLT(component: object, tab_index=""):
     }
 
     # Estimate the size of the payload with 'notes' and avoid pre-encoding
-    payload_size = len(str(payload).encode('utf-8'))
+    payload_size = len(str(PARAMETERS).encode('utf-8'))
 
     if payload_size > 200:
         component.logger.warning(f"Payload size exceeds 200 bytes ({payload_size} bytes). Excluding 'notes' field.")
-        payload.pop('notes', None)
+        PARAMETERS.pop('notes', None)
     else:
-        component.logger.info(f"Payload size within limits: {payload_size} bytes.")
+        pass
+        # component.logger.info(f"Payload size within limits: {payload_size} bytes.")
 
     # Send the payload directly as a dictionary
     response_message = {
         MessageFields.SOURCE: component.identifier,
         MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
         MessageFields.MESSAGE_NAME: "recallInfoMeshtasticReturnLT",
-        MessageFields.PARAMETERS: payload,
+        MessageFields.PARAMETERS: PARAMETERS,
     }
 
     await component.hiprfisr_socket.send_msg("Commands", response_message)
-    component.logger.info(f"Sent recallInfoMeshtasticReturnLT with payload: {payload}")
+    # component.logger.info(f"Sent recallInfoMeshtasticReturnLT with payload: {payload}")
 
 
 async def recallHardwareMeshtasticLT(component: object, sensor_node_id=""):
@@ -85,7 +86,7 @@ async def recallHardwareMeshtasticLT(component: object, sensor_node_id=""):
     print(settings_dict)
     
     # Prepare the payload
-    payload = {
+    PARAMETERS = {
         'tsi': settings_dict.get('Sensor Node', {}).get('tsi', ''),
         # 'pd': settings_dict.get('Sensor Node', {}).get('pd', ''),
         # 'attack': settings_dict.get('Sensor Node', {}).get('attack', ''),
@@ -94,7 +95,7 @@ async def recallHardwareMeshtasticLT(component: object, sensor_node_id=""):
     }
 
     # Estimate the size of the payload with 'notes' and avoid pre-encoding
-    payload_size = len(str(payload).encode('utf-8'))
+    payload_size = len(str(PARAMETERS).encode('utf-8'))
 
     if payload_size > 200:
         component.logger.warning(f"Payload size exceeds 200 bytes ({payload_size} bytes).")
@@ -107,11 +108,11 @@ async def recallHardwareMeshtasticLT(component: object, sensor_node_id=""):
         MessageFields.SOURCE: component.identifier,
         MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
         MessageFields.MESSAGE_NAME: "recallHardwareMeshtasticReturnLT",
-        MessageFields.PARAMETERS: payload,
+        MessageFields.PARAMETERS: PARAMETERS,
     }
 
     await component.hiprfisr_socket.send_msg("Commands", response_message)
-    component.logger.info(f"Sent recallHardwareMeshtasticReturnLT with payload: {payload}")
+    component.logger.info(f"Sent recallHardwareMeshtasticReturnLT with payload: {PARAMETERS}")
 
 
 async def recallStatusMeshtasticLT(component: object, tab_index=""):
@@ -122,7 +123,7 @@ async def recallStatusMeshtasticLT(component: object, tab_index=""):
     component.logger.info("Recall Status LT")
     
     # Prepare the payload
-    payload = {
+    PARAMETERS = {
         'tab_index': tab_index,
         'status': "test"
     }
@@ -132,8 +133,59 @@ async def recallStatusMeshtasticLT(component: object, tab_index=""):
         MessageFields.SOURCE: component.identifier,
         MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
         MessageFields.MESSAGE_NAME: "recallStatusMeshtasticReturnLT",
-        MessageFields.PARAMETERS: payload,
+        MessageFields.PARAMETERS: PARAMETERS,
     }
 
     await component.hiprfisr_socket.send_msg("Commands", response_message)
-    component.logger.info(f"Sent recallStatusMeshtasticReturnLT with payload: {payload}")
+    component.logger.info(f"Sent recallStatusMeshtasticReturnLT with payload: {PARAMETERS}")
+
+
+async def findGPS_CoordinatesLT(component: object, tab_index=0, gps_source="", format=""):
+    """
+    Find the sensor node GPS coordinates using gpsd and return the information.
+    """
+    print("FIRST IN THE CALLBACK")
+    # Retrieve Coordinates
+    if gps_source == "gpsd":
+        get_coordinates = fissure.utils.hardware.probe_gpsd(component.logger, format, component.gpsd_serial_port, False)
+    elif gps_source == "Meshtastic":
+        # Use Existing Serial Connection
+        if component.local_remote == "remote":
+            gps_data = await component.hiprfisr_socket.get_gps_position()
+            get_coordinates = fissure.utils.format_coordinates(
+                gps_data['latitude'], 
+                gps_data['longitude'],
+                format
+            )
+        # Establish Serial Connection
+        else:
+            gps_data = await fissure.utils.hardware.probeMeshtasticGPS(component.meshtastic_serial_port, 10)
+            get_coordinates = fissure.utils.format_coordinates(
+                gps_data['latitude'], 
+                gps_data['longitude'],
+                format
+            )
+
+    elif gps_source == "Saved":
+        get_coordinates = fissure.utils.format_coordinates(
+            component.gps_position['latitude'], 
+            component.gps_position['longitude'], 
+            format
+        )
+    else:
+        get_coordinates = "Invalid GPS Source"
+
+    # Return the Text
+    print("DOInG THE CALLBACK")
+    print(get_coordinates)
+    if get_coordinates:
+        print("dos send")
+        PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
+        response_message = {
+            MessageFields.SOURCE: component.identifier,
+            MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
+            MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResultsLT",
+            MessageFields.PARAMETERS: PARAMETERS,
+        }
+
+        await component.hiprfisr_socket.send_msg("Commands", response_message)

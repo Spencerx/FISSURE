@@ -2077,6 +2077,7 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionFIRMS.triggered.connect(MenuBarSlots._slotMenuFIRMS_Clicked)
     dashboard.window.actionMeshMap.triggered.connect(MenuBarSlots._slotMenuMeshMapClicked)
     dashboard.window.actionIEEE_OUI_List.triggered.connect(MenuBarSlots._slotMenuIEEE_OUI_ListClicked)
+    dashboard.window.actionACARS_Hub.triggered.connect(MenuBarSlots._slotMenuACARS_HubClicked)
         
     # Lessons Menu
     dashboard.window.actionLessonOpenBTS.triggered.connect(MenuBarSlots._slotMenuLessonOpenBTS_Clicked)
@@ -2115,6 +2116,7 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionHamSCI_Resources.triggered.connect(MenuBarSlots._slotMenuLessonHamSCI_ResourcesClicked)
     dashboard.window.actionLesson_Z_Wave.triggered.connect(MenuBarSlots._slotMenuLessonZ_WaveClicked)
     dashboard.window.actionLesson_Ceiling_Fans.triggered.connect(MenuBarSlots._slotMenuLessonCeilingFansClicked)
+    dashboard.window.actionTest_Measurement_Fundamentals.triggered.connect(MenuBarSlots._slotMenuLessonTestMeasurementFundamentalsClicked)    
 
     # Demo Menu
     dashboard.window.actionDemo_All.triggered.connect(lambda: MenuBarSlots._slotMenuDemoAllClicked(dashboard))

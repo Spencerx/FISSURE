@@ -6,6 +6,8 @@ MESSAGE_CODE_MAP = {
     "B2": "recallHardwareMeshtasticReturnLT",
     "C1": "recallStatusMeshtasticLT",
     "C2": "recallStatusMeshtasticReturnLT",    
+    "D1": "findGPS_CoordinatesLT",    
+    "D2": "findGPS_CoordinatesResultsLT",    
 
     
 }

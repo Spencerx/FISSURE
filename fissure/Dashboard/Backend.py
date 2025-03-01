@@ -2072,3 +2072,20 @@ class DashboardBackend:
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def findGPS_CoordinatesLT(self, tab_index=0, gps_source="", format=""):
+        """
+        Queries the remote sensor node for its GPS coordinates. 
+        """
+        PARAMETERS = {
+            "tab_index": tab_index,
+            "gps_source": gps_source,
+            "format": format
+        }
+        find_gps_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, find_gps_cmd)

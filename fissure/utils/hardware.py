@@ -1,12 +1,13 @@
 import subprocess
 import time
 import logging
-from gps import gps, WATCH_ENABLE
+from gps import gps, WATCH_ENABLE, WATCH_DEVICE, WATCH_JSON
 from fissure.utils import format_coordinates, get_library_version
 import asyncio
 import meshtastic
 from meshtastic.serial_interface import SerialInterface
 from typing import Optional, Dict
+import socket
 
 
 SUPPORTED_HARDWARE = [
@@ -1185,39 +1186,98 @@ def findRSPdxR2(guess_serial="", guess_index=0):
     return scan_results, guess_index
 
 
-def probe_gpsd(logger: logging.Logger, format=""):
+def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM2", return_altitude=False):
     """ 
     Probes GPS devices using gpsd and returns the coordinates.
     """
+    session = None
     try:
-        session = gps(mode=WATCH_ENABLE)
+        logger.info(f"Configuring gpsd for GPS device at {serial_port}")
+        
+        # Step 1: Kill any existing gpsd processes
+        subprocess.run(["sudo", "killall", "gpsd"], check=False)
+        time.sleep(0.2)
+
+        # Step 2: Clear any processes using the serial port
+        subprocess.run(["sudo", "fuser", "-k", serial_port], check=False)
+        time.sleep(0.1)
+
+        # Step 3: Start gpsd with the specified serial port
+        gpsd_command = [
+            "sudo", "gpsd", "-n", "-D", "4", "-F", "/var/run/gpsd.sock", serial_port
+        ]
+        logger.info(f"Starting gpsd with command: {' '.join(gpsd_command)}")
+        subprocess.run(gpsd_command, check=True)
+        time.sleep(0.5)  # Delay for gpsd initialization
+
+        # Step 4: Verify gpsd socket availability
+        try:
+            with socket.create_connection(("localhost", 2947), timeout=2) as sock:
+                logger.info("Successfully connected to gpsd socket on port 2947.")
+        except Exception as e:
+            logger.error(f"Unable to connect to gpsd socket: {e}")
+            return None
+
+        # Step 5: Initialize the GPS session using the gpsd socket
+        session = gps(mode=WATCH_ENABLE | WATCH_JSON)
+        logger.info("GPS session initialized. Waiting for data...")
 
         start_time = time.time()  # Track the start time
-        timeout = 3  # Maximum wait time in seconds
+        timeout = 10  # Set timeout to 10 seconds for GPS fix
 
         while True:
-            report = session.next()
+            try:
+                logger.info("Attempting to connect to GPS device via gpsd...")
+                report = session.next()
+                logger.debug(f"GPS Report: {report}")  # Log all received data
+                
+            except StopIteration:
+                logger.error("GPS session stopped unexpectedly.")
+                return None
+            except Exception as e:
+                logger.error(f"Error during gpsd session.next(): {e}")
+                return None
 
-            if report['class'] == 'TPV':  # Check if it's valid position data
+            # Check if we received a valid TPV (Time-Position-Velocity) report
+            if report['class'] == 'TPV':
                 lat = getattr(report, 'lat', None)
                 lon = getattr(report, 'lon', None)
 
                 if lat is not None and lon is not None:
-                    get_coordinates = format_coordinates(lat, lon, format)
-                    logger.debug(f"✅ GPS Data Received: {get_coordinates}")  # Debugging output
-                    return {
-                        "latitude": lat,
-                        "longitude": lon,
-                        "altitude": getattr(report, 'alt', None)
-                    } # Exit loop once we have valid coordinates
+                    # Sensor node gps_position is stored as 3D dictionary for TAK
+                    if return_altitude == True:
+                        alt = getattr(report, 'alt', None)
+                        return {
+                            "latitude": lat,
+                            "longitude": lon,
+                            "altitude": alt
+                        }
+                    # Dashboard sensor node configuration only uses 2D: lat, lon
+                    else:
+                        get_coordinates = format_coordinates(lat, lon, format)
+                        logger.debug(f"✅ GPS Data Received: {get_coordinates}")
+                        return get_coordinates
+                else:
+                    logger.debug("Valid TPV report received, but coordinates are None.")
+
+            else:
+                logger.debug(f"Non-TPV GPS report received: {report['class']}")
 
             if time.time() - start_time > timeout:
-                logger.debug("❌ GPS timeout: No valid data received.")
+                logger.error("❌ GPS timeout: No valid data received within timeout period.")
                 return None
 
     except Exception as e:
-        logger.error(f"Error: {e}")
-        return
+        logger.error(f"Error in GPS probe: {e}")
+        return None
+
+    finally:
+        if session:
+            try:
+                session.close()
+                logger.info("GPS session closed cleanly.")
+            except Exception as e:
+                logger.error(f"Error closing GPS session: {e}")
     
 
 async def probeMeshtasticGPS(serial_port: str, timeout: int = 10) -> Optional[Dict[str, float]]:

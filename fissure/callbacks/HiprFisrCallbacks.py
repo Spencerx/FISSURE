@@ -1539,6 +1539,33 @@ async def terminateSensorNode(component: object, sensor_node_id):
     # component.sensor_nodes[sensor_node_id].__init__()
     # component.sensor_nodes[sensor_node_id] = None
 
+    # Close the HIPRFISR Socket
+    get_connections = component.sensor_nodes[sensor_node_id].listener.connections
+    connections_copy = set(get_connections)
+    for connection in connections_copy:
+        component.sensor_nodes[sensor_node_id].listener.disconnect(connection)
+    # component.sensor_nodes[sensor_node_id].listener.shutdown()
+
+    component.sensor_nodes[sensor_node_id] = None
+
+    # Shift Sensor Node Variables By One
+    for n in range(sensor_node_id, len(component.sensor_nodes) - 1):
+        component.sensor_nodes[n] = component.sensor_nodes[n + 1]
+        component.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][n] = component.heartbeats[
+            fissure.comms.Identifiers.SENSOR_NODE
+        ][n + 1]
+        if component.sensor_nodes[n]:
+            component.sensor_nodes[n].connected = component.sensor_nodes[n + 1].connected
+            component.sensor_nodes[n].terminated = component.sensor_nodes[n + 1].terminated
+
+            if component.sensor_nodes[n + 1].connected is True:
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "componentConnected",
+                    fissure.comms.MessageFields.PARAMETERS: str(n),
+                }
+                await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 
 async def connectToSensorNodeIP(component: object, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):
     """
@@ -1644,16 +1671,17 @@ async def disconnectFromSensorNode(component: object, sensor_node_id=0, ip_addre
             component.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][n] = component.heartbeats[
                 fissure.comms.Identifiers.SENSOR_NODE
             ][n + 1]
-            component.sensor_nodes[n].connected = component.sensor_nodes[n + 1].connected
-            component.sensor_nodes[n].terminated = component.sensor_nodes[n + 1].terminated
+            if component.sensor_nodes[n]:
+                component.sensor_nodes[n].connected = component.sensor_nodes[n + 1].connected
+                component.sensor_nodes[n].terminated = component.sensor_nodes[n + 1].terminated
 
-            if component.sensor_nodes[n + 1].connected is True:
-                msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "componentConnected",
-                    fissure.comms.MessageFields.PARAMETERS: str(n),
-                }
-                await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+                if component.sensor_nodes[n + 1].connected is True:
+                    msg = {
+                        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                        fissure.comms.MessageFields.MESSAGE_NAME: "componentConnected",
+                        fissure.comms.MessageFields.PARAMETERS: str(n),
+                    }
+                    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
     # # Send to Sensor Node

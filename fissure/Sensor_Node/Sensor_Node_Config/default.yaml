@@ -15,6 +15,7 @@ Sensor Node:
                altitude: 10.5
           gps_source: gpsd  # gpsd or Meshtastic
           gps_update_interval_seconds: 20  # 300
+          gpsd_serial_port: '/dev/ttyACM2'
      hb_port: '5051'     
      ip_address: '127.0.0.1'
      iq:
@@ -33,8 +34,8 @@ Sensor Node:
      nickname: Local Sensor Node  # "Local Sensor Node" for local
      notes: fdh
      pd: ''
-     serial_port: '/dev/ttyACM1'
-     serial_baud_rate: '115200'
+     meshtastic_serial_port: '/dev/ttyACM1'
+     meshtastic_serial_baud_rate: '115200'
      tsi: ''
 
 
