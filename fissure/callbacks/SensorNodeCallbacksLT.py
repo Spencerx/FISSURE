@@ -66,7 +66,7 @@ async def recallInfoMeshtasticLT(component: object, tab_index=""):
         MessageFields.PARAMETERS: PARAMETERS,
     }
 
-    await component.hiprfisr_socket.send_msg("Commands", response_message)
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)
     # component.logger.info(f"Sent recallInfoMeshtasticReturnLT with payload: {payload}")
 
 
@@ -111,7 +111,7 @@ async def recallHardwareMeshtasticLT(component: object, sensor_node_id=""):
         MessageFields.PARAMETERS: PARAMETERS,
     }
 
-    await component.hiprfisr_socket.send_msg("Commands", response_message)
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)
     component.logger.info(f"Sent recallHardwareMeshtasticReturnLT with payload: {PARAMETERS}")
 
 
@@ -136,7 +136,7 @@ async def recallStatusMeshtasticLT(component: object, tab_index=""):
         MessageFields.PARAMETERS: PARAMETERS,
     }
 
-    await component.hiprfisr_socket.send_msg("Commands", response_message)
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)
     component.logger.info(f"Sent recallStatusMeshtasticReturnLT with payload: {PARAMETERS}")
 
 
@@ -188,4 +188,150 @@ async def findGPS_CoordinatesLT(component: object, tab_index=0, gps_source="", f
             MessageFields.PARAMETERS: PARAMETERS,
         }
 
-        await component.hiprfisr_socket.send_msg("Commands", response_message)
+        await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)
+
+
+async def probeHardwareLT(component: object, tab_index=0, table_row_text=[]):
+    """
+    Probe the selected hardware from the table and return the information.
+    """
+    get_hardware = str(table_row_text[0])
+    output = ""
+    height_width = ["", ""]
+
+    if get_hardware == "USRP X3x0":
+        get_ip = str(table_row_text[5])
+        output = await fissure.utils.hardware.probeUSRP_X3x0(get_ip)
+
+    elif (get_hardware == "USRP B2x0") or (get_hardware == "USRP B20xmini"):
+        output = await fissure.utils.hardware.probeUSRP_B2x0()
+
+    elif get_hardware == "bladeRF":
+        output = await fissure.utils.hardware.probe_bladeRF()
+        if not output.startswith("Error:"):
+            height_width = [140, 400]
+
+    elif get_hardware == "LimeSDR":
+        output = await fissure.utils.hardware.probeLimeSDR()
+        if not output.startswith("Error:"):
+            height_width = [75, 700]
+
+    elif get_hardware == "HackRF":
+        output = await fissure.utils.hardware.probeHackRF()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
+
+    elif get_hardware == "PlutoSDR":
+        output = await fissure.utils.hardware.probePlutoSDR()
+        if not output.startswith("Error:"):
+            height_width = [600, 900]
+
+    elif get_hardware == "USRP2":
+        get_ip = str(table_row_text[5])
+        output = await fissure.utils.hardware.probeUSRP2(get_ip)
+
+    elif get_hardware == "USRP N2xx":
+        # Get IP Address
+        get_ip = str(table_row_text[5])
+        output = await fissure.utils.hardware.probeUSRP_N2xx(get_ip)
+
+    elif get_hardware == "bladeRF 2.0":
+        output = await fissure.utils.hardware.probe_bladeRF2()
+        if not output.startswith("Error:"):
+            height_width = [140, 400]
+
+    elif get_hardware == "USRP X410":
+        get_ip = str(table_row_text[5])
+        output = await fissure.utils.hardware.probeUSRP_X410(get_ip)
+
+    elif get_hardware == "RTL2832U":
+        output = await fissure.utils.hardware.probeRTL2832U()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
+
+    elif get_hardware == "RSPduo":
+        output = await fissure.utils.hardware.probeRSPduo()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
+
+    elif get_hardware == "RSPdx":
+        output = await fissure.utils.hardware.probeRSPdx()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
+
+    elif get_hardware == "RSPdx R2":
+        output = await fissure.utils.hardware.probeRSPdxR2()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
+
+    # Return Text up to a Limit
+    print(output)
+    if output and len(output) > 10:
+        output = output[:10]
+        print(output)
+
+    # Return the Text
+    PARAMETERS = {"tab_index": tab_index, "output": output, "height_width": height_width}
+    msg = {
+        MessageFields.SOURCE: component.identifier,
+        MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
+        MessageFields.MESSAGE_NAME: "hardwareProbeResultsLT",
+        MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def scanHardwareLT(component: object, tab_index=0, hardware_list=[]):
+    """
+    Scans all types of hardware included in the hardware_list and returns the information.
+    """
+    # Scan Hardware
+    all_scan_results = []
+    for n in range(0, len(hardware_list)):
+        get_hardware = hardware_list[n]
+        if get_hardware == "USRP X3x0":
+            all_scan_results.append(fissure.utils.hardware.findX310()[0])
+        elif get_hardware == "USRP B2x0":
+            all_scan_results.append(fissure.utils.hardware.findB2x0())
+        elif get_hardware == "HackRF":
+            all_scan_results.append(fissure.utils.hardware.findHackRF()[0])
+        elif get_hardware == "RTL2832U":
+            all_scan_results.append(fissure.utils.hardware.findRTL2832U()[0])
+        elif get_hardware == "802.11x Adapter":
+            all_scan_results.append(fissure.utils.hardware.find80211x()[0])
+        elif get_hardware == "USRP B20xmini":
+            all_scan_results.append(fissure.utils.hardware.findB205mini())
+        elif get_hardware == "LimeSDR":
+            all_scan_results.append(fissure.utils.hardware.findLimeSDR())
+        elif get_hardware == "bladeRF":
+            bladerf_results = fissure.utils.hardware.find_bladeRF2()[0]
+            bladerf_results[0] = "bladeRF"  # Instead of bladeRF 2.0
+            all_scan_results.append(bladerf_results)
+        elif get_hardware == "Open Sniffer":
+            all_scan_results.append(["Open Sniffer", "", "", "", "", "", ""])
+        elif get_hardware == "PlutoSDR":
+            all_scan_results.append(fissure.utils.hardware.findPlutoSDR()[0])
+        elif get_hardware == "USRP2":
+            all_scan_results.append(fissure.utils.hardware.findUSRP2())
+        elif get_hardware == "USRP N2xx":
+            all_scan_results.append(fissure.utils.hardware.findUSRP_N2xx())
+        elif get_hardware == "bladeRF 2.0":
+            all_scan_results.append(fissure.utils.hardware.find_bladeRF2()[0])
+        elif get_hardware == "USRP X410":
+            all_scan_results.append(fissure.utils.hardware.findX410())
+        elif get_hardware == "RSPduo":
+            all_scan_results.append(fissure.utils.hardware.findRSPduo()[0])
+        elif get_hardware == "RSPdx":
+            all_scan_results.append(fissure.utils.hardware.findRSPdx()[0])
+        elif get_hardware == "RSPdx R2":
+            all_scan_results.append(fissure.utils.hardware.findRSPdxR2()[0])
+
+    # Return Scan Results
+    PARAMETERS = {"tab_index": tab_index, "hardware_scan_results": all_scan_results}
+    msg = {
+        MessageFields.SOURCE: component.identifier,
+        MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
+        MessageFields.MESSAGE_NAME: "hardwareScanResultsLT",
+        MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)    

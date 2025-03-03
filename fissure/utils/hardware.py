@@ -1624,3 +1624,272 @@ def getHardwareChannels(hardware_type: str, tx_rx: str):
             channel_values = None
 
     return channel_values
+
+
+async def probeUSRP_X3x0(ip_address=""):
+    """
+    Asynchronously probes a USRP X3x0 device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            f'uhd_usrp_probe --args="addr={ip_address}"',
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+    
+    return output
+
+
+async def probeUSRP_B2x0():
+    """
+    Asynchronously probes a USRP B200/B210 device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            'uhd_usrp_probe --args="type=b200"',
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probe_bladeRF():
+    """
+    Asynchronously probes a bladeRF device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "bladeRF-cli -p",
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+    
+    return output
+
+
+async def probeLimeSDR():
+    """
+    Asynchronously probes a LimeSDR device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "LimeUtil --find",
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeHackRF():
+    """
+    Asynchronously probes a HackRF device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "hackrf_info",
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probePlutoSDR():
+    """
+    Asynchronously probes a PlutoSDR device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "iio_info -n pluto.local",
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeUSRP2(ip_address=""):
+    """
+    Asynchronously probes a USRP2 device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            f'uhd_usrp_probe --args="addr={ip_address}"',
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeUSRP2_N2xx(ip_address=""):
+    """
+    Asynchronously probes a USRP2 N2xx device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            f'uhd_usrp_probe --args="addr={ip_address}"',
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+async def probe_bladeRF2():
+    """
+    Asynchronously probes a bladeRF 2.0 device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "bladeRF-cli -p",
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+    
+    return output
+
+
+async def probeUSRP_X410(ip_address=""):
+    """
+    Asynchronously probes a USRP X410 device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            f'uhd_usrp_probe --args="addr={ip_address}"',
+            shell=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeRTL2832U():
+    """
+    Asynchronously probes an RTL2832U device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "rtl_sdr -d -1",
+            shell=True, 
+            stdout=asyncio.subprocess.PIPE, 
+            stderr=asyncio.subprocess.PIPE
+        )  # Return text is in stderr
+        _, output = await proc.communicate()
+        output = output.decode()
+        output = output.split("No matching devices found.")[0]
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeRSPduo():
+    """
+    Asynchronously probes an RSPduo device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "lsusb",
+            shell=True, 
+            stdout=asyncio.subprocess.PIPE, 
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+    except Exception as e:
+        output = f"Error: {str(e)}"
+    
+    return output
+
+
+async def probeRSPdx():
+    """
+    Asynchronously probes an RSPdx device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "lsusb",
+            shell=True, 
+            stdout=asyncio.subprocess.PIPE, 
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeRSPdxR2():
+    """
+    Asynchronously probes an RSPdx R2 device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "lsusb",
+            shell=True, 
+            stdout=asyncio.subprocess.PIPE, 
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output

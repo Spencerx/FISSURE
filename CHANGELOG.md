@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-02
+
+Scan and probe functions for Meshtastic connections
+
+### Added
+
+- Scan and probe functions for remote connections with Meshtastic
+- closeEvent() function to HarwareSelectDialog.py
+
+### Changed
+
+- Moving hardware probe actions to utiliy functions in hardware.py
+- Replaced HardwareSelectSlots.py cancel() function with closeEvent()
+
+### Fixed
+
+- Starting local sensor node and closing Dashboard with the 'X' before clicking apply gives warning to prevent hanging on close
+
 ## 2025-2-28
 
 Fixing GPS acquisition, adding password prompt exceptions.

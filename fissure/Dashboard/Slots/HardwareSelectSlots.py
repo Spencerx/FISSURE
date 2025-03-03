@@ -852,10 +852,20 @@ async def probe(HWSelect: QtCore.QObject):
         HWSelect.pushButton_scan_results_probe_4,
         HWSelect.pushButton_scan_results_probe_5
     ]
-    probe_buttons[tab_index].setEnabled(False)
 
     # Send Message for HIPRFISR to Sensor Node Connections
-    await HWSelect.dashboard.backend.probe_sensor_node(str(tab_index), get_row_text)
+    local_remote_stacked_widgets = [
+        HWSelect.stackedWidget_local_remote_1,
+        HWSelect.stackedWidget_local_remote_2,
+        HWSelect.stackedWidget_local_remote_3,
+        HWSelect.stackedWidget_local_remote_4,
+        HWSelect.stackedWidget_local_remote_5
+    ]
+    if local_remote_stacked_widgets[tab_index].currentIndex() == 2:
+        probe_buttons[tab_index].setEnabled(False)
+        await HWSelect.dashboard.backend.probeHardware(str(tab_index), get_row_text)
+    elif local_remote_stacked_widgets[tab_index].currentIndex() == 4:
+        await HWSelect.dashboard.backend.probeHardwareLT(str(tab_index), get_row_text)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -879,7 +889,17 @@ async def scan(HWSelect: QtCore.QObject):
             hardware_list.append(str(get_list_widget.item(n).text()))
 
     # Send Message for HIPRFISR to Sensor Node Connections
-    await HWSelect.dashboard.backend.scan_sensor_node(str(tab_index), hardware_list)
+    local_remote_stacked_widgets = [
+        HWSelect.stackedWidget_local_remote_1,
+        HWSelect.stackedWidget_local_remote_2,
+        HWSelect.stackedWidget_local_remote_3,
+        HWSelect.stackedWidget_local_remote_4,
+        HWSelect.stackedWidget_local_remote_5
+    ]
+    if local_remote_stacked_widgets[tab_index].currentIndex() == 2:
+        await HWSelect.dashboard.backend.scanHardware(str(tab_index), hardware_list)
+    elif local_remote_stacked_widgets[tab_index].currentIndex() == 4:
+        await HWSelect.dashboard.backend.scanHardwareLT(str(tab_index), hardware_list)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1936,20 +1956,6 @@ def apply(HWSelect: QtCore.QObject):
     elif len(HWSelect.dashboard.backend.settings['sensor_node5']['nickname']) == 0:
         HWSelect.dashboard.ui.pushButton_top_node5.setVisible(True)
         HWSelect.dashboard.ui.pushButton_top_node5.setText("New Sensor Node")
-
-    # Close Window
-    HWSelect.accept()
-
-
-@QtCore.pyqtSlot(QtCore.QObject)
-def cancel(HWSelect: QtCore.QObject):
-    """
-    Close the HW Select window without saving changes
-    """
-    # Detect Connect without Saving
-    if any(HWSelect.new_local_connection):
-        fissure.Dashboard.UI_Components.Qt5.errorMessage("Click Apply or disconnect from local sensor node before cancelling.")
-        return
 
     # Close Window
     HWSelect.accept()

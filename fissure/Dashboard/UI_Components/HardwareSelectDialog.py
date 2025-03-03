@@ -408,7 +408,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict=""))
         self.pushButton_export.clicked.connect(lambda: HardwareSelectSlots.export(self))
         self.pushButton_apply.clicked.connect(lambda: HardwareSelectSlots.apply(self))
-        self.pushButton_cancel.clicked.connect(lambda: HardwareSelectSlots.cancel(self))
+        self.pushButton_cancel.clicked.connect(self.close)
         self.pushButton_delete.clicked.connect(lambda: HardwareSelectSlots.delete(self))
 
 
@@ -730,3 +730,16 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             return True
         else:
             return False
+        
+
+    def closeEvent(self, event):
+        """
+        Close the HW Select window without saving changes
+        """
+        # Detect Connect without Saving
+        if any(self.new_local_connection):
+            fissure.Dashboard.UI_Components.Qt5.errorMessage("Click Apply or disconnect from local sensor node before cancelling.")
+            event.ignore()
+        else:
+            # Close Window
+            event.accept()        

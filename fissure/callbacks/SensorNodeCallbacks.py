@@ -823,225 +823,69 @@ async def probeHardware(component: object, tab_index=0, table_row_text=[]):
     height_width = ["", ""]
 
     if get_hardware == "USRP X3x0":
-        # Get IP Address
         get_ip = str(table_row_text[5])
-
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                'uhd_usrp_probe --args="addr=' + get_ip + '" &',
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
-        except Exception as e:
-            output = f"Error: {str(e)}"
+        output = await fissure.utils.hardware.probeUSRP_X3x0(get_ip)
 
     elif (get_hardware == "USRP B2x0") or (get_hardware == "USRP B20xmini"):
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                'uhd_usrp_probe --args="type=b200" &',
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
-        except Exception as e:
-            output = f"Error: {str(e)}"
+        output = await fissure.utils.hardware.probeUSRP_B2x0()
 
     elif get_hardware == "bladeRF":
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "bladeRF-cli -p &",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
+        output = await fissure.utils.hardware.probe_bladeRF()
+        if not output.startswith("Error:"):
             height_width = [140, 400]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "LimeSDR":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "LimeUtil --find &",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
+        output = await fissure.utils.hardware.probeLimeSDR()
+        if not output.startswith("Error:"):
             height_width = [75, 700]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "HackRF":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "hackrf_info &",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
+        output = await fissure.utils.hardware.probeHackRF()
+        if not output.startswith("Error:"):
             height_width = [300, 500]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "PlutoSDR":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "iio_info -n pluto.local &",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
+        output = await fissure.utils.hardware.probePlutoSDR()
+        if not output.startswith("Error:"):
             height_width = [600, 900]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "USRP2":
-        # Get IP Address
         get_ip = str(table_row_text[5])
-
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                'uhd_usrp_probe --args="addr=' + get_ip + '" &',
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
-        except Exception as e:
-            output = f"Error: {str(e)}"
+        output = await fissure.utils.hardware.probeUSRP2(get_ip)
 
     elif get_hardware == "USRP N2xx":
         # Get IP Address
         get_ip = str(table_row_text[5])
-
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                'uhd_usrp_probe --args="addr=' + get_ip + '" &',
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
-        except Exception as e:
-            output = f"Error: {str(e)}"
+        output = await fissure.utils.hardware.probeUSRP_N2xx(get_ip)
 
     elif get_hardware == "bladeRF 2.0":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "bladeRF-cli -p &",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
+        output = await fissure.utils.hardware.probe_bladeRF2()
+        if not output.startswith("Error:"):
             height_width = [140, 400]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "USRP X410":
-        # Get IP Address
         get_ip = str(table_row_text[5])
-
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                'uhd_usrp_probe --args="addr=' + get_ip + '" &',
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            output, _ = await proc.communicate()
-            output = output.decode()
-        except Exception as e:
-            output = f"Error: {str(e)}"
+        output = await fissure.utils.hardware.probeUSRP_X410(get_ip)
 
     elif get_hardware == "RTL2832U":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "rtl_sdr -d -1 &", 
-                shell=True, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )  # Return text is in stderr
-            _, output = await proc.communicate()
-            output = output.decode()
-            output = output.split("No matching devices found.")[0]
-
+        output = await fissure.utils.hardware.probeRTL2832U()
+        if not output.startswith("Error:"):
             height_width = [300, 500]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "RSPduo":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "lsusb &", 
-                shell=True, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )  # Return text is in stderr
-            output, _ = await proc.communicate()
-            output = output.decode()
-
+        output = await fissure.utils.hardware.probeRSPduo()
+        if not output.startswith("Error:"):
             height_width = [300, 500]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "RSPdx":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "lsusb &", 
-                shell=True, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )  # Return text is in stderr
-            output, _ = await proc.communicate()
-            output = output.decode()
-
+        output = await fissure.utils.hardware.probeRSPdx()
+        if not output.startswith("Error:"):
             height_width = [300, 500]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     elif get_hardware == "RSPdx R2":
-        # Probe
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                "lsusb &", 
-                shell=True, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE
-            )  # Return text is in stderr
-            output, _ = await proc.communicate()
-            output = output.decode()
-
+        output = await fissure.utils.hardware.probeRSPdxR2()
+        if not output.startswith("Error:"):
             height_width = [300, 500]
-        except Exception as e:
-            output = f"Error: {str(e)}"
 
     # Return the Text
     PARAMETERS = {"tab_index": tab_index, "output": output, "height_width": height_width}

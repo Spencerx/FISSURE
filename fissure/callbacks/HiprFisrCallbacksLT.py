@@ -162,3 +162,60 @@ async def recallStatusMeshtasticReturnLT(component: object, tab_index="", status
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def scanHardwareLT(component: object, tab_index=0, hardware_list=[]):
+    """
+    Sends a message to a sensor node to scan for hardware information.
+    """
+    # Forward the Message
+    PARAMETERS = {"tab_index": tab_index, "hardware_list": hardware_list}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: tab_index,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "scanHardwareLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def probeHardwareLT(component: object, tab_index, table_row_text):
+    """
+    Sends a message to a sensor node to probe select hardware.
+    """
+    # Forward the Message
+    PARAMETERS = {"tab_index": tab_index, "table_row_text": table_row_text}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: tab_index,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "probeHardwareLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def hardwareProbeResultsLT(component: object, tab_index=0, output="", height_width=[]):
+    """
+    Forwards the hardware probe results message to the Dashboard.
+    """
+    # PARAMETERS = {"tab_index": tab_index, "output": eval(f'"{output}"'), "height_width": height_width}
+    PARAMETERS = {"tab_index": tab_index, "output": output, "height_width": height_width}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "hardwareProbeResultsLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def hardwareScanResultsLT(component: object, tab_index=0, hardware_scan_results=[]):
+    """
+    Forwards the hardware scan results message to the Dashboard.
+    """
+    PARAMETERS = {"tab_index": tab_index, "hardware_scan_results": hardware_scan_results}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "hardwareScanResultsLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

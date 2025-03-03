@@ -535,7 +535,10 @@ class DashboardBackend:
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, disconnect_cmd)
 
 
-    async def scan_sensor_node(self, tab_index, hardware_list):
+    async def scanHardware(self, tab_index, hardware_list):
+        """
+        Scans the listed hardware on the sensor node for information.
+        """
         PARAMETERS = {"tab_index": tab_index, "hardware_list": hardware_list}
         scan_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
@@ -545,7 +548,7 @@ class DashboardBackend:
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, scan_cmd)
 
 
-    async def probe_sensor_node(self, tab_index, table_row_text):
+    async def probeHardware(self, tab_index, table_row_text):
         """
         Probes hardware connected to a sensor node.
         """
@@ -2089,3 +2092,29 @@ class DashboardBackend:
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, find_gps_cmd)
+
+
+    async def scanHardwareLT(self, tab_index, hardware_list):
+        """
+        Scans the listed hardware on the sensor node for information.
+        """
+        PARAMETERS = {"tab_index": tab_index, "hardware_list": hardware_list}
+        scan_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "scanHardwareLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, scan_cmd)
+
+
+    async def probeHardwareLT(self, tab_index, table_row_text):
+        """
+        Probes hardware connected to a sensor node.
+        """
+        PARAMETERS = {"tab_index": tab_index, "table_row_text": table_row_text}
+        probe_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "probeHardwareLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, probe_cmd) 
