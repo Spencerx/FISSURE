@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-03
+
+Packet Crafter fixes and updates.
+
+### Added
+
+- Import and Export buttons to Packet Crafter
+
+### Changed
+
+- Data for UDP packets in Attack>Packet Crafter tab changed from String to Binary/Hex, edited AttackTabSlots.py to support hex strings and "\xFF\xAA" strings
+- Modified UDP packet types in FISSURE database to support binary/hex
+
+### Fixed
+
+- Changing protocol to/from 802.11x toggles "Calculate CRCs" and "Assemble" button visibility
+- "Restore Defaults" button in Packet Crafter is tied to the right callback function
+
 ## 2025-3-02
 
 Scan and probe functions for Meshtastic connections

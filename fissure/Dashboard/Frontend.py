@@ -3171,9 +3171,6 @@ def connect_iq_slots(dashboard: Dashboard):
     dashboard.ui.listWidget_iq_files.itemDoubleClicked.connect(lambda: IQDataTabSlots._slotIQ_LoadIQ_Data(dashboard))
 
     # Push Button
-    dashboard.ui.pushButton_packet_restore_defaults.clicked.connect(
-        lambda: IQDataTabSlots._slotPacketRestoreDefaultsClicked(dashboard)
-    )
     dashboard.ui.pushButton1_iq_tab_record.clicked.connect(
         lambda: IQDataTabSlots._slotIQ_TabClicked(dashboard, button_name="pushButton1_iq_tab_record")
     )
@@ -3627,7 +3624,13 @@ def connect_attack_slots(dashboard: Dashboard):
     )
     dashboard.ui.pushButton_attack_multi_stage_triggers_clear.clicked.connect(
         lambda: AttackTabSlots._slotAttackMultiStageTriggersClearClicked(dashboard)
-    )    
+    )
+    dashboard.ui.pushButton_packet_import.clicked.connect(
+        lambda: AttackTabSlots._slotPacketImportClicked(dashboard)
+    )
+    dashboard.ui.pushButton_packet_export.clicked.connect(
+        lambda: AttackTabSlots._slotPacketExportClicked(dashboard)
+    )
 
     # Table Widget
     dashboard.ui.tableWidget1_attack_packet_editor.cellChanged.connect(

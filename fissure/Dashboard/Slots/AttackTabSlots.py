@@ -41,9 +41,14 @@ def _slotPacketProtocols(dashboard: QtCore.QObject):
 
     # Change the Stacked Widget for Scapy Controls
     if "802.11x" in current_protocol_key:
+        dashboard.ui.pushButton_packet_calculate_crcs.setVisible(False)
+        dashboard.ui.pushButton_packet_assemble.setVisible(False)
         dashboard.ui.stackedWidget_packet.setCurrentIndex(1)
     else:
+        dashboard.ui.pushButton_packet_calculate_crcs.setVisible(True)
+        dashboard.ui.pushButton_packet_assemble.setVisible(True)
         dashboard.ui.stackedWidget_packet.setCurrentIndex(0)
+
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1240,7 +1245,8 @@ def _slotPacketScapyLoadClicked(dashboard: QtCore.QObject):
         get_udp_data = str(dashboard.ui.tableWidget1_attack_packet_editor.item(10,1).text())
 
         # Convert Hex to Hexstring Format ('00FF' --> '\x00\xFF')
-        get_udp_data = bytes(get_udp_data, encoding='utf-8')
+        # get_udp_data = bytes(get_udp_data, encoding='utf-8')  # Treats \xAA as string
+        get_udp_data = bytes.fromhex(get_udp_data.replace("\\x", ""))
 
         llc_bytes = LLC()/SNAP()
 
@@ -1268,7 +1274,8 @@ def _slotPacketScapyLoadClicked(dashboard: QtCore.QObject):
         get_udp_data = str(dashboard.ui.tableWidget1_attack_packet_editor.item(11,1).text())
 
         # Convert Hex to Hexstring Format ('00FF' --> '\x00\xFF')
-        get_udp_data = bytes(get_udp_data, encoding='utf-8')
+        # get_udp_data = bytes(get_udp_data, encoding='utf-8')  # Treats \xAA as string
+        get_udp_data = bytes.fromhex(get_udp_data.replace("\\x", ""))
 
         llc_bytes = LLC()/SNAP()
 
@@ -1380,7 +1387,8 @@ def _slotPacketScapyLoadClicked(dashboard: QtCore.QObject):
         get_udp_data = str(dashboard.ui.tableWidget1_attack_packet_editor.item(12,1).text())
 
         # Convert Hex to Hexstring Format ('00FF' --> '\x00\xFF')
-        get_udp_data = bytes(get_udp_data, encoding='utf-8')
+        # get_udp_data = bytes(get_udp_data, encoding='utf-8')  # Treats \xAA as string
+        get_udp_data = bytes.fromhex(get_udp_data.replace("\\x", ""))
 
         llc_bytes = LLC()/SNAP()
 
@@ -1495,38 +1503,50 @@ async def _slotPacketScapyStopClicked(dashboard: QtCore.QObject):
 @QtCore.pyqtSlot(QtCore.QObject, int, int)
 def _slotPacketItemChanged(dashboard: QtCore.QObject, row: int, col: int):
     """ 
-    This is called whenever an item in the packet editor table is changed. It is used to update the current lengths of the fields.
+    Updates the current lengths of fields when an item in the packet editor table changes.
     """
     # Only Look at the Data Column
     if col == 1:
         # Ignore Item Changes by the System
-        if dashboard.ui.tableWidget1_attack_packet_editor.cellWidget(dashboard.ui.tableWidget1_attack_packet_editor.currentRow(),0) != None:
+        if dashboard.ui.tableWidget1_attack_packet_editor.cellWidget(row, 0) is not None:
+            # Get the type from the combobox
+            field_type = dashboard.ui.tableWidget1_attack_packet_editor.cellWidget(row, 0).currentText()
 
-            # Ignore Strings
-            if dashboard.ui.tableWidget1_attack_packet_editor.cellWidget(dashboard.ui.tableWidget1_attack_packet_editor.currentRow(),0).currentText() == "String":
-                pass
+            # If it's a String, set length to 0
+            if field_type == "String":
+                get_length = 0
             else:
                 # Get the Current Item
-                current_item = dashboard.ui.tableWidget1_attack_packet_editor.item(dashboard.ui.tableWidget1_attack_packet_editor.currentRow(),1)
+                current_item = dashboard.ui.tableWidget1_attack_packet_editor.item(row, 1)
 
-                # Binary or Hex
-                if dashboard.ui.tableWidget1_attack_packet_editor.cellWidget(dashboard.ui.tableWidget1_attack_packet_editor.currentRow(),0).currentText() == "Binary":
-                    get_length_str = str(current_item.text()).replace(" ","")
-                    get_length = len(get_length_str)
-                else:
-                    get_length = 4*len(str(current_item.text()))
+                if current_item is not None:
+                    # Binary or Hex
+                    if field_type == "Binary":
+                        get_length_str = str(current_item.text()).replace(" ", "")
+                        get_length = len(get_length_str)
+                    else:  # Hex
+                        get_length = 4 * len(str(current_item.text()))
 
-                # Update the Current Length Label
-                new_length_item = QtWidgets.QTableWidgetItem(str(get_length))
-                new_length_item.setTextAlignment(QtCore.Qt.AlignCenter)
-                new_length_item.setFlags(new_length_item.flags() & ~QtCore.Qt.ItemIsEditable)
-                dashboard.ui.tableWidget1_attack_packet_editor.setItem(dashboard.ui.tableWidget1_attack_packet_editor.currentRow(),2,new_length_item)
+            # Always create a new `QTableWidgetItem`
+            new_length_item = QtWidgets.QTableWidgetItem(str(get_length))
+            new_length_item.setTextAlignment(QtCore.Qt.AlignCenter)
+            new_length_item.setFlags(new_length_item.flags() & ~QtCore.Qt.ItemIsEditable)
 
-                # Calculate the Lengths
-                current_length_total = 0
-                for n in range(0,dashboard.ui.tableWidget1_attack_packet_editor.rowCount()):
-                    current_length_total += int(dashboard.ui.tableWidget1_attack_packet_editor.item(n,2).text())
-                dashboard.ui.label2_packet_current_length_total.setText(str(current_length_total))
+            dashboard.ui.tableWidget1_attack_packet_editor.setItem(row, 2, new_length_item)
+
+            # Calculate the Total Lengths
+            current_length_total = sum(
+                int(dashboard.ui.tableWidget1_attack_packet_editor.item(n, 2).text())
+                for n in range(dashboard.ui.tableWidget1_attack_packet_editor.rowCount())
+                if dashboard.ui.tableWidget1_attack_packet_editor.item(n, 2) is not None
+            )
+            dashboard.ui.label2_packet_current_length_total.setText(str(current_length_total))
+
+    # Ensure the function is properly connected
+    dashboard.ui.tableWidget1_attack_packet_editor.cellChanged.disconnect()
+    dashboard.ui.tableWidget1_attack_packet_editor.cellChanged.connect(
+        lambda row, col: _slotPacketItemChanged(dashboard, row, col)
+    )
 
 
 @QtCore.pyqtSlot(QtCore.QObject, int, int)
@@ -5093,3 +5113,156 @@ def _slotAttackMultiStageTriggersClearClicked(dashboard: QtCore.QObject):
     """
     # Remove Rows
     dashboard.ui.tableWidget1_attack_multi_stage_triggers.setRowCount(0)
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotPacketImportClicked(dashboard: QtCore.QObject):
+    """ 
+    Imports default values for a packet type.
+    """
+    try:
+        # Select file to open
+        open_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            None, "Open Packet Defaults", "", "YAML Files (*.yaml);;All Files (*)"
+        )
+
+        if not open_path:
+            return  # User canceled file selection
+
+        # Load YAML file
+        with open(open_path, "r") as file:
+            import_data = yaml.safe_load(file)
+
+        # Set protocol and packet type
+        dashboard.ui.comboBox_packet_protocols.setCurrentText(import_data["protocol"])
+        dashboard.ui.comboBox_packet_subcategory.setCurrentText(import_data["packet_type"])
+
+        # Clear table contents and set row count
+        dashboard.ui.tableWidget1_attack_packet_editor.clearContents()
+        dashboard.ui.tableWidget1_attack_packet_editor.setRowCount(len(import_data["fields"]))
+
+        # Retrieve default field lengths
+        current_protocol_key = import_data["protocol"]
+        current_subcategory = import_data["packet_type"]
+
+        # Populate table with imported values
+        for row, field in enumerate(import_data["fields"]):
+            field_name = field["field_name"]
+            dashboard.ui.tableWidget1_attack_packet_editor.setVerticalHeaderItem(
+                row, QtWidgets.QTableWidgetItem(field_name)
+            )
+
+            # Create combobox with correct object name and options
+            type_combobox = QtWidgets.QComboBox(dashboard, objectName='comboBox2_')
+
+            if field["type"] in ["Binary", "Hex"]:
+                type_combobox.addItems(["Binary", "Hex"])
+            elif field["type"] == "String":
+                type_combobox.addItem("String")
+
+            type_combobox.setCurrentText(field["type"])
+            type_combobox.setFixedSize(75, 24)
+            type_combobox.setProperty("row", row)
+
+            # Connect to slot function
+            type_combobox.currentIndexChanged.connect(
+                lambda: _slotPacketBinaryHex(dashboard, dashboard.ui.tableWidget1_attack_packet_editor)
+            )
+
+            # Disable combobox if it's a String type
+            if field["type"] == "String":
+                type_combobox.setEnabled(False)
+
+            dashboard.ui.tableWidget1_attack_packet_editor.setCellWidget(row, 0, type_combobox)
+
+            # Set Data column
+            data_item = QtWidgets.QTableWidgetItem(field["data"])
+            dashboard.ui.tableWidget1_attack_packet_editor.setItem(row, 1, data_item)
+
+            # Get length values from the library (like `_slotPacketSubcategory`)
+            try:
+                length_value = fissure.utils.library.getFieldData(
+                    dashboard.backend.library, current_protocol_key, current_subcategory, field_name
+                )["Length"]
+            except KeyError:
+                length_value = 0  # Default to 0 if not found
+
+            # Set Default Length (Column 3)
+            default_length_item = QtWidgets.QTableWidgetItem(str(length_value))
+            default_length_item.setTextAlignment(QtCore.Qt.AlignCenter)
+            dashboard.ui.tableWidget1_attack_packet_editor.setItem(row, 3, default_length_item)
+
+            # **Trigger `_slotPacketItemChanged` to ensure Column 2 updates**
+            _slotPacketItemChanged(dashboard, row, 1)
+
+        # Calculate total lengths
+        current_length = sum(
+            int(dashboard.ui.tableWidget1_attack_packet_editor.item(row, 2).text())
+            for row in range(dashboard.ui.tableWidget1_attack_packet_editor.rowCount())
+            if dashboard.ui.tableWidget1_attack_packet_editor.item(row, 2) is not None
+        )
+
+        default_length = sum(
+            int(dashboard.ui.tableWidget1_attack_packet_editor.item(row, 3).text())
+            for row in range(dashboard.ui.tableWidget1_attack_packet_editor.rowCount())
+            if dashboard.ui.tableWidget1_attack_packet_editor.item(row, 3) is not None
+        )
+
+        dashboard.ui.label2_packet_current_length_total.setText(str(current_length))
+        dashboard.ui.label2_packet_default_length_total.setText(str(default_length))
+
+        # Resize columns
+        dashboard.ui.tableWidget1_attack_packet_editor.setColumnWidth(0, 75)
+        dashboard.ui.tableWidget1_attack_packet_editor.setColumnWidth(2, 75)
+        dashboard.ui.tableWidget1_attack_packet_editor.setColumnWidth(3, 75)
+        dashboard.ui.tableWidget1_attack_packet_editor.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+
+    except Exception as e:
+        dashboard.logger.error(f"Import Error: {e}")
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotPacketExportClicked(dashboard: QtCore.QObject):
+    """ 
+    Exports default values for a packet type.
+    """
+    try:
+        # Get current protocol and packet type
+        protocol = dashboard.ui.comboBox_packet_protocols.currentText()
+        packet_type = dashboard.ui.comboBox_packet_subcategory.currentText()
+
+        # Prepare data to export
+        export_data = {
+            "protocol": protocol,
+            "packet_type": packet_type,
+            "fields": []
+        }
+
+        # Iterate through table rows
+        for row in range(dashboard.ui.tableWidget1_attack_packet_editor.rowCount()):
+            field_name = dashboard.ui.tableWidget1_attack_packet_editor.verticalHeaderItem(row).text()
+            type_value = dashboard.ui.tableWidget1_attack_packet_editor.cellWidget(row, 0).currentText()
+
+            # Get the data column (Column 1)
+            data_item = dashboard.ui.tableWidget1_attack_packet_editor.item(row, 1)
+            data_value = data_item.text() if data_item is not None else ""
+
+            # Append field details
+            export_data["fields"].append({
+                "field_name": field_name,
+                "type": type_value,
+                "data": data_value
+            })
+
+        # Select file location
+        save_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            None, "Save Packet Defaults", "", "YAML Files (*.yaml);;All Files (*)"
+        )
+
+        if save_path:
+            # Write to YAML file
+            with open(save_path, "w") as file:
+                yaml.dump(export_data, file, default_flow_style=False)
+
+    except Exception as e:
+        dashboard.logger.error(f"Export Error: {e}")

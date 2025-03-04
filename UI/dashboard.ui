@@ -21563,7 +21563,7 @@ p, li { white-space: pre-wrap; }
         <rect>
          <x>140</x>
          <y>485</y>
-         <width>125</width>
+         <width>80</width>
          <height>27</height>
         </rect>
        </property>
@@ -21580,9 +21580,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="pushButton_packet_all_hex">
        <property name="geometry">
         <rect>
-         <x>270</x>
+         <x>225</x>
          <y>485</y>
-         <width>125</width>
+         <width>80</width>
          <height>27</height>
         </rect>
        </property>
@@ -21643,9 +21643,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="pushButton_packet_assemble">
        <property name="geometry">
         <rect>
-         <x>530</x>
+         <x>590</x>
          <y>485</y>
-         <width>125</width>
+         <width>100</width>
          <height>27</height>
         </rect>
        </property>
@@ -22539,9 +22539,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="pushButton_packet_calculate_crcs">
        <property name="geometry">
         <rect>
-         <x>400</x>
+         <x>470</x>
          <y>485</y>
-         <width>125</width>
+         <width>115</width>
          <height>27</height>
         </rect>
        </property>
@@ -22591,6 +22591,44 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="currentIndex">
         <number>-1</number>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_packet_import">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>485</y>
+         <width>75</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+         <strikeout>false</strikeout>
+        </font>
+       </property>
+       <property name="text">
+        <string>Import</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_packet_export">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>485</y>
+         <width>75</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+         <strikeout>false</strikeout>
+        </font>
+       </property>
+       <property name="text">
+        <string>Export</string>
        </property>
       </widget>
      </widget>
