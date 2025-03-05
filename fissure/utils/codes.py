@@ -5,13 +5,17 @@ MESSAGE_CODE_MAP = {
     "B1": "recallHardwareMeshtasticLT",
     "B2": "recallHardwareMeshtasticReturnLT",
     "C1": "recallStatusMeshtasticLT",
-    "C2": "recallStatusMeshtasticReturnLT",    
-    "D1": "findGPS_CoordinatesLT",    
+    "C2": "recallStatusMeshtasticReturnLT",
+    "D1": "findGPS_CoordinatesLT",
     "D2": "findGPS_CoordinatesResultsLT",
-    "E1": "scanHardwareLT",    
-    "E2": "hardwareScanResultsLT", 
-    "F1": "probeHardwareLT",    
-    "F2": "hardwareProbeResultsLT", 
+    "E1": "scanHardwareLT",
+    "E2": "hardwareScanResultsLT",
+    "F1": "probeHardwareLT",
+    "F2": "hardwareProbeResultsLT",
+    "G1": "guessHardwareLT",
+    "G2": "hardwareGuessResultsLT",
+    "H1": "autorunPlaylistExecuteLT",
+    "H2": "autorunPlaylistStopLT",
 }
 
 # Reverse mapping for sending messages

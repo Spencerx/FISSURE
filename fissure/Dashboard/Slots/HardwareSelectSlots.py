@@ -812,7 +812,19 @@ async def guess(HWSelect: QtCore.QObject):
         get_row_text.append(str(scan_results_tables[tab_index].item(get_row, n).text()))
 
     # Send Message for HIPRFISR to Sensor Node Connections
-    await HWSelect.dashboard.backend.guess_sensor_node(str(tab_index), get_row, get_row_text, HWSelect.guess_index)
+
+    # Send Message for HIPRFISR to Sensor Node Connections
+    local_remote_stacked_widgets = [
+        HWSelect.stackedWidget_local_remote_1,
+        HWSelect.stackedWidget_local_remote_2,
+        HWSelect.stackedWidget_local_remote_3,
+        HWSelect.stackedWidget_local_remote_4,
+        HWSelect.stackedWidget_local_remote_5
+    ]
+    if local_remote_stacked_widgets[tab_index].currentIndex() == 2:
+        await HWSelect.dashboard.backend.guessHardware(str(tab_index), get_row, get_row_text, HWSelect.guess_index)
+    elif local_remote_stacked_widgets[tab_index].currentIndex() == 4:
+        await HWSelect.dashboard.backend.guessHardwareLT(str(tab_index), get_row, get_row_text, HWSelect.guess_index)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -1819,6 +1831,9 @@ def apply(HWSelect: QtCore.QObject):
             autorun_delay_widget: QtWidgets.QLabel = getattr(HWSelect, f"label2_autorun_delay_value_{node_idx}")
             console_logging_level_widget: QtWidgets.QLabel = getattr(HWSelect, f"label2_console_logging_level_value_{node_idx}")
             file_logging_level_widget: QtWidgets.QLabel = getattr(HWSelect, f"label2_file_logging_level_value_{node_idx}")
+            meshtastic_serial_port_widget: QtWidgets.QLabel = getattr(HWSelect, f"comboBox_meshtastic_port_{node_idx}")
+            meshtastic_serial_baud_rate_widget: QtWidgets.QLabel = getattr(HWSelect, f"comboBox_meshtastic_baud_rate_{node_idx}")
+            network_type_widget: QtWidgets.QLabel = getattr(HWSelect, f"comboBox_network_type_{node_idx}")
             
             # Check for Valid Values Before Saving
             if local_button.isChecked() is False:
@@ -1925,6 +1940,9 @@ def apply(HWSelect: QtCore.QObject):
                 "attack": attack_info,
                 "iq": iq_info,
                 "archive": archive_info,
+                "meshtastic_serial_port": str(meshtastic_serial_port_widget.currentText()),
+                "meshtastic_serial_baud_rate": str(meshtastic_serial_baud_rate_widget.currentText()),
+                "network_type": str(network_type_widget.currentText())
             }
 
             HWSelect.dashboard.backend.settings.update({f"sensor_node{node_idx}": node_config})
@@ -2487,7 +2505,7 @@ async def meshtastic_connect(HWSelect: QtCore.QObject):
     # Check Existing IPs
     get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]
     for n in range(0, len(get_sensor_node)):
-        if (get_serial_port == HWSelect.dashboard.backend.settings[get_sensor_node[n]]["serial_port"]) and (n != tab_index):
+        if (get_serial_port == HWSelect.dashboard.backend.settings[get_sensor_node[n]]["meshtastic_serial_port"]) and (n != tab_index):
             ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect.dashboard, "Serial port is already in use.")
             return
 

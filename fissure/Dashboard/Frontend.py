@@ -1301,7 +1301,34 @@ class Dashboard(QtWidgets.QMainWindow):
         if node_number > -1 and self.backend.settings[get_sensor_node[node_number]]['local_remote'] == 'remote':
             deploy_button.setEnabled(True)
             remove_button.setEnabled(True)
-        SensorNodesPluginsTabSlots._slotSensorNodesPluginsPluginsListRefresh(self)
+        
+        # Do not retrieve plugins for Meshtastic
+        if self.backend.settings[get_sensor_node[node_number]]["network_type"] == "IP":
+            SensorNodesPluginsTabSlots._slotSensorNodesPluginsPluginsListRefresh(self)
+
+
+    def configureHighThroughputWidgets(self):
+        """
+        Enables Dashboard widgets for high throughput, reliable network connections (IP).
+        """
+        # Autorun Tab
+        self.ui.checkBox_sensor_nodes_autorun_run_as_stored.setEnabled(True)
+        self.ui.checkBox_sensor_nodes_autorun_run_as_stored.setChecked(False)
+        SensorNodesTabSlots._slotSensorNodeAutorunRunAsStoredChecked(self)
+        self.ui.pushButton_sensor_nodes_autorun_start.setEnabled(True)  # Need to check if this is running
+        self.ui.pushButton_sensor_nodes_autorun_stop.setEnabled(False)  # Need to check if this is running
+
+
+    def configureLowThroughputWidgets(self):
+        """
+        Enables Dashboard widgets for low throughput, unreliable network connections (Meshtastic).
+        """
+        # Autorun Tab
+        self.ui.checkBox_sensor_nodes_autorun_run_as_stored.setEnabled(False)
+        self.ui.checkBox_sensor_nodes_autorun_run_as_stored.setChecked(True)
+        SensorNodesTabSlots._slotSensorNodeAutorunRunAsStoredChecked(self)
+        self.ui.pushButton_sensor_nodes_autorun_start.setEnabled(True)
+        self.ui.pushButton_sensor_nodes_autorun_stop.setEnabled(True)
 
 
     def refreshStatusBarText(self):
@@ -2078,6 +2105,9 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionMeshMap.triggered.connect(MenuBarSlots._slotMenuMeshMapClicked)
     dashboard.window.actionIEEE_OUI_List.triggered.connect(MenuBarSlots._slotMenuIEEE_OUI_ListClicked)
     dashboard.window.actionACARS_Hub.triggered.connect(MenuBarSlots._slotMenuACARS_HubClicked)
+    dashboard.window.actionHeyWhatsThat_Path_Profiler.triggered.connect(MenuBarSlots._slotMenuHeyWhatsThatPathProfilerClicked)
+    dashboard.window.actionWindy_Route_Planner.triggered.connect(MenuBarSlots._slotMenuWindyRoutePlannerClicked)
+    dashboard.window.actionWindy.triggered.connect(MenuBarSlots._slotMenuWindyClicked)
         
     # Lessons Menu
     dashboard.window.actionLessonOpenBTS.triggered.connect(MenuBarSlots._slotMenuLessonOpenBTS_Clicked)
@@ -3830,9 +3860,12 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_sensor_nodes_autorun_triggers_edit.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesAutorunTriggersEditClicked(dashboard)
     )
-    dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.clicked.connect(
-        lambda: SensorNodesTabSlots._slotSensorNodesAutorunStartStopClicked(dashboard)
+    dashboard.ui.pushButton_sensor_nodes_autorun_start.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesAutorunStartClicked(dashboard)
     )
+    dashboard.ui.pushButton_sensor_nodes_autorun_stop.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesAutorunStopClicked(dashboard)
+    )    
     dashboard.ui.pushButton_sensor_nodes_autorun_overwrite.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesAutorunOverwriteClicked(dashboard)
     )

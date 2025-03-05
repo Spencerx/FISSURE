@@ -180,7 +180,7 @@ async def archivePlaylistFinished(component: object, sensor_node_id=0):
     component.frontend.ui.frame_archive_replay_controls.setEnabled(True)
 
 
-async def hardwareGuessResults(component: object, tab_index=0, table_row=[], hardware_type="", scan_results="", new_guess_index=0):
+async def hardwareGuessResults(component: object, tab_index=0, table_row=0, hardware_type="", scan_results="", new_guess_index=0):
     """
     Fills the scan results table row with hardware information in HardwareSelectDialog.
     """
@@ -322,15 +322,20 @@ async def componentConnectedSerial(component: object, component_name=""):
         except:
             return
         if sensor_node_id == 0:
-            pass  # Future tasks?
+            component.frontend.signals.ComponentStatus.emit("Sensor Node 0", True, component.frontend.statusBar())
+            component.sensor_node_connected[0] = True
         elif sensor_node_id == 1:
-            pass
+            component.frontend.signals.ComponentStatus.emit("Sensor Node 1", True, component.frontend.statusBar())
+            component.sensor_node_connected[1] = True
         elif sensor_node_id == 2:
-            pass
+            component.frontend.signals.ComponentStatus.emit("Sensor Node 2", True, component.frontend.statusBar())
+            component.sensor_node_connected[2] = True
         elif sensor_node_id == 3:
-            pass
+            component.frontend.signals.ComponentStatus.emit("Sensor Node 3", True, component.frontend.statusBar())
+            component.sensor_node_connected[3] = True
         elif sensor_node_id == 4:
-            pass
+            component.frontend.signals.ComponentStatus.emit("Sensor Node 4", True, component.frontend.statusBar())
+            component.sensor_node_connected[4] = True
         component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id, serial=True)
 
 

@@ -882,7 +882,7 @@ async def probeHardware(component: object, tab_index, table_row_text):
     await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def guessHardware(component: object, tab_index=0, table_row=[], table_row_text="", guess_index=0):
+async def guessHardware(component: object, tab_index=0, table_row=0, table_row_text=[], guess_index=0):
     """
     Sends a message to a sensor node to guess details for select hardware.
     """
@@ -1730,6 +1730,15 @@ async def disconnectFromMeshtastic(component: object, sensor_node_id=0):
     component.sensor_nodes[sensor_node_id] = None
     component.logger.info(f"Local serial connection for Sensor Node {sensor_node_id} successfully disconnected.")
 
+    # Notify the Dashboard
+    PARAMETERS = {"component_name": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "componentDisconnected",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 
 async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, serial_port, serial_baud_rate):
     """
@@ -2086,7 +2095,7 @@ async def hardwareScanResults(component: object, tab_index=0, hardware_scan_resu
 
 
 async def hardwareGuessResults(
-    component: object, tab_index=0, table_row=[], hardware_type="", scan_results="", new_guess_index=0
+    component: object, tab_index=0, table_row=0, hardware_type="", scan_results="", new_guess_index=0
 ):
     """
     Forwards sensnor node hardware guess results from HIPRFISR to Dashboard.

@@ -65,6 +65,14 @@ def sensor_node_rightClick(dashboard: QtCore.QObject, node_idx: int):
         dashboard.statusBar().dialog.label1_sensor_node.setText("Sensor Node " + str(node_idx + 1))
         dashboard.refreshStatusBarText()
 
+        # Swap Between High Throughput and Low Throughput Modes
+        get_sensor_node = ['sensor_node1','sensor_node2','sensor_node3','sensor_node4','sensor_node5']
+        if dashboard.backend.settings[get_sensor_node[node_idx]]["network_type"] == "IP":
+            dashboard.configureHighThroughputWidgets()
+        elif dashboard.backend.settings[get_sensor_node[node_idx]]["network_type"] == "Meshtastic":
+            dashboard.configureLowThroughputWidgets()
+
+
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def start(dashboard: QtCore.QObject):

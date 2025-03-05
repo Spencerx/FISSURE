@@ -34302,9 +34302,9 @@ p, li { white-space: pre-wrap; }
       <attribute name="title">
        <string>Autorun</string>
       </attribute>
-      <widget class="QPushButton" name="pushButton_sensor_nodes_autorun_start_stop">
+      <widget class="QPushButton" name="pushButton_sensor_nodes_autorun_stop">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -34321,7 +34321,7 @@ p, li { white-space: pre-wrap; }
         </font>
        </property>
        <property name="text">
-        <string>Start</string>
+        <string>Stop</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="checkBox_sensor_nodes_autorun_run_as_stored">
@@ -34437,7 +34437,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>870</x>
+          <x>770</x>
           <y>780</y>
           <width>200</width>
           <height>27</height>
@@ -34964,13 +34964,36 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </widget>
+      <widget class="QPushButton" name="pushButton_sensor_nodes_autorun_start">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>1010</x>
+         <y>780</y>
+         <width>90</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+         <strikeout>false</strikeout>
+        </font>
+       </property>
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </widget>
       <zorder>frame_sensor_nodes_autorun_controls</zorder>
-      <zorder>pushButton_sensor_nodes_autorun_start_stop</zorder>
+      <zorder>pushButton_sensor_nodes_autorun_stop</zorder>
       <zorder>textEdit_sensor_nodes_autorun_playlist_filename</zorder>
       <zorder>label2_sensor_nodes_autorun_playlist_filename</zorder>
       <zorder>line1_49</zorder>
       <zorder>line3_10</zorder>
       <zorder>checkBox_sensor_nodes_autorun_run_as_stored</zorder>
+      <zorder>pushButton_sensor_nodes_autorun_start</zorder>
      </widget>
      <widget class="QWidget" name="tab_21">
       <attribute name="title">

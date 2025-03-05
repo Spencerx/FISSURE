@@ -561,7 +561,7 @@ class DashboardBackend:
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, probe_cmd)    
 
 
-    async def guess_sensor_node(self, tab_index, table_row, table_row_text, guess_index):
+    async def guessHardware(self, tab_index=0, table_row=0, table_row_text=[], guess_index=0):
         """
         Guesses identifiers for hardware connected to a sensor node.
         """
@@ -2117,4 +2117,57 @@ class DashboardBackend:
             fissure.comms.MessageFields.MESSAGE_NAME: "probeHardwareLT",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, probe_cmd) 
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, probe_cmd)
+
+
+    async def guessHardwareLT(self, tab_index=0, table_row=0, table_row_text=[], guess_index=0):
+        """
+        Guesses identifiers for hardware connected to a sensor node.
+        """
+        PARAMETERS = {
+            "tab_index": tab_index,
+            "table_row": table_row,
+            "table_row_text": table_row_text,
+            "guess_index": guess_index,
+        }
+        guess_cmd = {
+            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+            fissure.comms.MessageFields.MESSAGE_NAME: "guessHardwareLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, guess_cmd)
+
+
+    async def autorunPlaylistExecuteLT(self, sensor_node_id=0, playlist_filename=""):
+        """
+        Sends a message to execute an autorun playlist already located on the sensor node.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+                "playlist_filename": playlist_filename,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistExecuteLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def autorunPlaylistStopLT(self, sensor_node_id=0):
+        """
+        Sends a message to stop the running autorun playlist.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStopLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

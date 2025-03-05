@@ -181,6 +181,27 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             self.label2_file_logging_level_value_4,
             self.label2_file_logging_level_value_5
         ]
+        meshtastic_serial_port_widgets = [
+            self.comboBox_meshtastic_port_1,
+            self.comboBox_meshtastic_port_2,
+            self.comboBox_meshtastic_port_3,
+            self.comboBox_meshtastic_port_4,
+            self.comboBox_meshtastic_port_5
+        ]
+        meshtastic_serial_baud_rate_widgets = [
+            self.comboBox_meshtastic_baud_rate_1,
+            self.comboBox_meshtastic_baud_rate_2,
+            self.comboBox_meshtastic_baud_rate_3,
+            self.comboBox_meshtastic_baud_rate_4,
+            self.comboBox_meshtastic_baud_rate_5
+        ]
+        network_type_widgets = [
+            self.comboBox_network_type_1,
+            self.comboBox_network_type_2,
+            self.comboBox_network_type_3,
+            self.comboBox_network_type_4,
+            self.comboBox_network_type_5
+        ]                        
 
         for n in range(0, len(get_sensor_node)):
             if self.dashboard.backend.settings[get_sensor_node[n]]["nickname"] != "":
@@ -202,6 +223,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
                 autorun_delay_widgets[n].setText(str(self.dashboard.backend.settings[get_sensor_node[n]]["autorun_delay_seconds"]))
                 console_logging_level_widgets[n].setText(str(self.dashboard.backend.settings[get_sensor_node[n]]['console_logging_level']))
                 file_logging_level_widgets[n].setText(str(self.dashboard.backend.settings[get_sensor_node[n]]['file_logging_level']))
+                meshtastic_serial_port_widgets[n].addItem(str(self.dashboard.backend.settings[get_sensor_node[n]]['meshtastic_serial_port']))
+                meshtastic_serial_baud_rate_widgets[n].addItem(str(self.dashboard.backend.settings[get_sensor_node[n]]['meshtastic_serial_baud_rate']))
+                network_type_widgets[n].setCurrentText(str(self.dashboard.backend.settings[get_sensor_node[n]]['network_type']))
 
                 # TSI Table
                 tsi_hardware = self.dashboard.backend.settings[get_sensor_node[n]]["tsi"]

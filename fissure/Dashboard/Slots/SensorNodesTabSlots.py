@@ -534,96 +534,111 @@ def _slotSensorNodesAutorunTriggersEditClicked(dashboard: QtCore.QObject):
 
 
 @qasync.asyncSlot(QtCore.QObject)
-async def _slotSensorNodesAutorunStartStopClicked(dashboard: QtCore.QObject):
+async def _slotSensorNodesAutorunStartClicked(dashboard: QtCore.QObject):
     """ 
     Sends a message to the sensor node to start/stop autorun playlist.
     """
-    # Start Clicked
-    if dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.text() == "Start":
-        # Error with no Sensor Node Selected
-        if dashboard.active_sensor_node == -1:
-            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Select an active sensor node.")
+    # Error with no Sensor Node Selected
+    if dashboard.active_sensor_node == -1:
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Select an active sensor node.")
+        return
+
+    # Run As Stored
+    get_sensor_node = ['sensor_node1','sensor_node2','sensor_node3','sensor_node4','sensor_node5']
+    if dashboard.ui.checkBox_sensor_nodes_autorun_run_as_stored.isChecked() == True:
+        get_filename = str(dashboard.ui.textEdit_sensor_nodes_autorun_playlist_filename.toPlainText())
+        if get_filename.strip() == "":
+            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Enter playlist filename.")
             return
+        
+        # Send the Message
+        if dashboard.backend.settings[get_sensor_node[dashboard.active_sensor_node]]["network_type"] == "IP":
+            await dashboard.backend.autorunPlaylistExecute(dashboard.active_sensor_node, get_filename)
+        if dashboard.backend.settings[get_sensor_node[dashboard.active_sensor_node]]["network_type"] == "Meshtastic":
+            await dashboard.backend.autorunPlaylistExecuteLT(dashboard.active_sensor_node, get_filename) 
 
-        # Run As Stored
-        if dashboard.ui.checkBox_sensor_nodes_autorun_run_as_stored.isChecked() == True:
-            get_filename = str(dashboard.ui.textEdit_sensor_nodes_autorun_playlist_filename.toPlainText())
-            if get_filename.strip() == "":
-                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Enter playlist filename.")
+    # Transfer Playlist to Sensor Node
+    else:
+        # Retrieve Playlist
+        playlist_dict = {}
+        playlist_dict['delay_start'] = str(dashboard.ui.checkBox_sensor_nodes_autorun_delay.isChecked())
+        playlist_dict['delay_start_time'] = str(dashboard.ui.dateTimeEdit_sensor_nodes_autorun.dateTime().toString('yyyy-MM-dd hh:mm:ss'))  #.toPyDateTime())  # '2024-01-24 14:08:47.182000'
+        playlist_dict['repetition_interval_seconds'] = str(dashboard.ui.textEdit_sensor_nodes_autorun_repetition_interval.toPlainText())
+        for n in range(0,dashboard.ui.tableWidget_sensor_nodes_autorun.rowCount()):
+            row_dict = {}      
+            try:
+                row_dict['type'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,0).text())
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Type")
                 return
-            
-            # Send the Message
-            await dashboard.backend.autorunPlaylistExecute(dashboard.active_sensor_node, get_filename)            
-
-        # Transfer Playlist to Sensor Node
-        else:
-            # Retrieve Playlist
-            playlist_dict = {}
-            playlist_dict['delay_start'] = str(dashboard.ui.checkBox_sensor_nodes_autorun_delay.isChecked())
-            playlist_dict['delay_start_time'] = str(dashboard.ui.dateTimeEdit_sensor_nodes_autorun.dateTime().toString('yyyy-MM-dd hh:mm:ss'))  #.toPyDateTime())  # '2024-01-24 14:08:47.182000'
-            playlist_dict['repetition_interval_seconds'] = str(dashboard.ui.textEdit_sensor_nodes_autorun_repetition_interval.toPlainText())
-            for n in range(0,dashboard.ui.tableWidget_sensor_nodes_autorun.rowCount()):
-                row_dict = {}      
-                try:
-                    row_dict['type'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,0).text())
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Type")
-                    return
-                try:
-                    row_dict['repeat'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,1).currentText())
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Repeat Value")
-                    return
-                try:
-                    row_dict['timeout_seconds'] = str(int(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,2).text()))
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Timeout Value")
-                    return
-                try:
-                    row_dict['delay'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,3).isChecked())
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Delay Value")
-                    return
-                try:
-                    row_dict['start_time'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,4).time().toString('hh:mm:ss'))
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Start Time Value")
-                    return                      
-                try:
-                    row_dict['details'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,5).text())
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Details Value")
-                    return
-                try:
-                    row_dict['variable_names'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,6).text())
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Variable Names Value")
-                    return
-                try:
-                    row_dict['variable_values'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,7).text())
-                except:
-                    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Variable Values Value")
-                    return
-                playlist_dict[n] = row_dict
-            
-            # Trigger Parameters
-            trigger_values = []
-            for row in range(0, dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.rowCount()):
-                trigger_values.append([str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,0).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,1).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,2).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,3).text())])
+            try:
+                row_dict['repeat'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,1).currentText())
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Repeat Value")
+                return
+            try:
+                row_dict['timeout_seconds'] = str(int(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,2).text()))
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Timeout Value")
+                return
+            try:
+                row_dict['delay'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,3).isChecked())
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Delay Value")
+                return
+            try:
+                row_dict['start_time'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.cellWidget(n,4).time().toString('hh:mm:ss'))
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Start Time Value")
+                return                      
+            try:
+                row_dict['details'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,5).text())
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Details Value")
+                return
+            try:
+                row_dict['variable_names'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,6).text())
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Variable Names Value")
+                return
+            try:
+                row_dict['variable_values'] = str(dashboard.ui.tableWidget_sensor_nodes_autorun.item(n,7).text())
+            except:
+                ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Invalid Variable Values Value")
+                return
+            playlist_dict[n] = row_dict
         
-            # Send the Message
-            await dashboard.backend.autorunPlaylistStart(dashboard.active_sensor_node, playlist_dict, trigger_values)
+        # Trigger Parameters
+        trigger_values = []
+        for row in range(0, dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.rowCount()):
+            trigger_values.append([str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,0).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,1).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,2).text()), str(dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.item(row,3).text())])
+    
+        # Send the Message
+        await dashboard.backend.autorunPlaylistStart(dashboard.active_sensor_node, playlist_dict, trigger_values)
 
-        # Toggle the Text
-        dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.setText("Stop")
-        
-    # Stop Clicked
-    elif dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.text() == "Stop":
+    # Toggle the Text
+    if dashboard.backend.settings[get_sensor_node[dashboard.active_sensor_node]]["network_type"] == "IP":
+        dashboard.ui.pushButton_sensor_nodes_autorun_start.setEnabled(False)
+        dashboard.ui.pushButton_sensor_nodes_autorun_stop.setEnabled(True)
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesAutorunStopClicked(dashboard: QtCore.QObject):
+    """ 
+    Sends a message to the sensor node to stop the autorun playlist.
+    """
+    get_sensor_node = ['sensor_node1','sensor_node2','sensor_node3','sensor_node4','sensor_node5']
+    if dashboard.backend.settings[get_sensor_node[dashboard.active_sensor_node]]["network_type"] == "IP":
         # Send the Message
         await dashboard.backend.autorunPlaylistStop(dashboard.active_sensor_node)
+        
+        # Swap Buttons
+        dashboard.ui.pushButton_sensor_nodes_autorun_start.setEnabled(True)
+        dashboard.ui.pushButton_sensor_nodes_autorun_stop.setEnabled(False)
 
-        # Toggle the Text
-        dashboard.ui.pushButton_sensor_nodes_autorun_start_stop.setText("Start")
+    elif dashboard.backend.settings[get_sensor_node[dashboard.active_sensor_node]]["network_type"] == "Meshtastic":
+        # Send the Message
+        await dashboard.backend.autorunPlaylistStopLT(dashboard.active_sensor_node)
 
 
 @qasync.asyncSlot(QtCore.QObject)

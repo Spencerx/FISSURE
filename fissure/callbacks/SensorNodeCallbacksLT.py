@@ -334,4 +334,116 @@ async def scanHardwareLT(component: object, tab_index=0, hardware_list=[]):
         MessageFields.MESSAGE_NAME: "hardwareScanResultsLT",
         MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)    
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def guessHardwareLT(component: object, tab_index=0, table_row=[], table_row_text=[], guess_index=0):
+    """
+    Probe the selected hardware from the table and return the information.
+    """
+    get_hardware = str(table_row_text[0])
+    scan_results = ["", "", "", "", "", "", ""]
+    new_guess_index = guess_index
+    if get_hardware == "USRP X3x0":
+        # Get IP Address
+        get_ip = str(table_row_text[5])
+
+        # self.parent.findX310(self.textEdit_ip, self.textEdit_serial, self.comboBox_daughterboard, self.label2_probe)
+
+    elif get_hardware == "USRP B2x0":
+        get_serial = str(table_row_text[3])
+        scan_results = fissure.utils.hardware.findB2x0(get_serial)
+    elif get_hardware == "USRP B20xmini":
+        get_serial = str(table_row_text[3])
+        scan_results = fissure.utils.hardware.findB205mini(get_serial)
+    elif get_hardware == "bladeRF":
+        get_serial = str(table_row_text[3])
+        scan_results = fissure.utils.hardware.find_bladeRF2(get_serial)
+    elif get_hardware == "LimeSDR":
+        pass
+    elif get_hardware == "HackRF":
+        get_serial = str(table_row_text[3])
+        scan_results, new_guess_index = fissure.utils.hardware.findHackRF(get_serial, guess_index)
+    elif get_hardware == "PlutoSDR":
+        pass
+    elif get_hardware == "USRP2":
+        # Get IP Address
+        get_ip = str(table_row_text[5])
+
+        # Update Serial, IP Address, Daughterboard
+        scan_results = fissure.utils.hardware.findUSRP2(get_ip)
+
+    elif get_hardware == "USRP N2xx":
+        # Get IP Address
+        get_ip = str(table_row_text[5])
+
+        # Update Serial, IP Address, Daughterboard
+        scan_results = fissure.utils.hardware.findUSRP_N2xx(get_ip)
+
+    elif get_hardware == "bladeRF 2.0":
+        get_serial = str(table_row_text[3])
+        scan_results = fissure.utils.hardware.find_bladeRF2(get_serial)
+    elif get_hardware == "USRP X410":
+        # Get IP Address
+        get_ip = str(table_row_text[5])
+
+        # Update Serial, IP Address, Daughterboard
+        scan_results = fissure.utils.hardware.findX410(get_ip)
+
+    elif get_hardware == "802.11x Adapter":
+        get_network_interface = str(table_row_text[4])
+        scan_results, new_guess_index = fissure.utils.hardware.find80211x(get_network_interface, guess_index)
+
+    elif get_hardware == "RTL2832U":
+        get_serial = str(table_row_text[3])
+        scan_results, new_guess_index = fissure.utils.hardware.findRTL2832U(get_serial, guess_index)
+
+    elif get_hardware == "RSPduo":
+        get_serial = str(table_row_text[3])
+        scan_results, new_guess_index = fissure.utils.hardware.findRSPduo(get_serial, guess_index)
+
+    elif get_hardware == "RSPdx":
+        get_serial = str(table_row_text[3])
+        scan_results, new_guess_index = fissure.utils.hardware.findRSPdx(get_serial, guess_index)        
+
+    elif get_hardware == "RSPdx R2":
+        get_serial = str(table_row_text[3])
+        scan_results, new_guess_index = fissure.utils.hardware.findRSPdxR2(get_serial, guess_index)        
+
+    # Return Guess Results
+    PARAMETERS = {"results": [tab_index, table_row, get_hardware, scan_results, new_guess_index]}
+    msg = {
+        MessageFields.SOURCE: component.identifier,
+        MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
+        MessageFields.MESSAGE_NAME: "hardwareGuessResultsLT",
+        MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def autorunPlaylistExecuteLT(component: object, sensor_node_id=0, playlist_filename=""):
+    """
+    Starts a new thread for loading and cycling through the autorun playlist.
+    """
+    component.logger.info("Start autorun playlist command received")
+
+    # Run Event and Do Not Block
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, component.autorunPlaylistExecute, sensor_node_id, playlist_filename)
+
+
+async def autorunPlaylistStopLT(component: object, sensor_node_id=0):
+    """
+    Stops an autorun playlist already in progress.
+    """
+    component.logger.info("Stop autorun playlist command received")
+    try:
+        # Stop Triggers
+        if component.triggers_running == True:
+            component.triggers_running = False
+            component.trigger_done.set()
+
+        # Stop the Thread
+        component.autorun_playlist_stop_event.set()
+    except:
+        pass

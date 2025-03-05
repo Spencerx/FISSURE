@@ -152,4 +152,9 @@ async def hardwareScanResultsLT(component: object, tab_index=0, hardware_scan_re
     component.frontend.popups["HardwareSelectDialog"].scanReturn(tab_index=tab_index, all_scan_results=hardware_scan_results)
 
 
-    
+async def hardwareGuessResultsLT(component: object, tab_index=0, table_row=0, hardware_type="", scan_results="", new_guess_index=0):
+    """
+    Fills the scan results table row with hardware information in HardwareSelectDialog.
+    """
+    # Fill the Table
+    component.frontend.popups["HardwareSelectDialog"].guessReturn(tab_index, table_row, hardware_type, scan_results, new_guess_index)

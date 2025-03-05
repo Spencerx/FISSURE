@@ -682,6 +682,8 @@
      </property>
      <addaction name="actionAirLink"/>
      <addaction name="actionSCADACore_RF_Line_of_Sight"/>
+     <addaction name="actionHeyWhatsThat_Path_Profiler"/>
+     <addaction name="actionWindy_Route_Planner"/>
     </widget>
     <widget class="QMenu" name="menuRFID">
      <property name="title">
@@ -854,6 +856,7 @@
      <addaction name="actionwttr_in"/>
      <addaction name="actionOpen_weather"/>
      <addaction name="actionFIRMS"/>
+     <addaction name="actionWindy"/>
     </widget>
     <widget class="QMenu" name="menuRailway">
      <property name="title">
@@ -3521,6 +3524,21 @@
   <action name="actionACARS_Hub">
    <property name="text">
     <string>ACARS Hub</string>
+   </property>
+  </action>
+  <action name="actionHeyWhatsThat_Path_Profiler">
+   <property name="text">
+    <string>HeyWhatsThat Path Profiler</string>
+   </property>
+  </action>
+  <action name="actionWindy_Route_Planner">
+   <property name="text">
+    <string>Windy Path Route Planner</string>
+   </property>
+  </action>
+  <action name="actionWindy">
+   <property name="text">
+    <string>Windy</string>
    </property>
   </action>
  </widget>

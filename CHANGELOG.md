@@ -1,6 +1,29 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-04
+
+Updates to low throughput network connections for remote sensor nodes.
+
+### Added
+
+- Guess button functions and messaging for meshtastic connections
+- HeyWhatsThat Path Profiler to Tools > Point-to-Point
+- Windy Route Planner to Tools > Point-to-Point (click "Distance & Planning" from Windy menu)
+- Windy to Tools > Weather
+- Functions in Frontend.py for enabling/disabling widgets when switching between high throughput and low throughput sensor nodes
+
+### Changed
+
+- Added Stop button for Sensor Nodes > Autorun tab
+
+### Fixed
+
+- Sensor Node Configuration dialog Apply button saves Meshtastic serial port and baud rate, network type
+- Sensor Node Configuration dialog recalls network type and Meshtastic settings
+- Replaced instances of sensor node setting "serial_port" with "meshtastic_serial_port"
+- Adding meshtastic_serial_port, meshtastic_serial_baud_rate, network_type variables to FISSURE config files under each sensor node
+
 ## 2025-3-03
 
 Packet Crafter fixes and updates.

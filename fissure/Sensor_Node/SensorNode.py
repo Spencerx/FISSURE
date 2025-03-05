@@ -1506,13 +1506,14 @@ class SensorNode():
         """ Sends the Autorun Playlist Started message to the HIPRFISR/Dashboard.
         """
         # Send the Message
-        PARAMETERS = {"sensor_node_id": sensor_node_id}
-        msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStarted",
-                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        if self.network_type == "IP":
+            PARAMETERS = {"sensor_node_id": sensor_node_id}
+            msg = {
+                        fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                        fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStarted",
+                        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
     
 
     #######################  Physical Fuzzing  #########################
@@ -2441,13 +2442,14 @@ class SensorNode():
         """ Sends the autorun playlist finished message to the HIPRFISR/Dashboard.
         """
         # Send the Message
-        PARAMETERS = {"sensor_node_id": sensor_node_id}
-        msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistFinished",
-                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        if self.network_type == "IP":
+            PARAMETERS = {"sensor_node_id": sensor_node_id}
+            msg = {
+                        fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                        fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistFinished",
+                        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
     def gpsUpdate(self, gps_data):

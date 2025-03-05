@@ -219,3 +219,72 @@ async def hardwareScanResultsLT(component: object, tab_index=0, hardware_scan_re
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def guessHardwareLT(component: object, tab_index=0, table_row=0, table_row_text=[], guess_index=0):
+    """
+    Sends a message to a sensor node to guess details for select hardware.
+    """
+    # Forward the Message
+    PARAMETERS = {
+        "tab_index": tab_index,
+        "table_row": table_row,
+        "table_row_text": table_row_text,
+        "guess_index": guess_index,
+    }
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: tab_index,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "guessHardwareLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def hardwareGuessResultsLT(component: object, results=[]):
+    """
+    Forwards sensnor node hardware guess results from HIPRFISR to Dashboard.
+    """
+    PARAMETERS = {
+        "tab_index": results[0],
+        "table_row": results[1],
+        "hardware_type": results[2],
+        "scan_results": results[3],
+        "new_guess_index": results[4],
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "hardwareGuessResultsLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def autorunPlaylistExecuteLT(component: object, sensor_node_id=0, playlist_filename=""):
+    """
+    Signals to sensor node to start autorun playlist already located on the sensor node.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id, "playlist_filename": playlist_filename}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistExecuteLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def autorunPlaylistStopLT(component: object, sensor_node_id=0):
+    """
+    Signals to sensor node to stop autorun playlist.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStopLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)    

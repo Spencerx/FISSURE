@@ -5845,3 +5845,29 @@ def _slotMenuACARS_HubClicked():
     # Open a Browser
     os.system("xdg-open https://tbgacarshub.airframes.io/adsb")
 
+
+@QtCore.pyqtSlot()
+def _slotMenuHeyWhatsThatPathProfilerClicked():
+    """
+    Opens HeyWhatsThat Path Profiler in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://www.heywhatsthat.com/profiler.html")
+
+
+@QtCore.pyqtSlot()
+def _slotMenuWindyRoutePlannerClicked():
+    """
+    Opens Windy in a browser. Click "Distance & planning" from menu.
+    """
+    # Open a Browser
+    os.system("xdg-open https://www.windy.com/route-planner")
+
+
+@QtCore.pyqtSlot()
+def _slotMenuWindyClicked():
+    """
+    Opens Windy in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://www.windy.com")    
