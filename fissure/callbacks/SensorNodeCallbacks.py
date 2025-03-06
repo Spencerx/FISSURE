@@ -886,6 +886,11 @@ async def probeHardware(component: object, tab_index=0, table_row_text=[]):
         output = await fissure.utils.hardware.probeRSPdxR2()
         if not output.startswith("Error:"):
             height_width = [300, 500]
+    
+    elif get_hardware == "802.11x Adapter":
+        output = await fissure.utils.hardware.probe80211x()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
 
     # Return the Text
     PARAMETERS = {"tab_index": tab_index, "output": output, "height_width": height_width}

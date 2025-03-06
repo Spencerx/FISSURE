@@ -448,38 +448,45 @@ def find80211x(guess_network_interface="", guess_index=0):
     """ 
     Parses the results of 'iwconfig' and sets the 802.11x Adapter interface for an edit box.
     """
-    # Scan Results
+        # Scan Results
     scan_results = ['802.11x Adapter','','','','','','']  # Type, UID, Radio Name, Serial, Net. Interface, IP Address, Daughterboard
     
     # Get the Text
-    proc = subprocess.Popen("iwconfig &", shell=True, stdout=subprocess.PIPE, )
+    proc = subprocess.Popen("iwconfig", shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     output = proc.communicate()[0].decode()
 
     # Reset Interface Index
-    get_text = guess_network_interface  # str(widget_interface.toPlainText())
-    if len(get_text) == 0:
+    if not guess_network_interface:
         guess_index = 0
     else:
-        guess_index = guess_index + 1
+        guess_index += 1
 
     # Pull the Interfaces
     lines = output.split('\n')
-    get_interface = ''
     wifi_interfaces = []
-    for n in range(0,len(lines)):
-        if 'ESSID' in lines[n]:
-            wifi_interfaces.append(lines[n].split(' ',1)[0])
+    
+    current_iface = None
+    for line in lines:
+        if line.strip() == "":  # Ignore empty lines
+            continue
+        
+        # Look for interface names (they are the first word in a line)
+        if not line.startswith(" "):
+            current_iface = line.split()[0]  # Extract interface name
+        
+        # Add to list if it's a Wi-Fi interface
+        if current_iface and ('ESSID' in line or 'Mode:Monitor' in line):
+            wifi_interfaces.append(current_iface)
+            current_iface = None  # Avoid duplicate entries
 
     # Found an Interface
-    if len(wifi_interfaces) > 0:
-
+    if wifi_interfaces:
         # Check Interface Index
-        if guess_index > (len(wifi_interfaces)-1):
+        if guess_index >= len(wifi_interfaces):
             guess_index = 0
 
         # Update the Edit Box
-        get_interface = wifi_interfaces[guess_index]
-        scan_results[4] = get_interface
+        scan_results[4] = wifi_interfaces[guess_index]
         
     return scan_results, guess_index
 
@@ -1882,6 +1889,26 @@ async def probeRSPdxR2():
     try:
         proc = await asyncio.create_subprocess_shell(
             "lsusb",
+            shell=True, 
+            stdout=asyncio.subprocess.PIPE, 
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
+
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probe80211x():
+    """
+    Asynchronously probes an 802.11x device.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "iwconfig",
             shell=True, 
             stdout=asyncio.subprocess.PIPE, 
             stderr=asyncio.subprocess.PIPE

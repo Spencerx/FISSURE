@@ -34,7 +34,7 @@ class fuzzer(gr.sync_block):
     """
     docstring for block fuzzer
     """
-    def __init__(self, fuzzing_seed, fuzzing_fields, fuzzing_type, fuzzing_min, fuzzing_max, fuzzing_data, fuzzing_interval, fuzzing_protocol, fuzzing_packet_type, library_filepath):
+    def __init__(self, fuzzing_seed, fuzzing_fields, fuzzing_type, fuzzing_min, fuzzing_max, fuzzing_data, fuzzing_interval, fuzzing_protocol, fuzzing_packet_type, packet_types_fields):
         gr.sync_block.__init__(self,
             name = "fuzzer",
             in_sig = None,
@@ -61,7 +61,7 @@ class fuzzer(gr.sync_block):
         self.fuzzing_protocol = fuzzing_protocol
         self.fuzzing_packet_type = fuzzing_packet_type
         
-        self.library_filepath = os.path.expanduser(library_filepath)
+        self.packet_types_fields = ast.literal_eval(packet_types_fields)
 
         # Make a new Thread
         self.stop_event = threading.Event()
@@ -71,12 +71,8 @@ class fuzzer(gr.sync_block):
                     
 
     def run(self):        
-        # Look up the Packet Structure from the Library
-        filename = self.library_filepath
-        with open(filename) as yaml_config_file:
-            fissure_library = yaml.load(yaml_config_file, yaml.FullLoader)
-            
-        packet_dictionary = fissure_library["Protocols"][self.fuzzing_protocol]["Packet Types"][self.fuzzing_packet_type]["Fields"]
+        # Look up the Packet Structure (From Database)          
+        packet_dictionary = self.packet_types_fields  #["Protocols"][self.fuzzing_protocol]["Packet Types"][self.fuzzing_packet_type]["Fields"]
 
         # Create the Random Number Generator
         generic_rng = random.Random(float(self.fuzzing_seed))
@@ -92,6 +88,7 @@ class fuzzer(gr.sync_block):
         while (not self.stop_event.is_set()):        
             # Single Loop Start Time
             start_time = time.time()
+
             #~ print(str(start_time))
 
             # Assemble the Data for the Packet
@@ -414,28 +411,28 @@ class fuzzer(gr.sync_block):
             
             
             
-            #~ ######
-            #~ # Test
-            #data_out_bytes = 0xAA,0xAA,0xAA,0xAA,0xD3,0x91,0xD3,0x91,0x0E,0x78,0x56,0x34,0x12,0xAA,0xAA,0xAA,0xAA,0x20,0x03,0x33,0xAA,0x00,0xFF,0xE4,0x0D   
-            #print(data_out_bytes2)
-            #~ 
-            #~ print(str(time.time()))
-            #~ data_out1 = 0xAA,0xAA,0xAA,0xAA,0xD3,0x91,0xD3,0x91,0x0E,0x78,0x56,0x34,0x12,0xAA,0xAA,0xAA,0xAA,0x20,0x03,0x33,0xFF,0xFF,0xFF,0x62,0x06
-            #~ list_out1 = pmt.list1(pmt.to_pmt(data_out1[0]))
-            #~ for n in range(1,len(data_out1)):
-                #~ list_out1 = pmt.list_add(list_out1,pmt.to_pmt(data_out1[n]))            
-            #~ self.message_port_pub(pmt.intern('packet_out'),list_out1)
-            #~ time.sleep(self.fuzzing_interval)
-            #~ 
-            #~ # Test
-            #~ print(str(time.time()))
-            #~ data_out1 = 0xAA,0xAA,0xAA,0xAA,0xD3,0x91,0xD3,0x91,0x0E,0x78,0x56,0x34,0x12,0xAA,0xAA,0xAA,0xAA,0x20,0x03,0x33,0x68,0x01,0xFF,0xED,0x25
-            #~ list_out1 = pmt.list1(pmt.to_pmt(data_out1[0]))
-            #~ for n in range(1,len(data_out1)):
-                #~ list_out1 = pmt.list_add(list_out1,pmt.to_pmt(data_out1[n]))            
-            #~ self.message_port_pub(pmt.intern('packet_out'),list_out1)
-            #~ time.sleep(self.fuzzing_interval)
-            #~ ######
+        #     #~ ######
+        #     #~ # Test
+        #     #data_out_bytes = 0xAA,0xAA,0xAA,0xAA,0xD3,0x91,0xD3,0x91,0x0E,0x78,0x56,0x34,0x12,0xAA,0xAA,0xAA,0xAA,0x20,0x03,0x33,0xAA,0x00,0xFF,0xE4,0x0D   
+        #     #print(data_out_bytes2)
+        #     #~ 
+        #     #~ print(str(time.time()))
+        #     #~ data_out1 = 0xAA,0xAA,0xAA,0xAA,0xD3,0x91,0xD3,0x91,0x0E,0x78,0x56,0x34,0x12,0xAA,0xAA,0xAA,0xAA,0x20,0x03,0x33,0xFF,0xFF,0xFF,0x62,0x06
+        #     #~ list_out1 = pmt.list1(pmt.to_pmt(data_out1[0]))
+        #     #~ for n in range(1,len(data_out1)):
+        #         #~ list_out1 = pmt.list_add(list_out1,pmt.to_pmt(data_out1[n]))            
+        #     #~ self.message_port_pub(pmt.intern('packet_out'),list_out1)
+        #     #~ time.sleep(self.fuzzing_interval)
+        #     #~ 
+        #     #~ # Test
+        #     #~ print(str(time.time()))
+        #     #~ data_out1 = 0xAA,0xAA,0xAA,0xAA,0xD3,0x91,0xD3,0x91,0x0E,0x78,0x56,0x34,0x12,0xAA,0xAA,0xAA,0xAA,0x20,0x03,0x33,0x68,0x01,0xFF,0xED,0x25
+        #     #~ list_out1 = pmt.list1(pmt.to_pmt(data_out1[0]))
+        #     #~ for n in range(1,len(data_out1)):
+        #         #~ list_out1 = pmt.list_add(list_out1,pmt.to_pmt(data_out1[n]))            
+        #     #~ self.message_port_pub(pmt.intern('packet_out'),list_out1)
+        #     #~ time.sleep(self.fuzzing_interval)
+        #     #~ ######
             
             
 
@@ -469,7 +466,8 @@ class fuzzer(gr.sync_block):
     def set_fuzzing_packet_type(self,fuzzing_packet_type):
         self.fuzzing_packet_type = fuzzing_packet_type        
 
-
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
 
 

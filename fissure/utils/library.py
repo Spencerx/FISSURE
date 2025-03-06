@@ -587,6 +587,17 @@ def getFieldData(library, protocol, packet_name, field_name):
     return field_dictionary
 
 
+def getFieldDataAll(library, protocol, packet_name):
+    """
+    Returns the whole field dictionary for a protocol, packet_name, the packet_types table.
+    """
+    fields = next(packet_type[4] for packet_type in library["packet_types"]
+                  if packet_type[1] == protocol and 
+                  packet_type[2] == packet_name)
+
+    return fields
+
+
 def getDemodulationFlowGraphs(library):
     """
     Returns the demdulation_flow_graph table contents.
@@ -684,15 +695,6 @@ def getNextDissectorPort(library):
     else:
         # Handle the case when there are no valid ports
         return 1  # Return 1 or any default starting port number
-
-
-def getFieldProperties(library, protocol, packet_name, field):
-    """
-    Returns a field value from the fields dictionary in the packet_types table.
-    """
-    field_properties = [row[4][field] for row in library["packet_types"] if row[1] == protocol and row[2] == packet_name and field in row[4]]
-    
-    return field_properties
 
 
 def getDefaults(library, protocol, packet_name):

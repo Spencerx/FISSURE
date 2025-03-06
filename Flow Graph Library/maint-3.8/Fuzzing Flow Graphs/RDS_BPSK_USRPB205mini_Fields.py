@@ -6,7 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: Rds Bpsk Usrpb205Mini Fields
-# GNU Radio version: 3.8.1.0
+# GNU Radio version: 3.8.5.0
 
 from gnuradio import analog
 from gnuradio import blocks
@@ -23,6 +23,7 @@ from gnuradio import uhd
 import time
 import fuzzer
 import math
+
 
 class RDS_BPSK_USRPB205mini_Fields(gr.top_block):
 
@@ -42,8 +43,8 @@ class RDS_BPSK_USRPB205mini_Fields(gr.top_block):
         self.samp_rate = samp_rate = 1e6
         self.rds_gain = rds_gain = .5
         self.pilot_gain = pilot_gain = .3
+        self.packet_types_fields = packet_types_fields = "{}"
         self.outbuffer = outbuffer = 0
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_8.yaml"
         self.input_gain = input_gain = .3
         self.fuzzing_type = fuzzing_type = "['Random']"
         self.fuzzing_seed = fuzzing_seed = "0"
@@ -93,12 +94,11 @@ class RDS_BPSK_USRPB205mini_Fields(gr.top_block):
         self.gr_frequency_modulator_fc_0 = analog.frequency_modulator_fc(2*math.pi*fm_max_dev/usrp_rate)
         self.gr_diff_encoder_bb_0 = digital.diff_encoder_bb(2)
         self.gr_char_to_float_0 = blocks.char_to_float(1, 1)
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.fuzzer_continuous_insert_0 = fuzzer.continuous_insert((99, 147, 114, 129, 114, 161, 206, 17, 122, 136, 204, 130, 179))
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
         self.blocks_null_source_0_0 = blocks.null_source(gr.sizeof_char*1)
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_ff(rds_gain)
-
 
 
         ##################################################
@@ -120,6 +120,7 @@ class RDS_BPSK_USRPB205mini_Fields(gr.top_block):
         self.connect((self.low_pass_filter_0, 0), (self.gr_multiply_xx_0, 1))
         self.connect((self.mmse_resampler_xx_0, 0), (self.low_pass_filter_0, 0))
         self.connect((self.mmse_resampler_xx_1, 0), (self.uhd_usrp_sink_0, 0))
+
 
     def get_usrp_rate(self):
         return self.usrp_rate
@@ -188,17 +189,17 @@ class RDS_BPSK_USRPB205mini_Fields(gr.top_block):
     def set_pilot_gain(self, pilot_gain):
         self.pilot_gain = pilot_gain
 
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
+
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
+
     def get_outbuffer(self):
         return self.outbuffer
 
     def set_outbuffer(self, outbuffer):
         self.outbuffer = outbuffer
-
-    def get_library_filepath(self):
-        return self.library_filepath
-
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
 
     def get_input_gain(self):
         return self.input_gain
@@ -269,18 +270,22 @@ class RDS_BPSK_USRPB205mini_Fields(gr.top_block):
 
 
 
+
+
 def main(top_block_cls=RDS_BPSK_USRPB205mini_Fields, options=None):
     tb = top_block_cls()
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
+
         sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
+
     try:
         input('Press Enter to quit: ')
     except EOFError:

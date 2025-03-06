@@ -1,6 +1,34 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-05
+
+Sensor node configuration GUI and field fuzzing fixes.
+
+### Added
+
+- Probe function for 802.11x devices (iwconfig)
+- pkill added to password prompt exceptions
+- getFieldDataAll() library function
+
+### Changed
+
+- Popup when querying remote sensor node status over Meshtastic 
+- Editing async_ok_dialog to have a scrollbar and follow style sheets
+- Removed getFieldProperties() library function, not in use
+- overwriteFlowGraphVariables can save variable values starting with double quotes (for quoted dictionaries "{}")
+- Updated fuzzing flow graphs and fuzzer block to accept database information
+- Updated AttackTabSlots.py to feed database information to sensor nodes when fuzzing fields
+
+### Fixed
+
+- Sensor Node Configuration init() opens to the right disconnect stacked widget
+- Calling local and remote slot functions on Sensor Node Configuration init() and disabling local button if already configured
+- Autoscan and guess return 802.11x interface names for interfaces in monitor mode
+- Bottom widgets are hidden on Sensor Node Configuration init() before connecting to/launching a sensor node
+- Fuzzing flow graphs now reference database packet type field values instead of the old library yaml file
+- Updated IQEngine button in IQ Data tab to use port 3001
+
 ## 2025-3-04
 
 Updates to low throughput network connections for remote sensor nodes.

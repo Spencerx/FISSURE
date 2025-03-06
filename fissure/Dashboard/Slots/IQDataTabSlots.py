@@ -6546,7 +6546,7 @@ def _slotIQ_IQEngineClicked(dashboard: QtCore.QObject):
 
             # Start the Container
             expect_script_filepath = os.path.join(fissure.utils.TOOLS_DIR, "expect_script")
-            start_command = """docker run --env-file .env -v \\\"""" + os.path.join(fissure.utils.FISSURE_ROOT, 'IQ Recordings') + """\\\":/tmp/myrecordings -p 3000:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre"""
+            start_command = """docker run --env-file .env -v \\\"""" + os.path.join(fissure.utils.FISSURE_ROOT, 'IQ Recordings') + """\\\":/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre"""
             iq_engine_directory = os.path.expanduser("~/Installed_by_FISSURE/IQEngine/")
             if fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "gnome-terminal":
                 proc = subprocess.Popen("gnome-terminal -- " + expect_script_filepath + ' "' + start_command + '"', shell=True, cwd=iq_engine_directory)
@@ -6560,11 +6560,11 @@ def _slotIQ_IQEngineClicked(dashboard: QtCore.QObject):
         get_iq_directory = str(dashboard.ui.comboBox3_iq_folders.currentText())
         if ("IQ Recordings" in get_iq_directory.split("/")[-1]) and (".sigmf-data" in get_iq_filename):
             # Open a Browser to the File
-            os.system("xdg-open http://localhost:3000/view/api/local/local/" + get_iq_filename.split(".sigmf-data")[0])
+            os.system("xdg-open http://localhost:3001/view/api/local/local/" + get_iq_filename.split(".sigmf-data")[0])
 
         else:
             # Open a Browser to the IQ Recordings Folder
-            os.system("xdg-open http://localhost:3000/browser")
+            os.system("xdg-open http://localhost:3001/browser")
             dashboard.logger.info("SigMF file not found in IQ Recordings folder. Click Refresh in the top right of the page to see new IQ files in the IQ Recordings folder.")
 
     except Exception as e:

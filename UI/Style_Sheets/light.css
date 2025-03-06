@@ -689,6 +689,7 @@ QDialog#SigMF_Window{background-color: @color1;}
 QDialog#Dialog_custom_color{background-color: @color1;}
 QDialog#Dialog_install{background-color: @color1;}
 QDialog#Dialog_install2{background-color: @color1;}
+QDialog#MessageDialog{background-color: @color1;}
 
 QTreeWidget#treeWidget_software::item{
     height: 30px;

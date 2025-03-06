@@ -703,6 +703,7 @@ QDialog#Dialog_chooser{background-color: @color1;}
 QDialog#Dialog_new_soi{background-color: @color1;}
 QDialog#SigMF_Window{background-color: @color1;}
 QDialog#Dialog_custom_color{background-color: @color1;}
+QDialog#MessageDialog{background-color: @color1;}
 
 QTreeView#treeWidget_attack_attacks > QHeaderView::section{
     color: @color4;

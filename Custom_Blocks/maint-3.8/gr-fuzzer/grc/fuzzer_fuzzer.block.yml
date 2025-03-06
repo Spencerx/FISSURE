@@ -4,7 +4,7 @@ category: '[fuzzer]'
 
 templates:
   imports: import fuzzer
-  make: fuzzer.fuzzer(${fuzzing_seed},${fuzzing_fields},${fuzzing_type},${fuzzing_min},${fuzzing_max},${fuzzing_data},${fuzzing_interval},${fuzzing_protocol},${fuzzing_packet_type},${library_filepath})
+  make: fuzzer.fuzzer(${fuzzing_seed},${fuzzing_fields},${fuzzing_type},${fuzzing_min},${fuzzing_max},${fuzzing_data},${fuzzing_interval},${fuzzing_protocol},${fuzzing_packet_type},${packet_types_fields})
 
 parameters:
 - id: fuzzing_seed
@@ -43,10 +43,10 @@ parameters:
   label: Fuzzing Packet Type
   dtype: string
   default: "0"
-- id: library_filepath
-  label: Library Filepath
+- id: packet_types_fields
+  label: Packet Types Fields
   dtype: string
-  default: "~/FISSURE/YAML/library.yaml"         
+  default: "{}"
 
 
 outputs:

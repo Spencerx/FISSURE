@@ -6,7 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: X10 Ook Usrpb205Mini Fields
-# GNU Radio version: 3.8.1.0
+# GNU Radio version: 3.8.5.0
 
 from gnuradio import blocks
 from gnuradio import gr
@@ -20,6 +20,7 @@ from gnuradio import uhd
 import time
 import X10
 import fuzzer
+
 
 class X10_OOK_USRPB205mini_Fields(gr.top_block):
 
@@ -37,7 +38,7 @@ class X10_OOK_USRPB205mini_Fields(gr.top_block):
         self.serial = serial = "False"
         self.sample_rate = sample_rate = 1e6
         self.rx_usrp_frequency = rx_usrp_frequency = 310.8e6
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_8.yaml"
+        self.packet_types_fields = packet_types_fields = "{}"
         self.fuzzing_type = fuzzing_type = "['Random']"
         self.fuzzing_seed = fuzzing_seed = "0"
         self.fuzzing_protocol = fuzzing_protocol = "X10"
@@ -68,11 +69,10 @@ class X10_OOK_USRPB205mini_Fields(gr.top_block):
         self.uhd_usrp_sink_0.set_antenna(tx_usrp_antenna, 0)
         self.uhd_usrp_sink_0.set_samp_rate(sample_rate)
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec())
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_gr_complex*1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(0.9)
         self.X10_msg_gen_fuzzer_0 = X10.msg_gen_fuzzer(sample_rate,address_code,data_code,transmit_interval/2,transmit_interval)
-
 
 
         ##################################################
@@ -82,6 +82,7 @@ class X10_OOK_USRPB205mini_Fields(gr.top_block):
         self.connect((self.X10_msg_gen_fuzzer_0, 0), (self.blocks_multiply_const_vxx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.blocks_null_source_0, 0), (self.X10_msg_gen_fuzzer_0, 0))
+
 
     def get_tx_usrp_gain(self):
         return self.tx_usrp_gain
@@ -137,11 +138,11 @@ class X10_OOK_USRPB205mini_Fields(gr.top_block):
     def set_rx_usrp_frequency(self, rx_usrp_frequency):
         self.rx_usrp_frequency = rx_usrp_frequency
 
-    def get_library_filepath(self):
-        return self.library_filepath
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
 
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
     def get_fuzzing_type(self):
         return self.fuzzing_type
@@ -213,18 +214,22 @@ class X10_OOK_USRPB205mini_Fields(gr.top_block):
 
 
 
+
+
 def main(top_block_cls=X10_OOK_USRPB205mini_Fields, options=None):
     tb = top_block_cls()
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
+
         sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
+
     try:
         input('Press Enter to quit: ')
     except EOFError:

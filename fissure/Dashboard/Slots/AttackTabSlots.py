@@ -1142,7 +1142,7 @@ async def _slotPacketScapyStartClicked(dashboard: QtCore.QObject):
         # Send the Message
         await dashboard.backend.startScapy(dashboard.active_sensor_node, get_iface, get_interval, get_loop, dashboard.backend.os_info)
     else:
-        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Specify wireless interface.")
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, "Specify wireless interface.", width=100, height=20)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -4872,7 +4872,18 @@ async def _slotAttackFuzzingStartClicked(dashboard: QtCore.QObject):
         for get_row in range(dashboard.ui.tableWidget_attack_fuzzing_flow_graph_current_values.rowCount()):
             # Save the Variable Name and Value in the Row to a Dictionary
             get_name = str(dashboard.ui.tableWidget_attack_fuzzing_flow_graph_current_values.verticalHeaderItem(get_row).text())
-            fuzzing_blocks = ["fuzzing_fields","fuzzing_type","fuzzing_min","fuzzing_max","fuzzing_data","fuzzing_seed","fuzzing_interval","fuzzing_protocol","fuzzing_packet_type"]
+            fuzzing_blocks = [
+                "fuzzing_fields",
+                "fuzzing_type",
+                "fuzzing_min",
+                "fuzzing_max",
+                "fuzzing_data",
+                "fuzzing_seed",
+                "fuzzing_interval",
+                "fuzzing_protocol",
+                "fuzzing_packet_type",
+                "packet_types_fields"
+            ]
             if not any(get_name in x for x in fuzzing_blocks):
                 variable_names.append(get_name)
                 variable_values.append(str(dashboard.ui.tableWidget_attack_fuzzing_flow_graph_current_values.item(get_row,0).text()))
@@ -4896,6 +4907,7 @@ async def _slotAttackFuzzingStartClicked(dashboard: QtCore.QObject):
             variable_names.append("fuzzing_interval")
             variable_names.append("fuzzing_protocol")
             variable_names.append("fuzzing_packet_type")
+            variable_names.append("packet_types_fields")
             variable_values.append(str(fuzzing_fields))
             variable_values.append(str(fuzzing_type))
             variable_values.append(str(fuzzing_min))
@@ -4905,6 +4917,11 @@ async def _slotAttackFuzzingStartClicked(dashboard: QtCore.QObject):
             variable_values.append(str(dashboard.ui.textEdit_attack_fuzzing_interval.toPlainText()))
             variable_values.append(str(dashboard.ui.label2_attack_fuzzing_selected_protocol.text()))
             variable_values.append(str(dashboard.ui.comboBox_attack_fuzzing_subcategory.currentText()))
+
+            get_protocol = str(dashboard.ui.comboBox_attack_protocols.currentText())
+            get_subcategory = str(dashboard.ui.comboBox_attack_fuzzing_subcategory.currentText())
+            get_fields = fissure.utils.library.getFieldDataAll(dashboard.backend.library, get_protocol, get_subcategory)
+            variable_values.append(str(get_fields))
 
         # Variables
         elif dashboard.ui.stackedWidget_fuzzing.currentIndex() == 1:

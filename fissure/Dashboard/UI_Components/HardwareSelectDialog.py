@@ -317,32 +317,26 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
                     and (local_assigned == False)
                 ):
                     local_widgets[n].setChecked(True)
-                    # HardwareSelectSlots.local(self, tab_index=n)
+                    HardwareSelectSlots.local(self, tab_index=n)
                 else:
+                    local_widgets[n].setEnabled(False)
                     remote_widgets[n].setChecked(True)
-                    # HardwareSelectSlots.remote(self, tab_index=n)
+                    HardwareSelectSlots.remote(self, tab_index=n)
 
         # Update if Connected
-        if "OK" in self.dashboard.statusBar().sensor_nodes[0].text():
-            self.sensorNodeConnected(0)
-        else:
-            self.sensorNodeDisconnected(0)
-        if "OK" in self.dashboard.statusBar().sensor_nodes[1].text():
-            self.sensorNodeConnected(1)
-        else:
-            self.sensorNodeDisconnected(1)
-        if "OK" in self.dashboard.statusBar().sensor_nodes[2].text():
-            self.sensorNodeConnected(2)
-        else:
-            self.sensorNodeDisconnected(2)
-        if "OK" in self.dashboard.statusBar().sensor_nodes[3].text():
-            self.sensorNodeConnected(3)
-        else:
-            self.sensorNodeDisconnected(3)
-        if "OK" in self.dashboard.statusBar().sensor_nodes[4].text():
-            self.sensorNodeConnected(4)
-        else:
-            self.sensorNodeDisconnected(4)
+        for n in range(0, len(get_sensor_node)):
+            if "OK" in self.dashboard.statusBar().sensor_nodes[n].text():
+                if self.dashboard.backend.settings[get_sensor_node[n]]["network_type"] == "IP":
+                    self.sensorNodeConnected(n, False)
+                elif self.dashboard.backend.settings[get_sensor_node[n]]["network_type"] == "Meshtastic":
+                    self.sensorNodeConnected(n, True)
+            else:
+                if self.dashboard.backend.settings[get_sensor_node[n]]["network_type"] == "IP":
+                    self.sensorNodeDisconnected(n)
+                elif self.dashboard.backend.settings[get_sensor_node[n]]["network_type"] == "Meshtastic":
+                    self.sensorNodeDisconnected(n)
+                else:
+                    self.sensorNodeDisconnected(n)  # network_type is empty on first time
 
 
     def __connect_slots__(self):
