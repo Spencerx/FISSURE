@@ -201,18 +201,6 @@ blocks:
     coordinate: [1104, 5]
     rotation: 0
     state: enabled
-- name: library_filepath
-  id: variable
-  parameters:
-    comment: ''
-    value: '"~/FISSURE/YAML/library_3_10.yaml"'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1296, 613]
-    rotation: 0
-    state: enabled
 - name: outbuffer
   id: variable
   parameters:
@@ -223,6 +211,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1200, 365]
+    rotation: 0
+    state: enabled
+- name: packet_types_fields
+  id: variable
+  parameters:
+    comment: ''
+    value: '"{}"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 612.0]
     rotation: 0
     state: enabled
 - name: pilot_gain
@@ -410,6 +410,7 @@ blocks:
     alias: ''
     comment: ''
     en_uvec: 'True'
+    log_level: info
   states:
     bus_sink: false
     bus_source: false
@@ -705,9 +706,9 @@ blocks:
     fuzzing_protocol: fuzzing_protocol
     fuzzing_seed: fuzzing_seed
     fuzzing_type: fuzzing_type
-    library_filepath: library_filepath
     maxoutbuf: '0'
     minoutbuf: '0'
+    packet_types_fields: packet_types_fields
   states:
     bus_sink: false
     bus_source: false
@@ -944,6 +945,7 @@ blocks:
     offset: '0'
     phase: '0'
     samp_rate: usrp_rate
+    showports: 'False'
     type: float
     waveform: analog.GR_SIN_WAVE
   states:
@@ -966,6 +968,7 @@ blocks:
     offset: '0'
     phase: '0'
     samp_rate: usrp_rate
+    showports: 'False'
     type: float
     waveform: analog.GR_SIN_WAVE
   states:
@@ -988,6 +991,7 @@ blocks:
     offset: '0'
     phase: '0'
     samp_rate: usrp_rate
+    showports: 'False'
     type: float
     waveform: analog.GR_SIN_WAVE
   states:
@@ -2392,3 +2396,4 @@ connections:
 
 metadata:
   file_format: 1
+  grc_version: 3.10.7.0

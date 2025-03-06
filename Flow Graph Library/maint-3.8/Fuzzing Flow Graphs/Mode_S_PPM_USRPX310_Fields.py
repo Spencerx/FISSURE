@@ -33,7 +33,7 @@ class Mode_S_PPM_USRPX310_Fields(gr.top_block):
         self.tx_freq = tx_freq = 915e6
         self.transmit_interval = transmit_interval = .1
         self.samp_rate = samp_rate = 2e6
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_8.yaml"
+        self.packet_types_fields = packet_types_fields = "{}"
         self.ip_address = ip_address = "192.168.40.2"
         self.gain = gain = 30
         self.fuzzing_type = fuzzing_type = "['Random']"
@@ -65,7 +65,7 @@ class Mode_S_PPM_USRPX310_Fields(gr.top_block):
         self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec())
         self.fuzzer_packet_insert_0 = fuzzer.packet_insert([0],int(samp_rate*transmit_interval/8),0)
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_char*1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(.3)
@@ -113,11 +113,11 @@ class Mode_S_PPM_USRPX310_Fields(gr.top_block):
         self.samp_rate = samp_rate
         self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
 
-    def get_library_filepath(self):
-        return self.library_filepath
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
 
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
     def get_ip_address(self):
         return self.ip_address

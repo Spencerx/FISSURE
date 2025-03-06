@@ -77,12 +77,10 @@ async def recallStatusMeshtasticReturnLT(component: object, tab_index="", status
     """
     Populates the HardwareSelectDialog with the sensor node settings on connect.
     """
-    print("AT THE DASHBOARD CALLBACK!! STATUS!")
-    print(tab_index)
-    print(status)
     if tab_index and 0 <= int(tab_index) < 5:
-        # Dynamically retrieve all relevant widgets
-        print("Status RETURN@!!!!@#@!#@!@!")
+        # Open a Text Dialog
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], status)
+        return
 
 
 async def findGPS_CoordinatesResultsLT(component: object, tab_index=0, coordinates=""):

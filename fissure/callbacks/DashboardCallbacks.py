@@ -216,11 +216,14 @@ async def hardwareProbeResults(component: object, tab_index=0, output="", height
     probe_buttons[int(tab_index)].setEnabled(True)
 
     # Open a Text Dialog
-    if height_width[0] == '':
-        msgBox = MyMessageBox(my_text = probe_text)
-    else:
-        msgBox = MyMessageBox(my_text = probe_text, height=height_width[0], width=height_width[1])
-    msgBox.exec_()
+    # if height_width[0] == '':
+    #     msgBox = MyMessageBox(my_text = probe_text)
+    # else:
+    #     msgBox = MyMessageBox(my_text = probe_text, height=height_width[0], width=height_width[1])
+    # msgBox.exec_()
+
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], probe_text)
     
 
 async def hardwareScanResults(component: object, tab_index=0, hardware_scan_results=[]):

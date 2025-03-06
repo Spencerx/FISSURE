@@ -34,7 +34,7 @@ class fuzzer(gr.sync_block):
     """
     docstring for block fuzzer
     """
-    def __init__(self, fuzzing_seed, fuzzing_fields, fuzzing_type, fuzzing_min, fuzzing_max, fuzzing_data, fuzzing_interval, fuzzing_protocol, fuzzing_packet_type, library_filepath):
+    def __init__(self, fuzzing_seed, fuzzing_fields, fuzzing_type, fuzzing_min, fuzzing_max, fuzzing_data, fuzzing_interval, fuzzing_protocol, fuzzing_packet_type, packet_types_fields):
         gr.sync_block.__init__(self,
             name = "fuzzer",
             in_sig = None,
@@ -61,7 +61,7 @@ class fuzzer(gr.sync_block):
         self.fuzzing_protocol = fuzzing_protocol
         self.fuzzing_packet_type = fuzzing_packet_type
         
-        self.library_filepath = os.path.expanduser(library_filepath)
+        self.packet_types_fields = ast.literal_eval(packet_types_fields)
 
         # Make a new Thread
         self.stop_event = threading.Event()
@@ -71,12 +71,8 @@ class fuzzer(gr.sync_block):
                     
 
     def run(self):        
-        # Look up the Packet Structure from the Library
-        filename = self.library_filepath
-        with open(filename) as yaml_config_file:
-            fissure_library = yaml.load(yaml_config_file, yaml.FullLoader)
-            
-        packet_dictionary = fissure_library["Protocols"][self.fuzzing_protocol]["Packet Types"][self.fuzzing_packet_type]["Fields"]
+        # Look up the Packet Structure from the Database            
+        packet_dictionary = self.packet_types_fields  #fissure_library["Protocols"][self.fuzzing_protocol]["Packet Types"][self.fuzzing_packet_type]["Fields"]
 
         # Create the Random Number Generator
         generic_rng = random.Random(float(self.fuzzing_seed))

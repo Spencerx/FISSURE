@@ -200,18 +200,6 @@ blocks:
     coordinate: [1104, 5]
     rotation: 0
     state: enabled
-- name: library_filepath
-  id: variable
-  parameters:
-    comment: ''
-    value: '"~/FISSURE/YAML/library_3_8.yaml"'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1296, 613]
-    rotation: 0
-    state: enabled
 - name: outbuffer
   id: variable
   parameters:
@@ -222,6 +210,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1200, 365]
+    rotation: 0
+    state: enabled
+- name: packet_types_fields
+  id: variable
+  parameters:
+    comment: ''
+    value: '"{}"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 612.0]
     rotation: 0
     state: enabled
 - name: pilot_gain
@@ -703,9 +703,9 @@ blocks:
     fuzzing_protocol: fuzzing_protocol
     fuzzing_seed: fuzzing_seed
     fuzzing_type: fuzzing_type
-    library_filepath: library_filepath
     maxoutbuf: '0'
     minoutbuf: '0'
+    packet_types_fields: packet_types_fields
   states:
     bus_sink: false
     bus_source: false
@@ -1982,6 +1982,7 @@ blocks:
     sd_spec6: ''
     sd_spec7: ''
     show_lo_controls: 'False'
+    start_time: '-1.0'
     stream_args: ''
     stream_chans: '[]'
     sync: sync
@@ -2258,6 +2259,7 @@ blocks:
     sd_spec6: ''
     sd_spec7: ''
     show_lo_controls: 'False'
+    start_time: '-1.0'
     stream_args: ''
     stream_chans: '[]'
     sync: sync

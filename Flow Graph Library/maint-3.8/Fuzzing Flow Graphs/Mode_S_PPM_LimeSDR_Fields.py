@@ -33,7 +33,7 @@ class Mode_S_PPM_LimeSDR_Fields(gr.top_block):
         self.tx_channel = tx_channel = 0
         self.transmit_interval = transmit_interval = .1
         self.sample_rate = sample_rate = 2e6
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_8.yaml"
+        self.packet_types_fields = packet_types_fields = "{}"
         self.fuzzing_type = fuzzing_type = "['Random']"
         self.fuzzing_seed = fuzzing_seed = "0"
         self.fuzzing_protocol = fuzzing_protocol = "Mode S"
@@ -68,7 +68,7 @@ class Mode_S_PPM_LimeSDR_Fields(gr.top_block):
 
         self.limesdr_sink_0.calibrate(5e6, 0)
         self.fuzzer_packet_insert_0 = fuzzer.packet_insert([0],int(sample_rate*transmit_interval/8),0)
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_char*1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(.3)
@@ -123,11 +123,11 @@ class Mode_S_PPM_LimeSDR_Fields(gr.top_block):
     def set_sample_rate(self, sample_rate):
         self.sample_rate = sample_rate
 
-    def get_library_filepath(self):
-        return self.library_filepath
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
 
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
     def get_fuzzing_type(self):
         return self.fuzzing_type

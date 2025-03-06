@@ -105,35 +105,52 @@ async def async_yes_no_dialog(parent, message_text):
 
     return msg_box.standardButton(future.result())
 
+###############################
 
-async def async_ok_dialog(parent, message_text, width=None):
-    """ 
-    Used for asynchronous message boxes. Needs to be its own class to adjust the width. Call with asyncio.ensure_future() in Dashboard callbacks.
-    """
-    msg_box = QtWidgets.QMessageBox(parent)
-    msg_box.setText(message_text)
-    msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    msg_box.setIcon(QtWidgets.QMessageBox.NoIcon)
-    # msg_box.setBaseSize(QtCore.QSize(1950, 120))
+class ScrollableMessageDialog(QtWidgets.QDialog):
+    def __init__(self, parent=None, message_text="", width=600, height=400):
+        super().__init__(parent)
+        self.setObjectName("MessageDialog") 
+        self.setWindowTitle(" ")  # Remove title bar text
+        self.setMinimumSize(250, 100)  # Prevents being too small
+        self.resize(width, height)  # Set reasonable size
 
-    # Set the width if provided
-    if width:
-        pass
-        # msg_box.resize(width, msg_box.sizeHint().height())
-        # msg_box.setFixedSize(width, msg_box.sizeHint().height())
+        layout = QtWidgets.QVBoxLayout(self)
+
+        # Scrollable Text Area
+        text_edit = QtWidgets.QTextEdit(self, objectName="textEdit_")
+        text_edit.setText(message_text)
+        text_edit.setReadOnly(True)  # Makes it behave like a label
+        text_edit.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+
+        # OK Button with Centered Alignment
+        ok_button = QtWidgets.QPushButton("OK", self, objectName='pushButton_')
+        ok_button.setFixedWidth(80)
+        ok_button.setFixedHeight(27)
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(ok_button)
+        button_layout.addStretch()
+
+        ok_button.clicked.connect(self.accept)
+
+        layout.addWidget(text_edit)
+        layout.addLayout(button_layout)  # Add button layout instead of just the button
+
+
+async def async_ok_dialog(parent, message_text, width=600, height=400):
+    dialog = ScrollableMessageDialog(parent, message_text, width, height)
 
     loop = asyncio.get_event_loop()
     future = loop.create_future()
 
-    def on_finished(button):
-        future.set_result(button)
+    def on_finished():
+        future.set_result(None)
 
-    msg_box.buttonClicked.connect(on_finished)
-    msg_box.show()
+    dialog.finished.connect(on_finished)
+    dialog.show()
 
     await future
-
-    return msg_box.standardButton(future.result())
 
 
 async def async_textedit_dialog(parent, label_text):

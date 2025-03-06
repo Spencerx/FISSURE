@@ -39,7 +39,7 @@ class SimpliciTI_FSK_LimeSDR_Fields(gr.top_block):
         self.sampling_multiple = sampling_multiple = 16
         self.sampling_factor = sampling_factor = 100
         self.sample_rate = sample_rate = 4e6
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_10.yaml"
+        self.packet_types_fields = packet_types_fields = "{}"
         self.fuzzing_type = fuzzing_type = "['Random','Sequential']"
         self.fuzzing_seed = fuzzing_seed = "0"
         self.fuzzing_protocol = fuzzing_protocol = "SimpliciTI"
@@ -60,7 +60,7 @@ class SimpliciTI_FSK_LimeSDR_Fields(gr.top_block):
         self.limesdr_sink_0 = limesdr.sink('', 0, '', '')
 
         self.fuzzer_packet_insert_0 = fuzzer.packet_insert([0],20,0)
-        self.fuzzer_fuzzer_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.digital_gfsk_mod_0 = digital.gfsk_mod(
             samples_per_symbol=200,
             sensitivity=0.1,
@@ -133,11 +133,11 @@ class SimpliciTI_FSK_LimeSDR_Fields(gr.top_block):
         self.sample_rate = sample_rate
         self.mmse_resampler_xx_0.set_resamp_ratio((self.sampling_factor*self.data_rate*self.sampling_multiple/self.sample_rate))
 
-    def get_library_filepath(self):
-        return self.library_filepath
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
 
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
     def get_fuzzing_type(self):
         return self.fuzzing_type

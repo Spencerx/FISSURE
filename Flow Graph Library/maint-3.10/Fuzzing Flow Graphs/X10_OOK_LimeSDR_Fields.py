@@ -38,7 +38,7 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
         self.transmit_interval = transmit_interval = 4
         self.string_variables = string_variables = ["address_code","data_code"]
         self.sample_rate = sample_rate = 1e6
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_10.yaml"
+        self.packet_types_fields = packet_types_fields = "{}"
         self.fuzzing_type = fuzzing_type = "['Random']"
         self.fuzzing_seed = fuzzing_seed = "0"
         self.fuzzing_protocol = fuzzing_protocol = "X10"
@@ -57,7 +57,7 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
 
         self.limesdr_sink_0 = limesdr.sink('', int(tx_channel), '', '')
 
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_gr_complex*1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(0.9)
         self.X10_msg_gen_fuzzer_0 = X10.msg_gen_fuzzer(sample_rate,address_code,data_code,transmit_interval/2,transmit_interval)
@@ -114,11 +114,11 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
         self.sample_rate = sample_rate
         self.X10_msg_gen_fuzzer_0.set_sample_rate(self.sample_rate)
 
-    def get_library_filepath(self):
-        return self.library_filepath
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
 
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
     def get_fuzzing_type(self):
         return self.fuzzing_type

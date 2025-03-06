@@ -45,8 +45,8 @@ class RDS_BPSK_USRPX310_Fields(gr.top_block):
         self.samp_rate = samp_rate = 1e6
         self.rds_gain = rds_gain = .5
         self.pilot_gain = pilot_gain = .3
+        self.packet_types_fields = packet_types_fields = "{}"
         self.outbuffer = outbuffer = 10
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_10.yaml"
         self.ip_address = ip_address = "192.168.1.40"
         self.input_gain = input_gain = .3
         self.fuzzing_type = fuzzing_type = "['Random']"
@@ -107,7 +107,7 @@ class RDS_BPSK_USRPX310_Fields(gr.top_block):
         self.gr_diff_encoder_bb_0.set_max_output_buffer(outbuffer)
         self.gr_char_to_float_0 = blocks.char_to_float(1, 1)
         self.gr_char_to_float_0.set_max_output_buffer(outbuffer)
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.fuzzer_continuous_insert_0 = fuzzer.continuous_insert((99, 147, 114, 129, 114, 161, 206, 17, 122, 136, 204, 130, 179))
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
         self.blocks_null_source_0_0 = blocks.null_source(gr.sizeof_char*1)
@@ -197,17 +197,17 @@ class RDS_BPSK_USRPX310_Fields(gr.top_block):
     def set_pilot_gain(self, pilot_gain):
         self.pilot_gain = pilot_gain
 
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
+
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
+
     def get_outbuffer(self):
         return self.outbuffer
 
     def set_outbuffer(self, outbuffer):
         self.outbuffer = outbuffer
-
-    def get_library_filepath(self):
-        return self.library_filepath
-
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
 
     def get_ip_address(self):
         return self.ip_address

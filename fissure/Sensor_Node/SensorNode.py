@@ -799,6 +799,9 @@ class SensorNode():
 
 
     def overwriteFlowGraphVariables(self, flow_graph_filename, variable_names, variable_values):
+        # print(variable_names)
+        # print(variable_values)
+
         # Check for string_variables
         for n in range(0,len(variable_names)):
             if variable_names[n] == "string_variables":
@@ -845,7 +848,13 @@ class SensorNode():
 
                         # A String
                         else:
-                            new_value = '"' + new_value + '"'
+                            # Already a String
+                            # print(new_value)
+                            if new_value[0] == '"':  
+                                pass
+                                # print(new_value)
+                            else:
+                                new_value = '"' + new_value + '"'
 
                         new_line = line.split("=",2)[0] + " = " + line.split("=",2)[1] + ' = ' + new_value + "\n"
                         new_stistr += new_line
@@ -871,6 +880,13 @@ class SensorNode():
         sticode=compile(new_stistr,'<string>','exec')
         loadedmod = types.ModuleType('stiimp')
         exec(sticode, loadedmod.__dict__)
+
+        # print("AANNNNNNNNNNNNNNNNNNN")
+        # print(new_stistr)
+        # print("DEBUG: Checking modified module variables")
+        for attr in dir(loadedmod):
+            if "packet_types_fields" in attr:
+                print(f"{attr} =", getattr(loadedmod, attr))
 
         return loadedmod, class_name
 
@@ -998,6 +1014,8 @@ class SensorNode():
                 
                 # Overwrite Variables
                 loadedmod, class_name = self.overwriteFlowGraphVariables(flow_graph_filename, variable_names, variable_values)
+                print(loadedmod)
+                print(class_name)
 
                 # Call the "__init__" Function
                 self.attackflowtoexec = getattr(loadedmod,class_name)()

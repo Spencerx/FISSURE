@@ -6,7 +6,7 @@
 #
 # GNU Radio Python Flow Graph
 # Title: X10 Ook Limesdr Fields
-# GNU Radio version: 3.8.1.0
+# GNU Radio version: 3.8.5.0
 
 from gnuradio import blocks
 from gnuradio import gr
@@ -19,6 +19,7 @@ from gnuradio import eng_notation
 import X10
 import fuzzer
 import limesdr
+
 
 class X10_OOK_LimeSDR_Fields(gr.top_block):
 
@@ -34,7 +35,7 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
         self.transmit_interval = transmit_interval = 4
         self.string_variables = string_variables = ["address_code","data_code"]
         self.sample_rate = sample_rate = 1e6
-        self.library_filepath = library_filepath = "~/FISSURE/YAML/library_3_8.yaml"
+        self.packet_types_fields = packet_types_fields = "{}"
         self.fuzzing_type = fuzzing_type = "['Random']"
         self.fuzzing_seed = fuzzing_seed = "0"
         self.fuzzing_protocol = fuzzing_protocol = "X10"
@@ -70,11 +71,10 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
 
 
         self.limesdr_sink_0.calibrate(5e6, 0)
-        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,library_filepath)
+        self.fuzzer_fuzzer_0_0 = fuzzer.fuzzer(fuzzing_seed,fuzzing_fields,fuzzing_type,fuzzing_min,fuzzing_max,fuzzing_data,fuzzing_interval,fuzzing_protocol,fuzzing_packet_type,packet_types_fields)
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_gr_complex*1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(0.9)
         self.X10_msg_gen_fuzzer_0 = X10.msg_gen_fuzzer(sample_rate,address_code,data_code,transmit_interval/2,transmit_interval)
-
 
 
         ##################################################
@@ -84,6 +84,7 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
         self.connect((self.X10_msg_gen_fuzzer_0, 0), (self.blocks_multiply_const_vxx_0, 0))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.limesdr_sink_0, 0))
         self.connect((self.blocks_null_source_0, 0), (self.X10_msg_gen_fuzzer_0, 0))
+
 
     def get_tx_gain(self):
         return self.tx_gain
@@ -127,11 +128,11 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
         self.sample_rate = sample_rate
         self.X10_msg_gen_fuzzer_0.set_sample_rate(self.sample_rate)
 
-    def get_library_filepath(self):
-        return self.library_filepath
+    def get_packet_types_fields(self):
+        return self.packet_types_fields
 
-    def set_library_filepath(self, library_filepath):
-        self.library_filepath = library_filepath
+    def set_packet_types_fields(self, packet_types_fields):
+        self.packet_types_fields = packet_types_fields
 
     def get_fuzzing_type(self):
         return self.fuzzing_type
@@ -203,18 +204,22 @@ class X10_OOK_LimeSDR_Fields(gr.top_block):
 
 
 
+
+
 def main(top_block_cls=X10_OOK_LimeSDR_Fields, options=None):
     tb = top_block_cls()
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
         tb.wait()
+
         sys.exit(0)
 
     signal.signal(signal.SIGINT, sig_handler)
     signal.signal(signal.SIGTERM, sig_handler)
 
     tb.start()
+
     try:
         input('Press Enter to quit: ')
     except EOFError:
