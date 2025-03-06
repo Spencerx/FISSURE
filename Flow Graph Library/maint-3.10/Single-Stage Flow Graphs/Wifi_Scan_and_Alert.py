@@ -126,7 +126,7 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
             reader = csv.reader(output.split('\n'),escapechar="\\")
             for row in reader:
                 if len(row) == 6: # populated line
-                    power = int(row[4].split(',')[0])
+                    power = power_limit - 1 if len(row[4])==0 else int(row[4].split(',')[0])
                     if power < power_limit:
                         continue
                     for mac in row[2:4]: # process both transmitter and receiver mac addresses
@@ -141,14 +141,6 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
 
                             # match mac to vendor
                             vendor = oui.match(mac)
-                            if not vendor is None and 'd-link' in vendor.lower():
-                                #do stuff here
-                                print('FOUND D-LINK')
-                                pass
-                            elif not vendor is None and 'tp-link' in vendor.lower():
-                                print('FOUND TP-LINK')
-                                #do stuff here
-                                pass
 
                             # add to nodes table
                             nodes[mac] = {
@@ -158,13 +150,13 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 'ssid': ssid,
                                 'vendor': vendor
                             }
+                            currobv = nodes.get(mac)
 
                             # create alert and tak messages
-                            taobv = nodes.get(mac)
-                            _ = taobv.pop('timestamp')
+                            _ = currobv.pop('timestamp')
                             sys.stdout.write(json.dumps({
                                 'msg': 'alert',
-                                'text': f'Wifi mac={mac} frequency_mhz={taobv.get('frequency_mhz')} snr_db={taobv.get('snr_db')}'
+                                'text': f'Wifi mac={mac} frequency_mhz={currobv.get('frequency_mhz')} snr_db={currobv.get('snr_db')}'
                             }) + '\n')
                             sys.stdout.write(json.dumps({
                                 'msg': 'tak',
@@ -173,7 +165,7 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 'lon': '%(longitude)f',
                                 'alt': '%(altitude)f',
                                 'time': datetime.fromtimestamp(float(row[0]), timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                                'remarks': '"' + json.dumps(taobv, separators=(',', ':')) + '"'
+                                'remarks': '"' + json.dumps(currobv, separators=(',', ':')) + '"'
                             }) + '\n')
                             sys.stdout.flush()
 
