@@ -881,13 +881,6 @@ class SensorNode():
         loadedmod = types.ModuleType('stiimp')
         exec(sticode, loadedmod.__dict__)
 
-        # print("AANNNNNNNNNNNNNNNNNNN")
-        # print(new_stistr)
-        # print("DEBUG: Checking modified module variables")
-        for attr in dir(loadedmod):
-            if "packet_types_fields" in attr:
-                print(f"{attr} =", getattr(loadedmod, attr))
-
         return loadedmod, class_name
 
 
@@ -1014,7 +1007,6 @@ class SensorNode():
                 
                 # Overwrite Variables
                 loadedmod, class_name = self.overwriteFlowGraphVariables(flow_graph_filename, variable_names, variable_values)
-                print(loadedmod)
                 print(class_name)
 
                 # Call the "__init__" Function

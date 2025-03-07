@@ -1,6 +1,22 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-06
+
+Updating TAK Server installer for testing.
+
+### Added
+
+- WebTAK menu item in Tools > Mapping
+
+### Changed
+
+- Updating TAK Server installer for testing
+
+### Fixed
+
+- Run with sudo set to False by default for Python attacks, checks in file to make it True
+
 ## 2025-3-05
 
 Sensor node configuration GUI and field fuzzing fixes.

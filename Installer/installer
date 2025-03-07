@@ -2193,6 +2193,61 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_ubuntu20_04.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
+
 ########################################################################
 ####################### Parrot Security/OS 6.1 #########################
 ########################################################################
@@ -4365,6 +4420,61 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_parrot_os_6_1.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
+
 
 ########################################################################
 ########################## Ubuntu 22.04 ################################
@@ -6515,8 +6625,11 @@ sudo docker run hello-world
 """,True,'Data'))
 
 # TAK Server
-programs_ubuntu22_04.append(('TAK',
-"""if command -v docker > /dev/null 2>&1; then
+programs_ubuntu22_04.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
   echo "Docker is installed."
 else
   echo "Docker is not installed."
@@ -6530,9 +6643,40 @@ mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
 cd ~/Installed_by_FISSURE/installTAK
-./installTAK Tools/Tak/takserver-docker-5.3-RELEASE-24.zip
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
 ########## Verify ##########
-locate webadmin.p12
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
 """,False,'Mapping'))
 
 ########################################################################
@@ -8712,6 +8856,60 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_dragonOS_focalx.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
 
 ########################################################################
 ############################ Kali 2024.3 ###############################
@@ -10886,6 +11084,60 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_kali.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
 
 ########################################################################
 ######################## BackBox Linux 8 ###############################
@@ -13030,6 +13282,60 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_backbox_linux_8.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
 
 ########################################################################
 ########################## Raspberry Pi OS #############################
@@ -15190,6 +15496,61 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_raspberry_pi_os.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  mkdir -p ~/Installed_by_FISSURE
+  cd ~/Installed_by_FISSURE/
+  curl -fsSL https://get.docker.com -o get-docker.sh
+  sudo sh get-docker.sh
+  sudo apt-get install -y docker-compose-plugin
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
 
 ########################################################################
 ######################### Ubuntu 22.04 ARM #############################
@@ -17340,6 +17701,60 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_ubuntu22_04_arm.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
 
 ########################################################################
 ########################## Ubuntu 24.04 ################################
@@ -19503,8 +19918,11 @@ sudo docker run hello-world
 """,True,'Data'))
 
 # TAK Server
-programs_ubuntu24_04.append(('TAK',
-"""if command -v docker > /dev/null 2>&1; then
+programs_ubuntu24_04.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
   echo "Docker is installed."
 else
   echo "Docker is not installed."
@@ -19518,9 +19936,40 @@ mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
 cd ~/Installed_by_FISSURE/installTAK
-./installTAK Tools/Tak/takserver-docker-5.3-RELEASE-24.zip
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
 ########## Verify ##########
-locate webadmin.p12
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
 """,False,'Mapping'))
 
 ########################################################################
@@ -21679,6 +22128,60 @@ docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
 sudo docker run hello-world
 """,True,'Data'))
 
+# TAK Server
+programs_arch_linux.append(('TAK Server',
+"""# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
+# Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
+
+if command -v docker > /dev/null 2>&1; then
+  echo "Docker is installed."
+else
+  echo "Docker is not installed."
+  sudo apt-get install -y docker.io
+  #sudo systemctl start docker
+  #sudo systemctl enable docker
+  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+  #newgrp docker
+fi
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
+cd ~/Installed_by_FISSURE/installTAK
+
+sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
+bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+
+openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+    -passin pass:"atakatak"
+
+chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
+"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
+"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+
+# Import webadmin.p12:
+
+# Google Chrome/Edge
+# Open chrome://settings/certificates in your browser.
+# Go to the "Your certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12.
+# Enter the password (default: atakatak, unless changed).
+# Complete the import and restart your browser.
+
+# Mozilla Firefox
+# Open about:preferences#privacy in the Firefox address bar.
+# Scroll down to Certificates and click "View Certificates".
+# Go to the "Your Certificates" tab.
+# Click "Import".
+# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+# Restart Firefox.
+
+########## Verify ##########
+find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+""",False,'Mapping'))
 
 ########################################################################
 
