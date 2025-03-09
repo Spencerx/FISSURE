@@ -37,9 +37,9 @@ def update_yaml(file_path, key_path, cert_path, webadmin_cert_path):
             doc["tak"] = {}
 
         # Update the key and cert paths
-        doc["tak"]["key"] = ensure_single_quotes(key_path)
-        doc["tak"]["cert"] = ensure_single_quotes(cert_path)
-        doc["tak"]["webadmin_cert"] = ensure_single_quotes(webadmin_cert_path)
+        doc["tak"]["key"] = key_path
+        doc["tak"]["cert"] = cert_path
+        doc["tak"]["webadmin_cert"] = webadmin_cert_path
 
         # Write the updated data back to the file
         with open(file_path, "w") as fiss_yaml:
@@ -48,16 +48,6 @@ def update_yaml(file_path, key_path, cert_path, webadmin_cert_path):
         print(f"Successfully updated {file_path}")
     except Exception as e:
         print(f"Error updating YAML file: {e} - {file_path}")
-
-
-# Add single quotes in YAML filepath variables to handle filepaths with spaces
-def ensure_single_quotes(s):
-    s = s.strip()  # Remove any leading/trailing whitespace
-    if s.startswith('"') and s.endswith('"'):
-        s = s[1:-1]  # Remove double quotes if they exist
-    if not (s.startswith("'") and s.endswith("'")):
-        return f"'{s}'"
-    return s
 
 
 # Update both config files

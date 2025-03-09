@@ -13,8 +13,9 @@ Updating TAK Server installer, downloading git submodules for OOT modules if mis
 ### Fixed
 
 - Filling the FISSURE config files with the TAK webadmin_cert during install
-- Adding single quotes around the TAK filepaths in the FISSURE config files
 - QtDesigner install for Ubuntu 24.04
+- Adding sudo to TAK Server docker commands to avoid errors from no restart/refresh of docker user permissions
+- Checking if unzipped TAK Server docker folder exists before doing the install
 
 ## 2025-3-06
 

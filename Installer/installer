@@ -2299,122 +2299,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -3258,7 +3262,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_parrot_os_6_1.append(('gr-mixalot',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -3377,7 +3385,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_parrot_os_6_1.append(('gr-tpms',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -3397,7 +3409,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_parrot_os_6_1.append(('gr-tpms_poore',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -3416,7 +3432,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_parrot_os_6_1.append(('gr-X10',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -3435,7 +3455,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_parrot_os_6_1.append(('gr-zwave_poore',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -4685,122 +4709,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -5627,7 +5655,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_ubuntu22_04.append(('gr-mixalot (19.1 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -5745,7 +5777,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_ubuntu22_04.append(('gr-tpms (11.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -5765,7 +5801,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_ubuntu22_04.append(('gr-tpms_poore (2.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -5784,7 +5824,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_ubuntu22_04.append(('gr-X10 (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -5803,7 +5847,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_ubuntu22_04.append(('gr-zwave_poore (2.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -7048,122 +7096,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -7983,7 +8035,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # # gr-mixalot
 # programs_dragonOS_focalx.append(('gr-mixalot',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 # then
   # sudo apt-get install -y libitpp-dev
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -8101,7 +8157,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_dragonOS_focalx.append(('gr-tpms',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -8121,7 +8181,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_dragonOS_focalx.append(('gr-tpms_poore',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -8140,7 +8204,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_dragonOS_focalx.append(('gr-X10',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -8159,7 +8227,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_dragonOS_focalx.append(('gr-zwave_poore',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -9439,122 +9511,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -10392,7 +10468,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_kali.append(('gr-mixalot (20.41 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -10510,7 +10590,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3  # Will fail without API
 
 # gr-tpms
 programs_kali.append(('gr-tpms (12.82 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -10530,7 +10614,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_kali.append(('gr-tpms_poore (2.71 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -10549,7 +10637,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_kali.append(('gr-X10 (2.71 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -10568,7 +10660,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_kali.append(('gr-zwave_poore (2.71 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -11826,122 +11922,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -12763,7 +12863,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_backbox_linux_8.append(('gr-mixalot (19.1 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -12881,7 +12985,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_backbox_linux_8.append(('gr-tpms (11.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -12901,7 +13009,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_backbox_linux_8.append(('gr-tpms_poore (2.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -12920,7 +13032,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_backbox_linux_8.append(('gr-X10 (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -12939,7 +13055,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_backbox_linux_8.append(('gr-zwave_poore (2.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -14183,122 +14303,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -15134,7 +15258,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_raspberry_pi_os.append(('gr-mixalot',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -15252,7 +15380,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_raspberry_pi_os.append(('gr-tpms',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -15272,7 +15404,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_raspberry_pi_os.append(('gr-tpms_poore',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -15291,7 +15427,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_raspberry_pi_os.append(('gr-X10',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -15310,7 +15450,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_raspberry_pi_os.append(('gr-zwave_poore',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -16557,122 +16701,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -17499,7 +17647,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_ubuntu22_04_arm.append(('gr-mixalot (19.1 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -17617,7 +17769,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_ubuntu22_04_arm.append(('gr-tpms (11.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -17637,7 +17793,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_ubuntu22_04_arm.append(('gr-tpms_poore (2.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -17656,7 +17816,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_ubuntu22_04_arm.append(('gr-X10 (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -17675,7 +17839,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_ubuntu22_04_arm.append(('gr-zwave_poore (2.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -18920,122 +19088,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -19873,7 +20045,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_ubuntu24_04.append(('gr-mixalot (19.87 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -19991,7 +20167,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_ubuntu24_04.append(('gr-tpms (13.07 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -20011,7 +20191,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_ubuntu24_04.append(('gr-tpms_poore (2.81 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -20030,7 +20214,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_ubuntu24_04.append(('gr-X10 (2.82 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -20049,7 +20237,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_ubuntu24_04.append(('gr-zwave_poore (2.84 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -21299,122 +21491,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
@@ -22249,7 +22445,11 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 
 # gr-mixalot
 programs_arch_linux.append(('gr-mixalot (19.87 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-mixalot/
@@ -22367,7 +22567,11 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 
 # gr-tpms
 programs_arch_linux.append(('gr-tpms (13.07 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms/
@@ -22387,7 +22591,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 
 # gr-tpms_poore
 programs_arch_linux.append(('gr-tpms_poore (2.81 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-tpms_poore/
   sudo rm -Rf build
@@ -22406,7 +22614,11 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 
 # gr-X10
 programs_arch_linux.append(('gr-X10 (2.82 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-X10/
   sudo rm -Rf build
@@ -22425,7 +22637,11 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 
 # gr-zwave_poore
 programs_arch_linux.append(('gr-zwave_poore (2.84 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-zwave_poore/
   sudo rm -Rf build
@@ -23669,122 +23885,126 @@ cd ~/Installed_by_FISSURE
 
 # Unzip and move into the extracted directory
 unzip takserver-docker-*.zip
-cd takserver-docker-*/
+if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+    cd takserver-docker-*/
 
-# Ensure CoreConfig.xml exists
-[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+    # Ensure CoreConfig.xml exists
+    [ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
 
-# Set database password
-sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+    # Set database password
+    sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
 
-# Build and start the database
-docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
-docker network create takserver-"$(cat tak/version.txt)"
+    # Build and start the database
+    sudo docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+    sudo docker network create takserver-"$(cat tak/version.txt)"
 
-# Set executable permissions for necessary scripts
-chmod +x tak/db-utils/configureInDocker.sh
-chmod +x tak/certs/makeRootCa.sh
-chmod +x tak/certs/makeCert.sh
+    # Set executable permissions for necessary scripts
+    chmod +x tak/db-utils/configureInDocker.sh
+    chmod +x tak/certs/makeRootCa.sh
+    chmod +x tak/certs/makeCert.sh
 
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 5432:5432 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --network-alias tak-database \
-  --name takserver-db-"$(cat tak/version.txt)" \
-  takserver-db:"$(cat tak/version.txt)"
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 5432:5432 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --network-alias tak-database \
+      --name takserver-db-"$(cat tak/version.txt)" \
+      takserver-db:"$(cat tak/version.txt)"
 
-# Wait for the database to be fully ready
-echo "Waiting for PostgreSQL to be ready..."
-until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
-    sleep 3
-    echo "Waiting for database..."
-done
-echo "Database is ready!"
+    # Wait for the database to be fully ready
+    echo "Waiting for PostgreSQL to be ready..."
+    until sudo docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+        sleep 3
+        echo "Waiting for database..."
+    done
+    echo "Database is ready!"
 
-# Build and start TAK Server
-docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
-docker run -d \
-  -v $(pwd)/tak:/opt/tak:z \
-  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
-  --network takserver-"$(cat tak/version.txt)" \
-  --name takserver-"$(cat tak/version.txt)" \
-  takserver:"$(cat tak/version.txt)"
+    # Build and start TAK Server
+    sudo docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+    sudo docker run -d \
+      -v $(pwd)/tak:/opt/tak:z \
+      -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+      --network takserver-"$(cat tak/version.txt)" \
+      --name takserver-"$(cat tak/version.txt)" \
+      takserver:"$(cat tak/version.txt)"
 
-# Modify certificate metadata
-sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
-sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
-sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+    # Modify certificate metadata
+    sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+    sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+    sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
 
-# Generate Root CA
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+    # Generate Root CA
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
-# Ensure CA certificate exists before continuing
-docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    # Ensure CA certificate exists before continuing
+    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
-# Generate Certificates
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
-docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+    # Generate Certificates
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-# Fix file/folder permissions for certificates
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
-   
-sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
-    -passin pass:"atakatak"
+    # Fix file/folder permissions for certificates
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+      
+    sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+        -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
+        -passin pass:"atakatak"
 
-sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
-   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+    sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+      "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
-# Restart TAK Server to apply changes
-docker restart takserver-"$(cat tak/version.txt)"
+    # Restart TAK Server to apply changes
+    sudo docker restart takserver-"$(cat tak/version.txt)"
 
-# Copy takserver.key and takserver.pem to FISSURE Config Files
-cd """ + fissure_directory + """
-python3 ./fissure/utils/tak_yaml_key_insert.py \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    # Copy takserver.key and takserver.pem to FISSURE Config Files
+    cd """ + fissure_directory + """
+    PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
-# Import webadmin.p12:
+    # Import webadmin.p12:
 
-# Google Chrome/Edge
-# Open chrome://settings/certificates in your browser.
-# Go to the "Your certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12.
-# Enter the password (default: atakatak, unless changed).
-# Complete the import and restart your browser.
+    # Google Chrome/Edge
+    # Open chrome://settings/certificates in your browser.
+    # Go to the "Your certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12.
+    # Enter the password (default: atakatak, unless changed).
+    # Complete the import and restart your browser.
 
-# Mozilla Firefox
-# Open about:preferences#privacy in the Firefox address bar.
-# Scroll down to Certificates and click "View Certificates".
-# Go to the "Your Certificates" tab.
-# Click "Import".
-# Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
-# Restart Firefox.
+    # Mozilla Firefox
+    # Open about:preferences#privacy in the Firefox address bar.
+    # Scroll down to Certificates and click "View Certificates".
+    # Go to the "Your Certificates" tab.
+    # Click "Import".
+    # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
+    # Restart Firefox.
 
-# To Remove TAK:
-# docker ps -a | grep takserver
-# docker rm -f $(docker ps -aq --filter "name=takserver")
-# docker rm -f $(docker ps -aq --filter "name=takserver-db")
-# docker ps -a
-# docker images | grep takserver
-# docker rmi -f $(docker images -q takserver)
-# docker rmi -f $(docker images -q takserver-db)
-# docker images
-# docker network ls | grep takserver
-# docker network rm $(docker network ls --filter "name=takserver" -q)
-# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+    # To Remove TAK:
+    # docker ps -a | grep takserver
+    # docker rm -f $(docker ps -aq --filter "name=takserver")
+    # docker rm -f $(docker ps -aq --filter "name=takserver-db")
+    # docker ps -a
+    # docker images | grep takserver
+    # docker rmi -f $(docker images -q takserver)
+    # docker rmi -f $(docker images -q takserver-db)
+    # docker images
+    # docker network ls | grep takserver
+    # docker network rm $(docker network ls --filter "name=takserver" -q)
+    # sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
 
-echo ""
-echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
-echo ""
+    echo ""
+    echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+    echo ""
+else
+    echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
+fi
 
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
