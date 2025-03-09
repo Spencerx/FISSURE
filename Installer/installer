@@ -487,7 +487,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_ubuntu20_04.append(('gr-adsb (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-adsb/
   sudo rm -Rf build
@@ -520,7 +524,11 @@ ls /usr/local/lib/python*/*/ainfosec
 
 # gr-ais
 programs_ubuntu20_04.append(('gr-ais (8.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ais/
   sudo rm -Rf build
@@ -539,7 +547,11 @@ ls /usr/local/lib/python*/*/ais
 
 # gr-aistx
 programs_ubuntu20_04.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/ais/gr-aistx/
   sudo rm -Rf build
@@ -558,7 +570,12 @@ ls /usr/local/lib/python*/*/AISTX
 
 # gr-bluetooth-maint-3.8
 programs_ubuntu20_04.append(('gr-bluetooth-maint-3.8 (13.3 MB)',
-"""mkdir -p ~/Installed_by_FISSURE
+"""# Missing git submodule?
+#cd """ + fissure_directory + """
+#if [ ! -f "Custom_Blocks/maint-3.8/gr-bluetooth/.git" ]; then
+#    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-bluetooth"
+#fi
+mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 sudo rm -Rf libbtbb
 git clone https://github.com/greatscottgadgets/libbtbb -b master
@@ -584,7 +601,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_ubuntu20_04.append(('gr-clapper_plus (2.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-clapper_plus/
   sudo rm -Rf build
@@ -603,7 +624,11 @@ ls /usr/local/lib/python*/*/clapper_plus
 
 # gr-dect2
 programs_ubuntu20_04.append(('gr-dect2 (9.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-dect2/
   sudo rm -Rf build
@@ -623,7 +648,11 @@ ls /usr/local/lib/python*/*/dect2
 
 # gr-foo
 programs_ubuntu20_04.append(('gr-foo (14.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-foo/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-foo/
   sudo rm -Rf build
@@ -656,7 +685,11 @@ ls /usr/local/lib/python*/*/fuzzer
 
 # gr-garage_door
 programs_ubuntu20_04.append(('gr-garage_door (2.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-garage_door/
   sudo rm -Rf build
@@ -675,7 +708,11 @@ ls /usr/local/lib/python*/*/garage_door
 
 # gr-gsm
 programs_ubuntu20_04.append(('gr-gsm (91.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-gsm/
   sudo rm -Rf build
@@ -699,7 +736,11 @@ ls /usr/local/lib/python*/*/grgsm
 
 # gr-ieee802-11
 programs_ubuntu20_04.append(('gr-ieee802-11 (18.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ieee802-11/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ieee802-11/
   sudo rm -Rf build
@@ -718,7 +759,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_ubuntu20_04.append(('gr-ieee802-15-4 (32.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ieee802-15-4/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-ieee802-15-4/
   sudo rm -Rf build
@@ -739,7 +784,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_ubuntu20_04.append(('gr-iridium (17.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-iridium/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-iridium/
   sudo rm -Rf build
@@ -758,7 +807,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_ubuntu20_04.append(('gr-j2497 (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-j2497/
   sudo rm -Rf build
@@ -777,7 +830,11 @@ ls /usr/local/lib/python*/*/j2497
 
 # gr-limesdr
 programs_ubuntu20_04.append(('gr-limesdr (10.3 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-limesdr/
   sudo rm -Rf build
@@ -796,7 +853,11 @@ ls /usr/local/lib/python*/*/limesdr
 
 # gr-mixalot
 programs_ubuntu20_04.append(('gr-mixalot (20.1 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-mixalot/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-mixalot/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-mixalot"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-mixalot/)" ]; 
 then
   sudo apt-get install -y libitpp-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-mixalot/
@@ -816,7 +877,11 @@ ls /usr/local/lib/python*/*/mixalot
 
 # gr-nrsc5
 programs_ubuntu20_04.append(('gr-nrsc5 (48.3 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-nrsc5/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-nrsc5/
   sudo rm -Rf build
@@ -836,7 +901,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_ubuntu20_04.append(('gr-paint (6.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-paint/
   sudo rm -Rf build
@@ -859,7 +928,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_ubuntu20_04.append(('gr-rds (15.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-rds/
   sudo rm -Rf build
@@ -878,7 +951,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-tpms_poore
 programs_ubuntu20_04.append(('gr-tpms_poore (2.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-tpms_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-tpms_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-tpms_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-tpms_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-tpms_poore/
   sudo rm -Rf build
@@ -897,7 +974,11 @@ ls /usr/local/lib/python*/*/tpms_poore
 
 # gr-X10
 programs_ubuntu20_04.append(('gr-X10 (2.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-X10/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-X10/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-X10"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-X10/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-X10/
   sudo rm -Rf build
@@ -916,7 +997,11 @@ ls /usr/local/lib/python*/*/X10
 
 # gr-zwave_poore
 programs_ubuntu20_04.append(('gr-zwave_poore (2.1 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-zwave_poore/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.8/gr-zwave_poore/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.8/gr-zwave_poore"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-zwave_poore/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.8/gr-zwave_poore/
   sudo rm -Rf build
@@ -2208,23 +2293,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -2244,8 +2399,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -2714,7 +2886,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_parrot_os_6_1.append(('gr-adsb',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -2747,7 +2923,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_parrot_os_6_1.append(('gr-ais',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sudo rm -Rf build
@@ -2766,7 +2946,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_parrot_os_6_1.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -2785,7 +2969,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_parrot_os_6_1.append(('gr-bluetooth',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -2815,7 +3003,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_parrot_os_6_1.append(('gr-clapper_plus',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -2834,7 +3026,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_parrot_os_6_1.append(('gr-dect2',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -2853,7 +3049,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_parrot_os_6_1.append(('gr-foo',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -2887,7 +3087,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_parrot_os_6_1.append(('gr-garage_door',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -2906,7 +3110,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_parrot_os_6_1.append(('gr-gsm',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -2930,7 +3138,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_parrot_os_6_1.append(('gr-ieee802-11',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -2950,7 +3162,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_parrot_os_6_1.append(('gr-ieee802-15-4',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -2972,7 +3188,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_parrot_os_6_1.append(('gr-iridium',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -2992,7 +3212,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_parrot_os_6_1.append(('gr-j2497',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -3011,7 +3235,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_parrot_os_6_1.append(('gr-limesdr',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ];  # Needs LimeSDR hardware installed first
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ];  # Needs LimeSDR hardware installed first
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -3050,7 +3278,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_parrot_os_6_1.append(('gr-nrsc5',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -3071,7 +3303,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_parrot_os_6_1.append(('gr-paint',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -3094,7 +3330,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_parrot_os_6_1.append(('gr-rds',
-"""sudo apt-get install -y libboost-locale-dev
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+sudo apt-get install -y libboost-locale-dev
 if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ];  # Needs hardware installed first
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
@@ -3114,7 +3354,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_parrot_os_6_1.append(('gr-sdrplay3',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -4435,23 +4679,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -4471,8 +4785,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 
@@ -4924,7 +5255,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_ubuntu22_04.append(('gr-adsb (2.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -4957,7 +5292,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_ubuntu22_04.append(('gr-ais (9.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sudo rm -Rf build
@@ -4976,7 +5315,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_ubuntu22_04.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -4995,7 +5338,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_ubuntu22_04.append(('gr-bluetooth (34.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -5025,7 +5372,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_ubuntu22_04.append(('gr-clapper_plus (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -5044,7 +5395,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_ubuntu22_04.append(('gr-dect2 (11.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -5063,7 +5418,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_ubuntu22_04.append(('gr-foo (37.6 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -5097,7 +5456,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_ubuntu22_04.append(('gr-garage_door (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -5116,7 +5479,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_ubuntu22_04.append(('gr-gsm (156.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -5140,7 +5507,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_ubuntu22_04.append(('gr-ieee802-11 (37.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -5160,7 +5531,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_ubuntu22_04.append(('gr-ieee802-15-4 (63.3 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -5182,7 +5557,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_ubuntu22_04.append(('gr-iridium (29.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -5202,7 +5581,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_ubuntu22_04.append(('gr-j2497 (2.6 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -5221,7 +5604,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_ubuntu22_04.append(('gr-limesdr (12.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -5260,7 +5647,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_ubuntu22_04.append(('gr-nrsc5 (53.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -5281,7 +5672,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_ubuntu22_04.append(('gr-paint (9.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -5304,7 +5699,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_ubuntu22_04.append(('gr-rds (20.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -5323,7 +5722,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_ubuntu22_04.append(('gr-sdrplay3',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -6639,23 +7042,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -6675,8 +7148,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -7120,7 +7610,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_dragonOS_focalx.append(('gr-adsb',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -7153,7 +7647,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_dragonOS_focalx.append(('gr-ais',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sed -i 's/c++11/c++17/g' ./CMakeLists.txt
@@ -7173,7 +7671,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_dragonOS_focalx.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -7192,7 +7694,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_dragonOS_focalx.append(('gr-bluetooth',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -7222,7 +7728,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_dragonOS_focalx.append(('gr-clapper_plus',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -7241,7 +7751,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # # gr-dect2
 # programs_dragonOS_focalx.append(('gr-dect2 (11.9 MB)',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 # then
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   # sudo rm -Rf build
@@ -7260,7 +7774,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # # gr-foo
 # programs_dragonOS_focalx.append(('gr-foo (37.6 MB)',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 # then
   # sudo apt-get install -y libsndfile1-dev
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -7294,7 +7812,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_dragonOS_focalx.append(('gr-garage_door',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -7313,7 +7835,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # # gr-gsm
 # programs_dragonOS_focalx.append(('gr-gsm',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 # then
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   # sudo rm -Rf build
@@ -7337,7 +7863,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # # gr-ieee802-11
 # programs_dragonOS_focalx.append(('gr-ieee802-11',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 # then
   # sudo apt-get install -y libsndfile1-dev
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -7357,7 +7887,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # # gr-ieee802-15-4
 # programs_dragonOS_focalx.append(('gr-ieee802-15-4',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 # then
   # sudo apt-get install -y libsndfile1-dev
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -7379,7 +7913,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # # gr-iridium
 # programs_dragonOS_focalx.append(('gr-iridium',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 # then
   # sudo apt-get install -y libsndfile1-dev
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -7399,7 +7937,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-j2497
 programs_dragonOS_focalx.append(('gr-j2497',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -7418,7 +7960,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # # gr-limesdr
 # programs_dragonOS_focalx.append(('gr-limesdr',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 # then
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   # sudo rm -Rf build
@@ -7457,7 +8003,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-nrsc5
 programs_dragonOS_focalx.append(('gr-nrsc5',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -7478,7 +8028,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # # gr-paint
 # programs_dragonOS_focalx.append(('gr-paint',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 # then
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   # sudo rm -Rf build
@@ -7501,7 +8055,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # # gr-rds
 # programs_dragonOS_focalx.append(('gr-rds',
-# """if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+# """cd """ + fissure_directory + """
+# if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+#     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+# fi
+# if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 # then
   # cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   # sudo rm -Rf build
@@ -7520,7 +8078,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-sdrplay3
 programs_dragonOS_focalx.append(('gr-sdrplay3',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -8871,23 +9433,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -8907,8 +9539,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -9368,7 +10017,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_kali.append(('gr-adsb (2.88 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -9401,7 +10054,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_kali.append(('gr-ais (1.34 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sed -i 's/VERSION 3.8/VERSION 3.10/g' ./CMakeLists.txt
@@ -9423,7 +10080,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_kali.append(('gr-aistx (18.61 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -9442,7 +10103,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_kali.append(('gr-bluetooth (38.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -9472,7 +10137,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_kali.append(('gr-clapper_plus (2.66 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -9491,7 +10160,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_kali.append(('gr-dect2 (16.49 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -9510,7 +10183,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_kali.append(('gr-foo (45.20 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -9544,7 +10221,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_kali.append(('gr-garage_door (2.69 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -9563,7 +10244,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_kali.append(('gr-gsm (150.50 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -9587,7 +10272,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_kali.append(('gr-ieee802-11 (39.11 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -9607,7 +10296,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_kali.append(('gr-ieee802-15-4 (64.45 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -9629,7 +10322,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_kali.append(('gr-iridium (30.27 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -9649,7 +10346,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_kali.append(('gr-j2497 (2.81 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -9668,7 +10369,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_kali.append(('gr-limesdr (13.05 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -9707,7 +10412,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_kali.append(('gr-nrsc5 (53.09 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -9728,7 +10437,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_kali.append(('gr-paint (9.82 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -9751,7 +10464,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_kali.append(('gr-rds (20.99 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -9770,7 +10487,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_kali.append(('gr-sdrplay3 (344.00 kB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -11099,23 +11820,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -11135,8 +11926,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -11583,7 +12391,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_backbox_linux_8.append(('gr-adsb (2.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -11616,7 +12428,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_backbox_linux_8.append(('gr-ais (9.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sudo rm -Rf build
@@ -11635,7 +12451,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_backbox_linux_8.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -11654,7 +12474,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_backbox_linux_8.append(('gr-bluetooth (34.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -11684,7 +12508,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_backbox_linux_8.append(('gr-clapper_plus (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -11703,7 +12531,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_backbox_linux_8.append(('gr-dect2 (11.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -11722,7 +12554,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_backbox_linux_8.append(('gr-foo (37.6 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -11756,7 +12592,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_backbox_linux_8.append(('gr-garage_door (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -11775,7 +12615,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_backbox_linux_8.append(('gr-gsm (156.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -11799,7 +12643,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_backbox_linux_8.append(('gr-ieee802-11 (37.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -11819,7 +12667,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_backbox_linux_8.append(('gr-ieee802-15-4 (63.3 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -11841,7 +12693,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_backbox_linux_8.append(('gr-iridium (29.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -11861,7 +12717,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_backbox_linux_8.append(('gr-j2497 (2.6 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -11880,7 +12740,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_backbox_linux_8.append(('gr-limesdr (12.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -11919,7 +12783,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_backbox_linux_8.append(('gr-nrsc5 (53.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -11940,7 +12808,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_backbox_linux_8.append(('gr-paint (9.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -11963,7 +12835,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_backbox_linux_8.append(('gr-rds (20.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -11982,7 +12858,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_backbox_linux_8.append(('gr-sdrplay3',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -13297,23 +14177,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -13333,8 +14283,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -13795,7 +14762,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_raspberry_pi_os.append(('gr-adsb',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -13828,7 +14799,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_raspberry_pi_os.append(('gr-ais',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sudo rm -Rf build
@@ -13847,7 +14822,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_raspberry_pi_os.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -13866,7 +14845,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_raspberry_pi_os.append(('gr-bluetooth',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -13896,7 +14879,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_raspberry_pi_os.append(('gr-clapper_plus',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -13915,7 +14902,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_raspberry_pi_os.append(('gr-dect2',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -13934,7 +14925,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_raspberry_pi_os.append(('gr-foo',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -13968,7 +14963,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_raspberry_pi_os.append(('gr-garage_door',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -13987,7 +14986,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_raspberry_pi_os.append(('gr-gsm',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -14011,7 +15014,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_raspberry_pi_os.append(('gr-ieee802-11',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -14031,7 +15038,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_raspberry_pi_os.append(('gr-ieee802-15-4',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -14053,7 +15064,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_raspberry_pi_os.append(('gr-iridium',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -14073,7 +15088,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_raspberry_pi_os.append(('gr-j2497',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -14092,7 +15111,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_raspberry_pi_os.append(('gr-limesdr',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ];  # Needs LimeSDR hardware installed first
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ];  # Needs LimeSDR hardware installed first
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -14131,7 +15154,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_raspberry_pi_os.append(('gr-nrsc5',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -14152,7 +15179,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_raspberry_pi_os.append(('gr-paint',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -14175,7 +15206,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_raspberry_pi_os.append(('gr-rds',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ];  # Needs hardware installed first
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ];  # Needs hardware installed first
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -14194,7 +15229,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_raspberry_pi_os.append(('gr-sdrplay3',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -15512,23 +16551,93 @@ else
   sudo apt-get install -y docker-compose-plugin
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -15548,8 +16657,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -16001,7 +17127,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_ubuntu22_04_arm.append(('gr-adsb (2.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -16034,7 +17164,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_ubuntu22_04_arm.append(('gr-ais (9.2 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sudo rm -Rf build
@@ -16053,7 +17187,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_ubuntu22_04_arm.append(('gr-aistx',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -16072,7 +17210,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_ubuntu22_04_arm.append(('gr-bluetooth (34.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -16102,7 +17244,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_ubuntu22_04_arm.append(('gr-clapper_plus (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -16121,7 +17267,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_ubuntu22_04_arm.append(('gr-dect2 (11.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -16140,7 +17290,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_ubuntu22_04_arm.append(('gr-foo (37.6 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -16174,7 +17328,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_ubuntu22_04_arm.append(('gr-garage_door (2.4 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -16193,7 +17351,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_ubuntu22_04_arm.append(('gr-gsm (156.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -16217,7 +17379,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_ubuntu22_04_arm.append(('gr-ieee802-11 (37.9 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -16237,7 +17403,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_ubuntu22_04_arm.append(('gr-ieee802-15-4 (63.3 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -16259,7 +17429,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_ubuntu22_04_arm.append(('gr-iridium (29.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -16279,7 +17453,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_ubuntu22_04_arm.append(('gr-j2497 (2.6 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -16298,7 +17476,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_ubuntu22_04_arm.append(('gr-limesdr (12.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -16337,7 +17519,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_ubuntu22_04_arm.append(('gr-nrsc5 (53.8 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -16358,7 +17544,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_ubuntu22_04_arm.append(('gr-paint (9.0 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -16381,7 +17571,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_ubuntu22_04_arm.append(('gr-rds (20.5 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -16400,7 +17594,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_ubuntu22_04_arm.append(('gr-sdrplay3',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -17716,23 +18914,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -17752,8 +19020,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -18213,7 +19498,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_ubuntu24_04.append(('gr-adsb (3.12 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -18246,7 +19535,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_ubuntu24_04.append(('gr-ais (1.38 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sed -i 's/VERSION 3.8/VERSION 3.10/g' ./CMakeLists.txt
@@ -18268,7 +19561,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_ubuntu24_04.append(('gr-aistx (18.81 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -18287,7 +19584,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_ubuntu24_04.append(('gr-bluetooth (34.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -18317,7 +19618,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_ubuntu24_04.append(('gr-clapper_plus (2.71 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -18336,7 +19641,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_ubuntu24_04.append(('gr-dect2 (12.84 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -18355,7 +19664,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_ubuntu24_04.append(('gr-foo (38.39 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -18389,7 +19702,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_ubuntu24_04.append(('gr-garage_door (2.78 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -18408,7 +19725,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_ubuntu24_04.append(('gr-gsm (155.17 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -18432,7 +19753,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_ubuntu24_04.append(('gr-ieee802-11 (39.38 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -18452,7 +19777,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_ubuntu24_04.append(('gr-ieee802-15-4 (65.07 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -18474,7 +19803,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_ubuntu24_04.append(('gr-iridium (33.02 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -18494,7 +19827,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_ubuntu24_04.append(('gr-j2497 (3.02 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -18513,7 +19850,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_ubuntu24_04.append(('gr-limesdr (13.12 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -18552,7 +19893,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_ubuntu24_04.append(('gr-nrsc5 (53.06 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -18573,7 +19918,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_ubuntu24_04.append(('gr-paint (10.05 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -18596,7 +19945,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_ubuntu24_04.append(('gr-rds (21.15 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -18615,7 +19968,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_ubuntu24_04.append(('gr-sdrplay3 (340.00 kB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -18751,7 +20108,11 @@ make
 
 # QtDesigner
 programs_ubuntu24_04.append(('QtDesigner (4.00 kB)',
-"""sudo apt-get install -y build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+"""sudo apt-get install -y qtcreator
+sudo apt-get install -y qtbase5-dev 
+sudo apt-get install -y qtchooser 
+sudo apt-get install -y qt5-qmake
+sudo apt-get install -y qttools5-dev-tools  # Does not have qtbase5-dev-tools
 ########## Verify ##########
 ls /usr/bin/designer
 """,True,'Development'))
@@ -19932,23 +21293,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -19968,8 +21399,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################
@@ -20426,7 +21874,11 @@ ls /usr/local/lib/python*/*/acars
 
 # gr-adsb
 programs_arch_linux.append(('gr-adsb (3.12 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-adsb/
   sudo rm -Rf build
@@ -20459,7 +21911,11 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 
 # gr-ais
 programs_arch_linux.append(('gr-ais (1.38 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
   sed -i 's/VERSION 3.8/VERSION 3.10/g' ./CMakeLists.txt
@@ -20481,7 +21937,11 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 
 # gr-aistx
 programs_arch_linux.append(('gr-aistx (18.81 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/ais/gr-aistx/
   sudo rm -Rf build
@@ -20500,7 +21960,11 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 
 # gr-bluetooth
 programs_arch_linux.append(('gr-bluetooth (34.7 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-bluetooth/)" ]; 
 then
   mkdir -p ~/Installed_by_FISSURE
   cd ~/Installed_by_FISSURE
@@ -20530,7 +21994,11 @@ ls /usr/local/bin/btrx
 
 # gr-clapper_plus
 programs_arch_linux.append(('gr-clapper_plus (2.71 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-clapper_plus/
   sudo rm -Rf build
@@ -20549,7 +22017,11 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 
 # gr-dect2
 programs_arch_linux.append(('gr-dect2 (12.84 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-dect2/
   sudo rm -Rf build
@@ -20568,7 +22040,11 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 
 # gr-foo
 programs_arch_linux.append(('gr-foo (38.39 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-foo/
@@ -20602,7 +22078,11 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 
 # gr-garage_door
 programs_arch_linux.append(('gr-garage_door (2.78 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-garage_door/
   sudo rm -Rf build
@@ -20621,7 +22101,11 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 
 # gr-gsm
 programs_arch_linux.append(('gr-gsm (155.17 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
@@ -20645,7 +22129,11 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 
 # gr-ieee802-11
 programs_arch_linux.append(('gr-ieee802-11 (39.38 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
@@ -20665,7 +22153,11 @@ ls /usr/local/lib/python*/*/ieee802_11
 
 # gr-ieee802-15-4
 programs_arch_linux.append(('gr-ieee802-15-4 (65.07 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-15-4/
@@ -20687,7 +22179,11 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 
 # gr-iridium
 programs_arch_linux.append(('gr-iridium (33.02 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-iridium/
@@ -20707,7 +22203,11 @@ ls /usr/local/lib/python*/*/iridium
 
 # gr-j2497
 programs_arch_linux.append(('gr-j2497 (3.02 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-j2497/
   sudo rm -Rf build
@@ -20726,7 +22226,11 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 
 # gr-limesdr
 programs_arch_linux.append(('gr-limesdr (13.12 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -20765,7 +22269,11 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 
 # gr-nrsc5
 programs_arch_linux.append(('gr-nrsc5 (53.06 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-nrsc5/
@@ -20786,7 +22294,11 @@ ls /usr/local/lib/python*/*/nrsc5
 
 # gr-paint
 programs_arch_linux.append(('gr-paint (10.05 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-paint/
   sudo rm -Rf build
@@ -20809,7 +22321,11 @@ ls /usr/local/lib/python*/*/paint
 
 # gr-rds
 programs_arch_linux.append(('gr-rds (21.15 MB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -20828,7 +22344,11 @@ ls /usr/local/lib/python*/*/rds
 
 # gr-sdrplay3
 programs_arch_linux.append(('gr-sdrplay3 (340.00 kB)',
-"""if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
+"""cd """ + fissure_directory + """
+if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
+fi
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/)" ];  # Requires SDRplay API before building: https://www.sdrplay.com/api
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-sdrplay3/
   sudo rm -Rf build
@@ -22143,23 +23663,93 @@ else
   sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
   #newgrp docker
 fi
+
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://github.com/myTeckNetCode/installTAK.git ./installTAK --recurse-submodules
-cd ~/Installed_by_FISSURE/installTAK
 
-sed -i 's|homeDir=.*|homeDir="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-sed -i 's|BASEDIR=.*|BASEDIR="$HOME/Installed_by_FISSURE"|' ~/Installed_by_FISSURE/installTAK/installTAK
-bash -c './installTAK \"$(ls ~/Installed_by_FISSURE/takserver-docker-* 2>/dev/null | head -n 1)\"'
+# Unzip and move into the extracted directory
+unzip takserver-docker-*.zip
+cd takserver-docker-*/
 
-openssl rsa -in "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
-    -out "$(find "$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1)" -maxdepth 1 -iname "$(hostname).key" 2>/dev/null | head -n 1)" \
+# Ensure CoreConfig.xml exists
+[ ! -f tak/CoreConfig.xml ] && cp tak/CoreConfig.example.xml tak/CoreConfig.xml
+
+# Set database password
+sed -i 's/password=""/password="atakatak"/' tak/CoreConfig.xml
+
+# Build and start the database
+docker build -t takserver-db:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver-db .
+docker network create takserver-"$(cat tak/version.txt)"
+
+# Set executable permissions for necessary scripts
+chmod +x tak/db-utils/configureInDocker.sh
+chmod +x tak/certs/makeRootCa.sh
+chmod +x tak/certs/makeCert.sh
+
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 5432:5432 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --network-alias tak-database \
+  --name takserver-db-"$(cat tak/version.txt)" \
+  takserver-db:"$(cat tak/version.txt)"
+
+# Wait for the database to be fully ready
+echo "Waiting for PostgreSQL to be ready..."
+until docker exec takserver-db-"$(cat tak/version.txt)" psql -U martiuser -d cot -c "SELECT 1;" &>/dev/null; do
+    sleep 3
+    echo "Waiting for database..."
+done
+echo "Database is ready!"
+
+# Build and start TAK Server
+docker build -t takserver:"$(cat tak/version.txt)" -f docker/Dockerfile.takserver .
+docker run -d \
+  -v $(pwd)/tak:/opt/tak:z \
+  -p 8089:8089 -p 8443:8443 -p 8444:8444 -p 8446:8446 -p 9000:9000 -p 9001:9001 \
+  --network takserver-"$(cat tak/version.txt)" \
+  --name takserver-"$(cat tak/version.txt)" \
+  takserver:"$(cat tak/version.txt)"
+
+# Modify certificate metadata
+sed -i 's/^STATE=.*/STATE="test_state"/' tak/certs/cert-metadata.sh
+sed -i 's/^CITY=.*/CITY="test_city"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATIONAL_UNIT=.*/ORGANIZATIONAL_UNIT="test_organization"/' tak/certs/cert-metadata.sh
+sed -i 's/^ORGANIZATION=.*/ORGANIZATION="test_org"/' tak/certs/cert-metadata.sh
+
+# Generate Root CA
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
+
+# Ensure CA certificate exists before continuing
+docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+
+# Generate Certificates
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
+docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
+
+# Fix file/folder permissions for certificates
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
+sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
+   
+sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+    -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
     -passin pass:"atakatak"
 
-chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
-"./""" + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1)" \
-"$(find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).pem\" 2>/dev/null | head -n 1)"
+sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
+   "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+# Restart TAK Server to apply changes
+docker restart takserver-"$(cat tak/version.txt)"
+
+# Copy takserver.key and takserver.pem to FISSURE Config Files
+cd """ + fissure_directory + """
+python3 ./fissure/utils/tak_yaml_key_insert.py \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
+"$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 
 # Import webadmin.p12:
 
@@ -22179,8 +23769,25 @@ chmod +x """ + fissure_directory + """/fissure/utils/tak_yaml_key_insert.py
 # Select /home/cups-pk-helper/webadmin.p12 and enter the password (atakatak).
 # Restart Firefox.
 
+# To Remove TAK:
+# docker ps -a | grep takserver
+# docker rm -f $(docker ps -aq --filter "name=takserver")
+# docker rm -f $(docker ps -aq --filter "name=takserver-db")
+# docker ps -a
+# docker images | grep takserver
+# docker rmi -f $(docker images -q takserver)
+# docker rmi -f $(docker images -q takserver-db)
+# docker images
+# docker network ls | grep takserver
+# docker network rm $(docker network ls --filter "name=takserver" -q)
+# sudo rm -rf ~/Installed_by_FISSURE/takserver-docker-*/
+
+echo ""
+echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
+echo ""
+
 ########## Verify ##########
-find /home -type d -path '*/takserver-docker-*/tak/certs/files' 2>/dev/null | head -n 1 | xargs -I {} find {} -maxdepth 1 -iname \"$(hostname).key\" 2>/dev/null | head -n 1
+ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 
 ########################################################################

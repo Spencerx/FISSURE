@@ -1,6 +1,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-09
+
+Updating TAK Server installer, downloading git submodules for OOT modules if missing
+
+### Changed
+
+- Updating the TAK installer with direct commands for installing with docker
+- Downloading git submodules for out-of-tree modules during install if not downloaded already
+
+### Fixed
+
+- Filling the FISSURE config files with the TAK webadmin_cert during install
+- Adding single quotes around the TAK filepaths in the FISSURE config files
+- QtDesigner install for Ubuntu 24.04
+
 ## 2025-3-06
 
 Updating TAK Server installer for testing.
