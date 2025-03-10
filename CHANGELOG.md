@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-10
+
+Fixing flow graph errors and TAK Server installer.
+
+### Fixed
+
+- overwriteFlowGraphVariables() can handle empty strings, fixes Archive Replay start button and other actions, broken after fuzzing fixes commit
+- Removing extra ip_address variable when starting Archive Replay
+- Added eventlet package to installer for tak_send.py
+
 ## 2025-3-09
 
 Updating TAK Server installer, downloading git submodules for OOT modules if missing

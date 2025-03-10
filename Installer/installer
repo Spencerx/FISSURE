@@ -105,6 +105,7 @@ sudo python3 -m pip install watchdog
 sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
 sudo python3 -m pip install msgpack
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,'Minimum Install'))
 
@@ -2359,11 +2360,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -2525,6 +2533,7 @@ sudo python3 -m pip install watchdog --break-system-packages
 sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
 sudo python3 -m pip install msgpack --break-system-packages
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -4769,11 +4778,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -4918,6 +4934,7 @@ sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
 sudo apt install -y python3-eventlet
 sudo python3 -m pip install msgpack
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -7156,11 +7173,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -7297,6 +7321,7 @@ sudo python3 -m pip install watchdog
 sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
 sudo python3 -m pip install msgpack
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """, True, "Minimum Install"))
 
@@ -9571,11 +9596,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -9723,6 +9755,7 @@ sudo python3 -m pip install watchdog --break-system-packages
 sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
 sudo python3 -m pip install msgpack --break-system-packages
+sudo python3 -m pip install eventlet --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -11982,11 +12015,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -12127,6 +12167,7 @@ sudo python3 -m pip install watchdog
 sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
 sudo python3 -m pip install msgpack
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -14363,11 +14404,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -14515,6 +14563,7 @@ sudo python3 -m pip install watchdog --break-system-packages
 sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
 sudo python3 -m pip install msgpack --break-system-packages
+sudo python3 -m pip install eventlet --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -16761,11 +16810,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -16909,6 +16965,7 @@ sudo python3 -m pip install watchdog
 sudo python3 -m pip install aiohttp
 sudo python3 -m pip install paho-mqtt
 sudo python3 -m pip install msgpack
+sudo python3 -m pip install eventlet
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -19148,11 +19205,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -19305,6 +19369,7 @@ sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
 sudo apt install -y python3-eventlet
 sudo python3 -m pip install msgpack --break-system-packages
+sudo python3 -m pip install eventlet --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -21551,11 +21616,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \
@@ -21705,6 +21777,7 @@ sudo python3 -m pip install watchdog --break-system-packages
 sudo python3 -m pip install aiohttp --break-system-packages
 sudo python3 -m pip install paho-mqtt --break-system-packages
 sudo python3 -m pip install msgpack --break-system-packages
+sudo python3 -m pip install eventlet --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
@@ -23945,11 +24018,18 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Fix file/folder permissions for certificates
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chmod 644 {} +
+    # Set ownership for all certificate-related files to the current user
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys (only owner/group can read)
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 640 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
+    # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -exec chown $USER:$USER {} +
       
     sudo openssl rsa -in "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
         -out "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d | head -n 1)/takserver.key.unencrypted" \

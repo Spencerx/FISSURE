@@ -799,88 +799,102 @@ class SensorNode():
 
 
     def overwriteFlowGraphVariables(self, flow_graph_filename, variable_names, variable_values):
-        # print(variable_names)
-        # print(variable_values)
+        # print("Variable Names:", variable_names)
+        # print("Variable Values:", variable_values)
 
-        # Check for string_variables
-        for n in range(0,len(variable_names)):
+        # Check if we need to handle string variables
+        fix_strings = False
+        fix_strings_index = None
+
+        for n in range(len(variable_names)):
             if variable_names[n] == "string_variables":
                 fix_strings = True
                 fix_strings_index = n
                 break
-            else:
-                fix_strings = False
-                fix_strings_index = None
 
         # Load New Flow Graph
-        flow_graph_filename = flow_graph_filename.rsplit("/",1)[-1]
-        flow_graph_filename = flow_graph_filename.replace(".py","")
-        loadedmod = __import__(flow_graph_filename)  # Don't need to reload() because the original never changes
+        flow_graph_filename = flow_graph_filename.rsplit("/", 1)[-1]
+        flow_graph_filename = flow_graph_filename.replace(".py", "")
+        loadedmod = __import__(flow_graph_filename)
 
-        # Update the Text in the Code
+        # Get source code
         stistr = inspect.getsource(loadedmod)
+        # print("Original Flow Graph Code:\n", stistr)
+
         variable_line_position = 0
         new_stistr = ""
+
+        # Process each line in the source
         for line in iter(stistr.splitlines()):
+            # print("Processing Line:", line)
+
             # Change Variable Values
             if variable_line_position == 2:
-
-                # Reached the End of the Variables Section
-                if line.strip() == "":
+                if line.strip() == "":  # End of the variable declaration section
                     variable_line_position = 3
-
-                # Change Value
                 else:
-                    variable_name = line.split("=",2)[1]  # Only the first two '=' in case value has '='
+                    # Extract the second value between the two '=' signs
+                    split_line = line.split("=", 2)
+                    if len(split_line) < 3:
+                        # print(f"Skipping line (not a variable assignment): {line}")
+                        new_stistr += line + "\n"
+                        continue
 
-                    # Ignore Notes
-                    if variable_name.replace(' ','') != "notes":
-                        old_value = line.split("=",2)[-1]
-                        index = variable_names.index(variable_name.replace(" ",""))
+                    # Preserve indentation before the variable assignment
+                    indentation = line[:len(line) - len(line.lstrip())]  # Extract leading spaces
+                    variable_name = split_line[1].strip()
+
+                    # Ignore the 'notes' variable
+                    if variable_name.replace(" ", "") == "notes":
+                        new_stistr += line + "\n"
+                        continue  # Skip this line without modifying
+
+                    # Ensure we only process variables that exist in variable_names
+                    if variable_name in variable_names:
+                        index = variable_names.index(variable_name)
                         new_value = variable_values[index]
 
-                        # A Number
-                        if fissure.utils.isFloat(new_value):
-                            # Make Numerical Value a String
-                            if fix_strings == True:
-                                if variable_name.strip() in variable_values[fix_strings_index]:
-                                    new_value = '"' + new_value + '"'
+                        # Handle empty values explicitly
+                        if new_value.strip() == "":
+                            new_value = '""'  # Ensure empty values are properly assigned
 
-                        # A String
-                        else:
-                            # Already a String
-                            # print(new_value)
-                            if new_value[0] == '"':  
-                                pass
-                                # print(new_value)
-                            else:
-                                new_value = '"' + new_value + '"'
+                        # Handle numbers vs. strings
+                        elif fissure.utils.isFloat(new_value):
+                            if fix_strings and variable_name in variable_values[fix_strings_index]:
+                                new_value = f'"{new_value}"'  # Convert numbers to strings if necessary
+                        elif not new_value.startswith('"') and not new_value.startswith("'"):
+                            new_value = f'"{new_value}"'  # Ensure strings are properly quoted
 
-                        new_line = line.split("=",2)[0] + " = " + line.split("=",2)[1] + ' = ' + new_value + "\n"
+                        # Debug print to track replacements
+                        # print(f"Updating {variable_name}: {split_line[-1].strip()} -> {new_value}")
+
+                        # Construct new line with updated value, preserving indentation
+                        new_line = f"{indentation}{split_line[0].strip()} = {variable_name} = {new_value}\n"
                         new_stistr += new_line
+                        continue  # Skip adding the original line
 
             # Write Unreplaced Contents
-            if variable_line_position != 2:
-                new_stistr += line + "\n"
+            new_stistr += line + "\n"
 
-            # Skip "#################################" Line after "# Variables"
-            if variable_line_position == 1:
-                variable_line_position = 2
-
-            # Find Line Containing "# Variables"
+            # Identify start of variable section
             if "# Variables" in line:
                 variable_line_position = 1
 
-            # Find Class Name
-            if "class " in line and "(gr." in line:
-                class_name = line.split(" ")[1]
-                class_name = class_name.split("(")[0]
+            # Move past the header separator
+            if variable_line_position == 1:
+                variable_line_position = 2
 
-        # Compile
-        sticode=compile(new_stistr,'<string>','exec')
-        loadedmod = types.ModuleType('stiimp')
+            # Identify class name
+            if "class " in line and "(gr." in line:
+                class_name = line.split(" ")[1].split("(")[0]
+
+        # Compile and execute modified code
+        # print("\nCompiled Modified Flow Graph:\n", new_stistr)
+        sticode = compile(new_stistr, '<string>', 'exec')
+        loadedmod = types.ModuleType('modified_flow_graph')
         exec(sticode, loadedmod.__dict__)
 
+        # print("Flow Graph Successfully Updated")
         return loadedmod, class_name
 
 
@@ -1805,12 +1819,12 @@ class SensorNode():
                 asyncio.run(self.archivePlaylistPosition(sensor_node_id, n))
 
                 # Change Variable Values
-                variable_names = ["tx_gain","tx_frequency","tx_channel","sample_rate","ip_address","filepath","ip_address","serial"]
-                variable_values = [gains[n],frequencies[n],channels[n],sample_rates[n],"",filenames[n],ip_address, serial]
+                variable_names = ["tx_gain","tx_frequency","tx_channel","sample_rate","filepath","ip_address","serial"]
+                variable_values = [gains[n],frequencies[n],channels[n],sample_rates[n],filenames[n],ip_address, serial]
                 
                 # Adjust Filepath
                 if self.local_remote == "remote":
-                    variable_values[5] = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Archive_Replay", filenames[n].split('/')[-1])
+                    variable_values[4] = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Archive_Replay", filenames[n].split('/')[-1])
 
                 # Make a new Thread
                 stop_event = threading.Event()
