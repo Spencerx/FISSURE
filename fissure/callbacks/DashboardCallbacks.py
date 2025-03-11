@@ -1,6 +1,7 @@
 import fissure.comms
 import time
 from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 import yaml
 import os
 import subprocess
@@ -1587,6 +1588,46 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
 
     # Update Sensor Nodes Tab with Count
     component.frontend.ui.tabWidget.tabBar().setTabText(6, new_text.replace("Alerts", "Sensor Nodes"))
+
+
+async def exploitReturn(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
+    """ 
+    Updates the Sensor Nodes Exploit tab with a new alert.
+    """
+    # Append the message
+    row_position = component.frontend.ui.tableWidget_exploits.rowCount()
+    component.frontend.ui.tableWidget_exploits.insertRow(row_position)
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 0, QTableWidgetItem(protocol))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 1, QTableWidgetItem(modulation))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 2, QTableWidgetItem(hardware))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 3, QTableWidgetItem(type))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 4, QTableWidgetItem(attack))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 5, QTableWidgetItem(str(variables)))
+
+    # Calculate Alert Total
+    current_text = component.frontend.ui.tabWidget_sensor_nodes.tabBar().tabText(4)
+    if "(" in current_text and ")" in current_text:
+        base_text, count = current_text.rsplit("(", 1)
+        count = count.rstrip(")")
+        try:
+            current_count = int(count)
+        except ValueError:
+            current_count = 0
+    else:
+        base_text = current_text
+        current_count = 0
+
+    new_count = current_count + 1
+    new_text = f"{base_text.strip()} ({new_count})"
+
+    # Update Alert Tab with Count
+    #component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(3, new_text)
+    
+    # Update Epxloits Tab with Count
+    component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(4, new_text)
+    
+    # Update Sensor Nodes Tab with Count
+    component.frontend.ui.tabWidget.tabBar().setTabText(6, new_text.replace("Exploits", "Sensor Nodes"))
 
 
 async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):

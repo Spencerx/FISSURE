@@ -8,7 +8,8 @@ import qasync
 import time
 import asyncio
 import ast
-
+from fissure.Dashboard.Slots import AttackTabSlots
+import json
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotSensorNodeAutorunTableDelayChecked(state: int, dashboard: QtCore.QObject):
@@ -887,6 +888,79 @@ def _slotSensorNodesAlertsSaveClicked(dashboard: QtCore.QObject):
             print(f"Error saving file: {e}")
     else:
         print("File save dialog was canceled.")
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesExploitsClearClicked(dashboard: QtCore.QObject):
+    """ 
+    Clears the Listed Exploits text edit and resets the tab color.
+    """
+    tableWidget_exploits: QtWidgets.QTableWidget = dashboard.ui.tableWidget_exploits
+
+    # Clear
+    tableWidget_exploits.clear()
+    tableWidget_exploits.setRowCount(0)
+
+    tableWidget_exploits.horizontalHeader().setVisible(True) # set header visible in code; qt designer always sets to false
+
+    # Reset Alerts Tab Text
+    dashboard.ui.tabWidget_sensor_nodes.tabBar().setTabText(4,"Exploits")
+
+    # Reset Sensor Nodes Tab Text
+    dashboard.ui.tabWidget.tabBar().setTabText(6,"Sensor Nodes")
+
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesExploitsRunClicked(dashboard: QtCore.QObject):
+    """ 
+    Saves the alerts to a text file.
+    """
+    # get table
+    table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_exploits
+    table.horizontalHeader().setVisible(True) # set header visible in code; qt designer always sets to false
+
+    row = table.selectedItems()
+    fields = {}
+    for r in row:
+        fields[int(r.column())] = r.text()
+
+    # stop attack (Attack/Single-Stage/Stop Attack button)
+    # Switch to exploit script within single stage window
+    # Fill variables
+    # Start attack?
+
+    toptab: QtWidgets.QTabWidget = dashboard.ui.tabWidget
+    toptab.setCurrentIndex(3) # switch to attack tab
+
+    subtab: QtWidgets.QTabWidget = dashboard.ui.tabWidget_attack_attack
+    subtab.setCurrentIndex(0) # switch to Single-Stage
+
+    AttackTabSlots._slotAttackLoadFromLibraryClicked(dashboard, True, fields.get(4), fields.get(3))
+    protocol: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_protocols
+    protocol.setCurrentText(fields.get(0))
+    modulation: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_modulation
+    modulation.setCurrentText(fields.get(1))
+    hardware: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_modulation
+    for i in range(hardware.count()):
+        print(hardware.itemData(i))
+    hardware_idx = hardware.findText(fields.get(2))
+    print(hardware_idx)
+    print(hardware.itemText(hardware_idx))
+    hardware.setCurrentIndex(hardware_idx)
+    
+    print('fields', str(fields.get(5)))
+    print('fields', json.loads(str(fields.get(5))))
+
+    variables = json.loads(str(fields.get(5)))
+    table_vars:QtWidgets.QTableWidget = dashboard.ui.tableWidget1_attack_flow_graph_current_values
+    print('keys', variables.keys())
+    #for (j, variable) in enumerate([table_vars.item(i,0) for i in range(table_vars.rowCount())]):
+    for i in range(table_vars.rowCount()):
+        variable = table_vars.verticalHeaderItem(i).text()
+        print('variable', variable)
+        if variable in variables.keys():
+            print('Setting',variable,variables.get(variable))
+            table_vars.item(i, 0).setText(str(variables.get(variable)))
 
 
 @QtCore.pyqtSlot(QtCore.QObject)

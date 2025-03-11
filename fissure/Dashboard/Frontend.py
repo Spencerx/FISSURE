@@ -3890,6 +3890,12 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_sensor_nodes_alerts_save.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesAlertsSaveClicked(dashboard)
     )
+    dashboard.ui.pushButton_sensor_nodes_exploits_clear.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesExploitsClearClicked(dashboard)
+    )
+    dashboard.ui.pushButton_sensor_nodes_exploit_run.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesExploitsRunClicked(dashboard)
+    )
     dashboard.ui.pushButton_sensor_nodes_listeners_meshtastic_info.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesListenersMeshtasticInfoClicked(dashboard)
     )
