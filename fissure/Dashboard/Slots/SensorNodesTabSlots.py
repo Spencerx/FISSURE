@@ -898,7 +898,6 @@ def _slotSensorNodesExploitsClearClicked(dashboard: QtCore.QObject):
     tableWidget_exploits: QtWidgets.QTableWidget = dashboard.ui.tableWidget_exploits
 
     # Clear
-    tableWidget_exploits.clear()
     tableWidget_exploits.setRowCount(0)
 
     tableWidget_exploits.horizontalHeader().setVisible(True) # set header visible in code; qt designer always sets to false
