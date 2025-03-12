@@ -3907,7 +3907,7 @@ def _slotAttackLoadFromLibraryClicked(dashboard: QtCore.QObject, checked, fname=
             # Python Script
             else:
                 # Run with sudo Checkbox
-                dashboard.ui.checkBox_attack_single_stage_sudo.setChecked(True)
+                dashboard.ui.checkBox_attack_single_stage_sudo.setChecked(False)
                 dashboard.ui.checkBox_attack_single_stage_sudo.setEnabled(True)                    
                 
                 # Get Python2/Python3 Variables

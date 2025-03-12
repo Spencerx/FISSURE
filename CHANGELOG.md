@@ -1,6 +1,48 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-10
+
+Fixing flow graph errors and TAK Server installer.
+
+### Fixed
+
+- overwriteFlowGraphVariables() can handle empty strings, fixes Archive Replay start button and other actions, broken after fuzzing fixes commit
+- Removing extra ip_address variable when starting Archive Replay
+- Added eventlet package to installer for tak_send.py
+
+## 2025-3-09
+
+Updating TAK Server installer, downloading git submodules for OOT modules if missing
+
+### Changed
+
+- Updating the TAK installer with direct commands for installing with docker
+- Downloading git submodules for out-of-tree modules during install if not downloaded already
+
+### Fixed
+
+- Filling the FISSURE config files with the TAK webadmin_cert during install
+- QtDesigner install for Ubuntu 24.04
+- Adding sudo to TAK Server docker commands to avoid errors from no restart/refresh of docker user permissions
+- Checking if unzipped TAK Server docker folder exists before doing the install
+
+## 2025-3-06
+
+Updating TAK Server installer for testing.
+
+### Added
+
+- WebTAK menu item in Tools > Mapping
+
+### Changed
+
+- Updating TAK Server installer for testing
+
+### Fixed
+
+- Run with sudo set to False by default for Python attacks, checks in file to make it True
+
 ## 2025-3-05
 
 Sensor node configuration GUI and field fuzzing fixes.

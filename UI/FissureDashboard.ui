@@ -744,6 +744,7 @@
      <addaction name="actionGoogle_Earth_Pro"/>
      <addaction name="actionViking"/>
      <addaction name="actionUS_County_Overlays"/>
+     <addaction name="actionWebTAK"/>
     </widget>
     <widget class="QMenu" name="menuGPS">
      <property name="title">
@@ -3539,6 +3540,11 @@
   <action name="actionWindy">
    <property name="text">
     <string>Windy</string>
+   </property>
+  </action>
+  <action name="actionWebTAK">
+   <property name="text">
+    <string>WebTAK</string>
    </property>
   </action>
  </widget>

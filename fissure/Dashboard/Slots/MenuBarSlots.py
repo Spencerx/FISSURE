@@ -5871,3 +5871,12 @@ def _slotMenuWindyClicked():
     """
     # Open a Browser
     os.system("xdg-open https://www.windy.com")    
+
+
+@QtCore.pyqtSlot()
+def _slotMenuWebTAK_Clicked():
+    """
+    Opens WebTAK in a browser.
+    """
+    # Open a Browser
+    os.system("xdg-open https://localhost:8443/webtak/index.html")   

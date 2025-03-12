@@ -71,13 +71,13 @@ sensor_node1:
   iq: ''
   local_remote: ''
   location: ''
+  meshtastic_serial_baud_rate: ''
+  meshtastic_serial_port: ''
   msg_port: ''
+  network_type: ''
   nickname: ''
   notes: ''
   pd: ''
-  meshtastic_serial_baud_rate: ''
-  meshtastic_serial_port: ''
-  network_type: ''
   tsi: ''
 sensor_node2:
   archive: ''
@@ -91,13 +91,13 @@ sensor_node2:
   iq: ''
   local_remote: ''
   location: ''
+  meshtastic_serial_baud_rate: ''
+  meshtastic_serial_port: ''
   msg_port: ''
+  network_type: ''
   nickname: ''
   notes: ''
   pd: ''
-  meshtastic_serial_baud_rate: ''
-  meshtastic_serial_port: ''
-  network_type: ''
   tsi: ''
 sensor_node3:
   archive: ''
@@ -111,13 +111,13 @@ sensor_node3:
   iq: ''
   local_remote: ''
   location: ''
+  meshtastic_serial_baud_rate: ''
+  meshtastic_serial_port: ''
   msg_port: ''
+  network_type: ''
   nickname: ''
   notes: ''
   pd: ''
-  meshtastic_serial_baud_rate: ''
-  meshtastic_serial_port: ''
-  network_type: ''
   tsi: ''
 sensor_node4:
   archive: ''
@@ -131,13 +131,13 @@ sensor_node4:
   iq: ''
   local_remote: ''
   location: ''
+  meshtastic_serial_baud_rate: ''
+  meshtastic_serial_port: ''
   msg_port: ''
+  network_type: ''
   nickname: ''
   notes: ''
   pd: ''
-  meshtastic_serial_baud_rate: ''
-  meshtastic_serial_port: ''
-  network_type: ''
   tsi: ''
 sensor_node5:
   archive: ''
@@ -151,13 +151,13 @@ sensor_node5:
   iq: ''
   local_remote: ''
   location: ''
+  meshtastic_serial_baud_rate: ''
+  meshtastic_serial_port: ''
   msg_port: ''
+  network_type: ''
   nickname: ''
   notes: ''
   pd: ''
-  meshtastic_serial_baud_rate: ''
-  meshtastic_serial_port: ''
-  network_type: ''
   tsi: ''
 sensor_node_hiprfisr_dealer_port: 5053
 sensor_node_pub_port: 5061
@@ -165,15 +165,15 @@ server:
   address: fissure
   protocol: ipc
 startup_automation_mode: Manual
+tak:
+  cert: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.pem
+  ip_addr: localhost
+  key: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.key
+  port: 8089
+  tak_on_startup: 'False'
+  webadmin_cert: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/webadmin.p12
 target_SOI: 0
 tsi_hiprfisr_dealer_port: 5052
 tsi_pub_port: 5059
 tsi_pub_port_classification: 5065
 tsi_pub_port_id: 5060
-tak:
-  ip_addr : localhost
-  tak_on_startup: 'False'
-  port: 5432
-  webadmin_cert: ''
-  cert: ''
-  key: ''
