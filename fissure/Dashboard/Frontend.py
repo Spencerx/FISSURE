@@ -2108,6 +2108,7 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionHeyWhatsThat_Path_Profiler.triggered.connect(MenuBarSlots._slotMenuHeyWhatsThatPathProfilerClicked)
     dashboard.window.actionWindy_Route_Planner.triggered.connect(MenuBarSlots._slotMenuWindyRoutePlannerClicked)
     dashboard.window.actionWindy.triggered.connect(MenuBarSlots._slotMenuWindyClicked)
+    dashboard.window.actionWebTAK.triggered.connect(MenuBarSlots._slotMenuWebTAK_Clicked)
         
     # Lessons Menu
     dashboard.window.actionLessonOpenBTS.triggered.connect(MenuBarSlots._slotMenuLessonOpenBTS_Clicked)
