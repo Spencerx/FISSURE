@@ -915,53 +915,65 @@ def _slotSensorNodesExploitsRunClicked(dashboard: QtCore.QObject):
     """ 
     Saves the alerts to a text file.
     """
-    # get table
-    table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_exploits
-    table.horizontalHeader().setVisible(True) # set header visible in code; qt designer always sets to false
+    if dashboard.ui.pushButton_attack_start_stop.text() == "Start Attack" and dashboard.ui.pushButton_attack_fuzzing_start.text() == "Start Attack":
+        # get table
+        table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_exploits
+        table.horizontalHeader().setVisible(True) # set header visible in code; qt designer always sets to false
 
-    row = table.selectedItems()
-    fields = {}
-    for r in row:
-        fields[int(r.column())] = r.text()
+        # get the fields from the table entry
+        row = table.selectedItems()
+        fields = {}
+        for r in row:
+            fields[int(r.column())] = r.text()
 
-    # stop attack (Attack/Single-Stage/Stop Attack button)
-    # Switch to exploit script within single stage window
-    # Fill variables
-    # Start attack?
+        # switch to single-stage attack tab
+        toptab: QtWidgets.QTabWidget = dashboard.ui.tabWidget
+        toptab.setCurrentIndex(3) # switch to attack tab
+        subtab: QtWidgets.QTabWidget = dashboard.ui.tabWidget_attack_attack
+        subtab.setCurrentIndex(0) # switch to Single-Stage
 
-    toptab: QtWidgets.QTabWidget = dashboard.ui.tabWidget
-    toptab.setCurrentIndex(3) # switch to attack tab
+        # switch to protocol
+        comboBox_attack_protocols: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_protocols
+        for i in range(comboBox_attack_protocols.count()):
+            if comboBox_attack_protocols.itemText(i).lower() == fields.get(0).lower():
+                comboBox_attack_protocols.setCurrentIndex(i)
+                break
+        AttackTabSlots._slotAttackProtocols(dashboard)
 
-    subtab: QtWidgets.QTabWidget = dashboard.ui.tabWidget_attack_attack
-    subtab.setCurrentIndex(0) # switch to Single-Stage
+        # switch to modulation
+        comboBox_attack_modulation: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_modulation
+        for i in range(comboBox_attack_modulation.count()):
+            if comboBox_attack_modulation.itemText(i).lower() == fields.get(1).lower():
+                comboBox_attack_modulation.setCurrentIndex(i)
+                break
+        AttackTabSlots._slotAttackModulationChanged(dashboard)
 
-    AttackTabSlots._slotAttackLoadFromLibraryClicked(dashboard, True, fields.get(4), fields.get(3))
-    protocol: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_protocols
-    protocol.setCurrentText(fields.get(0))
-    modulation: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_modulation
-    modulation.setCurrentText(fields.get(1))
-    hardware: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_modulation
-    for i in range(hardware.count()):
-        print(hardware.itemData(i))
-    hardware_idx = hardware.findText(fields.get(2))
-    print(hardware_idx)
-    print(hardware.itemText(hardware_idx))
-    hardware.setCurrentIndex(hardware_idx)
-    
-    print('fields', str(fields.get(5)))
-    print('fields', json.loads(str(fields.get(5))))
+        # switch to hardware
+        comboBox_attack_hardware: QtWidgets.QComboBox = dashboard.ui.comboBox_attack_hardware
+        for i in range(comboBox_attack_hardware.count()):
+            if str(fields.get(2)).lower() in str(comboBox_attack_hardware.itemText(i)).lower():
+                comboBox_attack_hardware.setCurrentIndex(i)
+                break
+        AttackTabSlots._slotAttackHardwareChanged(dashboard)
 
-    variables = json.loads(str(fields.get(5)))
-    table_vars:QtWidgets.QTableWidget = dashboard.ui.tableWidget1_attack_flow_graph_current_values
-    print('keys', variables.keys())
-    #for (j, variable) in enumerate([table_vars.item(i,0) for i in range(table_vars.rowCount())]):
-    for i in range(table_vars.rowCount()):
-        variable = table_vars.verticalHeaderItem(i).text()
-        print('variable', variable)
-        if variable in variables.keys():
-            print('Setting',variable,variables.get(variable))
-            table_vars.item(i, 0).setText(str(variables.get(variable)))
+        # select attack
+        treeWidget_attack_attacks: QtWidgets.QTreeWidget = dashboard.ui.treeWidget_attack_attacks
+        tree_item_string = comboBox_attack_protocols.currentText() + " - " + fields.get(4)  # protocol - attack_name
+        treeWidget_attack_attacks.setCurrentItem(treeWidget_attack_attacks.findItems(tree_item_string, QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0])
 
+        # load attack
+        AttackTabSlots._slotAttackLoadTemplateClicked(dashboard)
+
+        # set detected exploit variables
+        variables = json.loads(str(fields.get(5)))
+        table_vars:QtWidgets.QTableWidget = dashboard.ui.tableWidget1_attack_flow_graph_current_values
+        for i in range(table_vars.rowCount()):
+            variable = table_vars.verticalHeaderItem(i).text()
+            if variable in variables.keys():
+                table_vars.item(i, 0).setText(str(variables.get(variable)))
+
+    else:
+        fissure.Dashboard.UI_Components.Qt5.errorMessage("Stop the current attack to stage an exploit")
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotSensorNodeAutorunRunAsStoredChecked(dashboard: QtCore.QObject):
