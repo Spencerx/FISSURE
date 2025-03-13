@@ -275,6 +275,8 @@ Notes:
 - The installer will ask to install PyQt software dependencies required to launch the installation GUIs if they are not found. 
 - Select the operating option in the GUI that best matches your operating system (should be detected automatically if your OS matches an option).
 - Periodically answer prompts regarding third-party software throughout the install. Use your best judgment, the answers will not likely impact FISSURE.
+- Ensure your system clock is set correctly to avoid errors with apt rejecting repository updates.
+- After installation, reboot your computer or log out and back in so that user group changes take effect.
 
 <p align="center">
 <img src="/docs/Icons/README/install1.png" width="257" height="379">

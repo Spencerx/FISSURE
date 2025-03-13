@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-12
+
+Merging pull request #79 and bug fixes.
+
+### Added
+
+- Added more installer notes to README
+- Merging pull request #79: "Exploit detection/messaging infrastructure and UI features"
+- Sensor Nodes>Exploit tab
+
+### Changed
+
+- Updated database dump with exploit attacks/scripts
+
+### Fixed
+
+- Removed sudod typo in TAK Server installs
+- probeMeshtasticGPS no longer hangs when there is no GPS lock 
+- Adding libpulse-dev to GQRX install
+
 ## 2025-3-10
 
 Fixing flow graph errors and TAK Server installer.

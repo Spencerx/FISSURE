@@ -3499,6 +3499,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_parrot_os_6_1.append(('GQRX',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -4771,7 +4772,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -5899,6 +5900,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_ubuntu22_04.append(('GQRX (7.0 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -7166,7 +7168,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -8287,6 +8289,7 @@ ls /usr/local/lib/python*/*/gnuradio/zwave_poore
 # # GQRX
 # programs_dragonOS_focalx.append(('GQRX',
 # """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+# sudo apt-get install -y libpulse-dev
 # mkdir -p ~/Installed_by_FISSURE
 # cd ~/Installed_by_FISSURE/
 # git clone https://github.com/gqrx-sdr/gqrx.git
@@ -9589,7 +9592,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -10728,6 +10731,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_kali.append(('GQRX (35.46 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -12008,7 +12012,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -13131,6 +13135,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_backbox_linux_8.append(('GQRX (7.0 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -14397,7 +14402,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -15534,6 +15539,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_raspberry_pi_os.append(('GQRX',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -16803,7 +16809,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -17931,6 +17937,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_ubuntu22_04_arm.append(('GQRX (7.0 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -19198,7 +19205,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -20337,6 +20344,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_ubuntu24_04.append(('GQRX (9.39 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -21609,7 +21617,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"
@@ -22746,6 +22754,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # GQRX
 programs_arch_linux.append(('GQRX (9.39 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/gqrx-sdr/gqrx.git
@@ -24012,7 +24021,7 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeRootCa.sh"
 
     # Ensure CA certificate exists before continuing
-    sudod docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
+    sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "test -f /opt/tak/certs/files/ca.pem || (echo 'CA generation failed!' && exit 1)"
 
     # Generate Certificates
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh server takserver"

@@ -1299,8 +1299,6 @@ async def probeMeshtasticGPS(serial_port: str, timeout: int = 10) -> Optional[Di
         dict: GPS coordinates if successful, None if failed.
     """
     try:
-        # Create a temporary Meshtastic connection
-        gps_data = "GPS not acquired"
         interface = SerialInterface(serial_port)
         start_time = asyncio.get_running_loop().time()
 
@@ -1309,36 +1307,32 @@ async def probeMeshtasticGPS(serial_port: str, timeout: int = 10) -> Optional[Di
 
             if node_info and "position" in node_info:
                 position = node_info["position"]
-                if node_info and "position" in node_info:
-                    position = node_info["position"]
 
-                    # Prefer `latitudeI` and `longitudeI` (more precise), fallback to float values if needed
-                    if "latitudeI" in position and "longitudeI" in position:
-                        latitude = round(position["latitudeI"] / 1e7, 6)
-                        longitude = round(position["longitudeI"] / 1e7, 6)
-                    elif "latitude" in position and "longitude" in position:
-                        latitude = round(position["latitude"], 6)
-                        longitude = round(position["longitude"], 6)
-                    else:
-                        latitude = None
-                        longitude = None
+                if "latitudeI" in position and "longitudeI" in position:
+                    latitude = round(position["latitudeI"] / 1e7, 6)
+                    longitude = round(position["longitudeI"] / 1e7, 6)
+                elif "latitude" in position and "longitude" in position:
+                    latitude = round(position["latitude"], 6)
+                    longitude = round(position["longitude"], 6)
+                else:
+                    latitude = None
+                    longitude = None
 
-                    altitude = position.get("altitude", 0.0)  # Altitude is optional
+                altitude = position.get("altitude", 0.0)  # Altitude is optional
 
-                    if latitude is not None and longitude is not None and latitude != 0 and longitude != 0:
-                        gps_data = {
-                            "latitude": latitude,
-                            "longitude": longitude,
-                            "altitude": altitude
-                        }
-                        break
+                if latitude is not None and longitude is not None and latitude != 0 and longitude != 0:
+                    interface.close()
+                    return {
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "altitude": altitude
+                    }
 
             await asyncio.sleep(1)  # Retry if GPS is unavailable
 
-        # Close the temporary connection
+        # Close the connection if no GPS lock is found
         interface.close()
-
-        return gps_data
+        return None  # Instead of "GPS not acquired", return None
 
     except Exception as e:
         print(f"Error creating temporary connection to {serial_port}: {e}")
