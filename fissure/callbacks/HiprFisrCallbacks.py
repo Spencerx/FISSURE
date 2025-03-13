@@ -2218,6 +2218,27 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     os.system(f"expect {tak_exp_path} {uid} {lat} {lon} {alt} {time} {remarks}")
 
 
+async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
+    """"
+    Forwards the necesarry information to the proper exploit flow graph.
+    """
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "protocol": protocol,
+        "modulation": modulation,
+        "hardware": hardware,
+        "type": type,
+        "attack": attack,
+        "variables": variables,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "exploitReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    pass
+
 ##########################################################################
 ####################### Outdated/Incomplete/Unused #######################
 ##########################################################################

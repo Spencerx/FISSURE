@@ -42,7 +42,7 @@ def set_channel(dev:str,channel:int):
     ])
 
 def get_channels(dev:str)->dict:
-    output = subprocess.run(['sudo','iwlist','wlx00c0cab6704c','frequency'], capture_output=True)
+    output = subprocess.run(['sudo','iwlist',dev,'frequency'], capture_output=True)
     output = output.stdout.decode('utf-8')
     output = output.split('\n')
     channels = {}
@@ -55,6 +55,20 @@ def get_channels(dev:str)->dict:
             frequency = float(line[line.index(':')+1:line.index('GHz')])
             channels[channel] = frequency
     return channels
+
+class OUILookup(object):
+    def __init__(self):
+        self._table = {}
+        with open('./resources/oui.csv', newline='') as ouifile:
+            ouireader = csv.reader(ouifile)
+            for lines in ouireader:
+                self._table[lines[1]] = lines[2]
+
+    def match(self, mac):
+        tmp_mac = mac.replace(":", "").upper()
+        found_mac = tmp_mac[:6]
+        entry = self._table.get(found_mac)
+        return entry
 
 def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWELL, power_limit:float=-np.inf):
     """Scan Wifi Channels
@@ -80,7 +94,7 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
     Returns
     -------
     dict
-        Detected transmitters where keys are detected transmitter mac addresses and values are the observed values including `timestamp` as time of first observation
+        Detected wireless nodes where keys are detected transmitter/receiver mac addresses and values are the observed values including `timestamp` as time of first observation
     """
     if channels is None:
         # get available channels
@@ -89,8 +103,11 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
     # set monitor mode
     set_monitor_mode(dev)
 
-    # create known transmitter address list
-    transmitters = {}
+    # create known wireless nodes address list
+    nodes = {}
+
+    # create oui lookup table
+    oui = OUILookup()
 
     tend = np.inf if duration == -1 else time.time() + duration
     while True:
@@ -101,18 +118,19 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
 
             if time.time() + dwell > tend:
                 # stop scan
-                return transmitters
+                return nodes
 
             # capture
             output = subprocess.run(['sudo', 'tshark', '-i', dev, '-E', 'separator=,', '-a', 'duration:' + str(dwell), '-Tfields', '-e', 'frame.time_epoch', '-e', 'radiotap.channel.freq', '-e', 'wlan.ta', '-e', 'wlan.ra', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.ssid'], capture_output=True)
             output = output.stdout.decode('utf-8')
             reader = csv.reader(output.split('\n'),escapechar="\\")
             for row in reader:
-                if len(row) == 6:
-                    ta = row[2]
-                    if len(ta) > 0 and not ta in transmitters.keys():
-                        power = int(row[4].split(',')[0])
-                        if power > power_limit:
+                if len(row) == 6: # populated line
+                    power = power_limit - 1 if len(row[4])==0 else int(row[4].split(',')[0])
+                    if power < power_limit:
+                        continue
+                    for mac in row[2:4]: # process both transmitter and receiver mac addresses
+                        if len(mac) > 0 and not mac in nodes.keys():
                             newta = True
                             if row[5] == '<MISSING>':
                                 ssid = '<MISSING>'
@@ -120,28 +138,37 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 ssid = ''
                                 for i in range(0,len(row[5]),2):
                                     ssid += chr(int(row[5][i:i+2], 16))
-                            transmitters[ta] = {
-                                'frequency': int(row[1]),
-                                'timestamp': float(row[0]),
-                                'power': power,
-                                'ssid': ssid
+
+                            # match mac to vendor
+                            vendor = oui.match(mac)
+
+                            # add to nodes table
+                            nodes[mac] = {
+                                'frequency_mhz': int(row[1]),
+                                'timestamp': datetime.fromtimestamp(float(row[0]), timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                                'snr_db': power,
+                                'ssid': ssid,
+                                'vendor': vendor
                             }
-                            taobv = transmitters.get(ta)
+                            currobv = nodes.get(mac)
+
+                            # create alert and tak messages
+                            _ = currobv.pop('timestamp')
                             sys.stdout.write(json.dumps({
                                 'msg': 'alert',
-                                'text': time.strftime('%Y-%m-%d %H:%M:%S') + ' New Wifi Device: ' + str(ta) + ' frequency=' + str(taobv.get('frequency')) + ' snr=' + str(taobv.get('power')) + ' latitude=%(latitude)f longitude=%(longitude)f altitude=%(altitude)f'
+                                'text': f'Wifi mac={mac} frequency_mhz={currobv.get('frequency_mhz')} snr_db={currobv.get('snr_db')}'
                             }) + '\n')
                             sys.stdout.write(json.dumps({
                                 'msg': 'tak',
-                                'uid': str(ta),
+                                'uid': str(mac),
                                 'lat': '%(latitude)f',
                                 'lon': '%(longitude)f',
                                 'alt': '%(altitude)f',
-                                'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                                'remarks': 'ssid=' + ssid + ', freq=' + str(taobv.get('frequency')) + ' MHz'
+                                'time': datetime.fromtimestamp(float(row[0]), timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                                'remarks': '"' + json.dumps(currobv, separators=(',', ':')) + '"'
                             }) + '\n')
                             sys.stdout.flush()
-                        
+
         if not newta:
             sys.stdout.write(time.strftime("%Y-%m-%d %H:%M:%S") + ' - No new mac addresses detected in channel scan\n')
             sys.stdout.flush()

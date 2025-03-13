@@ -80,6 +80,22 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                     }
                     asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                elif data.get('msg') == 'exploit':
+                    PARAMETERS = {
+                        "sensor_node_id": sensor_node_id,
+                        "protocol": data.get('protocol'),
+                        "modulation": data.get('modulation'),
+                        "hardware": data.get('hardware'),
+                        "type": data.get('type'),
+                        "attack": data.get('attack'),
+                        "variables": data.get('variables'),
+                    }
+                    msg = {
+                        fissure.comms.MessageFields.IDENTIFIER: identifier,
+                        fissure.comms.MessageFields.MESSAGE_NAME: "exploit",
+                        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                    }
+                    asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
             except json.decoder.JSONDecodeError:
                 # not a valid json string
