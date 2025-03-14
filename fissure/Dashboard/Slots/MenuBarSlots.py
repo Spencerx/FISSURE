@@ -5879,4 +5879,40 @@ def _slotMenuWebTAK_Clicked():
     Opens WebTAK in a browser.
     """
     # Open a Browser
-    os.system("xdg-open https://localhost:8443/webtak/index.html")   
+    os.system("xdg-open https://localhost:8443/webtak/index.html")
+
+
+@QtCore.pyqtSlot()
+def _slotMenuTAK_StartDockerContainersClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Opens a terminal with the docker start commands for the two takserver containers.
+    """
+    # Print Start Command to Terminal
+    expect_script_filepath = os.path.join(fissure.utils.TOOLS_DIR, "expect_script")
+    docker_start_command = """sudo docker start \$(sudo docker ps -a --filter \\\"name=takserver-db-\\\" --format \\\"{{.Names}}\\\") && sudo docker start \$(sudo docker ps -a --filter \\\"name=takserver-\\\" --format \\\"{{.Names}}\\\" | grep -v takserver-db-)"""
+    if fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "gnome-terminal":
+        proc = subprocess.Popen("gnome-terminal -- " + expect_script_filepath + ' "' + docker_start_command + '"', shell=True)
+    elif fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "qterminal":
+        proc = subprocess.Popen("qterminal -e " + expect_script_filepath + ' "' + docker_start_command + '"', shell=True)
+    elif fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "lxterminal":
+        proc = subprocess.Popen('lxterminal -e ' + expect_script_filepath + ' "' + docker_start_command + '"', shell=True)
+        
+
+@QtCore.pyqtSlot()
+def _slotMenuTAK_StopDockerContainersClickedClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Opens a terminal with the docker stop commands for the two taskerver containers.
+    """
+    # Print Stop Command to Terminal
+    expect_script_filepath = os.path.join(fissure.utils.TOOLS_DIR, "expect_script")
+    docker_stop_command = """sudo docker stop \$(sudo docker ps -a --filter \\\"name=takserver-\\\" --format \\\"{{.Names}}\\\" | grep -v takserver-db-) && sudo docker stop \$(sudo docker ps -a --filter \\\"name=takserver-db-\\\" --format \\\"{{.Names}}\\\")"""
+    if fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "gnome-terminal":
+        proc = subprocess.Popen("gnome-terminal -- " + expect_script_filepath + ' "' + docker_stop_command + '"', shell=True)
+    elif fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "qterminal":
+        proc = subprocess.Popen("qterminal -e " + expect_script_filepath + ' "' + docker_stop_command + '"', shell=True)
+    elif fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "lxterminal":
+        proc = subprocess.Popen('lxterminal -e ' + expect_script_filepath + ' "' + docker_stop_command + '"', shell=True)
+
+
+
+

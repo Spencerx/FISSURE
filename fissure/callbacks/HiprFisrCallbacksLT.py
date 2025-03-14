@@ -287,4 +287,63 @@ async def autorunPlaylistStopLT(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStopLT",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)    
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    
+
+########################################################################
+async def alertReturnLT(component: object, sensor_node_id=0, alert_text=""):
+    """
+    Forwards alertReturn Message to the Dashboard.
+    """
+    print(alert_text)
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "alert_text": alert_text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    
+    
+async def takPlotLT(component: object, msg=[]):
+    """
+    Forwards the GPS coordinate results message to Tak.
+    """
+    uid = str(msg[0])
+    lat = float(msg[1])
+    lon = float(msg[2])
+    alt = float(msg[3])
+    time = float(msg[4])
+    remarks = str(msg[5])
+    
+    time = time.replace(" ", "T")
+    tak_exp_path = os.path.join(fissure.utils.FISSURE_ROOT, "fissure", "callbacks", "tak.exp")
+    os.system(f"expect {tak_exp_path} {uid} {lat} {lon} {alt} {time} {remarks}")
+    
+
+async def exploitLT(component: object, msg=[]):
+    """"
+    Forwards the necesarry information to the proper exploit flow graph.
+    """
+    PARAMETERS = {
+        "sensor_node_id": str(msg[0]),
+        "protocol": str(msg[1]),
+        "modulation": str(msg[2]),
+        "hardware": str(msg[3]),
+        "type": str(msg[4]),
+        "attack": str(msg[5]),
+        "variables": str(msg[6]),
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "exploitReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    pass
+    
+    

@@ -1,6 +1,22 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-13
+
+Low throughput callbacks for alerts.
+
+### Added
+
+- Low throughput functions and codes for alert, tak plot, and exploit returns
+- Start/Stop TAK docker container menu items
+- alertReturn, takPlot, exploit low throughput callbacks and codes
+
+### Fixed
+
+- Changed permission level for certain TAK certificates from root to user
+- Removed extra DIR-815 Python2 attack in database
+- Improved error handling when online archive files cannot be reached, using asynchronous functions
+
 ## 2025-3-12
 
 Merging pull request #79 and bug fixes.

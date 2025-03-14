@@ -16,6 +16,9 @@ MESSAGE_CODE_MAP = {
     "G2": "hardwareGuessResultsLT",
     "H1": "autorunPlaylistExecuteLT",
     "H2": "autorunPlaylistStopLT",
+    "I1": "alertReturnLT",
+    "J1": "takPlotLT",
+    "K1": "exploitLT",
 }
 
 # Reverse mapping for sending messages

@@ -741,10 +741,18 @@
      <property name="title">
       <string>Mapping</string>
      </property>
+     <widget class="QMenu" name="menuTAK">
+      <property name="title">
+       <string>TAK</string>
+      </property>
+      <addaction name="actionWebTAK"/>
+      <addaction name="actionTAK_Start_Docker_Containers"/>
+      <addaction name="actionTAK_Stop_Docker_Containers"/>
+     </widget>
      <addaction name="actionGoogle_Earth_Pro"/>
      <addaction name="actionViking"/>
      <addaction name="actionUS_County_Overlays"/>
-     <addaction name="actionWebTAK"/>
+     <addaction name="menuTAK"/>
     </widget>
     <widget class="QMenu" name="menuGPS">
      <property name="title">
@@ -3545,6 +3553,16 @@
   <action name="actionWebTAK">
    <property name="text">
     <string>WebTAK</string>
+   </property>
+  </action>
+  <action name="actionTAK_Start_Docker_Containers">
+   <property name="text">
+    <string>Start Docker Containers</string>
+   </property>
+  </action>
+  <action name="actionTAK_Stop_Docker_Containers">
+   <property name="text">
+    <string>Stop Docker Containers</string>
    </property>
   </action>
  </widget>

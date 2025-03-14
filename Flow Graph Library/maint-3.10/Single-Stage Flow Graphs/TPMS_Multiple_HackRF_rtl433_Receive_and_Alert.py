@@ -56,12 +56,19 @@ def main(frequency: float=FREQUENCY, gain: float=GAIN):
             data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
             #print('DATA:' + str(data) + "\n")
             #sys.stdout.write(data.get('type') + ', ID=' + data.get('id') + ', snr=' + data.get('snr') + ', model=' + data.get('model'))
-            if 'id' in data.keys():
-                id = data.pop('id')
-                if 'pressure_PSI' in data.keys():
+            
+            # Find the actual key that matches "id" (case-insensitive)
+            id_key = next((key for key in data.keys() if key.lower() == "id"), None)
+            if id_key:
+                id = data.pop(id_key)
+                        
+                # Find any key that contains "pressure" (case-insensitive)
+                pressure_key = next((key for key in data.keys() if "pressure" in key.lower()), None)
+
+                if pressure_key:
                     sys.stdout.write(json.dumps({
                         'msg': 'alert',
-                        'text': f"TPMS id={id} PSI={data.get('pressure_PSI')}",
+                        'text': f"TPMS id={id} {pressure_key}={data.get(pressure_key)}",
                     }) + '\n')
                     sys.stdout.flush()
             else:

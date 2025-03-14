@@ -34,7 +34,7 @@ Sensor Node:
      nickname: Local Sensor Node  # "Local Sensor Node" for local
      notes: fdh
      pd: ''
-     meshtastic_serial_port: '/dev/ttyACM1'
+     meshtastic_serial_port: '/dev/ttyACM0'
      meshtastic_serial_baud_rate: '115200'
      tsi: ''
 

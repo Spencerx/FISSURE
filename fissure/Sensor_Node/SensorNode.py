@@ -716,7 +716,7 @@ class SensorNode():
 
                 # In New Terminal
                 if trigger_action == False:
-                    _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger)
+                    _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger, self.network_type)
                     
                     # In FISSURE Dashboard
                     #proc = subprocess.Popen(osCommandString + " &", shell=True)#, stderr=subprocess.PIPE)

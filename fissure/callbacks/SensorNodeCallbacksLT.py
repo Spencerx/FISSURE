@@ -144,7 +144,6 @@ async def findGPS_CoordinatesLT(component: object, tab_index=0, gps_source="", f
     """
     Find the sensor node GPS coordinates using gpsd and return the information.
     """
-    print("FIRST IN THE CALLBACK")
     # Retrieve Coordinates
     if gps_source == "gpsd":
         get_coordinates = fissure.utils.hardware.probe_gpsd(component.logger, format, component.gpsd_serial_port, False)
@@ -176,10 +175,7 @@ async def findGPS_CoordinatesLT(component: object, tab_index=0, gps_source="", f
         get_coordinates = "Invalid GPS Source"
 
     # Return the Text
-    print("DOInG THE CALLBACK")
-    print(get_coordinates)
     if get_coordinates:
-        print("dos send")
         PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
         response_message = {
             MessageFields.SOURCE: component.identifier,

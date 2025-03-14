@@ -9,7 +9,7 @@ import fissure.comms
 import json
 import logging
 
-def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger):
+def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger, network_type: str):
     """Run Command and Capture stdout for Alerts
 
     Run command, capture stdout and send by to HIPRFISR as alertReturn command. Will stop capturing when `QUIT` is received on `c2`.
@@ -35,6 +35,7 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True)
 
     # monitor for alerts
+    print("ALERT SENDER!!!!!!!!!111111111111")
     stop = False
     while not stop and proc.poll() is None:
         for proc_text in proc.stdout:
@@ -54,48 +55,123 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
                     logger.info(str(data))
 
                 elif data.get('msg') == 'alert':
-                    PARAMETERS = {
-                        "sensor_node_id": sensor_node_id,
-                        "alert_text": data.get('text')
-                    }
-                    msg = {
-                        fissure.comms.MessageFields.IDENTIFIER: identifier,
-                        fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
-                        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                    }
-                    asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                    print("AAAAAAAAAAAAAAALLLLLLLLLLLLLEEEEEEEEEERT")
+                    if network_type == "IP":
+                        PARAMETERS = {
+                            "sensor_node_id": sensor_node_id,
+                            "alert_text": data.get('text')
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.IDENTIFIER: identifier,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                        
+                    elif network_type == "Meshtastic":
+                        PARAMETERS = {
+                            "sensor_node_id": sensor_node_id,
+                            "alert_text":  data.get('text')[:100] if data.get('text') else None                            
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.SOURCE: identifier,
+                            fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "alertReturnLT",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
                 elif data.get('msg') == 'tak':
-                    PARAMETERS = {
-                        "uid": data.get('uid'),
-                        "lat": data.get('lat'),
-                        "lon": data.get('lon'),
-                        "alt": data.get('alt'),
-                        "time": data.get('time'),
-                        "remarks": data.get('remarks'),
-                    }
-                    msg = {
-                        fissure.comms.MessageFields.IDENTIFIER: identifier,
-                        fissure.comms.MessageFields.MESSAGE_NAME: "takPlot",
-                        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                    }
-                    asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                    if network_type == "IP":
+                        PARAMETERS = {
+                            "uid": data.get('uid'),
+                            "lat": data.get('lat'),
+                            "lon": data.get('lon'),
+                            "alt": data.get('alt'),
+                            "time": data.get('time'),
+                            "remarks": data.get('remarks'),
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.IDENTIFIER: identifier,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "takPlot",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                        
+                    elif network_type == "Meshtastic":
+                        # PARAMETERS = {
+                            # "uid": data.get('uid'),
+                            # "lat": data.get('lat'),
+                            # "lon": data.get('lon'),
+                            # "alt": data.get('alt'),
+                            # "time": data.get('time'),
+                            # "remarks": data.get('remarks'),
+                        # }
+                        #PARAMETERS = {"msg": [data.get('uid'), data.get('lat'), data.get('lon'), data.get('alt'), data.get('time'), data.get('remarks')]}
+                        PARAMETERS = {
+                            "msg": [
+                                data.get('uid'),
+                                data.get('lat'),
+                                data.get('lon'),
+                                data.get('alt'),
+                                data.get('time'),
+                                data.get('remarks')[:20] if data.get('remarks') else None
+                            ]
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.SOURCE: identifier,
+                            fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "takPlotLT",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
                 elif data.get('msg') == 'exploit':
-                    PARAMETERS = {
-                        "sensor_node_id": sensor_node_id,
-                        "protocol": data.get('protocol'),
-                        "modulation": data.get('modulation'),
-                        "hardware": data.get('hardware'),
-                        "type": data.get('type'),
-                        "attack": data.get('attack'),
-                        "variables": data.get('variables'),
-                    }
-                    msg = {
-                        fissure.comms.MessageFields.IDENTIFIER: identifier,
-                        fissure.comms.MessageFields.MESSAGE_NAME: "exploit",
-                        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                    }
-                    asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                    if network_type == "IP":
+                        PARAMETERS = {
+                            "sensor_node_id": sensor_node_id,
+                            "protocol": data.get('protocol'),
+                            "modulation": data.get('modulation'),
+                            "hardware": data.get('hardware'),
+                            "type": data.get('type'),
+                            "attack": data.get('attack'),
+                            "variables": data.get('variables'),
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.IDENTIFIER: identifier,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "exploit",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+
+                    elif network_type == "Meshtastic":
+                        # PARAMETERS = {
+                            # "sensor_node_id": sensor_node_id,
+                            # "protocol": data.get('protocol'),
+                            # "modulation": data.get('modulation'),
+                            # "hardware": data.get('hardware'),
+                            # "type": data.get('type'),
+                            # "attack": data.get('attack'),
+                            # "variables": data.get('variables'),
+                        # }
+                        PARAMETERS = {
+                            "msg": [
+                                sensor_node_id,
+                                data.get('protocol'),
+                                data.get('modulation'),
+                                data.get('hardware'),
+                                data.get('type'),
+                                data.get('attack'),
+                                data.get('variables')
+                                # data.get('variables')[:20] if data.get('variables') else None
+                            ]
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.SOURCE: identifier,
+                            fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "exploitLT",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
             except json.decoder.JSONDecodeError:
                 # not a valid json string
@@ -109,7 +185,7 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
     proc.wait() # wait for process to end
 
 class alertSender(object):
-    def __init__(self, cmd: str, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger):
+    def __init__(self, cmd: str, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger, network_type: str):
         """Run Command and Capture stdout for Alerts
 
         Run command, capture stdout and send by to HIPRFISR as alertReturn command
@@ -130,7 +206,7 @@ class alertSender(object):
             Sensor node logger
         """
         (self.conn1, conn2) = Pipe()
-        _alert_sender(cmd, conn2, identifier, sensor_node_id, hiprfisr_socket, gps_position, logger)
+        _alert_sender(cmd, conn2, identifier, sensor_node_id, hiprfisr_socket, gps_position, logger, network_type)
 
     def stop(self):
         """Stop capture and wait for process to finished

@@ -11,6 +11,7 @@ from ..UI_Components import TriggersDialog
 from fissure.Dashboard.UI_Components.Qt5 import MyMessageBox
 import struct
 import matplotlib.pyplot as plt
+import asyncio
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -638,35 +639,63 @@ def _slotArchiveDownloadDeleteClicked(dashboard: QtCore.QObject):
             dashboard.ui.listView_archive.setCurrentIndex(next_index)
 
 
-@QtCore.pyqtSlot(QtCore.QObject)
-def _slotArchiveDownloadClicked(dashboard: QtCore.QObject):
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotArchiveDownloadClicked(dashboard: QtCore.QObject):
     """ 
-    Downloads the selected file from the internet.
+    Asynchronously downloads the selected file from the internet with error handling.
+    Prevents GUI freezing.
     """
     # Find Selected Row
     get_row = dashboard.ui.tableWidget_archive_download.currentRow()
-    if get_row >= 0:
-        # Get File
-        get_file = str(dashboard.ui.tableWidget_archive_download.verticalHeaderItem(get_row).text())
+    if get_row < 0:
+        fissure.Dashboard.UI_Components.Qt5.errorMessage("No file selected for download.")
+        return
 
-        # Get Folder
-        get_folder = str(dashboard.ui.listView_archive.model().rootPath())
+    # Get File
+    get_file = str(dashboard.ui.tableWidget_archive_download.verticalHeaderItem(get_row).text())
 
-        # Download
-        os.system('wget -P "' + get_folder + '/"' + ' https://fissure.ainfosec.com/' + get_file)
+    # Get Folder
+    get_folder = str(dashboard.ui.listView_archive.model().rootPath())
+
+    # Build the URL
+    url = f"https://fissure.ainfosec.com/{get_file}"
+    download_path = f"{get_folder}/"
+
+    # Wget command with timeout (10s) and retries (2)
+    command = ["wget", "-P", download_path, "--timeout=5", "--tries=1", url]
+
+    try:
+        process = await asyncio.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            error_message = f"Download failed: {stderr.decode().strip()}"
+            dashboard.logger.error(error_message)
+            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, error_message)
+        else:
+            success_message = f"Download completed: {url}"
+            dashboard.logger.info(success_message)
+    
+    except asyncio.TimeoutError:
+        error_message = f"Download timed out: {url}"
+        dashboard.logger.error(error_message)
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, error_message)
 
 
-@QtCore.pyqtSlot(QtCore.QObject)
-def _slotArchiveDownloadCollectionClicked(dashboard: QtCore.QObject):
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotArchiveDownloadCollectionClicked(dashboard: QtCore.QObject):
     """ 
-    Downloads a single IQ file or a collection of IQ files and unzips them.
+    Asynchronously downloads a single IQ file or a collection of IQ files and unzips them.
+    Prevents multiple error popups if the first download fails.
     """
     # Find Selected Row Text and Parent Text
     try:
         item_index = dashboard.ui.treeView_archive_download_collection.selectedIndexes()[0]
-    except:
+    except IndexError:
         fissure.Dashboard.UI_Components.Qt5.errorMessage("Select a collection")
         return
+    
     parent1_index = dashboard.ui.treeView_archive_download_collection.model().parent(item_index)
     parent2_index = dashboard.ui.treeView_archive_download_collection.model().parent(parent1_index)
 
@@ -675,26 +704,101 @@ def _slotArchiveDownloadCollectionClicked(dashboard: QtCore.QObject):
     parent2_data = dashboard.ui.treeView_archive_download_collection.model().data(parent2_index)
 
     # Use None instead of Notes
-    if parent1_data == "Notes":
-        parent1_data = None
-    if parent2_data == "Notes":
-        parent2_data = None
+    parent1_data = None if parent1_data == "Notes" else parent1_data
+    parent2_data = None if parent2_data == "Notes" else parent2_data
 
     # Assemble Filepath
     get_filepath = fissure.utils.library.getArchiveCollectionFilepath(dashboard.backend.library, item_data, parent1_data, parent2_data)
 
-    # Download and Unzip
-    if get_filepath == None:
+    # Check if the filepath is valid
+    if get_filepath is None:
         dashboard.logger.error("Invalid filepath format. File not downloaded.")
+        return
+
+    get_folder = str(dashboard.ui.listView_archive.model().rootPath())
+
+    # Define base URL
+    base_url = "https://fissure.ainfosec.com"
+
+    # Function to execute `wget` asynchronously with a return status
+    async def download_file(url, output_folder):
+        command = ["wget", "--timeout=5", "--tries=1", "-P", output_folder, url]
+        process = await asyncio.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            error_message = f"Failed to download {url}: {stderr.decode().strip()}"
+            dashboard.logger.error(error_message)
+            await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, error_message)
+            return False  # Return failure status
+        return True  # Return success status
+
+    # Handle different file types
+    file_url = f"{base_url}{get_filepath}"
+
+    if get_filepath.endswith('.tar'):
+        # Download and extract .tar file in one step asynchronously
+        command = f"wget {file_url} -O - | tar -x -C {get_folder}"
+        process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        
+        stdout, stderr = await process.communicate()
+        
+        if process.returncode != 0:
+            error_message = f"Failed to download and extract {file_url}: {stderr.decode().strip()}"
+            dashboard.logger.error(error_message)
+            await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(dashboard, error_message)
+
+    elif get_filepath.endswith('.sigmf-data'):
+        # Download .sigmf-data first
+        success = await download_file(file_url, get_folder)
+
+        # Only try .sigmf-meta if .sigmf-data was successful
+        if success:
+            meta_url = file_url.replace('.sigmf-data', '.sigmf-meta')
+            await download_file(meta_url, get_folder)
+
     else:
-        get_folder = str(dashboard.ui.listView_archive.model().rootPath())
-        if get_filepath[-4:] == '.tar':
-            os.system('wget https://fissure.ainfosec.com' + get_filepath + ' -O - | tar -x -C "' + get_folder + '/"')
-        elif get_filepath[-11:] == '.sigmf-data':
-            os.system('wget https://fissure.ainfosec.com' + get_filepath + ' -P "' + get_folder + '/"')
-            os.system('wget https://fissure.ainfosec.com' + get_filepath.replace('.sigmf-data','.sigmf-meta') + ' -P "' + get_folder + '/"')
-        else:
-            os.system('wget https://fissure.ainfosec.com' + get_filepath + ' -P "' + get_folder + '/"')
+        # General file download
+        await download_file(file_url, get_folder)
+        
+    # """ 
+    # Downloads a single IQ file or a collection of IQ files and unzips them.
+    # """
+    # # Find Selected Row Text and Parent Text
+    # try:
+        # item_index = dashboard.ui.treeView_archive_download_collection.selectedIndexes()[0]
+    # except:
+        # fissure.Dashboard.UI_Components.Qt5.errorMessage("Select a collection")
+        # return
+    # parent1_index = dashboard.ui.treeView_archive_download_collection.model().parent(item_index)
+    # parent2_index = dashboard.ui.treeView_archive_download_collection.model().parent(parent1_index)
+
+    # item_data = dashboard.ui.treeView_archive_download_collection.model().data(item_index)
+    # parent1_data = dashboard.ui.treeView_archive_download_collection.model().data(parent1_index)
+    # parent2_data = dashboard.ui.treeView_archive_download_collection.model().data(parent2_index)
+
+    # # Use None instead of Notes
+    # if parent1_data == "Notes":
+        # parent1_data = None
+    # if parent2_data == "Notes":
+        # parent2_data = None
+
+    # # Assemble Filepath
+    # get_filepath = fissure.utils.library.getArchiveCollectionFilepath(dashboard.backend.library, item_data, parent1_data, parent2_data)
+
+    # # Download and Unzip
+    # if get_filepath == None:
+        # dashboard.logger.error("Invalid filepath format. File not downloaded.")
+    # else:
+        # get_folder = str(dashboard.ui.listView_archive.model().rootPath())
+        # if get_filepath[-4:] == '.tar':
+            # os.system('wget https://fissure.ainfosec.com' + get_filepath + ' -O - | tar -x -C "' + get_folder + '/"')
+        # elif get_filepath[-11:] == '.sigmf-data':
+            # os.system('wget https://fissure.ainfosec.com' + get_filepath + ' -P "' + get_folder + '/"')
+            # os.system('wget https://fissure.ainfosec.com' + get_filepath.replace('.sigmf-data','.sigmf-meta') + ' -P "' + get_folder + '/"')
+        # else:
+            # os.system('wget https://fissure.ainfosec.com' + get_filepath + ' -P "' + get_folder + '/"')
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
