@@ -2213,9 +2213,16 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     """
     Forwards the GPS coordinate results message to Tak.
     """
+    uid = str(msg[0])
+    lat = float(msg[1])
+    lon = float(msg[2])
+    alt = float(msg[3])
+    time = str(msg[4])
+    remarks = str(msg[5])
+
     time = time.replace(" ", "T")
-    tak_exp_path = os.path.join(fissure.utils.FISSURE_ROOT, "fissure", "callbacks", "tak.exp")
-    os.system(f"expect {tak_exp_path} {uid} {lat} {lon} {alt} {time} {remarks}")
+    
+    await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -2237,7 +2244,7 @@ async def exploit(component: object, sensor_node_id: str, protocol:str, modulati
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-    pass
+
 
 ##########################################################################
 ####################### Outdated/Incomplete/Unused #######################

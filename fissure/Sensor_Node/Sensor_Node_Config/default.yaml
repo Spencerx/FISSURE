@@ -30,8 +30,8 @@ Sensor Node:
      local_remote: local  # Does not need to be set, updated during init
      location: fgh
      msg_port: '5052'
-     network_type: IP  # "IP" or "Meshtastic"
-     nickname: Local Sensor Node  # "Local Sensor Node" for local
+     network_type: Meshtastic  # "IP" or "Meshtastic"
+     nickname: Remote1  # "Local Sensor Node" for local
      notes: fdh
      pd: ''
      meshtastic_serial_port: '/dev/ttyACM0'

@@ -25,6 +25,7 @@ from fissure.Listeners import (
     TCPUDPListener,
     MQTTListener
 )
+from fissure.callbacks import tak_send
 
 """ HiprFisr Specific Callback Functions """
 
@@ -317,12 +318,12 @@ async def takPlotLT(component: object, msg=[]):
     lat = float(msg[1])
     lon = float(msg[2])
     alt = float(msg[3])
-    time = float(msg[4])
+    time = str(msg[4])
     remarks = str(msg[5])
-    
+
     time = time.replace(" ", "T")
-    tak_exp_path = os.path.join(fissure.utils.FISSURE_ROOT, "fissure", "callbacks", "tak.exp")
-    os.system(f"expect {tak_exp_path} {uid} {lat} {lon} {alt} {time} {remarks}")
+    
+    await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
     
 
 async def exploitLT(component: object, msg=[]):
@@ -344,6 +345,6 @@ async def exploitLT(component: object, msg=[]):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-    pass
+
     
     

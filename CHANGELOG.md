@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-14
+
+Updating TAK send functions for async messaging.
+
+### Changed
+
+- Updating TAK send functions for async messaging
+
 ## 2025-3-13
 
 Low throughput callbacks for alerts.

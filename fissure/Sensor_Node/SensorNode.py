@@ -723,8 +723,9 @@ class SensorNode():
                     #output, error = proc.communicate()
                     
                     # Restore the Start Button for Scripts
-                    asyncio.run(self.flowGraphFinished(sensor_node_id, "Attack"))
-                    asyncio.run(self.multiStageAttackFinished(sensor_node_id))
+                    if self.network_type == "IP":
+                        asyncio.run(self.flowGraphFinished(sensor_node_id, "Attack"))
+                        asyncio.run(self.multiStageAttackFinished(sensor_node_id))
 
                 # As a Blocking Trigger
                 else:               
@@ -774,15 +775,17 @@ class SensorNode():
 
             # In New Terminal
             if trigger_action == False:
-                proc = subprocess.Popen('gnome-terminal -- ' + osCommandString + " &", shell=True)
+                #proc = subprocess.Popen('gnome-terminal -- ' + osCommandString + " &", shell=True)
+                _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger, self.network_type)
                 
                 # In FISSURE Dashboard
                 #proc = subprocess.Popen(osCommandString + " &", shell=True)#, stderr=subprocess.PIPE)
                 #output, error = proc.communicate()
                 
                 # Restore the Start Button for Scripts
-                asyncio.run(self.flowGraphFinished(sensor_node_id, "Attack"))
-                asyncio.run(self.multiStageAttackFinished(sensor_node_id))
+                if self.network_type == "IP":
+                    asyncio.run(self.flowGraphFinished(sensor_node_id, "Attack"))
+                    asyncio.run(self.multiStageAttackFinished(sensor_node_id))
 
             # As a Blocking Trigger
             else:               
