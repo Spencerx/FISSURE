@@ -67,6 +67,7 @@ class Dashboard(QtWidgets.QMainWindow):
         self.logger = fissure.utils.get_logger(f"{fissure.comms.Identifiers.DASHBOARD}.frontend")
         self.logger.info("=== INITIALIZING ===")
 
+        # Launch Splash Screen
         self.splash = SplashScreen()
         self.splash.show_with_delay(200)  # Helps with flicker
         QtWidgets.QApplication.processEvents()

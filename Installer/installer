@@ -2360,16 +2360,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -2380,6 +2370,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -2388,7 +2388,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -4779,16 +4780,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -4799,6 +4790,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -4807,7 +4808,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -7175,16 +7177,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -7195,6 +7187,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -7203,7 +7205,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -9599,16 +9602,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -9619,6 +9612,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -9627,7 +9630,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -12019,16 +12023,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -12039,6 +12033,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -12047,7 +12051,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -14409,16 +14414,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -14429,6 +14424,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -14437,7 +14442,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -16816,16 +16822,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -16836,6 +16832,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -16844,7 +16850,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -19212,16 +19219,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -19232,6 +19229,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -19240,7 +19247,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 
@@ -21624,16 +21632,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -21643,6 +21641,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
+
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
 
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
@@ -24028,16 +24036,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client admin"
     sudo docker exec takserver-"$(cat tak/version.txt)" bash -c "cd /opt/tak/certs && ./makeCert.sh client webadmin"
 
-    # Set ownership for all certificate-related files to the current user
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
-
-    # Set proper permissions for private keys
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
-
-    # Set correct permissions for other certificate files
-    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
-
     # Ensure directories have correct permissions
     sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chmod 755 {} +
       
@@ -24048,6 +24046,16 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     sudo mv "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key.unencrypted" \
       "$(ls -d ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files | head -n 1)/takserver.key"
 
+    # Set ownership for all certificate-related files to the current user
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -exec chown $USER:$USER {} +
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type d -exec chown $USER:$USER {} +
+
+    # Set proper permissions for private keys
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -name "*.key" -exec chmod 644 {} +
+
+    # Set correct permissions for other certificate files
+    sudo find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -type f -not -name "*.key" -exec chmod 644 {} +
+
     # Restart TAK Server to apply changes
     sudo docker restart takserver-"$(cat tak/version.txt)"
 
@@ -24056,7 +24064,8 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     PYTHONPATH=""" + fissure_directory + """ python3 fissure/utils/tak_yaml_key_insert.py \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.key' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
-    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+    "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
+    "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
     # Import webadmin.p12:
 

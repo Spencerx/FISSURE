@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-16
+
+gr-fuzzer fix for maint-3.10, TAK installer fixes
+
+### Fixed
+
+- Imports in maint-3.10/gr-fuzzer blocks.yml files changed to "import gnuradio.fuzzer as fuzzer"
+- Changing ownership from root to user for certificate in TAK installer
+- Adding docker IP address acquisition to all operating systems in TAK installer
+- Ignoring Wayland warnings when changing the main menu items
+- Checking for certificates folder when launching FISSURE
+
 ## 2025-3-14
 
 Updating TAK send functions for async messaging.

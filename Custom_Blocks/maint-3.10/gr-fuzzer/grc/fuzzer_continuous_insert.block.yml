@@ -3,7 +3,7 @@ label: continuous_insert
 category: '[fuzzer]'
 
 templates:
-  imports: import fuzzer
+  imports: import gnuradio.fuzzer as fuzzer
   make: fuzzer.continuous_insert(${vector})
 
 

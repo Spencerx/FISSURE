@@ -12,6 +12,14 @@ import os
 def run():
     fissure.utils.init_logging()
 
+    # Check for Certificates Folder
+    certificates_directory = os.path.join(fissure.utils.FISSURE_ROOT, "certificates")
+    if os.path.exists(certificates_directory):
+        print("certficates folder found.")
+    else:
+        print('"certificates" folder not found. Run "Network Certificates" item in installer')
+        sys.exit(1)
+
     # Handle high resolution displays:
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -22,6 +30,9 @@ def run():
     settings = fissure.utils.get_fissure_config()
     qt_scale_factor = settings.get("qt_scale_factor", "1.0") 
     os.environ["QT_SCALE_FACTOR"] = str(qt_scale_factor)  # >=1.0
+
+    # Supress warnings on main menu changing
+    os.environ["QT_LOGGING_RULES"] = "qt.qpa.wayland.warning=false"
 
     app = QtWidgets.QApplication(sys.argv)
 
