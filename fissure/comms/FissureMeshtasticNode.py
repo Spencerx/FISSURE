@@ -49,18 +49,18 @@ class FissureMeshtasticNode:
         except Exception as e:
             self.logger.warning(f"⚠️ Failed to enqueue message: {e}")
 
-    async def recv_msg(self) -> Optional[Dict]:
-        try:
-            if self.message_queue.qsize() > 0:
-                msgrcvd = await self.message_queue.get()
-                self.logger.info(f"Message received: {msgrcvd}")
-                return msgrcvd
-            else:
-                # self.logger.info("Message queue is empty, no message to receive.")
-                return None
-        except Exception as e:
-            self.logger.warning(f"⚠️ Error while receiving message: {e}")
-            return None
+    # async def recv_msg(self) -> Optional[Dict]:
+    #     try:
+    #         if self.message_queue.qsize() > 0:
+    #             msgrcvd = await self.message_queue.get()
+    #             self.logger.info(f"Message received: {msgrcvd}")
+    #             return msgrcvd
+    #         else:
+    #             # self.logger.info("Message queue is empty, no message to receive.")
+    #             return None
+    #     except Exception as e:
+    #         self.logger.warning(f"⚠️ Error while receiving message: {e}")
+    #         return None
 
     async def process_messages(self):
         """Continuously processes messages from the queue using `run_callback`."""
@@ -68,17 +68,22 @@ class FissureMeshtasticNode:
             # self.logger.debug(f"Process task running: {self.process_task and not self.process_task.done()}")
 
             if not self.process_task.done():
-                msg = await self.recv_msg()
-                if msg:
-                    # self.logger.info(f"Preparing to execute callback for message: {msg}")
-                    await self.run_callback(self.context, msg)
-                else:
-                    pass
-                    # self.logger.warning("Received an empty or invalid message from the queue.")
+                # msg = await self.message_queue.get()
+                try:
+                    # print("in the loop")
+                    msg = await asyncio.wait_for(self.message_queue.get(), timeout=0.2)
+                    if msg:
+                        # self.logger.info(f"Preparing to execute callback for message: {msg}")
+                        await self.run_callback(self.context, msg)
+                    else:
+                        pass
+                        # self.logger.warning("Received an empty or invalid message from the queue.")
+                except asyncio.TimeoutError:
+                    pass  # Just loops back and checks `self.running` and `self.process_task`
             else:
                 self.logger.error("Process task is not running as expected!")
             
-            await asyncio.sleep(0.2)
+            # await asyncio.sleep(0.2)
 
     def generate_short_uuid(self, length: int = 4) -> str:
         """Generate a short, random hexadecimal UUID."""
@@ -198,9 +203,9 @@ class FissureMeshtasticNode:
         :return: result of the executed callback
         :rtype: any
         """
-        print("In the run_callback of fissuremeshtasticnode!")
-        print("Context:", context)
-        print("Parsed Command:", parsed_command)
+        # print("In the run_callback of fissuremeshtasticnode!")
+        # print("Context:", context)
+        # print("Parsed Command:", parsed_command)
 
         cb_name = parsed_command.get("callback")
         try:

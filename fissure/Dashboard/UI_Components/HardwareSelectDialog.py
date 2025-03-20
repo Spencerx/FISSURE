@@ -423,7 +423,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_recall_status_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_status(self))
 
         # Connect general slots
-        self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict=""))
+        self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict="", recall_settings_on_connect=False))
         self.pushButton_export.clicked.connect(lambda: HardwareSelectSlots.export(self))
         self.pushButton_apply.clicked.connect(lambda: HardwareSelectSlots.apply(self))
         self.pushButton_cancel.clicked.connect(self.close)
@@ -666,12 +666,12 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         find_widget.setEnabled(True)
 
 
-    def importResults(self, settings_dict=""):
+    def importResults(self, settings_dict="", recall_settings_on_connect=False):
         """
         Reuses the importClicked function on recall settings return from sensor node.
         """
         # Function in Slots
-        HardwareSelectSlots.importClicked(self, settings_dict)
+        HardwareSelectSlots.importClicked(self, settings_dict, recall_settings_on_connect)
 
 
     def sensorNodeDisconnected(self, tab_index=0):

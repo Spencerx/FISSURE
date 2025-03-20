@@ -351,16 +351,19 @@ class SensorNode():
         while self.shutdown is False:
             await asyncio.sleep(DELAY)
 
-            # Process Incoming Messages
-            await self.read_hiprfisr_messages()
+            # FissureMeshtastic node has its own loop
+            if self.network_type == "IP":
 
-            # Read Incoming TSI Wideband Messages
-            if self.tsi_detector_socket != None:
-                await self.read_detector_messages()
+                # Process Incoming Messages
+                await self.read_hiprfisr_messages()
 
-            # Read Incoming PD Bits Messages
-            if self.pd_bits_socket != None:
-                await self.read_pd_bits_messages()
+                # Read Incoming TSI Wideband Messages
+                if self.tsi_detector_socket != None:
+                    await self.read_detector_messages()
+
+                # Read Incoming PD Bits Messages
+                if self.pd_bits_socket != None:
+                    await self.read_pd_bits_messages()
 
         # Clean up Sockets
         # await self.shutdown_comms()

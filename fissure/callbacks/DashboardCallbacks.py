@@ -239,7 +239,7 @@ async def recallSettingsReturn(component: object, settings_dict={}):
     Populates the HardwareSelectDialog with the sensor node settings on connect.
     """
     # Pass Sensor Node Settings to HardwareSelectDialog
-    component.frontend.popups["HardwareSelectDialog"].importResults(settings_dict=settings_dict)
+    component.frontend.popups["HardwareSelectDialog"].importResults(settings_dict=settings_dict, recall_settings_on_connect=True)
 
 
 async def componentDisconnected(component: object, component_name=""):

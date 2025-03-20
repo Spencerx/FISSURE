@@ -17,7 +17,7 @@ Sensor Node:
           gps_update_interval_seconds: 20  # 300
           gpsd_serial_port: '/dev/ttyACM2'
      hb_port: '5051'     
-     ip_address: '127.0.0.1'
+     ip_address: '127.0.0.1'  # '127.0.0.1' for local, anything else for remote
      iq:
           0:
                daughterboard: ''
@@ -27,12 +27,12 @@ Sensor Node:
                serial: ''
                type: ''
                uid: ''
-     local_remote: local  # Does not need to be set, updated during init
-     location: fgh
+     local_remote: local  # Does not need to be set, updated during init, "remote" or "local"
+     location: Location text
      msg_port: '5052'
      network_type: IP  # "IP" or "Meshtastic"
-     nickname: Local Sensor Node  # "Local Sensor Node" for local
-     notes: fdh
+     nickname: Local Sensor Node  # "Local Sensor Node" for local, anything else for remote
+     notes: Notes text
      pd: ''
      meshtastic_serial_port: '/dev/ttyACM0'
      meshtastic_serial_baud_rate: '115200'

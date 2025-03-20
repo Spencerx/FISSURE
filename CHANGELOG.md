@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-20
+
+Fixing receiving functions for Meshtastic network node.
+
+### Fixed
+
+- Removing recv_msg() from FissureMeshtasticNode() and calls inside receive loops (it polls on its own)
+- Connecting to remote sensor node over IP with "local" set in sensor node config file and recall settings on connect checked no longer shows up as local on connect button click
+
 ## 2025-3-16
 
 gr-fuzzer fix for maint-3.10, TAK installer fixes

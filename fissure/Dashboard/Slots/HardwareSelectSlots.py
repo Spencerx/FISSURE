@@ -13,7 +13,7 @@ import serial.tools.list_ports
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
-def importClicked(HWSelect, settings_dict=""):
+def importClicked(HWSelect, settings_dict="", recall_settings_on_connect=False):
     """Import all sensor node information from a .csv file."""
     # Choose File
     if len(settings_dict) == 0:
@@ -180,14 +180,28 @@ def importClicked(HWSelect, settings_dict=""):
             ignore_nickname = True
 
         # Local/Remote
-        if settings_dict["Sensor Node " + str(n + 1)]["local_remote"] == "local":
-            local_widgets[n].setChecked(True)
-            local_assigned = True
-            local(HWSelect, tab_index=n)
-            HWSelect.tabWidget_nodes.setTabText(n, "Local Sensor Node")
+        if recall_settings_on_connect == True:
+            # Recalling Settings on Connect
+            if local_widgets[n].isChecked() == True:
+                settings_dict["Sensor Node " + str(n + 1)]["local_remote"] = "local"
+                local_widgets[n].setChecked(True)
+                local_assigned = True
+                local(HWSelect, tab_index=n)
+                HWSelect.tabWidget_nodes.setTabText(n, "Local Sensor Node")
+            else:
+                settings_dict["Sensor Node " + str(n + 1)]["local_remote"] = "remote"
+                remote_widgets[n].setChecked(True)
+                remote(HWSelect, tab_index=n)
         else:
-            remote_widgets[n].setChecked(True)
-            remote(HWSelect, tab_index=n)
+            # Loading a YAML File
+            if settings_dict["Sensor Node " + str(n + 1)]["local_remote"] == "local":
+                local_widgets[n].setChecked(True)
+                local_assigned = True
+                local(HWSelect, tab_index=n)
+                HWSelect.tabWidget_nodes.setTabText(n, "Local Sensor Node")
+            else:
+                remote_widgets[n].setChecked(True)
+                remote(HWSelect, tab_index=n)
 
         # Nickname
         if local_widgets[n].isChecked() == True:
