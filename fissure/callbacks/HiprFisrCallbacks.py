@@ -16,6 +16,7 @@ import yaml
 import asyncio
 import socket
 import shutil
+from fissure.callbacks import tak_send
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -2213,14 +2214,14 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     """
     Forwards the GPS coordinate results message to Tak.
     """
-    uid = str(msg[0])
+    '''uid = str(msg[0])
     lat = float(msg[1])
     lon = float(msg[2])
     alt = float(msg[3])
     time = str(msg[4])
     remarks = str(msg[5])
 
-    time = time.replace(" ", "T")
+    time = time.replace(" ", "T")'''
     
     await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
 
