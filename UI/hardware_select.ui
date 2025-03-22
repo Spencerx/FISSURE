@@ -317,13 +317,64 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>155</x>
-          <y>45</y>
+          <y>70</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
          <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_enable_disable_1">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_ip_gps_beacon_enable_disable_1">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>20</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_refresh_1">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>205</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Refresh</string>
         </property>
        </widget>
       </widget>
@@ -478,7 +529,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_info_1">
         <property name="geometry">
          <rect>
-          <x>70</x>
+          <x>85</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -494,7 +545,7 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="geometry">
          <rect>
-          <x>175</x>
+          <x>190</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -507,7 +558,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="label2_meshtastic_recall_1">
         <property name="geometry">
          <rect>
-          <x>-15</x>
+          <x>0</x>
           <y>10</y>
           <width>80</width>
           <height>27</height>
@@ -529,7 +580,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_status_1">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>295</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -537,6 +588,57 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Status</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_gps_beacon_1">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>45</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_disable_1">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_enable_1">
+        <property name="geometry">
+         <rect>
+          <x>85</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
         </property>
        </widget>
       </widget>
@@ -2408,13 +2510,64 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>155</x>
-          <y>45</y>
+          <y>70</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
          <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_ip_gps_beacon_enable_disable_2">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>20</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_enable_disable_2">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_refresh_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>205</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Refresh</string>
         </property>
        </widget>
       </widget>
@@ -2556,7 +2709,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_info_2">
         <property name="geometry">
          <rect>
-          <x>70</x>
+          <x>85</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -2582,7 +2735,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="label2_meshtastic_recall_2">
         <property name="geometry">
          <rect>
-          <x>-15</x>
+          <x>0</x>
           <y>10</y>
           <width>80</width>
           <height>27</height>
@@ -2602,9 +2755,12 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="geometry">
          <rect>
-          <x>175</x>
+          <x>190</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -2617,7 +2773,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_status_2">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>295</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -2625,6 +2781,57 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Status</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_enable_2">
+        <property name="geometry">
+         <rect>
+          <x>85</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_gps_beacon_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>45</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_disable_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disable</string>
         </property>
        </widget>
       </widget>
@@ -4507,13 +4714,64 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>155</x>
-          <y>45</y>
+          <y>70</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
          <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_ip_gps_beacon_enable_disable_3">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>20</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_enable_disable_3">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_refresh_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>205</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Refresh</string>
         </property>
        </widget>
       </widget>
@@ -4655,7 +4913,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_info_3">
         <property name="geometry">
          <rect>
-          <x>70</x>
+          <x>85</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -4681,7 +4939,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="label2_meshtastic_recall_3">
         <property name="geometry">
          <rect>
-          <x>-15</x>
+          <x>0</x>
           <y>10</y>
           <width>80</width>
           <height>27</height>
@@ -4701,9 +4959,12 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_3">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="geometry">
          <rect>
-          <x>175</x>
+          <x>190</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -4716,7 +4977,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_status_3">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>295</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -4724,6 +4985,57 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Status</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_enable_3">
+        <property name="geometry">
+         <rect>
+          <x>85</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_gps_beacon_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>45</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_disable_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disable</string>
         </property>
        </widget>
       </widget>
@@ -6609,13 +6921,64 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>155</x>
-          <y>45</y>
+          <y>70</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
          <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_ip_gps_beacon_enable_disable_4">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>20</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_enable_disable_4">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_refresh_4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>205</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Refresh</string>
         </property>
        </widget>
       </widget>
@@ -6757,7 +7120,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_info_4">
         <property name="geometry">
          <rect>
-          <x>70</x>
+          <x>85</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -6783,7 +7146,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="label2_meshtastic_recall_4">
         <property name="geometry">
          <rect>
-          <x>-15</x>
+          <x>0</x>
           <y>10</y>
           <width>80</width>
           <height>27</height>
@@ -6803,9 +7166,12 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_4">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="geometry">
          <rect>
-          <x>175</x>
+          <x>190</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -6818,7 +7184,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_status_4">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>295</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -6826,6 +7192,57 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Status</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_enable_4">
+        <property name="geometry">
+         <rect>
+          <x>85</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_gps_beacon_4">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>45</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_disable_4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disable</string>
         </property>
        </widget>
       </widget>
@@ -8733,13 +9150,64 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>155</x>
-          <y>45</y>
+          <y>70</y>
           <width>99</width>
           <height>27</height>
          </rect>
         </property>
         <property name="text">
          <string>Disconnect</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_ip_gps_beacon_enable_disable_5">
+        <property name="geometry">
+         <rect>
+          <x>15</x>
+          <y>20</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_enable_disable_5">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_ip_gps_beacon_refresh_5">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>205</x>
+          <y>20</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Refresh</string>
         </property>
        </widget>
       </widget>
@@ -8881,7 +9349,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_info_5">
         <property name="geometry">
          <rect>
-          <x>70</x>
+          <x>85</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -8907,7 +9375,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QLabel" name="label2_meshtastic_recall_5">
         <property name="geometry">
          <rect>
-          <x>-15</x>
+          <x>0</x>
           <y>10</y>
           <width>80</width>
           <height>27</height>
@@ -8927,9 +9395,12 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
        <widget class="QPushButton" name="pushButton_meshtastic_recall_hardware_5">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="geometry">
          <rect>
-          <x>175</x>
+          <x>190</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -8942,7 +9413,7 @@ p, li { white-space: pre-wrap; }
        <widget class="QPushButton" name="pushButton_meshtastic_recall_status_5">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>295</x>
           <y>10</y>
           <width>99</width>
           <height>27</height>
@@ -8950,6 +9421,57 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Status</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_enable_5">
+        <property name="geometry">
+         <rect>
+          <x>85</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_meshtastic_gps_beacon_5">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>45</y>
+          <width>80</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <underline>false</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>GPS Beacon:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_meshtastic_gps_beacon_disable_5">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>45</y>
+          <width>99</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Disable</string>
         </property>
        </widget>
       </widget>

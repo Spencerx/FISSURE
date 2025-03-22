@@ -7,15 +7,46 @@ import fissure.utils
 import qasync
 import sys
 import os
+import atexit
+
+LOCK_FILE = "/tmp/fissure.lock"
+
+
+def check_existing_instance():
+    """ 
+    Prevent multiple instances of FISSURE from running. 
+    """
+    if os.path.exists(LOCK_FILE):
+        with open(LOCK_FILE, "r") as f:
+            pid = f.read().strip()
+            if pid and os.path.exists(f"/proc/{pid}"):
+                print(f"❌ FISSURE is already running (PID: {pid}). Exiting.")
+                sys.exit(1)  # Prevent multiple instances
+
+    # Write current process ID to lock file
+    with open(LOCK_FILE, "w") as f:
+        f.write(str(os.getpid()))
+
+
+def cleanup_lock_file():
+    """ 
+    Remove the lock file when FISSURE exits. 
+    """
+    if os.path.exists(LOCK_FILE):
+        os.remove(LOCK_FILE)
 
 
 def run():
+    """
+    Starts FISSURE.
+    """
     fissure.utils.init_logging()
 
     # Check for Certificates Folder
     certificates_directory = os.path.join(fissure.utils.FISSURE_ROOT, "certificates")
     if os.path.exists(certificates_directory):
-        print("certficates folder found.")
+        pass
+        # print("certificates folder found.")
     else:
         print('"certificates" folder not found. Run "Network Certificates" item in installer')
         sys.exit(1)
@@ -47,6 +78,13 @@ def run():
 
 
 if __name__ == "__main__":
+    # Prevent multiple instances
+    check_existing_instance()
+    
+    # Ensure lock file is removed on exit
+    atexit.register(cleanup_lock_file)
+
+
     rc = 0
     # try:
     run()

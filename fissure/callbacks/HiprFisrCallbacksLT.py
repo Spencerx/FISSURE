@@ -291,7 +291,6 @@ async def autorunPlaylistStopLT(component: object, sensor_node_id=0):
     await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
     
 
-########################################################################
 async def alertReturnLT(component: object, sensor_node_id=0, alert_text=""):
     """
     Forwards alertReturn Message to the Dashboard.
@@ -347,4 +346,47 @@ async def exploitLT(component: object, msg=[]):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     
-    
+async def takPlotGpsUpdateLT(component: object, msg=[]):
+    """
+    Forwards the GPS coordinate results message to TAK.
+    """
+    uid = str(msg[0])
+    lat = float(msg[1])
+    lon = float(msg[2])
+    alt = float(msg[3])
+    time = str(msg[4])
+    remarks = str(msg[5])
+
+    time = time.replace(" ", "T")
+
+    await tak_send.send_cot_gps_update(uid, lat, lon, alt, time, remarks)
+
+
+async def gpsBeaconEnableMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals to sensor node to enable the GPS TAK beacon.
+    """
+    # Send Message
+    PARAMETERS = {}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def gpsBeaconDisableMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals to sensor node to disable the GPS TAK beacon.
+    """
+    # Send Message
+    PARAMETERS = {}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconDisableMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

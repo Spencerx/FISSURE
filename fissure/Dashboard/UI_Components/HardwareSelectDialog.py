@@ -383,6 +383,11 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_recall_info_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_recall_info_{node_idx}")
             meshtastic_recall_hardware_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_recall_hardware_{node_idx}")
             meshtastic_recall_status_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_recall_status_{node_idx}")
+            meshtastic_gps_beacon_enable_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_gps_beacon_enable_{node_idx}")
+            meshtastic_gps_beacon_disable_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_gps_beacon_disable_{node_idx}")
+            ip_gps_beacon_disable_button: QtWidgets.QPushButton = getattr(self, f"pushButton_ip_gps_beacon_enable_disable_{node_idx}")
+            ip_gps_beacon_refresh_button: QtWidgets.QPushButton = getattr(self, f"pushButton_ip_gps_beacon_refresh_{node_idx}")
+            
 
             local_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.local(self, tab_index=idx - 1))
             remote_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.remote(self, tab_index=idx - 1))
@@ -421,6 +426,10 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_recall_info_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_info(self))
             meshtastic_recall_hardware_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_hardware(self))
             meshtastic_recall_status_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_status(self))
+            meshtastic_gps_beacon_enable_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_gps_beacon_enable(self))
+            meshtastic_gps_beacon_disable_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_gps_beacon_disable(self))
+            ip_gps_beacon_disable_button.clicked.connect(lambda: HardwareSelectSlots.ip_gps_beacon_enable_disable(self))
+            ip_gps_beacon_refresh_button.clicked.connect(lambda: HardwareSelectSlots.ip_gps_beacon_refresh(self))
 
         # Connect general slots
         self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict="", recall_settings_on_connect=False))

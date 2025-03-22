@@ -2015,17 +2015,54 @@ class DashboardBackend:
         """
         Sends message to HIPRFISR to establish local serial connection to communicate with preconfigured remote sensor node.
         """
-        PARAMETERS = {
-            "sensor_node_id": str(sensor_node_id),
-            "serial_port": serial_port,
-            "serial_baud_rate": serial_baud_rate,
-        }
-        launch_cmd = {
-            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeMeshtastic",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": str(sensor_node_id),
+                "serial_port": serial_port,
+                "serial_baud_rate": serial_baud_rate,
+            }
+            launch_cmd = {
+                fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeMeshtastic",
+                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
+
+
+    async def gpsBeaconEnableDisableIP(self, sensor_node_id):
+        """
+        Sends a message to the HIPRFISR to enable/disable the GPS TAK beacon at the sensor node.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def gpsBeaconRefreshIP(self, sensor_node_id):
+        """
+        Sends a message to the HIPRFISR to retrieve the GPS TAK beacon state from the sensor node.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconRefreshIP",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 
 #######################################################################################
 ############################## Low Throughput Messages ################################
@@ -2171,3 +2208,39 @@ class DashboardBackend:
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def gpsBeaconEnableMeshtasticLT(self, sensor_node_id: str):
+        """
+        Sends a message to enable the GPS TAK beacon.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableMeshtasticLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def gpsBeaconDisableMeshtasticLT(self, sensor_node_id: str):
+        """
+        Sends a message to disable the GPS TAK beacon.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconDisableMeshtasticLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+

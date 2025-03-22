@@ -34,6 +34,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 
 from fissure.utils.alert_sender import alertSender
+from datetime import datetime, timezone
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)  # Scapy warnings
@@ -96,7 +97,9 @@ async def main(local_flag):
         gps_manager = GPSManager(
             sensor_node.logger,
             gps_update_interval_seconds=sensor_node.gps_update_interval_seconds,
-            gps_callback=sensor_node.gpsUpdate
+            gps_callback=sensor_node.gpsUpdate,
+            gps_data=sensor_node.gps_position,
+            gpsd_serial_port=sensor_node.gpsd_serial_port,
         )
         if sensor_node.gps_source == "gpsd":
             gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, None))
@@ -243,6 +246,7 @@ class SensorNode():
 
         # Initialize GPS Coordinates
         self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
+        self.gps_tak_beacon = self.settings_dict['Sensor Node']['gps']['gps_tak_beacon']
         self.gps_source = self.settings_dict['Sensor Node']['gps']['gps_source']
         self.gps_update_interval_seconds = self.settings_dict['Sensor Node']['gps']['gps_update_interval_seconds']
 
@@ -972,7 +976,13 @@ class SensorNode():
                 self.attack_flow_graph_loaded = False
             # Autorun
             else:
-                os.system("pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
+                process_name = self.autorun_playlist_manager[autorun_index] if 0 <= autorun_index < len(self.autorun_playlist_manager) else None
+                if process_name is None:
+                    self.logger.debug(f"⚠️ Warning: No process found for autorun index {autorun_index}. Skipping kill command.")
+                else:
+                    os.system("pkill -f " + '"' + process_name + '"')
+
+                # os.system("pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
                 self.autorun_playlist_manager[autorun_index] = None
                 
         elif parameter == "Flow Graph - GUI":
@@ -982,7 +992,13 @@ class SensorNode():
                 self.attack_flow_graph_loaded = False
             # Autorun
             else:
-                os.system("pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
+                process_name = self.autorun_playlist_manager[autorun_index] if 0 <= autorun_index < len(self.autorun_playlist_manager) else None
+                if process_name is None:
+                    self.logger.debug(f"⚠️ Warning: No process found for autorun index {autorun_index}. Skipping kill command.")
+                else:
+                    os.system("pkill -f " + '"' + process_name + '"')
+
+                # os.system("pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
                 self.autorun_playlist_manager[autorun_index] = None
             
         else:
@@ -2482,12 +2498,48 @@ class SensorNode():
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    def gpsUpdate(self, gps_data):
+    async def gpsUpdate(self, gps_data):
         """
         Callback function to save GPS updates from Meshtastic node.
         """
         self.logger.info(f"Updated GPS Position: {gps_data}")
         self.gps_position = gps_data
+
+        # Beacon GPS Position to HIPFISR then TAK
+        if self.gps_tak_beacon == True:
+            if self.network_type == "IP":
+                PARAMETERS = {
+                    "uid": self.identifier,
+                    "lat": self.gps_position['latitude'],
+                    "lon": self.gps_position['longitude'],
+                    "alt": self.gps_position['altitude'],
+                    "time": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                    "remarks": "GPS UPDATE"
+                }
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdate",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+            elif self.network_type == "Meshtastic":
+                PARAMETERS = {
+                    "msg": [
+                        self.identifier,
+                        self.gps_position['latitude'],
+                        self.gps_position['longitude'],
+                        self.gps_position['altitude'],
+                        datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                        'GPS UPDATE'
+                    ]
+                }
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdateLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)                
 
     ########################################################################
 
@@ -2497,7 +2549,14 @@ class GPSManager:
     Manages periodic GPS updates from multiple sources.
     """
 
-    def __init__(self, logger: logging.Logger, gps_update_interval_seconds: int, gps_callback: Callable[[Dict[str, float]], None], gps_data: dict={"latitude": None, "longitude": None, "altitude": None}):
+    def __init__(
+            self, 
+            logger: logging.Logger, 
+            gps_update_interval_seconds: int, 
+            gps_callback: Callable[[Dict[str, float]], None], 
+            gps_data: dict={"latitude": None, "longitude": None, "altitude": None},
+            gpsd_serial_port = str,
+        ):
         """
         Args:
             gps_update_interval_seconds (int): How often to check GPS (in seconds).
@@ -2508,6 +2567,7 @@ class GPSManager:
         self.gps_callback = gps_callback  # Function to store GPS data
         self.running = False  # Controls the GPS update loop
         self.gps_data = gps_data
+        self.gpsd_serial_port = gpsd_serial_port
 
 
     async def fetch_gps_from_meshtastic(self, meshtastic_node) -> Optional[Dict[str, float]]:
@@ -2572,7 +2632,7 @@ class GPSManager:
                     value = gps_data.get(key)
                     if not value is None:
                         self.gps_data[key] = value
-                self.gps_callback(self.gps_data)
+                await self.gps_callback(self.gps_data)
 
             await asyncio.sleep(self.gps_update_interval_seconds)
 

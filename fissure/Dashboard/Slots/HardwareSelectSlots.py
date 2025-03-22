@@ -2481,7 +2481,7 @@ async def meshtastic_info(HWSelect: QtCore.QObject):
         output_text = "No serial devices found"
 
     # Open a Dialog
-    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect.dashboard, output_text)
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect, output_text)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -2580,3 +2580,44 @@ async def meshtastic_recall_status(HWSelect: QtCore.QObject):
     # Send Message to Backend
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
     await HWSelect.dashboard.backend.recallStatusMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_gps_beacon_enable(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to enable the GPS TAK beacon.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.gpsBeaconEnableMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_gps_beacon_disable(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to disable the GPS TAK beacon.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.gpsBeaconDisableMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def ip_gps_beacon_enable_disable(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to enable/disable the GPS TAK beacon.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.gpsBeaconEnableDisableIP(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def ip_gps_beacon_refresh(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to disable the GPS TAK beacon.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.gpsBeaconRefreshIP(str(tab_index))
+

@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-22
+
+GPS TAK beacon feature.
+
+### Added
+
+- GPS TAK beacon functionality
+- IP and Meshtastic functions for passing GPS TAK beacons from Sensor Node to TAK
+- Buttons in sensor node configuration dialog to enable/disable the GPS TAK beacon for IP and Meshtastic network types
+- gps_tak_beacon option in sensor node configuration file
+
+### Fixed
+
+- Probing gpsd now checks for the serial connection and quickly times out if there is no GPS lock to help prevent freezing
+- gpsd serial port correctly passed into GPSManager object
+- Changing Meshtastic Info popup parent to sensor node configuration dialog
+- Find button returns None for the location and re-enables the Find button when an error occurs while probing gpsd
+- Removed process errors for attacks when stopping an autorun playlist
+- Preventing multiple instances of FISSURE from running on the same computer with the fissure command
+
 ## 2025-3-20
 
 Fixing receiving functions for Meshtastic network node.
