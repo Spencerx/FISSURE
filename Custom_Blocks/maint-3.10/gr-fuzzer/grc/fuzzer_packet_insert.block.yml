@@ -3,7 +3,7 @@ label: packet_insert
 category: '[fuzzer]'
 
 templates:
-  imports: import fuzzer
+  imports: import gnuradio.fuzzer as fuzzer
   make: fuzzer.packet_insert(${vector},${period},${offset})
 
 parameters:

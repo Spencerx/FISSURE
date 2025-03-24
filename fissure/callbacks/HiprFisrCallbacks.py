@@ -26,6 +26,7 @@ from fissure.Listeners import (
     TCPUDPListener,
     MQTTListener
 )
+from fissure.callbacks import tak_send
 
 """ HiprFisr Specific Callback Functions """
 
@@ -1790,6 +1791,34 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
     await component.sensor_nodes[int(tab_index)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+async def gpsBeaconEnableDisableIP(component: object, sensor_node_id: str):
+    """
+    Enables/disables the GPS TAK beacon at the sensor node.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def gpsBeaconRefreshIP(component: object, sensor_node_id: str):
+    """
+    Retrieves the GPS TAK beacon state from the sensor node.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconRefreshIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
 ##########################################################################
 ########################### From Sensor Node #############################
 ##########################################################################
@@ -2212,7 +2241,7 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
 
 async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
     """
-    Forwards the GPS coordinate results message to Tak.
+    Forwards the GPS coordinate results message to TAK.
     """
     '''uid = str(msg[0])
     lat = float(msg[1])
@@ -2224,6 +2253,14 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     time = time.replace(" ", "T")'''
     
     await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
+
+
+async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+    """
+    Forwards the sensor node GPS coordinates message to TAK.
+    """
+    time = time.replace(" ", "T")
+    await tak_send.send_cot_gps_update(uid, lat, lon, alt, time, remarks)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -2261,6 +2298,24 @@ async def snreport(component: object, sensor_node_id:str, text:str):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def gpsBeaconEnableDisableIP_Return(component: object, sensor_node_id:str, gps_tak_beacon_status: bool):
+    """
+    Forwards GPS TAK beacon state to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "gps_tak_beacon_status": gps_tak_beacon_status,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 
 ##########################################################################
 ####################### Outdated/Incomplete/Unused #######################

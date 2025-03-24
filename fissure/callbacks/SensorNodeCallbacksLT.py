@@ -125,7 +125,7 @@ async def recallStatusMeshtasticLT(component: object, tab_index=""):
     # Prepare the payload
     PARAMETERS = {
         'tab_index': tab_index,
-        'status': "test"
+        'status': "Sensor node online"
     }
 
     # Send the payload directly as a dictionary
@@ -443,3 +443,21 @@ async def autorunPlaylistStopLT(component: object, sensor_node_id=0):
         component.autorun_playlist_stop_event.set()
     except:
         pass
+
+
+async def gpsBeaconEnableMeshtasticLT(component: object):
+    """
+    Enables the GPS TAK beacon.
+    """
+    # Enable
+    component.logger.info("Enabling the GPS TAK beacon")
+    component.gps_tak_beacon = True
+
+
+async def gpsBeaconDisableMeshtasticLT(component: object):
+    """
+    Disables the GPS TAK beacon.
+    """
+    # Disable
+    component.logger.info("Disabling the GPS TAK beacon")
+    component.gps_tak_beacon = False

@@ -1330,12 +1330,54 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
         get_coordinates = "Invalid GPS Source"
 
     # Return the Text
-    if get_coordinates:
-        # Only return lat, lon
-        PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
-        msg = {
-            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    # if get_coordinates:
+    # Only return lat, lon
+    PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def gpsBeaconEnableDisableIP(component: object, sensor_node_id: str):
+    """
+    Toggles the state of the GPS TAK beacon.
+    """
+    # Toggle
+    if component.gps_tak_beacon == True:
+        component.gps_tak_beacon = False
+        component.logger.info("GPS TAK beacon disabled.")
+    else:
+        component.gps_tak_beacon = True
+        component.logger.info("GPS TAK beacon enabled.")
+
+    # Send Confirmation
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "gps_tak_beacon_status": component.gps_tak_beacon
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def gpsBeaconRefreshIP(component: object, sensor_node_id: str):
+    """
+    Retrieves the state of the GPS TAK beacon.
+    """
+    # Semd Status
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "gps_tak_beacon_status": component.gps_tak_beacon
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

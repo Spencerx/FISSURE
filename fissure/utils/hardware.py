@@ -8,6 +8,9 @@ import meshtastic
 from meshtastic.serial_interface import SerialInterface
 from typing import Optional, Dict
 import socket
+import os
+import select
+import json
 
 
 SUPPORTED_HARDWARE = [
@@ -1193,89 +1196,98 @@ def findRSPdxR2(guess_serial="", guess_index=0):
     return scan_results, guess_index
 
 
-def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM2", return_altitude=False):
+def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM1", return_altitude=False):
     """ 
     Probes GPS devices using gpsd and returns the coordinates.
     """
     session = None
+    gpsd_socket = None
     try:
+        # **Check if the GPS device exists before proceeding**
+        if not os.path.exists(serial_port):
+            logger.error(f"❌ GPS device not found at {serial_port}. Ensure the device is connected.")
+            return None
+
         logger.info(f"Configuring gpsd for GPS device at {serial_port}")
-        
-        # Step 1: Kill any existing gpsd processes
+
+        # **Kill any existing gpsd processes**
         subprocess.run(["sudo", "killall", "gpsd"], check=False)
         time.sleep(0.2)
 
-        # Step 2: Clear any processes using the serial port
+        # **Clear any processes using the serial port**
         subprocess.run(["sudo", "fuser", "-k", serial_port], check=False)
         time.sleep(0.1)
 
-        # Step 3: Start gpsd with the specified serial port
+        # **Start gpsd only if the device exists**
         gpsd_command = [
             "sudo", "gpsd", "-n", "-D", "4", "-F", "/var/run/gpsd.sock", serial_port
         ]
         logger.info(f"Starting gpsd with command: {' '.join(gpsd_command)}")
         subprocess.run(gpsd_command, check=True)
-        time.sleep(0.5)  # Delay for gpsd initialization
+        time.sleep(0.5)  # Allow gpsd time to start
 
-        # Step 4: Verify gpsd socket availability
+        # **Verify gpsd socket availability**
         try:
-            with socket.create_connection(("localhost", 2947), timeout=2) as sock:
+            with socket.create_connection(("localhost", 2947), timeout=2):
                 logger.info("Successfully connected to gpsd socket on port 2947.")
         except Exception as e:
-            logger.error(f"Unable to connect to gpsd socket: {e}")
+            logger.error(f"❌ Could not reach gpsd. Ensure gpsd is running and configured correctly: {e}")
             return None
 
-        # Step 5: Initialize the GPS session using the gpsd socket
+        # **Initialize GPS session**
         session = gps(mode=WATCH_ENABLE | WATCH_JSON)
         logger.info("GPS session initialized. Waiting for data...")
 
-        start_time = time.time()  # Track the start time
-        timeout = 10  # Set timeout to 10 seconds for GPS fix
+        start_time = time.time()
+        timeout = 3  # Set timeout for GPS fix
 
-        while True:
+        # **Manually open a socket to gpsd**
+        gpsd_socket = socket.create_connection(("localhost", 2947))
+        gpsd_socket.sendall(b'?WATCH={"enable":true,"json":true}\n')
+
+        while time.time() - start_time < timeout:
             try:
-                logger.info("Attempting to connect to GPS device via gpsd...")
-                report = session.next()
-                logger.debug(f"GPS Report: {report}")  # Log all received data
-                
-            except StopIteration:
-                logger.error("GPS session stopped unexpectedly.")
-                return None
+                logger.info("Attempting to retrieve GPS data...")
+
+                # **Use select() on the raw socket**
+                ready, _, _ = select.select([gpsd_socket], [], [], 1.0)
+                if not ready:
+                    logger.debug("No GPS data available yet, retrying...")
+                    continue  # Skip this iteration to avoid blocking
+
+                # **Read and parse the JSON response from gpsd**
+                data = gpsd_socket.recv(4096)
+                reports = data.decode("utf-8").splitlines()
+                for report in reports:
+                    try:
+                        report_json = json.loads(report)
+                    except json.JSONDecodeError:
+                        continue
+
+                    logger.debug(f"GPS Report: {report_json}")
+
+                    if report_json.get('class') == 'TPV':
+                        lat = report_json.get('lat')
+                        lon = report_json.get('lon')
+
+                        if lat is not None and lon is not None:
+                            if return_altitude:
+                                alt = report_json.get('alt')
+                                return {"latitude": lat, "longitude": lon, "altitude": alt}
+                            else:
+                                get_coordinates = format_coordinates(lat, lon, format)
+                                logger.debug(f"✅ GPS Data Received: {get_coordinates}")
+                                return get_coordinates
+
             except Exception as e:
-                logger.error(f"Error during gpsd session.next(): {e}")
+                logger.error(f"❌ Error while retrieving GPS data: {e}")
                 return None
 
-            # Check if we received a valid TPV (Time-Position-Velocity) report
-            if report['class'] == 'TPV':
-                lat = getattr(report, 'lat', None)
-                lon = getattr(report, 'lon', None)
-
-                if lat is not None and lon is not None:
-                    # Sensor node gps_position is stored as 3D dictionary for TAK
-                    if return_altitude == True:
-                        alt = getattr(report, 'alt', None)
-                        return {
-                            "latitude": lat,
-                            "longitude": lon,
-                            "altitude": alt
-                        }
-                    # Dashboard sensor node configuration only uses 2D: lat, lon
-                    else:
-                        get_coordinates = format_coordinates(lat, lon, format)
-                        logger.debug(f"✅ GPS Data Received: {get_coordinates}")
-                        return get_coordinates
-                else:
-                    logger.debug("Valid TPV report received, but coordinates are None.")
-
-            else:
-                logger.debug(f"Non-TPV GPS report received: {report['class']}")
-
-            if time.time() - start_time > timeout:
-                logger.error("❌ GPS timeout: No valid data received within timeout period.")
-                return None
+        logger.error("❌ GPS timeout: No valid data received within timeout period.")
+        return None
 
     except Exception as e:
-        logger.error(f"Error in GPS probe: {e}")
+        logger.error(f"❌ Error in GPS probe: {e}")
         return None
 
     finally:
@@ -1285,6 +1297,9 @@ def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM2", re
                 logger.info("GPS session closed cleanly.")
             except Exception as e:
                 logger.error(f"Error closing GPS session: {e}")
+
+        if gpsd_socket:
+            gpsd_socket.close()
     
 
 async def probeMeshtasticGPS(serial_port: str, timeout: int = 10) -> Optional[Dict[str, float]]:

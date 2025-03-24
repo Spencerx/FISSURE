@@ -239,7 +239,7 @@ async def recallSettingsReturn(component: object, settings_dict={}):
     Populates the HardwareSelectDialog with the sensor node settings on connect.
     """
     # Pass Sensor Node Settings to HardwareSelectDialog
-    component.frontend.popups["HardwareSelectDialog"].importResults(settings_dict=settings_dict)
+    component.frontend.popups["HardwareSelectDialog"].importResults(settings_dict=settings_dict, recall_settings_on_connect=True)
 
 
 async def componentDisconnected(component: object, component_name=""):
@@ -1756,3 +1756,21 @@ async def deleteListenerReturn(component: object, listener_name=""):
             break
     else:
         component.logger.error(f"No matching listener found in the table for name '{listener_name}'.")
+
+
+async def gpsBeaconEnableDisableIP_Return(component: object, sensor_node_id:str, gps_tak_beacon_status: bool):
+    """
+    Sets the state of the GPS TAK beacon enable/disable button for IP network connections.
+    """
+    # Populate Location
+    enable_disable_button = [
+        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_1,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_2,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_3,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_4,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_5
+    ]
+    if gps_tak_beacon_status == True:
+        enable_disable_button[int(sensor_node_id)].setText("Disable")
+    else:
+        enable_disable_button[int(sensor_node_id)].setText("Enable")

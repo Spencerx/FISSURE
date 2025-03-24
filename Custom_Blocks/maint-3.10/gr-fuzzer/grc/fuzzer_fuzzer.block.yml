@@ -3,7 +3,7 @@ label: fuzzer
 category: '[fuzzer]'
 
 templates:
-  imports: import fuzzer
+  imports: import gnuradio.fuzzer as fuzzer
   make: fuzzer.fuzzer(${fuzzing_seed},${fuzzing_fields},${fuzzing_type},${fuzzing_min},${fuzzing_max},${fuzzing_data},${fuzzing_interval},${fuzzing_protocol},${fuzzing_packet_type},${packet_types_fields})
 
 parameters:
