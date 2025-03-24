@@ -3899,6 +3899,9 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_sensor_nodes_exploit_run.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesExploitsRunClicked(dashboard)
     )
+    dashboard.ui.pushButton_sensor_nodes_reports_clear.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesReportsClearClicked(dashboard)
+    )
     dashboard.ui.pushButton_sensor_nodes_listeners_meshtastic_info.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesListenersMeshtasticInfoClicked(dashboard)
     )

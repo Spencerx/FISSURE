@@ -35,11 +35,9 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True)
 
     # monitor for alerts
-    print("ALERT SENDER!!!!!!!!!111111111111")
     stop = False
     while not stop and proc.poll() is None:
         for proc_text in proc.stdout:
-
             # replace any gps fields in text
             proc_text = proc_text % gps_position
 
@@ -55,7 +53,6 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
                     logger.info(str(data))
 
                 elif data.get('msg') == 'alert':
-                    print("AAAAAAAAAAAAAAALLLLLLLLLLLLLEEEEEEEEEERT")
                     if network_type == "IP":
                         PARAMETERS = {
                             "sensor_node_id": sensor_node_id,
@@ -169,6 +166,19 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
                             fissure.comms.MessageFields.SOURCE: identifier,
                             fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
                             fissure.comms.MessageFields.MESSAGE_NAME: "exploitLT",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+
+                elif data.get('msg') == 'snreport':
+                    if network_type == "IP":
+                        PARAMETERS = {
+                            "sensor_node_id": sensor_node_id,
+                            "text": data.get('text')
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.IDENTIFIER: identifier,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
                             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                         }
                         asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))

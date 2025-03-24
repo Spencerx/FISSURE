@@ -2247,6 +2247,21 @@ async def exploit(component: object, sensor_node_id: str, protocol:str, modulati
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+async def snreport(component: object, sensor_node_id:str, text:str):
+    """"
+    Forwards the necesarry information to the proper exploit flow graph.
+    """
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "text": text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 ##########################################################################
 ####################### Outdated/Incomplete/Unused #######################
 ##########################################################################

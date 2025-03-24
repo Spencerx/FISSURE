@@ -610,4 +610,28 @@ def decimal_to_dms(lat, lon):
     # Format output
     return f"{abs(lat_d)}°{lat_m}'{lat_s:.2f}\" {lat_dir}, {abs(lon_d)}°{lon_m}'{lon_s:.2f}\" {lon_dir}"
 
+
+def decimal_to_ddm(lat:float, lon:float) -> tuple[str]:
+    """
+    Converts latitude and longitude from Decimal Degrees (DD) to Degrees, Decimal Minutes.
+
+    Output is in the form [D]DDMM.MMMMN (degrees, decimal minutes and direction).
+    """
+    def convert(coord):
+        degrees = int(coord)
+        minutes = (abs(coord) - abs(degrees)) * 60
+        return degrees, minutes
+
+    # Convert latitude and longitude
+    lat_d, lat_m = convert(lat)
+    lon_d, lon_m = convert(lon)
+
+    # Determine N/S and E/W
+    lat_dir = "N" if lat >= 0 else "S"
+    lon_dir = "E" if lon >= 0 else "W"
+
+    # Format output
+    return f"{abs(lat_d)}{lat_m:07.4f}{lat_dir}", f"{abs(lon_d)}{lon_m:07.4f}{lon_dir}"
+
+
 ##################################################################################################

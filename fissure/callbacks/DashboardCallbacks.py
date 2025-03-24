@@ -1537,6 +1537,25 @@ async def responsePluginProtocolParameters(component: object, plugin_name: str, 
         tableWidget_protocol_packet_type.setRowCount(0)
 
 
+async def update_sensor_node_title(component: object, change: int):
+    # get current number
+    current_text = component.frontend.ui.tabWidget.tabBar().tabText(6)
+    if "(" in current_text and ")" in current_text:
+        base_text, count = current_text.rsplit("(", 1)
+        count = count.rstrip(")")
+        try:
+            current_count = int(count)
+        except ValueError:
+            current_count = 0
+    else:
+        base_text = current_text
+        current_count = 0
+
+    new_count = max([0, current_count + change])
+    new_text = f"{base_text.strip()} ({new_count})"
+    component.frontend.ui.tabWidget.tabBar().setTabText(6, new_text)
+
+
 async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     """ 
     Updates the Sensor Nodes Alert tab with a new alert.
@@ -1587,7 +1606,7 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(3, new_text)
 
     # Update Sensor Nodes Tab with Count
-    component.frontend.ui.tabWidget.tabBar().setTabText(6, new_text.replace("Alerts", "Sensor Nodes"))
+    await update_sensor_node_title(component, 1)
 
 
 async def exploitReturn(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -1627,7 +1646,39 @@ async def exploitReturn(component: object, sensor_node_id: str, protocol:str, mo
     component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(4, new_text)
     
     # Update Sensor Nodes Tab with Count
-    component.frontend.ui.tabWidget.tabBar().setTabText(6, new_text.replace("Exploits", "Sensor Nodes"))
+    await update_sensor_node_title(component, 1)
+
+
+async def snreport(component: object, sensor_node_id: str, text:str):
+    """Updates the Sensor Nodes Exploit tab with a new alert.
+    """
+    # Append the message
+    tableWidget_reports: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_reports
+    row_position = component.frontend.ui.tableWidget_reports.rowCount()
+    component.frontend.ui.tableWidget_reports.insertRow(row_position)
+    component.frontend.ui.tableWidget_reports.setItem(row_position, 0, QTableWidgetItem('\n'.join(text)))
+    tableWidget_reports.resizeRowsToContents()
+
+    # Calculate Alert Total
+    current_text = component.frontend.ui.tabWidget_sensor_nodes.tabBar().tabText(5)
+    if "(" in current_text and ")" in current_text:
+        base_text, count = current_text.rsplit("(", 1)
+        count = count.rstrip(")")
+        try:
+            current_count = int(count)
+        except ValueError:
+            current_count = 0
+    else:
+        base_text = current_text
+        current_count = 0
+
+    new_count = current_count + 1
+    new_text = f"{base_text.strip()} ({new_count})"
+
+    # update tab title
+    component.frontend.ui.tabWidget_sensor_nodes.tabBar().setTabText(5, new_text)
+
+    await update_sensor_node_title(component, 1)
 
 
 async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):

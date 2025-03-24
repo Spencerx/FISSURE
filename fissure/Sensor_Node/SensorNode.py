@@ -246,11 +246,9 @@ class SensorNode():
         self.gps_source = self.settings_dict['Sensor Node']['gps']['gps_source']
         self.gps_update_interval_seconds = self.settings_dict['Sensor Node']['gps']['gps_update_interval_seconds']
 
-        if self.gps_autostart == False:
-            # From Config File
-            self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
-        else:
-            self.gps_position = {"latitude": None, "longitude": None, "altitude": None}
+        # initial position from config file
+        self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
+        self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(self.gps_position['latitude'], self.gps_position['longitude'])
 
 
     def initialize_comms(self):
@@ -2485,6 +2483,7 @@ class SensorNode():
         """
         self.logger.info(f"Updated GPS Position: {gps_data}")
         self.gps_position = gps_data
+        self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(gps_data['latitude'], gps_data['longitude'])
 
     ########################################################################
 
