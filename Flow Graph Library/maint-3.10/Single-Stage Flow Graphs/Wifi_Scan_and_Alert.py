@@ -167,6 +167,16 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 'time': datetime.fromtimestamp(float(row[0]), timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                                 'remarks': '"' + json.dumps(currobv, separators=(',', ':')) + '"'
                             }) + '\n')
+                            sys.stdout.write(json.dumps({
+                                'msg': 'report',
+                                'text': [ # https://www.globalsecurity.org/intell/library/policy/army/fm/34-35/appc.htm#figc_5
+                                    'UNCLAS',
+                                    f'MSGID/TACREP/FISSURE REPORT//', # TACREP=Tactical Report
+                                    f'GNDOP/{datetime.now(timezone.utc).strftime('%H%M%SZ')}/1/US/ENEMY COMBATANT/ROUTER:{mac}//', # GNDOP=Ground Operations
+                                    'LOCATION/TAMPA,FL/%(latitude_ddm)s%(longitude_ddm)s//', # City as city,state or city,country and Location in degree and decimal minutes format
+                                    f'COMEW/{currobv.get('frequency_mhz'):0.3f}MHZ/20MHZ//', # COMEW=Communications Electronic Warfare
+                                ]
+                            }) + '\n')
                             sys.stdout.flush()
 
         if not newta:

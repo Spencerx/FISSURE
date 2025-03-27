@@ -840,6 +840,28 @@ def _slotSensorNodesAutorunTriggersClearClicked(dashboard: QtCore.QObject):
     dashboard.ui.tableWidget1_sensor_nodes_autorun_triggers.setRowCount(0)
 
 
+def update_sensor_node_title(dashboard: QtCore.QObject, change: int):
+    # get current number
+    current_text = dashboard.ui.tabWidget.tabBar().tabText(6)
+    if "(" in current_text and ")" in current_text:
+        base_text, count = current_text.rsplit("(", 1)
+        count = count.rstrip(")")
+        try:
+            current_count = int(count)
+        except ValueError:
+            current_count = 0
+    else:
+        base_text = current_text
+        current_count = 0
+
+    new_count = max([0, current_count + change])
+    if new_count == 0:
+        new_text = base_text.strip()
+    else:
+        new_text = f"{base_text.strip()} ({new_count})"
+    dashboard.ui.tabWidget.tabBar().setTabText(6, new_text)
+
+
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotSensorNodesAlertsClearClicked(dashboard: QtCore.QObject):
     """ 
@@ -848,11 +870,24 @@ def _slotSensorNodesAlertsClearClicked(dashboard: QtCore.QObject):
     # Clear
     dashboard.ui.textEdit2_sensor_nodes_alerts.clear()
 
+    # get count from current title
+    current_text = dashboard.ui.tabWidget_sensor_nodes.tabBar().tabText(3)
+    if "(" in current_text and ")" in current_text:
+        base_text, count = current_text.rsplit("(", 1)
+        count = count.rstrip(")")
+        try:
+            current_count = int(count)
+        except ValueError:
+            current_count = 0
+    else:
+        base_text = current_text
+        current_count = 0
+
     # Reset Alerts Tab Text
     dashboard.ui.tabWidget_sensor_nodes.tabBar().setTabText(3,"Alerts")
 
-    # Reset Sensor Nodes Tab Text
-    dashboard.ui.tabWidget.tabBar().setTabText(6,"Sensor Nodes")
+    # Update Sensor Nodes Tab Text
+    update_sensor_node_title(dashboard, -current_count)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -898,6 +933,7 @@ def _slotSensorNodesExploitsClearClicked(dashboard: QtCore.QObject):
     tableWidget_exploits: QtWidgets.QTableWidget = dashboard.ui.tableWidget_exploits
 
     # Clear
+    row_count = tableWidget_exploits.rowCount()
     tableWidget_exploits.setRowCount(0)
 
     tableWidget_exploits.horizontalHeader().setVisible(True) # set header visible in code; qt designer always sets to false
@@ -906,7 +942,7 @@ def _slotSensorNodesExploitsClearClicked(dashboard: QtCore.QObject):
     dashboard.ui.tabWidget_sensor_nodes.tabBar().setTabText(4,"Exploits")
 
     # Reset Sensor Nodes Tab Text
-    dashboard.ui.tabWidget.tabBar().setTabText(6,"Sensor Nodes")
+    update_sensor_node_title(dashboard, -row_count)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -973,6 +1009,25 @@ def _slotSensorNodesExploitsRunClicked(dashboard: QtCore.QObject):
 
     else:
         fissure.Dashboard.UI_Components.Qt5.errorMessage("Stop the current attack to stage an exploit")
+
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesReportsClearClicked(dashboard: QtCore.QObject):
+    """ 
+    Clears the Listed Reports and resets the tab color.
+    """
+    tableWidget_reports: QtWidgets.QTableWidget = dashboard.ui.tableWidget_reports
+
+    # Clear
+    row_count = tableWidget_reports.rowCount()
+    tableWidget_reports.setRowCount(0)
+
+    # Reset Tab Text
+    dashboard.ui.tabWidget_sensor_nodes.tabBar().setTabText(5,"Reports")
+
+    # Reset Sensor Nodes Tab Text
+    update_sensor_node_title(dashboard, -row_count)
+    #dashboard.ui.tabWidget.tabBar().setTabText(6,"Sensor Nodes")
+
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotSensorNodeAutorunRunAsStoredChecked(dashboard: QtCore.QObject):

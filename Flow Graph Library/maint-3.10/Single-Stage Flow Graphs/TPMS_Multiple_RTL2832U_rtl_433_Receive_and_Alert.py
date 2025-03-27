@@ -26,7 +26,7 @@ FREQUENCY = 315e6 # or 433e6
 GAIN = 49 # rx gain
 NOTES = 'Use rtl_433 to capture TPMS messages'
 
-def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
+def main(device:int=DEVICE, frequency:float=FREQUENCY, gain:float=GAIN, whitelist:list[str]=None):
     # launch tpms receiver
     cmd = ['rtl_433', '-d', '%d'%device, '-M', 'level', '-f', '%d'%frequency, '-g', '%d'%gain, '-v', '-F', 'syslog:127.0.0.1:1514']
     p = Process(target=subprocess.run, args=(' '.join(cmd),), kwargs={'shell': True})
@@ -60,34 +60,45 @@ def main(device: int=DEVICE, frequency: float=FREQUENCY, gain: float=GAIN):
             data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
             
             # Find the actual key that matches "id" (case-insensitive)
-            id_key = next((key for key in data.keys() if key.lower() == "id"), None)
+            id_key = next((key for key in data.keys() if 'id' in key.lower()), None)
             if id_key:
                 id = data.pop(id_key)
-                        
-                # Find any key that contains "pressure" (case-insensitive)
-                pressure_key = next((key for key in data.keys() if "pressure" in key.lower()), None)
+                if whitelist is None or id in whitelist:
+                    # Find any key that contains "pressure" (case-insensitive)
+                    pressure_key = next((key for key in data.keys() if "pressure" in key.lower()), None)
 
-                if pressure_key:
+                    if pressure_key:
+                        sys.stdout.write(json.dumps({
+                            'msg': 'alert',
+                            'text': f"TPMS id={id} {pressure_key}={data.get(pressure_key)}",
+                        }) + '\n')
+                        sys.stdout.flush()
+
+                    # tactical report
                     sys.stdout.write(json.dumps({
-                        'msg': 'alert',
-                        'text': f"TPMS id={id} {pressure_key}={data.get(pressure_key)}",
+                        'msg': 'snreport',
+                        'text': [ # https://www.globalsecurity.org/intell/library/policy/army/fm/34-35/appc.htm#figc_5
+                            'UNCLAS',
+                            f'MSGID/TACREP/FISSURE REPORT//', # TACREP=Tactical Report
+                            f'GNDOP/{datetime.now(timezone.utc).strftime('%H%M%SZ')}/1/US/ENEMY COMBATANT/TPMS:{id}//', # GNDOP=Ground Operations
+                            'LOCATION/TAMPA,FL/%(latitude_ddm)s%(longitude_ddm)s//', # City as city,state or city,country and Location in DM format
+                            f'COMEW/{frequency/1e6:06.2f}MHZ/100KHZ//', # COMEW=Communications Electronic Warfare
+                        ]
                     }) + '\n')
                     sys.stdout.flush()
-        
-            else:
-                id = ''
-            if 'time' in data.keys():
-                _ = data.pop('time')
-            sys.stdout.write(json.dumps({
-                'msg': 'tak',
-                'uid': id,
-                'lat': '%(latitude)f',
-                'lon': '%(longitude)f',
-                'alt': '%(altitude)f',
-                'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                'remarks': '"' + json.dumps(data, separators=(',', ':')) + '"'
-            }) + '\n')
-            sys.stdout.flush()
+
+                    if 'time' in data.keys():
+                        _ = data.pop('time')
+                    sys.stdout.write(json.dumps({
+                        'msg': 'tak',
+                        'uid': id,
+                        'lat': '%(latitude)f',
+                        'lon': '%(longitude)f',
+                        'alt': '%(altitude)f',
+                        'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                        'remarks': '"' + json.dumps(data, separators=(',', ':')) + '"'
+                    }) + '\n')
+                    sys.stdout.flush()
     finally:
         client_socket.close()
         p.terminate()
@@ -96,22 +107,28 @@ def getArguments():
     device = DEVICE
     frequency = FREQUENCY
     gain = GAIN
+    whitelist = '' # no whitelist == all ids reported
     notes = NOTES
 
     return (
-        ['device', 'frequency', 'gain', 'notes'],
-        [device, frequency, gain, notes]
+        ['device', 'frequency', 'gain', 'whitelist', 'notes'],
+        [device, frequency, gain, whitelist, notes]
     )
 
 if __name__ == '__main__':
     # get default values
-    (device, frequency, gain, notes) = getArguments()[1]
+    (device, frequency, gain, whitelist, notes) = getArguments()[1]
 
     # handle input
     nargs = len(sys.argv)
     device = float(sys.argv[1]) if nargs > 1 else device
     frequency = float(sys.argv[2]) if nargs > 2 else frequency
     gain = float(sys.argv[3]) if nargs > 3 else gain
+    whitelist = sys.argv[4] if nargs > 4 else whitelist
+    if len(whitelist) > 0:
+        whitelist = list(whitelist.split(','))
+    else:
+        whitelist = None
 
     # run
-    main(device, frequency, gain)
+    main(device, frequency, gain, whitelist)

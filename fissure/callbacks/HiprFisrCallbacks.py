@@ -16,6 +16,7 @@ import yaml
 import asyncio
 import socket
 import shutil
+from fissure.callbacks import tak_send
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -2242,7 +2243,15 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     """
     Forwards the GPS coordinate results message to TAK.
     """
-    time = time.replace(" ", "T")
+    '''uid = str(msg[0])
+    lat = float(msg[1])
+    lon = float(msg[2])
+    alt = float(msg[3])
+    time = str(msg[4])
+    remarks = str(msg[5])
+
+    time = time.replace(" ", "T")'''
+    
     await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
 
 
@@ -2270,6 +2279,22 @@ async def exploit(component: object, sensor_node_id: str, protocol:str, modulati
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "exploitReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def snreport(component: object, sensor_node_id:str, text:str):
+    """"
+    Forwards the necesarry information to the proper exploit flow graph.
+    """
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "text": text,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

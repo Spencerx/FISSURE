@@ -173,6 +173,19 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
                         }
                         asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
+                elif data.get('msg') == 'snreport':
+                    if network_type == "IP":
+                        PARAMETERS = {
+                            "sensor_node_id": sensor_node_id,
+                            "text": data.get('text')
+                        }
+                        msg = {
+                            fissure.comms.MessageFields.IDENTIFIER: identifier,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+
             except json.decoder.JSONDecodeError:
                 # Not a valid json string
                 logger.info(str(proc_text))
