@@ -222,6 +222,8 @@ There are now two branches within FISSURE: the Python3 branch and the Python2_ma
 
 The GitHub releases provided in this repository are periodic snapshots of the project's state, intended primarily for archival purposes. These releases may not include the latest updates, bug fixes, or features currently under development. To access the most up-to-date version of the software, we strongly recommend using the main Python3 branch, which reflects ongoing development and the current state of the project.
 
+FISSURE is most extensively tested on Ubuntu, making it the most validated platform.
+
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
 | BackBox Linux 8 (amd64) | Python3 | maint-3.10 |

@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-27
+
+Merging pull request #82: Flat file reporting
+
+### Added
+
+- Placed note in README that Ubuntu is the most tested operating system
+- Reports tab for structured message returns to FISSURE
+- Save button for Reports tab
+- Resizing Reports table rows to contents
+
+### Fixed
+
+- tuple/Tuple error in common.py
+- Added tshark, ip to password prompt exceptions list
+- Copied the updated 3.10 Python attack scripts to the 3.8 library directory
+- Fixing nested quote errors in Wifi_Scan_and_Alert.py and Wifi_Exploit_Finder.py
+- Copying resources folder from maint-3.10 single stage attacks to to maint-3.8
+- Fixing Wi-Fi Scan and Alert and Exploit Finder returning multiple power values that impacted message parsing
+
 ## 2025-3-22
 
 GPS TAK beacon feature.

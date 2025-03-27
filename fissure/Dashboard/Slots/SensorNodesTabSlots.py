@@ -10,6 +10,7 @@ import asyncio
 import ast
 from fissure.Dashboard.Slots import AttackTabSlots
 import json
+import csv
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotSensorNodeAutorunTableDelayChecked(state: int, dashboard: QtCore.QObject):
@@ -1374,5 +1375,64 @@ def _slotSensorNodesListenersFilesystemFilepathBrowseClicked(dashboard: QtCore.Q
         pass
 
 
-    
-    
+@QtCore.pyqtSlot(QtCore.QObject)
+def _slotSensorNodesReportsSaveClicked(dashboard: QtCore.QObject):
+    """ 
+    Saves the reports from `tableWidget_reports` to a .txt or .csv file.
+    """
+    # Define the default directory
+    directory = os.path.join(fissure.utils.LOG_DIR, "Session Logs")
+
+    # Open the Save File Dialog
+    dialog = QtWidgets.QFileDialog()
+    dialog.setDirectory(directory)
+    dialog.setFilter(dialog.filter() | QtCore.QDir.Hidden)
+    dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+    dialog.setNameFilters(["Text Files (*.txt)", "CSV Files (*.csv)"])
+
+    if dialog.exec_() == QtWidgets.QDialog.Accepted:
+        # Get the selected file path
+        fname = dialog.selectedFiles()[0]
+
+        # Get the selected filter (CSV or TXT)
+        selected_filter = dialog.selectedNameFilter()
+
+        # Ensure the correct file extension based on the selected filter
+        if "CSV Files" in selected_filter:
+            file_format = "csv"
+            if not fname.lower().endswith(".csv"):
+                fname += ".csv"
+        else:
+            file_format = "txt"
+            if not fname.lower().endswith(".txt"):
+                fname += ".txt"
+
+        try:
+            # Extract data from tableWidget_reports
+            table = dashboard.ui.tableWidget_reports
+            row_count = table.rowCount()
+            col_count = table.columnCount()
+
+            if file_format == "txt":
+                with open(fname, "w", encoding="utf-8") as file:
+                    for row in range(row_count):
+                        row_data = []
+                        for col in range(col_count):
+                            item = table.item(row, col)
+                            row_data.append(item.text() if item else "")
+                        file.write(" | ".join(row_data) + "\n")  # Format for readability
+            else:  # CSV format
+                with open(fname, "w", newline="", encoding="utf-8") as file:
+                    writer = csv.writer(file)
+                    # Write header row (if available)
+                    headers = [table.horizontalHeaderItem(col).text() if table.horizontalHeaderItem(col) else f"Column {col+1}" for col in range(col_count)]
+                    writer.writerow(headers)
+                    # Write table rows
+                    for row in range(row_count):
+                        writer.writerow([table.item(row, col).text() if table.item(row, col) else "" for col in range(col_count)])
+
+            dashboard.logger.info(f"File saved successfully at: {fname}")
+        except Exception as e:
+            dashboard.logger.error(f"Error saving file: {e}")
+    else:
+        dashboard.logger.debug("File save dialog was canceled.")

@@ -611,7 +611,7 @@ def decimal_to_dms(lat, lon):
     return f"{abs(lat_d)}°{lat_m}'{lat_s:.2f}\" {lat_dir}, {abs(lon_d)}°{lon_m}'{lon_s:.2f}\" {lon_dir}"
 
 
-def decimal_to_ddm(lat:float, lon:float) -> tuple[str]:
+def decimal_to_ddm(lat:float, lon:float) -> Tuple[str]:
     """
     Converts latitude and longitude from Decimal Degrees (DD) to Degrees, Decimal Minutes.
 

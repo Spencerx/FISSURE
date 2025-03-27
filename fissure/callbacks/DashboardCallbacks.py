@@ -1650,16 +1650,17 @@ async def exploitReturn(component: object, sensor_node_id: str, protocol:str, mo
 
 
 async def snreport(component: object, sensor_node_id: str, text:str):
-    """Updates the Sensor Nodes Exploit tab with a new alert.
+    """
+    Updates the Sensor Nodes Report tab with a new report.
     """
     # Append the message
     tableWidget_reports: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_reports
     row_position = component.frontend.ui.tableWidget_reports.rowCount()
     component.frontend.ui.tableWidget_reports.insertRow(row_position)
     component.frontend.ui.tableWidget_reports.setItem(row_position, 0, QTableWidgetItem('\n'.join(text)))
-    tableWidget_reports.resizeRowsToContents()
+    component.frontend.ui.tableWidget_reports.resizeRowsToContents()
 
-    # Calculate Alert Total
+    # Calculate Reports Total
     current_text = component.frontend.ui.tabWidget_sensor_nodes.tabBar().tabText(5)
     if "(" in current_text and ")" in current_text:
         base_text, count = current_text.rsplit("(", 1)

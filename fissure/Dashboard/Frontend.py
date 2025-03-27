@@ -3927,7 +3927,9 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_sensor_nodes_listeners_serial_info.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesListenersMeshtasticInfoClicked(dashboard)  # Reuse function
     )
-    
+    dashboard.ui.pushButton_sensor_nodes_reports_save.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesReportsSaveClicked(dashboard)
+    )
 
     # create connections for sensor nodes pluginsList tab
     SensorNodesPluginsTabSlots.connect_plugins_slots(dashboard)

@@ -15,12 +15,14 @@ import csv
 import numpy as np
 import json
 from datetime import datetime, timezone
+from typing import List
+import os
 
 DURATION = -1 # to run until interrupted
 DWELL = 1 # 1 second per channel
 NOTES = 'Scan Wifi channels'
 
-def apply_change(dev:str,commands:list[list[str]]):
+def apply_change(dev:str,commands:List[List[str]]):
     subprocess.run(['sudo','ip','link','set',dev,'down'])
     for command in commands:
         subprocess.run(command)
@@ -59,7 +61,9 @@ def get_channels(dev:str)->dict:
 class OUILookup(object):
     def __init__(self):
         self._table = {}
-        with open('./resources/oui.csv', newline='') as ouifile:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_dir, 'resources', 'oui.csv')
+        with open(file_path, newline='') as ouifile:
             ouireader = csv.reader(ouifile)
             for lines in ouireader:
                 self._table[lines[1]] = lines[2]
@@ -70,7 +74,7 @@ class OUILookup(object):
         entry = self._table.get(found_mac)
         return entry
 
-def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWELL, power_limit:float=-np.inf):
+def scan(dev:str, channels:List[int]=None, duration:int=DURATION, dwell:int=DWELL, power_limit:float=-np.inf):
     """Scan Wifi Channels
 
     Scan wifi channels using an 802.11x adapter capable of monitor mode.
@@ -84,7 +88,7 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
     ----------
     dev : str
         Phy interface name
-    channels : list[int], optional
+    channels : List[int], optional
         Channels to scan, by default None to use all channels available to phy
     duration : int, optional
         Duration of scan where -1 is infinite, by default DURATION
@@ -99,17 +103,18 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
     if channels is None:
         # get available channels
         channels = list(get_channels(dev).keys())
-
+   
     # set monitor mode
     set_monitor_mode(dev)
-
+    
     # create known wireless nodes address list
     nodes = {}
 
     # create oui lookup table
     oui = OUILookup()
-
+    
     tend = np.inf if duration == -1 else time.time() + duration
+        
     while True:
         newta = False
         for channel in channels:
@@ -121,7 +126,12 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                 return nodes
 
             # capture
-            output = subprocess.run(['sudo', 'tshark', '-i', dev, '-E', 'separator=,', '-a', 'duration:' + str(dwell), '-Tfields', '-e', 'frame.time_epoch', '-e', 'radiotap.channel.freq', '-e', 'wlan.ta', '-e', 'wlan.ra', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.ssid'], capture_output=True)
+            output = subprocess.run([
+                'sudo', 'tshark', '-i', dev, '-E', 'separator=,', '-E', 'occurrence=f',
+                '-a', 'duration:' + str(dwell), '-Tfields',
+                '-e', 'frame.time_epoch', '-e', 'radiotap.channel.freq', '-e', 'wlan.ta',
+                '-e', 'wlan.ra', '-e', 'radiotap.dbm_antsignal', '-e', 'wlan.ssid'
+            ], capture_output=True)
             output = output.stdout.decode('utf-8')
             reader = csv.reader(output.split('\n'),escapechar="\\")
             for row in reader:
@@ -156,7 +166,7 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                             _ = currobv.pop('timestamp')
                             sys.stdout.write(json.dumps({
                                 'msg': 'alert',
-                                'text': f'Wifi mac={mac} frequency_mhz={currobv.get('frequency_mhz')} snr_db={currobv.get('snr_db')}'
+                                'text': f"Wifi mac={mac} frequency_mhz={currobv.get('frequency_mhz')} snr_db={currobv.get('snr_db')}"
                             }) + '\n')
                             sys.stdout.write(json.dumps({
                                 'msg': 'tak',
@@ -168,13 +178,13 @@ def scan(dev:str, channels:list[int]=None, duration:int=DURATION, dwell:int=DWEL
                                 'remarks': '"' + json.dumps(currobv, separators=(',', ':')) + '"'
                             }) + '\n')
                             sys.stdout.write(json.dumps({
-                                'msg': 'report',
+                                'msg': 'snreport',
                                 'text': [ # https://www.globalsecurity.org/intell/library/policy/army/fm/34-35/appc.htm#figc_5
                                     'UNCLAS',
-                                    f'MSGID/TACREP/FISSURE REPORT//', # TACREP=Tactical Report
-                                    f'GNDOP/{datetime.now(timezone.utc).strftime('%H%M%SZ')}/1/US/ENEMY COMBATANT/ROUTER:{mac}//', # GNDOP=Ground Operations
-                                    'LOCATION/TAMPA,FL/%(latitude_ddm)s%(longitude_ddm)s//', # City as city,state or city,country and Location in degree and decimal minutes format
-                                    f'COMEW/{currobv.get('frequency_mhz'):0.3f}MHZ/20MHZ//', # COMEW=Communications Electronic Warfare
+                                    f"MSGID/TACREP/FISSURE REPORT//", # TACREP=Tactical Report
+                                    f"GNDOP/{datetime.now(timezone.utc).strftime('%H%M%SZ')}/1/US/ENEMY COMBATANT/ROUTER:{mac}//", # GNDOP=Ground Operations
+                                    "LOCATION/TAMPA,FL/%(latitude_ddm)s%(longitude_ddm)s//", # City as city,state or city,country and Location in degree and decimal minutes format
+                                    f"COMEW/{currobv.get('frequency_mhz'):0.3f}MHZ/20MHZ//", # COMEW=Communications Electronic Warfare
                                 ]
                             }) + '\n')
                             sys.stdout.flush()
