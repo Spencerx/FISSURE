@@ -40,6 +40,7 @@ class FissureMeshtasticNode:
 
         self.process_task = self.loop.create_task(self.process_messages())
 
+
     async def _enqueue_message(self, message: Dict):
         """Places received messages into the async queue."""
         try:
@@ -49,18 +50,6 @@ class FissureMeshtasticNode:
         except Exception as e:
             self.logger.warning(f"⚠️ Failed to enqueue message: {e}")
 
-    # async def recv_msg(self) -> Optional[Dict]:
-    #     try:
-    #         if self.message_queue.qsize() > 0:
-    #             msgrcvd = await self.message_queue.get()
-    #             self.logger.info(f"Message received: {msgrcvd}")
-    #             return msgrcvd
-    #         else:
-    #             # self.logger.info("Message queue is empty, no message to receive.")
-    #             return None
-    #     except Exception as e:
-    #         self.logger.warning(f"⚠️ Error while receiving message: {e}")
-    #         return None
 
     async def process_messages(self):
         """Continuously processes messages from the queue using `run_callback`."""
@@ -85,9 +74,11 @@ class FissureMeshtasticNode:
             
             # await asyncio.sleep(0.2)
 
+
     def generate_short_uuid(self, length: int = 4) -> str:
         """Generate a short, random hexadecimal UUID."""
         return ''.join(random.choices(string.hexdigits.lower(), k=length))
+
 
     def cleanup_expired_message_ids(self):
         """Remove expired message IDs from the cache."""
@@ -95,12 +86,14 @@ class FissureMeshtasticNode:
         while self.recent_message_ids and (current_time - self.recent_message_ids[0][1]) > ID_EXPIRATION_SECONDS:
             self.recent_message_ids.popleft()
 
+
     def add_message_id(self, msg_id: str):
         """Add a message ID to the cache and clean up expired IDs."""
         self.cleanup_expired_message_ids()
         if msg_id not in [stored_id for stored_id, _ in self.recent_message_ids]:
             self.recent_message_ids.append((msg_id, time.time()))
         # self.logger.debug(f"Message ID Cache after adding {msg_id}: {self.recent_message_ids}")
+
 
     async def send_msg(self, msg_type: str, msg: Dict):
         msg_id = self.generate_short_uuid(4)  # Generate a 4-character short UUID
@@ -132,9 +125,13 @@ class FissureMeshtasticNode:
         message = f"{source},{destination},{msg_code},{msg_id},{parameters_str}"
         
         self.add_message_id(msg_id)  # Store the ID to avoid processing if it bounces back
-        await asyncio.get_running_loop().run_in_executor(None, self.interface.sendText, message)
+        await asyncio.get_running_loop().run_in_executor(None, self.interface.sendText, message)  # hopLimit set in Meshtastic app, testing with 0
 
         self.logger.info(f"Raw message sent: {message}")
+
+        await asyncio.sleep(0.5)
+        
+
 
     def _handle_message(self, packet, interface=None):
         """Handles incoming messages and decodes binary parameters if needed."""
@@ -190,6 +187,7 @@ class FissureMeshtasticNode:
 
             except Exception as e:
                 self.logger.warning(f"⚠️ Failed to handle message: {e}")
+
 
     async def run_callback(self, context: object, parsed_command: Dict) -> Any:
         """

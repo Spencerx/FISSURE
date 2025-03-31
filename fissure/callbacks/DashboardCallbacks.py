@@ -1622,6 +1622,7 @@ async def exploitReturn(component: object, sensor_node_id: str, protocol:str, mo
     component.frontend.ui.tableWidget_exploits.setItem(row_position, 3, QTableWidgetItem(type))
     component.frontend.ui.tableWidget_exploits.setItem(row_position, 4, QTableWidgetItem(attack))
     component.frontend.ui.tableWidget_exploits.setItem(row_position, 5, QTableWidgetItem(str(variables)))
+    component.frontend.ui.tableWidget_exploits.resizeColumnsToContents()
 
     # Calculate Alert Total
     current_text = component.frontend.ui.tabWidget_sensor_nodes.tabBar().tabText(4)

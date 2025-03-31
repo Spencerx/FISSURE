@@ -67,7 +67,7 @@ async def recallHardwareMeshtasticReturnLT(component: object, tsi={}):
     """
     Populates the HardwareSelectDialog with the sensor node settings on connect.
     """
-    print("HARDWARE RETURN @#$#@$@#$#@$#@")
+    print("HARDWARE RETURN @#$#@$@#$#@$#@")  # To Do
     print(tsi)
     # Pass Sensor Node Settings to HardwareSelectDialog
     # component.frontend.popups["HardwareSelectDialog"].importResults(settings_dict=settings_dict)
@@ -220,12 +220,12 @@ async def exploitReturnLT(component: object, sensor_node_id: str, protocol:str, 
     # Append the message
     row_position = component.frontend.ui.tableWidget_exploits.rowCount()
     component.frontend.ui.tableWidget_exploits.insertRow(row_position)
-    component.frontend.ui.tableWidget_exploits.setItem(row_position, 0, QTableWidgetItem(protocol))
-    component.frontend.ui.tableWidget_exploits.setItem(row_position, 1, QTableWidgetItem(modulation))
-    component.frontend.ui.tableWidget_exploits.setItem(row_position, 2, QTableWidgetItem(hardware))
-    component.frontend.ui.tableWidget_exploits.setItem(row_position, 3, QTableWidgetItem(type))
-    component.frontend.ui.tableWidget_exploits.setItem(row_position, 4, QTableWidgetItem(attack))
-    component.frontend.ui.tableWidget_exploits.setItem(row_position, 5, QTableWidgetItem(str(variables)))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 0, QtWidgets.QTableWidgetItem(protocol))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 1, QtWidgets.QTableWidgetItem(modulation))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 2, QtWidgets.QTableWidgetItem(hardware))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 3, QtWidgets.QTableWidgetItem(type))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 4, QtWidgets.QTableWidgetItem(attack))
+    component.frontend.ui.tableWidget_exploits.setItem(row_position, 5, QtWidgets.QTableWidgetItem(str(variables)))
 
     # Calculate Alert Total
     current_text = component.frontend.ui.tabWidget_sensor_nodes.tabBar().tabText(4)

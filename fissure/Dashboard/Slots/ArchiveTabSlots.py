@@ -662,7 +662,7 @@ async def _slotArchiveDownloadClicked(dashboard: QtCore.QObject):
     download_path = f"{get_folder}/"
 
     # Wget command with timeout (10s) and retries (2)
-    command = ["wget", "-P", download_path, "--timeout=5", "--tries=1", url]
+    command = ["wget", "-P", download_path, "--timeout=5", "--tries=1", "--no-check-certificate", url]
 
     try:
         process = await asyncio.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -722,7 +722,7 @@ async def _slotArchiveDownloadCollectionClicked(dashboard: QtCore.QObject):
 
     # Function to execute `wget` asynchronously with a return status
     async def download_file(url, output_folder):
-        command = ["wget", "--timeout=5", "--tries=1", "-P", output_folder, url]
+        command = ["wget", "--timeout=5", "--tries=1", "--no-check-certificate", "-P", output_folder, url]
         process = await asyncio.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
         stdout, stderr = await process.communicate()
@@ -739,7 +739,7 @@ async def _slotArchiveDownloadCollectionClicked(dashboard: QtCore.QObject):
 
     if get_filepath.endswith('.tar'):
         # Download and extract .tar file in one step asynchronously
-        command = f"wget {file_url} -O - | tar -x -C {get_folder}"
+        command = f"wget --no-check-certificate {file_url} -O - | tar -x -C {get_folder}"
         process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         
         stdout, stderr = await process.communicate()

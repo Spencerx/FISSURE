@@ -25,7 +25,7 @@ from fissure.Listeners import (
     TCPUDPListener,
     MQTTListener
 )
-from fissure.callbacks import tak_send
+
 
 """ HiprFisr Specific Callback Functions """
 
@@ -83,7 +83,6 @@ async def recallInfoMeshtasticReturnLT(component: object, tab_index="", nickname
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-
 async def recallHardwareMeshtasticReturnLT(component: object, tsi={}):
     """
     Returns the recalled sensor node settings to the Dashboard.
@@ -92,13 +91,13 @@ async def recallHardwareMeshtasticReturnLT(component: object, tsi={}):
     print(tsi)
     
     # Send the Message
-    PARAMETERS = {"tsi": tsi}
+    PARAMETERS = {"tsi": tsi}  # To Do
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "recallHardwareMeshtasticReturnLT",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  # To Do
 
 
 async def recallInfoMeshtasticLT(component: object, tab_index=""):
@@ -150,8 +149,6 @@ async def recallStatusMeshtasticReturnLT(component: object, tab_index="", status
     """
     Returns the recalled sensor node settings to the Dashboard.
     """
-    print("MADE IT TO HIPRFISR CALLBACKS")
-    
     # Send the Message
     PARAMETERS = {
         "tab_index": tab_index,
@@ -295,7 +292,6 @@ async def alertReturnLT(component: object, sensor_node_id=0, alert_text=""):
     """
     Forwards alertReturn Message to the Dashboard.
     """
-    print(alert_text)
     # Forward to Dashboard
     PARAMETERS = {
         "sensor_node_id": sensor_node_id,
@@ -322,7 +318,7 @@ async def takPlotLT(component: object, msg=[]):
 
     time = time.replace(" ", "T")
     
-    await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
+    await component.send_cot(uid, lat, lon, alt, time, remarks)
     
 
 async def exploitLT(component: object, msg=[]):
@@ -359,7 +355,9 @@ async def takPlotGpsUpdateLT(component: object, msg=[]):
 
     time = time.replace(" ", "T")
 
-    await tak_send.send_cot_gps_update(uid, lat, lon, alt, time, remarks)
+    max_history = 5
+
+    await component.sensor_node_tracker.send_cot_gps_update(uid, lat, lon, alt, time, remarks, max_history)
 
 
 async def gpsBeaconEnableMeshtasticLT(component: object, sensor_node_id: str):

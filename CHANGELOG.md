@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-3-31
+
+Tracking sensor node position in WebTAK.
+
+### Added
+
+- Sensor node tracker class in HIPRFISR
+
+### Changed
+
+- Moving tak_send.py code from callbacks to HiprFisr.py
+- Removed tak.exp
+
+### Fixed
+
+- Resize columns to contents in exploit table
+- Adding sleep after transmitting a message in Meshtastic send_msg() to avoid crashing serial connection
+- Fixing QTableWidgetItems in exploitReturnLT()
+- Adding --no-check-certificate to remove error when downloading IQ files/collections from online archive
+
 ## 2025-3-27
 
 Merging pull request #82: Flat file reporting

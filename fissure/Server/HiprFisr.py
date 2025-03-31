@@ -15,6 +15,8 @@ import zmq
 import subprocess
 import os
 import atexit
+import ssl
+from datetime import datetime, timezone, timedelta
 
 
 HEARTBEAT_LOOP_DELAY = 0.1  # Seconds
@@ -126,6 +128,9 @@ class HiprFisr:
 
         # Get IP Address
         self.ip_address = fissure.utils.get_ip_address()
+
+        # Sensor Node GPS Tracker for TAK
+        self.sensor_node_tracker = SensorNodeTracker()
 
         # Store Collected Wideband and Narrowband Signals in Lists
         self.wideband_list = []
@@ -845,6 +850,181 @@ class HiprFisr:
         Closes SensorNode object on exit.
         """
         asyncio.run(sensor.close())
+
+
+    async def send_cot(self, uid, lat, lon, alt, time, remarks):
+        """
+        Sends CoT message to TAK server. Used for alerts but not for the sensor node GPS beacon.
+        """
+
+        #print("IN TAK SEND FUNCTION")
+        
+        # Get TAK server settings
+        settings: dict = fissure.utils.get_fissure_config()
+        s_addr = settings["tak"]["ip_addr"]
+        s_port = settings["tak"]["port"]
+        tak_cert = settings["tak"]["cert"]
+        tak_key = settings["tak"]["key"]
+
+        cot_msg = f"""<?xml version="1.0" encoding="UTF-8"?>
+        <event version="2.0" type="a-f-G-U-H" uid="{uid}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
+            <detail>
+                <contact callsign="{uid}"/>
+                <remarks>"{remarks}"</remarks>
+            </detail>
+            <point lat="{lat}" lon="{lon}" ce="0" le="0" hae="0"/>
+        </event>"""
+
+        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        context.load_cert_chain(certfile=tak_cert, keyfile=tak_key)
+
+        # Base directory where TAK server versions are installed
+        tak_base_path = os.path.expanduser("~/Installed_by_FISSURE")
+
+        # List directories, ignoring .zip files
+        try:
+            tak_dirs = [
+                d for d in os.listdir(tak_base_path)
+                if d.startswith("takserver-docker-") and os.path.isdir(os.path.join(tak_base_path, d))
+            ]
+            tak_dirs.sort(reverse=True)  # Sort to get the latest version first
+            takserver_path = os.path.join(tak_base_path, tak_dirs[0]) if tak_dirs else None
+        except FileNotFoundError:
+            takserver_path = None  # Handle case where directory does not exist
+
+        # Construct the full path to root-ca.pem
+        if takserver_path:
+            root_ca_path = os.path.join(takserver_path, "tak/certs/files/root-ca.pem")
+        else:
+            root_ca_path = None  # No TAK server found
+
+        #print("Using TAK Root CA:", root_ca_path)
+        
+        context.load_verify_locations(root_ca_path)
+        context.check_hostname = False
+        
+        try:
+            reader, writer = await asyncio.open_connection(s_addr, s_port, ssl=context)
+            writer.write(cot_msg.encode('utf-8'))
+            await writer.drain()
+            print("Message sent to TAK server.")
+            await asyncio.sleep(1)  # Add a small delay before closing, prevents [SSL: APPLICATION_DATA_AFTER_CLOSE_NOTIFY] error
+            writer.close()
+            await writer.wait_closed()
+        except Exception as e:
+            print(f"Error sending to TAK: {e}")
+
+
+class SensorNodeTracker:
+    def __init__(self):
+        self.past_positions = {}
+
+
+    async def send_cot_gps_update(self, uid, lat, lon, alt, time, remarks, max_history=10):
+        """
+        Sends GPS update CoT messages to TAK server for current position and past positions.
+        """
+        # Ensure history size limit
+        self.past_positions.setdefault(uid, []).append((lat, lon, alt, time))  # Creates dict key and empty list if it does not exist
+        if len(self.past_positions[uid]) > max_history:
+            self.past_positions[uid].pop(0)
+
+        # Generate stale time (5 minutes ahead)
+        time_format = "%Y-%m-%dT%H:%M:%SZ"
+        stale_time = (datetime.now(timezone.utc) + timedelta(minutes=60)).strftime(time_format)  # stale_time="2029-08-09T18:18:06.521956Z"
+
+        # Get TAK server settings
+        settings: dict = fissure.utils.get_fissure_config()
+        s_addr = settings["tak"]["ip_addr"]
+        s_port = settings["tak"]["port"]
+        tak_cert = settings["tak"]["cert"]
+        tak_key = settings["tak"]["key"]
+
+        # # Live Position CoT
+        # cot_msg = f"""<?xml version="1.0" encoding="UTF-8"?>
+        # <event version="2.0" type="b-m-p-w" uid="{uid}{time}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
+        #     <detail>
+        #         <contact callsign="{uid}"/>
+        #         <remarks>"{remarks}"</remarks>
+        #     </detail>
+        #     <point lat="{lat}" lon="{lon}" ce="0" le="0" hae="0"/>
+        # </event>"""
+
+        # List to hold CoT messages
+        cot_messages = []
+
+        # **Loop through past positions and add them to CoT messages**
+        for i, past_entry in enumerate(reversed(self.past_positions[uid])):  # Reverse order for logical labeling
+            if len(past_entry) == 4:
+                p_lat, p_lon, p_alt, p_time = past_entry
+            elif len(past_entry) == 3:
+                p_lat, p_lon, p_time = past_entry
+                p_alt = 0  # Default altitude if missing
+            else:
+                self.logger.error(f"Skipping malformed entry: {past_entry}")
+                continue  # Skip invalid entries
+
+            # First entry gets the base UID, others are numbered
+            position_number = "" if i == 0 else f"-{i}"
+
+            past_cot = f"""<?xml version="1.0" encoding="UTF-8"?>
+            <event version="2.0" type="b-m-p-w" uid="{uid}{position_number}" how="m-g"
+                time="{p_time}" start="{p_time}" stale="{stale_time}">
+                <detail>
+                    <contact callsign="{uid} {position_number}"/>
+                    <remarks>"{remarks}"</remarks>
+                </detail>
+                <point lat="{p_lat}" lon="{p_lon}" ce="5" le="5" hae="{p_alt}"/>
+            </event>"""
+            
+            cot_messages.append(past_cot)
+
+        # Use Single Persistent Connection
+        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        context.load_cert_chain(certfile=tak_cert, keyfile=tak_key)
+
+        # Base directory where TAK server versions are installed
+        tak_base_path = os.path.expanduser("~/Installed_by_FISSURE")
+
+        # List directories, ignoring .zip files
+        try:
+            tak_dirs = [
+                d for d in os.listdir(tak_base_path)
+                if d.startswith("takserver-docker-") and os.path.isdir(os.path.join(tak_base_path, d))
+            ]
+            tak_dirs.sort(reverse=True)  # Sort to get the latest version first
+            takserver_path = os.path.join(tak_base_path, tak_dirs[0]) if tak_dirs else None
+        except FileNotFoundError:
+            takserver_path = None  # Handle case where directory does not exist
+
+        # Construct the full path to root-ca.pem
+        if takserver_path:
+            root_ca_path = os.path.join(takserver_path, "tak/certs/files/root-ca.pem")
+        else:
+            root_ca_path = None  # No TAK server found
+
+        #print("Using TAK Root CA:", root_ca_path)
+
+        context.load_verify_locations(root_ca_path)
+        context.check_hostname = False
+
+        try:
+            reader, writer = await asyncio.open_connection(s_addr, s_port, ssl=context)
+
+            for msg in cot_messages:
+                writer.write(msg.encode('utf-8'))
+                await writer.drain()  # Ensure the message is fully sent
+                await asyncio.sleep(0.1)  # Prevent message flooding
+                # print(msg)
+
+            self.logger.info(f"Sent {len(cot_messages)} CoT messages (latest position + track history)")
+            await asyncio.sleep(1.0)  # Add a small delay before closing, prevents [SSL: APPLICATION_DATA_AFTER_CLOSE_NOTIFY] error
+            writer.close()
+            await writer.wait_closed()
+
+        except Exception as e:
+            print(f"Error sending to TAK: {e}")
+
 
 
 if __name__ == "__main__":

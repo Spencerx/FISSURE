@@ -197,6 +197,7 @@ def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any
                     break
     proc.wait()  # Wait for process to end
 
+
 class alertSender(object):
     def __init__(self, cmd: str, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger, network_type: str):
         """Run Command and Capture stdout for Alerts

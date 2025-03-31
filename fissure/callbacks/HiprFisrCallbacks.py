@@ -16,7 +16,6 @@ import yaml
 import asyncio
 import socket
 import shutil
-from fissure.callbacks import tak_send
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -26,7 +25,6 @@ from fissure.Listeners import (
     TCPUDPListener,
     MQTTListener
 )
-from fissure.callbacks import tak_send
 
 """ HiprFisr Specific Callback Functions """
 
@@ -2252,7 +2250,7 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
 
     time = time.replace(" ", "T")'''
     
-    await tak_send.send_cot(uid, lat, lon, alt, time, remarks)
+    await component.send_cot(uid, lat, lon, alt, time, remarks)
 
 
 async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
@@ -2260,7 +2258,8 @@ async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, 
     Forwards the sensor node GPS coordinates message to TAK.
     """
     time = time.replace(" ", "T")
-    await tak_send.send_cot_gps_update(uid, lat, lon, alt, time, remarks)
+    max_history = 5
+    await component.sensor_node_tracker.send_cot_gps_update(uid, lat, lon, alt, time, remarks, max_history)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
