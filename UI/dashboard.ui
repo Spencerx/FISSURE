@@ -37618,6 +37618,28 @@ p, li { white-space: pre-wrap; }
         <string>Copy Row to Plugin Editor</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButton_library_browse_refresh">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>465</x>
+         <y>15</y>
+         <width>100</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+         <strikeout>false</strikeout>
+        </font>
+       </property>
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">

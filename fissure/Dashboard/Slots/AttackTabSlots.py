@@ -1822,7 +1822,11 @@ def _slotAttackModulationChanged(dashboard: QtCore.QObject):
                 iterator+=1
 
             # Enable the Selections
-            get_attack_rows = fissure.utils.library.getAttacks(dashboard.backend.library, current_protocol, fissure.utils.get_library_version())
+            get_attack_rows = fissure.utils.library.getAttacks(
+                dashboard.backend.library, 
+                current_protocol, 
+                fissure.utils.get_library_version()
+            )
             get_hardware = str(dashboard.ui.comboBox_attack_hardware.currentText())
             if ' - ' in get_hardware:
                 get_hardware = str(dashboard.ui.comboBox_attack_hardware.currentText()).split(' - ')[0]
@@ -1830,18 +1834,42 @@ def _slotAttackModulationChanged(dashboard: QtCore.QObject):
             for n in range(0, len(get_attack_rows)):
                 if current_modulation == get_attack_rows[n][3]:
                     if get_hardware == get_attack_rows[n][4]:
-                        tree_item_string = get_attack_rows[n][1] + " - " + get_attack_rows[n][2]  # protocol - attack_name
-                        dashboard.ui.treeWidget_attack_attacks.findItems(tree_item_string, QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setDisabled(False)
-                        dashboard.ui.treeWidget_attack_attacks.findItems(tree_item_string, QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setHidden(False)
-                        enableAttackTreeParents(dashboard, tree_item_string)
+                        tree_item_string = get_attack_rows[n][1] + " - " + get_attack_rows[n][2]
+                        dashboard.logger.debug(f"Looking for tree item string: {tree_item_string}")
+                        items = dashboard.ui.treeWidget_attack_attacks.findItems(
+                            tree_item_string,
+                            QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive,
+                            0
+                        )
+                        if items:
+                            items[0].setDisabled(False)
+                            items[0].setHidden(False)
+                            enableAttackTreeParents(dashboard, tree_item_string)
+                        else:
+                            dashboard.logger.warning(f"Could not find tree item for: {tree_item_string}")
+                        # tree_item_string = get_attack_rows[n][1] + " - " + get_attack_rows[n][2]  # protocol - attack_name
+                        # dashboard.ui.treeWidget_attack_attacks.findItems(tree_item_string, QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setDisabled(False)
+                        # dashboard.ui.treeWidget_attack_attacks.findItems(tree_item_string, QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setHidden(False)
+                        # enableAttackTreeParents(dashboard, tree_item_string)
 
             # Always Enabled
             for n in ['Single-Stage', 'Multi-Stage', 'New Multi-Stage', 'Fuzzing', 'Variables']:
                 try:
-                    dashboard.ui.treeWidget_attack_attacks.findItems(n,QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setDisabled(False)
-                    dashboard.ui.treeWidget_attack_attacks.findItems(n,QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setHidden(False)
-                except:
-                    pass
+                    items = dashboard.ui.treeWidget_attack_attacks.findItems(
+                        n,
+                        QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive,
+                        0
+                    )
+                    if items:
+                        items[0].setDisabled(False)
+                        items[0].setHidden(False)
+                except Exception as e:
+                    dashboard.logger.warning(f"Failed to unhide/enable category '{n}': {e}")
+                # try:
+                #     dashboard.ui.treeWidget_attack_attacks.findItems(n,QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setDisabled(False)
+                #     dashboard.ui.treeWidget_attack_attacks.findItems(n,QtCore.Qt.MatchExactly|QtCore.Qt.MatchRecursive,0)[0].setHidden(False)
+                # except:
+                #     pass
 
             # Expand the Tree Widget
             dashboard.ui.treeWidget_attack_attacks.expandAll()
@@ -1849,8 +1877,9 @@ def _slotAttackModulationChanged(dashboard: QtCore.QObject):
             # Select the Top Item
             dashboard.ui.treeWidget_attack_attacks.setCurrentItem(dashboard.ui.treeWidget_attack_attacks.topLevelItem(0))
 
-    except:
+    except Exception as e:
         # No Attack Listed in Library
+        dashboard.logger.error(f"Exception: {e}")
         dashboard.logger.error("Error parsing attacks in library. Some attacks may not be listed until fixed.")
 
 

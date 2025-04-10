@@ -207,8 +207,8 @@ class DashboardBackend:
                 # Retrieve Initial Database Cache from HIPRFISR
                 if self.initial_database_retrieval == True:
                     # Update Plugin Lists Retrieved from HIPRFISR Computer
-                    await self.requestPluginNamesHiprfisr()
-                    await self.checkPluginStatus(-1)
+                    #await self.requestPluginNamesHiprfisr()  # Future
+                    #await self.checkPluginStatus(-1)  # Future
 
                     # Retrieve Initial Database Cache from HIPRFISR if Plugins Did Not Already
                     if self.library == None:

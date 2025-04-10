@@ -1290,6 +1290,9 @@ def _slotLibraryPluginExportZipClicked(dashboard: QtCore.QObject):
     if not save_path:
         QtWidgets.QMessageBox.warning(None, "Operation Canceled", "No save location selected.")
         return
+    
+    # Derive the internal folder name from the saved filename
+    zip_root_name = os.path.splitext(os.path.basename(save_path))[0]
 
     # Ensure the save path ends with .zip
     if not save_path.lower().endswith(".zip"):
@@ -1315,7 +1318,8 @@ def _slotLibraryPluginExportZipClicked(dashboard: QtCore.QObject):
             for root, _, files in os.walk(plugin_folder):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    arcname = os.path.relpath(file_path, plugins_root)
+                    rel_path = os.path.relpath(file_path, plugin_folder)
+                    arcname = os.path.join(zip_root_name, rel_path)
                     zipf.write(file_path, arcname)
 
         QtWidgets.QMessageBox.information(None, "Success", f"Plugin '{selected_plugin}' successfully zipped to {save_path}")
@@ -1840,4 +1844,13 @@ def _slotLibraryPluginSupportResetAllClicked(dashboard: QtCore.QObject):
                     else:
                         # Remove the Row
                         table.removeRow(row)
-        
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotLibraryBrowseRefreshClicked(dashboard: QtCore.QObject):
+    """
+    Refreshes the Dashboard database cache.
+    """
+    # Send the Message
+    await dashboard.backend.retrieveDatabaseCache(refresh_frontend_widgets=True)
+    

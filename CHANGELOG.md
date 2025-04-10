@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-4-10
+
+Fixes for plugins.
+
+### Added
+
+- Refresh button in Library > Browse tab for updating Dashboard database cache and widgets
+
+### Changed
+
+- Merging pull request #83: Update docker-compose.yml to fix CVE-2025-2945
+
+### Fixed
+
+- Apply changes, delete plugin in Library > Plugin Editor tab refreshes database cache and widgets
+- Disabled functions checking plugin names at the sensor node that were unintentionally writing to the database
+- Plugin export saves the inner folder with the new name
+
 ## 2025-3-31
 
 Tracking sensor node position in WebTAK.

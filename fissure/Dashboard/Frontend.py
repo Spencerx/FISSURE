@@ -1305,7 +1305,9 @@ class Dashboard(QtWidgets.QMainWindow):
         
         # Do not retrieve plugins for Meshtastic
         if self.backend.settings[get_sensor_node[node_number]]["network_type"] == "IP":
-            SensorNodesPluginsTabSlots._slotSensorNodesPluginsPluginsListRefresh(self)
+            pass
+            # LibraryTabSlots._slotLibraryPluginPluginRefresh(self)  # async, make user press refresh for now
+            # SensorNodesPluginsTabSlots._slotSensorNodesPluginsPluginsListRefresh(self)  # Future
 
 
     def configureHighThroughputWidgets(self):
@@ -4066,8 +4068,11 @@ def connect_library_slots(dashboard: Dashboard):
     )
     dashboard.ui.pushButton_library_plugin_support_reset_all.clicked.connect(
         lambda: LibraryTabSlots._slotLibraryPluginSupportResetAllClicked(dashboard)
-    )    
-
+    )
+    dashboard.ui.pushButton_library_browse_refresh.clicked.connect(
+        lambda: LibraryTabSlots._slotLibraryBrowseRefreshClicked(dashboard)
+    )
+    
     # Radio Button
     dashboard.ui.radioButton_library_search_binary.clicked.connect(
         lambda: LibraryTabSlots._slotLibrarySearchBinaryClicked(dashboard)

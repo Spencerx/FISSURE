@@ -73,7 +73,6 @@ def sensor_node_rightClick(dashboard: QtCore.QObject, node_idx: int):
             dashboard.configureLowThroughputWidgets()
 
 
-
 @QtCore.pyqtSlot(QtCore.QObject)
 def start(dashboard: QtCore.QObject):
     """ 

@@ -2941,6 +2941,9 @@ async def pluginDelete(component: object, plugin_name: str, delete_from_library:
     # Update the Combobox of Plugins
     await requestPluginNamesHiprfisr(component)
 
+    # Send Message to Dashboard to Update Library
+    await retrieveDatabaseCache(component, True)
+
 
 async def pluginApplyChanges(component: object, table_data_json: dict, supporting_files_data_json: dict):
     """Handle Request for Plugin Names
@@ -2955,6 +2958,9 @@ async def pluginApplyChanges(component: object, table_data_json: dict, supportin
         Supporting Files data from Plugin Editor tab
     """
     component.plugin_editor.applyChanges(table_data_json, supporting_files_data_json, component.os_info)
+
+    # Send Message to Dashboard to Update Library
+    await retrieveDatabaseCache(component, True)
     
 
 async def pluginAddProtocolHiprfisr(component: object, protocol_name: str):
