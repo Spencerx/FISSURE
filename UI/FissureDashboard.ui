@@ -482,6 +482,7 @@
      <addaction name="actionGHex"/>
      <addaction name="actionBinwalk"/>
      <addaction name="actionGraphing_Calculator"/>
+     <addaction name="actionJohn_the_Ripper"/>
     </widget>
     <widget class="QMenu" name="menuBluetooth">
      <property name="title">
@@ -3563,6 +3564,11 @@
   <action name="actionTAK_Stop_Docker_Containers">
    <property name="text">
     <string>Stop Docker Containers</string>
+   </property>
+  </action>
+  <action name="actionJohn_the_Ripper">
+   <property name="text">
+    <string>John the Ripper</string>
    </property>
   </action>
  </widget>

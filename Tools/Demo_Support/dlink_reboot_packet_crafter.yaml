@@ -1,0 +1,42 @@
+fields:
+- data: 340804071E9E
+  field_name: AP MAC
+  type: Hex
+- data: 826F9BA43AC3
+  field_name: STA Source MAC
+  type: Hex
+- data: FFFFFFFFFFFF
+  field_name: STA Destination MAC
+  type: Hex
+- data: '88'
+  field_name: Type and Subtype
+  type: Hex
+- data: '01'
+  field_name: Flags
+  type: Hex
+- data: 2C00
+  field_name: Duration
+  type: Hex
+- data: E0EB
+  field_name: Fragment Sequence
+  type: Hex
+- data: '0000'
+  field_name: QoS Control Sequence
+  type: Hex
+- data: 192.168.21.200
+  field_name: Source IP
+  type: String
+- data: 239.255.255.250
+  field_name: Destination IP
+  type: String
+- data: '12345'
+  field_name: Source Port
+  type: String
+- data: '1900'
+  field_name: Destination Port
+  type: String
+- data: 4d2d534541524348202a20485454502f312e310d0a484f53543a3233392e3235352e3235352e3235303a313930300d0a53543a757569643a607265626f6f74600d0a4d583a320d0a4d414e3a22737364703a646973636f766572220d0a0d0a
+  field_name: Data
+  type: Hex
+packet_type: UDP to AP QoS
+protocol: 802.11x

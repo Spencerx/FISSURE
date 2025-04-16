@@ -5899,7 +5899,7 @@ def _slotMenuTAK_StartDockerContainersClicked(dashboard: QtWidgets.QMainWindow):
         
 
 @QtCore.pyqtSlot()
-def _slotMenuTAK_StopDockerContainersClickedClicked(dashboard: QtWidgets.QMainWindow):
+def _slotMenuTAK_StopDockerContainersClicked(dashboard: QtWidgets.QMainWindow):
     """
     Opens a terminal with the docker stop commands for the two taskerver containers.
     """
@@ -5914,5 +5914,18 @@ def _slotMenuTAK_StopDockerContainersClickedClicked(dashboard: QtWidgets.QMainWi
         proc = subprocess.Popen('lxterminal -e ' + expect_script_filepath + ' "' + docker_stop_command + '"', shell=True)
 
 
-
+@QtCore.pyqtSlot()
+def _slotMenuJohnTheRipperClicked(dashboard: QtWidgets.QMainWindow):
+    """
+    Opens a terminal with an example John the Ripper command for hash dictionary cracking.
+    """
+    # Print Stop Command to Terminal
+    expect_script_filepath = os.path.join(fissure.utils.TOOLS_DIR, "expect_script")
+    john_command = "rm ~/.john/john.pot 2>/dev/null || true; john --format=md5crypt --wordlist=~/Installed_by_FISSURE/wifite2/wordlist-top4800-probable.txt ~/shadow.txt && john --show ~/shadow.txt | cowsay -f milk"
+    if fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "gnome-terminal":
+        proc = subprocess.Popen("gnome-terminal -- " + expect_script_filepath + ' "' + john_command + '"', shell=True)
+    elif fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "qterminal":
+        proc = subprocess.Popen("qterminal -e " + expect_script_filepath + ' "' + john_command + '"', shell=True)
+    elif fissure.utils.get_default_expect_terminal(dashboard.backend.os_info) == "lxterminal":
+        proc = subprocess.Popen('lxterminal -e ' + expect_script_filepath + ' "' + john_command + '"', shell=True)
 

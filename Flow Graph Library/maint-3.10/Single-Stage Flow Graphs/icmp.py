@@ -18,9 +18,10 @@ def getArguments():
     icmp_seq = 0    
     interval = .1
     iface = ''
+    run_with_sudo = "True"
     notes = 'Generates a Scapy ICMP packet and transmits it periodically.'
-    arg_names = ['source_mac','dest_mac','bssid_mac','source_ip','dest_ip','icmp_type','icmp_code','icmp_id','icmp_seq','interval','iface','notes']
-    arg_values = [source_mac, dest_mac, bssid_mac, source_ip, dest_ip, icmp_type, icmp_code, icmp_id, icmp_seq, interval, iface, notes]
+    arg_names = ['source_mac','dest_mac','bssid_mac','source_ip','dest_ip','icmp_type','icmp_code','icmp_id','icmp_seq','interval','iface','run_with_sudo','notes']
+    arg_values = [source_mac, dest_mac, bssid_mac, source_ip, dest_ip, icmp_type, icmp_code, icmp_id, icmp_seq, interval, iface, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

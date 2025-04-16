@@ -10,10 +10,11 @@ def getArguments():
     iface = 'wlan0'	                    # Wireless interface name 
     channel = '1'                       # Wireless channel
     interval = 0.01                     # Scapy interval
+    run_with_sudo = "True"
     notes = 'Generates Scapy beacons with unqiue MAC addresses that increase sequentially.'
 
-    arg_names = ['dst_mac_addr','netSSID','iface','channel','interval','notes']
-    arg_values = [dst_mac_addr, netSSID, iface, channel, interval, notes]
+    arg_names = ['dst_mac_addr','netSSID','iface','channel','interval','run_with_sudo','notes']
+    arg_values = [dst_mac_addr, netSSID, iface, channel, interval, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

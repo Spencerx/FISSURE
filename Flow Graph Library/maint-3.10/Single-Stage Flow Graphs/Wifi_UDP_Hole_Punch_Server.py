@@ -11,10 +11,11 @@ def getArguments():
     server_port = 55555
     #response_string = b"Sneakin"
     magic = "Beacon"
+    run_with_sudo = "True"
     notes = "Responds to UDP messages containing the magic string. Observe the responses in Wireshark to map IP addresses and ports. See wifi_tx UDP Mapper."
     
-    arg_names = ['server_ip','server_port','magic','notes']
-    arg_values = [server_ip,server_port,magic,notes]
+    arg_names = ['server_ip','server_port','magic','run_with_sudo','notes']
+    arg_values = [server_ip, server_port, magic, run_with_sudo, notes]
 
     return (arg_names,arg_values)
     

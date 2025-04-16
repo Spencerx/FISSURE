@@ -13,9 +13,10 @@ def getArguments():
     tcp_dest_port = 80
     iface = ''
     interval = .1
+    run_with_sudo = "True"
     notes = 'Transmits Scapy TCP SYN messages with random source IP addresses to consume resources on the target.'
-    arg_names = ['source_mac','dest_mac','tcp_dest_ip','tcp_dest_port','iface','interval','notes']
-    arg_values = [source_mac, dest_mac, tcp_dest_ip, tcp_dest_port, iface, interval, notes]
+    arg_names = ['source_mac','dest_mac','tcp_dest_ip','tcp_dest_port','iface','interval','run_with_sudo','notes']
+    arg_values = [source_mac, dest_mac, tcp_dest_ip, tcp_dest_port, iface, interval, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

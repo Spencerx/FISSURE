@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-4-16
+
+Demo support files and alert sender fixes.
+
+### Added
+
+- John the Ripper example in Tools>Data
+- Demo support files
+- D-Link DIR-815 Expoit attack
+
+### Changed
+
+- Adjusted TP-Link Exploit attack to have wget command example, better print statements, lander filename variable, faster intervals
+- Renamed _slotMenuTAK_StopDockerContainersClickedClicked
+- Changing all pkill commands to sudo pkill in SensorNode.py to help with scripts requiring sudo
+- Adding run_with_sudo variable to Wi-Fi attack scripts
+
+### Fixed
+
+- Tracking alert_sender objects in SensorNode.py to close properly on attack stop
+- Killing child processes when alert sender is stopped
+
 ## 2025-4-10
 
 Fixes for plugins.

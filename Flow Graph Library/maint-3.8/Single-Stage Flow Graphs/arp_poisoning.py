@@ -20,10 +20,11 @@ def getArguments():
     ignore2 = '-1'
     iface = ''
     single_ip = 'off'
+    run_with_sudo = "True"
     notes = 'Generates Scapy ARP messages that continuously cycle through the last octet of the source IP address.'
                 
-    arg_names = ['hwtype','ptype','hwlen','plen','op','hwsrc','psrc','hwdst','pdst','ignore1','ignore2','iface','single_ip','notes']
-    arg_values = [hwtype, ptype, hwlen, plen, op, hwsrc, psrc, hwdst, pdst, ignore1, ignore2, iface, single_ip, notes]
+    arg_names = ['hwtype','ptype','hwlen','plen','op','hwsrc','psrc','hwdst','pdst','ignore1','ignore2','iface','single_ip','run_with_sudo','notes']
+    arg_values = [hwtype, ptype, hwlen, plen, op, hwsrc, psrc, hwdst, pdst, ignore1, ignore2, iface, single_ip, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

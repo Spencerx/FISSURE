@@ -13,9 +13,10 @@ def getArguments():
     src_ip = "255.255.255.255"
     iface = ''
     interval = .1
+    run_with_sudo = "True"
     notes = 'Transmits Scapy ICMP request messages to all network hosts to make their responses overwhelm the target server.'
-    arg_names = ['source_mac','dest_mac','target_ip','src_ip','iface','interval','notes']
-    arg_values = [source_mac, dest_mac, target_ip, src_ip, iface, interval, notes]
+    arg_names = ['source_mac','dest_mac','target_ip','src_ip','iface','interval','run_with_sudo','notes']
+    arg_values = [source_mac, dest_mac, target_ip, src_ip, iface, interval, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

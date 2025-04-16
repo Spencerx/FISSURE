@@ -10,9 +10,10 @@ def getArguments():
     iface = 'wlan0'	                    # Wireless interface name 
     channel = '1'                       # Wireless channel
     interval = 0.01                     # Scapy interval
+    run_with_sudo = "True"
     notes = 'Generates Scapy deauthentication frames with reason=7.'
-    arg_names = ['client','bssid','iface','channel','interval','notes']
-    arg_values = [client, bssid, iface, channel, interval, notes]
+    arg_names = ['client','bssid','iface','channel','interval','run_with_sudo','notes']
+    arg_values = [client, bssid, iface, channel, interval, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

@@ -14,9 +14,10 @@ def getArguments():
     tcp_dest_port = 80
     iface = ''
     interval = .1
+    run_with_sudo = "True"
     notes = 'Transmits a Scapy TCP SYN spoofed packet where the source and destination IPs and ports are identical. This can cause the target to repeatedly send replies to itself and possibly lead to a crash. (Local Area Network Denial)'
-    arg_names = ['source_mac','dest_mac','tcp_source_dest_ip','tcp_source_port','tcp_dest_port','iface','interval','notes']
-    arg_values = [source_mac, dest_mac, tcp_source_dest_ip, tcp_source_port, tcp_dest_port, iface, interval, notes]
+    arg_names = ['source_mac','dest_mac','tcp_source_dest_ip','tcp_source_port','tcp_dest_port','iface','interval','run_with_sudo','notes']
+    arg_values = [source_mac, dest_mac, tcp_source_dest_ip, tcp_source_port, tcp_dest_port, iface, interval, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

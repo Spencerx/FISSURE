@@ -7,10 +7,11 @@ import time
 def getArguments():
     iface = 'wlan0'	                    # Wireless interface name 
     filepath = ''                       # PCAP Location
+    run_with_sudo = "True"
     notes = 'Replays the UDP from a .pcap file with udpreplay while connected to a network.'
 
-    arg_names = ['iface','filepath','notes']
-    arg_values = [iface,filepath,notes]
+    arg_names = ['iface','filepath','run_with_sudo','notes']
+    arg_values = [iface, filepath, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

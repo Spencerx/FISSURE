@@ -2113,7 +2113,8 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionWindy.triggered.connect(MenuBarSlots._slotMenuWindyClicked)
     dashboard.window.actionWebTAK.triggered.connect(MenuBarSlots._slotMenuWebTAK_Clicked)
     dashboard.window.actionTAK_Start_Docker_Containers.triggered.connect(lambda: MenuBarSlots._slotMenuTAK_StartDockerContainersClicked(dashboard))
-    dashboard.window.actionTAK_Stop_Docker_Containers.triggered.connect(lambda: MenuBarSlots._slotMenuTAK_StopDockerContainersClickedClicked(dashboard))
+    dashboard.window.actionTAK_Stop_Docker_Containers.triggered.connect(lambda: MenuBarSlots._slotMenuTAK_StopDockerContainersClicked(dashboard))
+    dashboard.window.actionJohn_the_Ripper.triggered.connect(lambda: MenuBarSlots._slotMenuJohnTheRipperClicked(dashboard))
         
     # Lessons Menu
     dashboard.window.actionLessonOpenBTS.triggered.connect(MenuBarSlots._slotMenuLessonOpenBTS_Clicked)

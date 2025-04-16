@@ -199,6 +199,7 @@ class SensorNode():
             fissure.comms.Identifiers.HIPRFISR: 0,
         }
 
+        # Other Variables
         self.heartbeat_interval = 5
         self.sensor_node_heartbeat_time = 0
         self.attack_flow_graph_loaded = False
@@ -209,6 +210,8 @@ class SensorNode():
         self.inspection_script_name = ""
 
         self.triggers_running = False
+
+        self.alert_senders = {}
         
         # TSI
         self.tsi_detector_socket = None
@@ -366,6 +369,14 @@ class SensorNode():
                 # Read Incoming PD Bits Messages
                 if self.pd_bits_socket != None:
                     await self.read_pd_bits_messages()
+
+        # Stop Alert Senders
+        for sender in self.alert_senders.values():
+            try:
+                sender.stop()
+            except:
+                pass
+        self.alert_senders.clear()
 
         # Clean up Sockets
         # await self.shutdown_comms()
@@ -721,8 +732,9 @@ class SensorNode():
 
                 # In New Terminal
                 if trigger_action == False:
-                    _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger, self.network_type)
-                    
+                    self.alert_senders[autorun_index] = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger, self.network_type)
+                    self.alert_senders[autorun_index].thread.join()
+
                     # In FISSURE Dashboard
                     #proc = subprocess.Popen(osCommandString + " &", shell=True)#, stderr=subprocess.PIPE)
                     #output, error = proc.communicate()
@@ -781,8 +793,9 @@ class SensorNode():
             # In New Terminal
             if trigger_action == False:
                 #proc = subprocess.Popen('gnome-terminal -- ' + osCommandString + " &", shell=True)
-                _ = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger, self.network_type)
-                
+                self.alert_senders[autorun_index] = alertSender(osCommandString, self.identifier, sensor_node_id, self.hiprfisr_socket, self.gps_position, self.logger, self.network_type)
+                self.alert_senders[autorun_index].thread.join()
+
                 # In FISSURE Dashboard
                 #proc = subprocess.Popen(osCommandString + " &", shell=True)#, stderr=subprocess.PIPE)
                 #output, error = proc.communicate()
@@ -959,18 +972,20 @@ class SensorNode():
             self.triggers_running = False
             self.trigger_done.set()
         
-        # User Kills Python Scripts Manually
+        # Stop Alert Sender Gracefully if Present
         if parameter == "Python Script":
-            #pass
-            #os.system("sudo pkill -f " + '"' + self.attack_script_name +'"')  # Make terminal responsible for killing scripts
-
-            #script_pid = subprocess.check_output("pgrep -f '" + self.attack_script_name + "'", shell=True)
-            #print(script_pid)
-            #os.system("sudo kill " + str(script_pid))
+            # Stop Alert Sender
+            sender = self.alert_senders.pop(autorun_index, None)
+            if sender:
+                try:
+                    sender.stop()
+                    sender.thread.join(timeout=3)
+                except Exception as e:
+                    self.logger.warning(f"Failed to stop alert sender: {e}")
             
             # Normal
             if autorun_index == -1:
-                os.system("pkill -f " + '"' + self.attack_script_name +'"')
+                os.system("sudo pkill -f " + '"' + self.attack_script_name +'"')
                 self.attack_flow_graph_loaded = False
             # Autorun
             else:
@@ -978,15 +993,15 @@ class SensorNode():
                 if process_name is None:
                     self.logger.debug(f"⚠️ Warning: No process found for autorun index {autorun_index}. Skipping kill command.")
                 else:
-                    os.system("pkill -f " + '"' + process_name + '"')
+                    os.system("sudo pkill -f " + '"' + process_name + '"')
 
-                # os.system("pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
+                # os.system("sudo pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
                 self.autorun_playlist_manager[autorun_index] = None
                 
         elif parameter == "Flow Graph - GUI":
             # Normal
             if autorun_index == -1:
-                os.system("pkill -f " + '"' + self.attack_script_name +'"')
+                os.system("sudo pkill -f " + '"' + self.attack_script_name +'"')
                 self.attack_flow_graph_loaded = False
             # Autorun
             else:
@@ -994,9 +1009,9 @@ class SensorNode():
                 if process_name is None:
                     self.logger.debug(f"⚠️ Warning: No process found for autorun index {autorun_index}. Skipping kill command.")
                 else:
-                    os.system("pkill -f " + '"' + process_name + '"')
+                    os.system("sudo pkill -f " + '"' + process_name + '"')
 
-                # os.system("pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
+                # os.system("sudo pkill -f " + '"' + self.autorun_playlist_manager[autorun_index] +'"')
                 self.autorun_playlist_manager[autorun_index] = None
             
         else:
@@ -1041,7 +1056,6 @@ class SensorNode():
                 
                 # Overwrite Variables
                 loadedmod, class_name = self.overwriteFlowGraphVariables(flow_graph_filename, variable_names, variable_values)
-                print(class_name)
 
                 # Call the "__init__" Function
                 self.attackflowtoexec = getattr(loadedmod,class_name)()
@@ -1959,7 +1973,7 @@ class SensorNode():
             self.archive_playlist_stop_event.set()
             
         except Exception as e:
-            print(f"Error in archivePlaylistStop: {e}")
+            self.logger.error(f"Error in archivePlaylistStop: {e}")
 
 
     async def archivePlaylistFinished(self, sensor_node_id):
@@ -2192,7 +2206,7 @@ class SensorNode():
         """
         # Only Supports Flow Graphs with GUIs
         if (parameter == "Flow Graph - GUI") and (len(self.detector_script_name) > 0):
-            os.system("pkill -f " + '"' + self.detector_script_name +'"')
+            os.system("sudo pkill -f " + '"' + self.detector_script_name +'"')
             self.detector_script_name = ""
 
 

@@ -9,9 +9,10 @@ def getArguments():
     iface = 'wlan0'	                    # Wireless interface name 
     channel = '1'                       # Wireless channel
     interval = 0.01                     # Scapy interval
+    run_with_sudo = "True"
     notes = 'Generates Scapy CTS frames.'
-    arg_names = ['target_addr','iface','channel','interval','notes']
-    arg_values = [target_addr, iface, channel, interval, notes]
+    arg_names = ['target_addr','iface','channel','interval','run_with_sudo','notes']
+    arg_values = [target_addr, iface, channel, interval, run_with_sudo, notes]
 
     return (arg_names,arg_values)
 

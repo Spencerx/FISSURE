@@ -199,11 +199,12 @@ def getArguments():
     dwell=DWELL
     power = -100
     channels = None
+    run_with_sudo = "True"
     notes = NOTES
 
     return (
-        ['iface', 'duration', 'dwell', 'power', 'channels', 'notes'],
-        [iface, duration, dwell, power, channels, notes]
+        ['iface', 'duration', 'dwell', 'power', 'channels', 'run_with_sudo', 'notes'],
+        [iface, duration, dwell, power, channels, run_with_sudo, notes]
     )
 
 if __name__ == '__main__':

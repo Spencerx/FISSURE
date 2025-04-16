@@ -8,194 +8,205 @@ import subprocess
 import fissure.comms
 import json
 import logging
+import os
+import signal
+import threading
 
-def _alert_sender(cmd: str, c2: Connection, identifier: str, sensor_node_id: any, hiprfisr_socket: fissure.comms.Server, gps_position: dict, logger: logging.Logger, network_type: str):
-    """Run Command and Capture stdout for Alerts
 
-    Run command, capture stdout and send by to HIPRFISR as alertReturn command. Will stop capturing when `QUIT` is received on `c2`.
+def _alert_sender(
+    self,
+    cmd: str,
+    c2: Connection,
+    identifier: str,
+    sensor_node_id: any,
+    hiprfisr_socket: fissure.comms.Server,
+    gps_position: dict,
+    logger: logging.Logger,
+    network_type: str,
+):
+    """Run command and monitor stdout for alerts.
+
+    This function runs in a thread. It reads line-based JSON from the stdout
+    of a launched process and sends messages back to HIPRFISR.
 
     Parameters
     ----------
     cmd : str
-        System command to run
+        Command to execute.
     c2 : Connection
-        Pipe connection to command-and-control
+        Pipe for shutdown signaling.
     identifier : str
-        Sensor node identifier
+        Node identifier.
     sensor_node_id : any
-        Sensor node ID
+        Unique node ID.
     hiprfisr_socket : fissure.comms.Server
-        HIPRFISR socker
+        Socket to HIPRFISR.
     gps_position : dict
-        Dictionary with gps position
+        Dict with GPS keys.
     logger : logging.Logger
-        Sensor node logger
+        Logger for debug/info/error messages.
+    network_type : str
+        "IP" or "Meshtastic"
     """
-    # Run command
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, bufsize=1, universal_newlines=True, shell=True)
+    try:
+        self.proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.DEVNULL,  # stdin not needed
+            bufsize=1,
+            universal_newlines=True,
+            shell=True,
+            preexec_fn=os.setsid,
+        )
+    except Exception as e:
+        logger.error(f"Failed to start alertSender command: {e}")
+        self.proc = None
+        return
 
-    # Monitor for alerts
     stop = False
-    while not stop and proc.poll() is None:
-        for proc_text in proc.stdout:
 
-            # Replace any gps fields in text
-            proc_text = proc_text % gps_position
+    try:
+        # Read stdout line-by-line until signaled to stop or process ends
+        while not stop:
+            # Ensure the subprocess and stdout are still available
+            if not self.proc or not self.proc.stdout or self.proc.stdout.closed:
+                break
 
             try:
-                data = json.loads(proc_text)
+                line = self.proc.stdout.readline()
+            except ValueError:
+                # This happens if stdout was closed while reading
+                break
 
-                if not data.__class__ is dict:
-                    # Not within the scope of alert messaging; log as info
-                    logger.info(str(data))
+            if not line:
+                break  # EOF or closed
 
-                elif not 'msg' in list(data.keys()):
-                    # Not within the scope of alert messaging; log as info
-                    logger.info(str(data))
+            # Try to substitute GPS fields into the line
+            try:
+                line = line % gps_position
+            except (TypeError, ValueError):
+                pass  # Not a formatting string or placeholder missing
 
-                elif data.get('msg') == 'alert':
-                    if network_type == "IP":
-                        PARAMETERS = {
-                            "sensor_node_id": sensor_node_id,
-                            "alert_text": data.get('text')
-                        }
-                        msg = {
-                            fissure.comms.MessageFields.IDENTIFIER: identifier,
-                            fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
-                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                        }
-                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
-                        
-                    elif network_type == "Meshtastic":
-                        PARAMETERS = {
-                            "sensor_node_id": sensor_node_id,
-                            "alert_text":  data.get('text')[:100] if data.get('text') else None                            
-                        }
-                        msg = {
-                            fissure.comms.MessageFields.SOURCE: identifier,
-                            fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
-                            fissure.comms.MessageFields.MESSAGE_NAME: "alertReturnLT",
-                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                        }
-                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+            # Try to parse JSON and handle message types
+            try:
+                data = json.loads(line)
+            except json.JSONDecodeError:
+                logger.info(line.strip())
+                continue
 
-                elif data.get('msg') == 'tak':
-                    if network_type == "IP":
-                        PARAMETERS = {
-                            "uid": data.get('uid'),
-                            "lat": data.get('lat'),
-                            "lon": data.get('lon'),
-                            "alt": data.get('alt'),
-                            "time": data.get('time'),
-                            "remarks": data.get('remarks'),
-                        }
+            # Make sure it's a dict and has a message type
+            if not isinstance(data, dict) or 'msg' not in data:
+                logger.info(str(data))
+                continue
 
-                        if data.get('remarks') == "GPS UPDATE":
-                            msg = {
-                                fissure.comms.MessageFields.IDENTIFIER: identifier,
-                                fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdate",
-                                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                            }
-                            asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))                        
+            msg_type = data['msg']
 
-                        else:
-                            msg = {
-                                fissure.comms.MessageFields.IDENTIFIER: identifier,
-                                fissure.comms.MessageFields.MESSAGE_NAME: "takPlot",
-                                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                            }
-                            asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
-                        
-                    elif network_type == "Meshtastic":
-                        PARAMETERS = {
-                            "msg": [
-                                data.get('uid'),
-                                data.get('lat'),
-                                data.get('lon'),
-                                data.get('alt'),
-                                data.get('time'),
-                                data.get('remarks')[:20] if data.get('remarks') else None
-                            ]
-                        }
+            if msg_type == 'alert':
+                PARAMETERS = {
+                    "sensor_node_id": sensor_node_id,
+                    "alert_text": data.get('text')
+                }
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER if network_type == "IP" else fissure.comms.MessageFields.SOURCE: identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn" if network_type == "IP" else "alertReturnLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS if network_type == "IP" else { "sensor_node_id": sensor_node_id, "alert_text": PARAMETERS["alert_text"][:100] },
+                }
+                asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
-                        if data.get('remarks') == "GPS UPDATE":
-                            msg = {
-                                fissure.comms.MessageFields.SOURCE: identifier,
-                                fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
-                                fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdateLT",
-                                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                            }
-                        else:
-                            msg = {
-                                fissure.comms.MessageFields.SOURCE: identifier,
-                                fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
-                                fissure.comms.MessageFields.MESSAGE_NAME: "takPlotLT",
-                                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                            }
-                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+            elif msg_type == 'tak':
+                PARAMETERS = {
+                    "uid": data.get('uid'),
+                    "lat": data.get('lat'),
+                    "lon": data.get('lon'),
+                    "alt": data.get('alt'),
+                    "time": data.get('time'),
+                    "remarks": data.get('remarks'),
+                }
+                is_gps_update = PARAMETERS["remarks"] == "GPS UPDATE"
+                name = "takPlotGpsUpdate" if is_gps_update else "takPlot"
+                if network_type == "Meshtastic":
+                    name += "LT"
+                    PARAMETERS = {
+                        "msg": [
+                            PARAMETERS["uid"],
+                            PARAMETERS["lat"],
+                            PARAMETERS["lon"],
+                            PARAMETERS["alt"],
+                            PARAMETERS["time"],
+                            PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
+                        ]
+                    }
 
-                elif data.get('msg') == 'exploit':
-                    if network_type == "IP":
-                        PARAMETERS = {
-                            "sensor_node_id": sensor_node_id,
-                            "protocol": data.get('protocol'),
-                            "modulation": data.get('modulation'),
-                            "hardware": data.get('hardware'),
-                            "type": data.get('type'),
-                            "attack": data.get('attack'),
-                            "variables": data.get('variables'),
-                        }
-                        msg = {
-                            fissure.comms.MessageFields.IDENTIFIER: identifier,
-                            fissure.comms.MessageFields.MESSAGE_NAME: "exploit",
-                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                        }
-                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER if network_type == "IP" else fissure.comms.MessageFields.SOURCE: identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: name,
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                msg[fissure.comms.MessageFields.DESTINATION] = fissure.comms.Identifiers.HIPRFISR_LT if network_type == "Meshtastic" else None
+                asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
-                    elif network_type == "Meshtastic":
-                        PARAMETERS = {
-                            "msg": [
-                                sensor_node_id,
-                                data.get('protocol'),
-                                data.get('modulation'),
-                                data.get('hardware'),
-                                data.get('type'),
-                                data.get('attack'),
-                                data.get('variables')
-                                # data.get('variables')[:20] if data.get('variables') else None
-                            ]
-                        }
-                        msg = {
-                            fissure.comms.MessageFields.SOURCE: identifier,
-                            fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,
-                            fissure.comms.MessageFields.MESSAGE_NAME: "exploitLT",
-                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                        }
-                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+            elif msg_type == 'exploit':
+                PARAMETERS = {
+                    "sensor_node_id": sensor_node_id,
+                    "protocol": data.get('protocol'),
+                    "modulation": data.get('modulation'),
+                    "hardware": data.get('hardware'),
+                    "type": data.get('type'),
+                    "attack": data.get('attack'),
+                    "variables": data.get('variables'),
+                }
 
-                elif data.get('msg') == 'snreport':
-                    if network_type == "IP":
-                        PARAMETERS = {
-                            "sensor_node_id": sensor_node_id,
-                            "text": data.get('text')
-                        }
-                        msg = {
-                            fissure.comms.MessageFields.IDENTIFIER: identifier,
-                            fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
-                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                        }
-                        asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+                if network_type == "Meshtastic":
+                    PARAMETERS = {
+                        "msg": list(PARAMETERS.values())
+                    }
 
-            except json.decoder.JSONDecodeError:
-                # Not a valid json string
-                logger.info(str(proc_text))
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER if network_type == "IP" else fissure.comms.MessageFields.SOURCE: identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "exploit" if network_type == "IP" else "exploitLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                if network_type == "Meshtastic":
+                    msg[fissure.comms.MessageFields.DESTINATION] = fissure.comms.Identifiers.HIPRFISR_LT
+                asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
-            if c2.poll(): # Check for messages on c2 comms
-                msg = c2.recv()  # Get message
+            elif msg_type == 'snreport':
+                PARAMETERS = {
+                    "sensor_node_id": sensor_node_id,
+                    "text": data.get('text')
+                }
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
+
+            # Check for quit signal from control pipe
+            if c2.poll():
+                msg = c2.recv()
                 if msg == 'QUIT':
-                    stop = True  # Stop alert monitoring
+                    stop = True
                     break
-    proc.wait()  # Wait for process to end
+
+    finally:
+        # Cleanup process
+        if self.proc:
+            try:
+                if self.proc.poll() is None:
+                    os.killpg(os.getpgid(self.proc.pid), signal.SIGTERM)
+                    self.proc.wait(timeout=3)
+            except Exception:
+                pass
+
+            try:
+                if self.proc.stdout:
+                    self.proc.stdout.close()
+                if self.proc.stderr:
+                    self.proc.stderr.close()
+            except Exception:
+                pass
 
 
 class alertSender(object):
@@ -219,10 +230,71 @@ class alertSender(object):
         logger : logging.Logger
             Sensor node logger
         """
+        self.proc = None
+        self.logger = logger
+        self.cmd = cmd
+        self.identifier = identifier
+        self.sensor_node_id = sensor_node_id
+        self.hiprfisr_socket = hiprfisr_socket
+        self.gps_position = gps_position
+        self.network_type = network_type
+
         (self.conn1, conn2) = Pipe()
-        _alert_sender(cmd, conn2, identifier, sensor_node_id, hiprfisr_socket, gps_position, logger, network_type)
+
+        # Launch _alert_sender in its own thread
+        self.thread = threading.Thread(
+            target=_alert_sender,
+            args=(self, cmd, conn2, identifier, sensor_node_id, hiprfisr_socket, gps_position, logger, network_type),
+            daemon=True
+        )
+        self.thread.start()
+
 
     def stop(self):
-        """Stop capture and wait for process to finished
         """
-        self.conn1.send('QUIT')
+        Gracefully stop the alert sender thread and its subprocess.
+        """
+        # Notify the alert sender thread to stop
+        try:
+            self.conn1.send('QUIT')
+        except Exception:
+            pass  # Pipe already closed or broken
+
+        # Terminate the subprocess if it is running
+        if self.proc:
+            if self.proc.poll() is None:
+                try:
+                    os.killpg(os.getpgid(self.proc.pid), signal.SIGTERM)
+                    self.proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    try:
+                        os.killpg(os.getpgid(self.proc.pid), signal.SIGKILL)
+                        self.proc.wait(timeout=3)
+                    except Exception:
+                        pass
+                except Exception:
+                    pass
+
+        # Wait for thread to finish before touching self.proc.* streams
+        thread_ref = getattr(self, "thread", None)
+        if thread_ref:
+            try:
+                thread_ref.join(timeout=3)
+            except Exception:
+                pass
+
+        # Now safe to close any remaining process pipes
+        if self.proc:
+            try:
+                if self.proc.stdout and not self.proc.stdout.closed:
+                    self.proc.stdout.close()
+                if self.proc.stderr and not self.proc.stderr.closed:
+                    self.proc.stderr.close()
+                if self.proc.stdin and not self.proc.stdin.closed:
+                    self.proc.stdin.close()
+            except Exception:
+                pass
+            self.proc = None
+
+        # Final cleanup of thread reference
+        self.thread = None
