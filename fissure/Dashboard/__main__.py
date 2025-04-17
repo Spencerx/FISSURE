@@ -67,6 +67,9 @@ def run():
 
     app = QtWidgets.QApplication(sys.argv)
 
+    app.setApplicationName("FISSURE")
+    app.setDesktopFileName("fissure.desktop")
+
     eventLoop: asyncio.AbstractEventLoop = qasync.QEventLoop(app)
     asyncio.set_event_loop(eventLoop)
 

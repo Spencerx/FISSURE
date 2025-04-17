@@ -18,7 +18,7 @@ import os
 def getArguments():
     iface = 'wlan0'	                    # Wireless interface name 
     tp_link_ip = '192.168.1.1'          # IP of the TP-Link AC1750
-    run_with_sudo = "True"
+    run_with_sudo = "False"
     notes = 'While joined to the network, executes a reboot command on the device using a single UDP message.'
     
     arg_names = ['iface','tp_link_ip','run_with_sudo','notes']

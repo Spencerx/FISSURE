@@ -1,6 +1,23 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-4-17
+
+Adjusting monitor mode tool, attacks, and demo files.
+
+### Added
+
+- maint-3.10 demo plugin example
+
+### Fixed
+
+- Refactored Monitor Mode Tool to detect operating system and use appropriate command sets
+- Fixed Wi-Fi Exploit Finder attack error from missing run_with_sudo variable
+- Updating DIR-815 Exploit to Python3 in database
+- Changing payload hex string for DIR-815 Exploit maint-3.10 attack
+- Setting TP-Link Archer A7 attacks to not run with sudo
+- Setting application name and desktop file name in \_\_main\_\_.py
+
 ## 2025-4-16
 
 Demo support files and alert sender fixes.

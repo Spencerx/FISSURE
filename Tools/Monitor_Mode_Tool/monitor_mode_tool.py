@@ -1,10 +1,21 @@
 import sys
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 import os
-import time
 import subprocess
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType("main.ui")
+
+def get_ubuntu_version():
+    try:
+        with open("/etc/os-release") as f:
+            for line in f:
+                if line.startswith("VERSION_ID"):
+                    return line.strip().split("=")[1].strip('"')
+    except Exception:
+        return None
+
+UBUNTU_VERSION = get_ubuntu_version()
+USE_SYSTEMCTL = UBUNTU_VERSION and UBUNTU_VERSION >= "24.04"
 
 class MonitorModeTool(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -13,25 +24,27 @@ class MonitorModeTool(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.connect()
         self.refreshInterfaces()
-        
-        
+
     def connect(self):
-        """ Stores the connect functions
-        """
         self.pushButton_monitor_mode_execute.clicked.connect(self.monitorMode)
         self.pushButton_managed_mode_execute.clicked.connect(self.managedMode)
         self.pushButton_refresh_interfaces.clicked.connect(self.refreshInterfaces)
         self.pushButton_aircrack.clicked.connect(self.aircrackStartStop)
         self.pushButton_aircrack_file_open.clicked.connect(self.aircrackFileOpen)
         self.pushButton_modprobe.clicked.connect(self.modprobeClicked)
-        
-        
+
+    def stop_network_manager(self):
+        cmd = "sudo systemctl stop NetworkManager" if USE_SYSTEMCTL else "sudo service network-manager stop"
+        os.system(cmd)
+        self.label_terminal.setText(str(self.label_terminal.text()) + f"\n\t{cmd}")
+
+    def start_network_manager(self):
+        cmd = "sudo systemctl start NetworkManager" if USE_SYSTEMCTL else "sudo service network-manager start"
+        os.system(cmd)
+        self.label_terminal.setText(str(self.label_terminal.text()) + f"\n\t{cmd}")
+
     def refreshInterfaces(self):
-        """ Loads all available interfaces in the comboboxes.
-        """
-        print("Refreshing Interfaces")
-        
-        # Update Interface Comboboxes
+        self.label_terminal.setText("Refreshing Interfaces")
         get_interfaces = os.listdir("/sys/class/net/")
         self.comboBox_monitor_mode_interface.clear()
         self.comboBox_managed_mode_interface.clear()
@@ -40,124 +53,78 @@ class MonitorModeTool(QtWidgets.QMainWindow, Ui_MainWindow):
             self.comboBox_monitor_mode_interface.addItem(n)
             self.comboBox_managed_mode_interface.addItem(n)
             self.comboBox_aircrack_interface.addItem(n)
-       
-        # Select the Last Interface by Default
+
         self.comboBox_monitor_mode_interface.setCurrentIndex(self.comboBox_monitor_mode_interface.count()-1)
         self.comboBox_managed_mode_interface.setCurrentIndex(self.comboBox_managed_mode_interface.count()-1)
         self.comboBox_aircrack_interface.setCurrentIndex(self.comboBox_aircrack_interface.count()-1)
-        
-        print("Done")
-        
-        
+
+        self.label_terminal.setText(self.label_terminal.text() + "\nDone")
+
     def monitorMode(self):
-        """ Puts the selected interface into monitor mode.
-        """
-        # Starting
         self.label_terminal.setText("Starting Monitor Mode")
 
-        # Get Text
         get_interface = str(self.comboBox_monitor_mode_interface.currentText())
         get_channel = str(self.comboBox_monitor_mode_channel.currentText())
         get_disable_network_manager = self.checkBox_monitor_mode_disable_network_manager.isChecked()
-        
-        # Disable Network Manager
-        if get_disable_network_manager == True:
-            os.system("sudo service network-manager stop")
-            self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo service network-manager stop")
-        
-        # Put into Monitor Mode        
-        os.system("sudo ifconfig " + get_interface + " down")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo ifconfig " + get_interface + " down")
-        os.system("sudo iwconfig " + get_interface + " mode monitor")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo iwconfig " + get_interface + " mode monitor")
-        os.system("sudo ifconfig " + get_interface + " up")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo ifconfig " + get_interface + " up")
-        
-        # Set Frequency Channel
-        os.system("sudo iwconfig " + get_interface + " channel " + get_channel)
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo iwconfig " + get_interface + " channel " + get_channel)
 
-        # Done
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\nDone")
-        
-        # Print "iwconfig" Output
-        proc = subprocess.Popen("sudo iwconfig " + get_interface + ' &', shell=True, stdout=subprocess.PIPE, )
+        if get_disable_network_manager:
+            self.stop_network_manager()
+
+        os.system(f"sudo ifconfig {get_interface} down")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo ifconfig {get_interface} down")
+        os.system(f"sudo iwconfig {get_interface} mode monitor")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo iwconfig {get_interface} mode monitor")
+        os.system(f"sudo ifconfig {get_interface} up")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo ifconfig {get_interface} up")
+        os.system(f"sudo iwconfig {get_interface} channel {get_channel}")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo iwconfig {get_interface} channel {get_channel}")
+
+        self.label_terminal.setText(self.label_terminal.text() + "\nDone")
+        proc = subprocess.Popen(f"sudo iwconfig {get_interface} &", shell=True, stdout=subprocess.PIPE)
         output = proc.communicate()[0].decode()
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\n" + output)
-        
-        
+        self.label_terminal.setText(self.label_terminal.text() + "\n\n" + output)
+
     def managedMode(self):
-        """ Puts the selected interface into managed mode and turns on Network Manager.
-        """
-        # Starting
         self.label_terminal.setText("Starting Managed Mode")
-        
-        # Get Text
         get_interface = str(self.comboBox_managed_mode_interface.currentText())
-        
-        # Put into Managed Mode        
-        os.system("sudo ifconfig " + get_interface + " down")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo ifconfig " + get_interface + " down")
-        os.system("sudo iwconfig " + get_interface + " mode managed")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo iwconfig " + get_interface + " mode managed")
-        os.system("sudo ifconfig " + get_interface + " up")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo ifconfig " + get_interface + " up")
-        
-        # Start Network Manager
-        os.system("sudo service network-manager start")
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\tsudo service network-manager start")
-        
-        # Done
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\nDone")
-        
-        # Print "iwconfig" Output
-        proc = subprocess.Popen("sudo iwconfig " + get_interface + ' &', shell=True, stdout=subprocess.PIPE, )
+
+        os.system(f"sudo ifconfig {get_interface} down")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo ifconfig {get_interface} down")
+        os.system(f"sudo iwconfig {get_interface} mode managed")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo iwconfig {get_interface} mode managed")
+        os.system(f"sudo ifconfig {get_interface} up")
+        self.label_terminal.setText(self.label_terminal.text() + f"\n\tsudo ifconfig {get_interface} up")
+
+        self.start_network_manager()
+
+        self.label_terminal.setText(self.label_terminal.text() + "\nDone")
+        proc = subprocess.Popen(f"sudo iwconfig {get_interface} &", shell=True, stdout=subprocess.PIPE)
         output = proc.communicate()[0].decode()
-        self.label_terminal.setText(str(self.label_terminal.text()) + "\n\n" + output)
+        self.label_terminal.setText(self.label_terminal.text() + "\n\n" + output)
 
     def aircrackStartStop(self):
-        """ Starts and stops an Aircrack capture.
-        """
         print("Starting Aircrack Capture")
-        
         get_interface = str(self.comboBox_aircrack_interface.currentText())
         get_channel = str(self.comboBox_aircrack_channel.currentText())
         get_mac_filter = str(self.plainTextEdit_aircrack_mac_filter.toPlainText())
         get_filepath = str(self.plainTextEdit_aircrack_filepath.toPlainText())
-        
-        # Start Aircrack on Interface (Optional, Sometimes Doesn't Work Right)
-        #os.system("sudo airmon-ng start " + get_interface)
-        
-        # Run Airodump on New Aircrack Interface
-        os.system("sudo airodump-ng -c " + get_channel + " -d " + get_mac_filter + " -w " + get_filepath + " --output-format pcap " + get_interface)
-                
+        os.system(f"sudo airodump-ng -c {get_channel} -d {get_mac_filter} -w {get_filepath} --output-format pcap {get_interface}")
         print("Done")
-        
+
     def aircrackFileOpen(self):
-        """ Opens a dialog to select the filepath for new aircrack captures.
-        """
         print("file open clicked")
-        dlg = QtGui.QFileDialog()
-        dlg.setFileMode(QtGui.QFileDialog.AnyFile)
-        dlg.setFilter("CAP (*.cap)")
-        filename = QtCore.Qt.QStringList
-        
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QtWidgets.QFileDialog.AnyFile)
+        dlg.setNameFilter("CAP (*.cap)")
         if dlg.exec_():
             filename = dlg.selectedFiles()
-            
-        self.plainTextEdit_aircrack_filepath.setPlainText(str(str(filename[0])+".cap"))
-        
+            self.plainTextEdit_aircrack_filepath.setPlainText(str(filename[0]) + ".cap")
+
     def modprobeClicked(self):
-        """ Runs 'sudo modprobe <driver>'.
-        """
-        # Issue Command
         get_driver = str(self.plainTextEdit_driver.toPlainText())
-        os.system("sudo modprobe " + get_driver)
-        
-        
+        os.system(f"sudo modprobe {get_driver}")
+
 if __name__ == "__main__":
-    """ main()
-    """
     app = QtWidgets.QApplication(sys.argv)
     window = MonitorModeTool()
     window.show()
