@@ -107,10 +107,6 @@ class Dashboard(QtWidgets.QMainWindow):
             ["", "", "", "", "", "", ""],
         ]
 
-        # Temporarily Disable Plugin Tabs until Developed Further
-        self.ui.tabWidget_sensor_nodes.setTabEnabled(2, False)
-        # self.ui.tabWidget_library.setTabEnabled(4, False)
-
         # Disable Buttons for Disconnected HIPRFISR
         self.ui.pushButton_top_node2.setVisible(False)
         self.ui.pushButton_top_node3.setVisible(False)
@@ -1294,16 +1290,8 @@ class Dashboard(QtWidgets.QMainWindow):
         node_number : int
             Sensor node index
         """
-        deploy_button: QtWidgets.QPushButton = self.ui.pluginsPushButtonDeploy
-        deploy_button.setEnabled(False)
-        remove_button: QtWidgets.QPushButton = self.ui.pluginsPushButtonRemove
-        remove_button.setEnabled(False)
-        get_sensor_node = ['sensor_node1','sensor_node2','sensor_node3','sensor_node4','sensor_node5']
-        if node_number > -1 and self.backend.settings[get_sensor_node[node_number]]['local_remote'] == 'remote':
-            deploy_button.setEnabled(True)
-            remove_button.setEnabled(True)
-        
         # Do not retrieve plugins for Meshtastic
+        get_sensor_node = ['sensor_node1','sensor_node2','sensor_node3','sensor_node4','sensor_node5']
         if self.backend.settings[get_sensor_node[node_number]]["network_type"] == "IP":
             pass
             # LibraryTabSlots._slotLibraryPluginPluginRefresh(self)  # async, make user press refresh for now
