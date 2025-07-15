@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-7-15
+
+Fixing installer for password prompt exceptions.
+
+### Fixed
+
+- Changed "USER_NAME" to "USERNAME" in password prompt exceptions template to allow sed command to work for $USER
+
 ## 2025-7-11
 
 Preliminary support for CaribouLite.
