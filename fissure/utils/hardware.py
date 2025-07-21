@@ -11,6 +11,7 @@ import socket
 import os
 import select
 import json
+import re
 
 
 SUPPORTED_HARDWARE = [
@@ -31,7 +32,8 @@ SUPPORTED_HARDWARE = [
     "USRP X410",
     "RSPduo",
     "RSPdx",
-    "RSPdx R2"
+    "RSPdx R2",
+    "CaribouLite"
 ]
     
 
@@ -83,6 +85,8 @@ def hardwareID_Column(hardware_type):
         hardware_id = 3
     elif hardware_type == "RSPdx R2":
         hardware_id = 3
+    elif hardware_type == "CaribouLite":
+        hardware_id = 1
     else:
         hardware_id = None
 
@@ -131,6 +135,8 @@ def hardwareDisplayName(dashboard, hardware_type, sensor_node, component, index)
         get_hardware_name = hardware_type + " - " + dashboard.backend.settings[sensor_node][component][index][get_column]        
     elif hardware_type == "RSPdx R2":
         get_hardware_name = hardware_type + " - " + dashboard.backend.settings[sensor_node][component][index][get_column]
+    elif hardware_type == "CaribouLite":
+        get_hardware_name = hardware_type + " - " + dashboard.backend.settings[sensor_node][component][index][get_column]        
     else:
         get_hardware_name = "UNKNOWN HARDWARE"
 
@@ -225,7 +231,11 @@ def hardwareDisplayNameLookup(dashboard, display_name, component):
             elif hardware_type == "RSPdx R2":
                 if second_value == dashboard.backend.settings[sensor_node][component][n][get_column]:
                     get_index = n
-                    break                                
+                    break
+            elif hardware_type == "CaribouLite":
+                if second_value == dashboard.backend.settings[sensor_node][component][n][get_column]:
+                    get_index = n
+                    break                                         
             else:
                 pass
 
@@ -441,6 +451,11 @@ def checkFrequencyBounds(get_frequency, get_hardware, get_daughterboard):
     elif get_hardware == "RSPdx R2":
         # Frequency Limits
         if (get_frequency >= 0.001) and (get_frequency <= 2000):
+            return True
+        
+    elif get_hardware == "CaribouLite":
+        # Frequency Limits
+        if (get_frequency >= 30) and (get_frequency <= 6000):
             return True
 
     # Not in Bounds
@@ -1120,7 +1135,7 @@ def findRSPdx(guess_serial="", guess_index=0):
     Parses the results of 'lsusb' and returns an integer based on the guess index and number of RSPdxs.
     """
     # Scan Results
-    scan_results = ['RSPdx R2','','','','','','']  # Type, UID, Radio Name, Serial, Net. Interface, IP Address, Daughterboard
+    scan_results = ['RSPdx','','','','','','']  # Type, UID, Radio Name, Serial, Net. Interface, IP Address, Daughterboard
     
     # Get the Text
     proc = subprocess.Popen("lsusb | grep -w RSPdx &", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1194,6 +1209,31 @@ def findRSPdxR2(guess_serial="", guess_index=0):
         pass
         
     return scan_results, guess_index
+
+
+def findCaribouLite():
+    """  
+    Parses the results of 'SoapySDRUtil --find' and extracts the first CaribouLite device's UUID.
+    """
+    # Placeholder results
+    scan_results = ['CaribouLite', '', '', '', '', '', '']  # Type, UID, Radio Name, Serial, Net. Interface, IP Address, Daughterboard
+
+    # Run the command
+    proc = subprocess.Popen("SoapySDRUtil --find &", shell=True, stdout=subprocess.PIPE)
+    output = proc.communicate()[0].decode()
+
+    # Find all CaribouLite device blocks
+    blocks = output.split("Found device")
+    for block in blocks:
+        if "driver = Cariboulite" in block:
+            # Extract UUID using regex
+            match = re.search(r'uuid\s*=\s*([a-fA-F0-9\-]+)', block)
+            if match:
+                uuid = match.group(1)
+                scan_results[1] = uuid
+                break  # Stop after the first CaribouLite device
+
+    return scan_results
 
 
 def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM1", return_altitude=False):
@@ -1400,6 +1440,8 @@ def getHardwareGain(hardware_type: str, tx_rx: str):
             gain_values = [0, 59, 0]  # attenuation, not gain
         elif hardware_type == "RSPdx R2":
             gain_values = [0, 59, 0]  # attenuation, not gain
+        elif hardware_type == "CaribouLite":
+            gain_values = [0, 31, 20]  # Does CaribouLite use TX gain or is it fixed?
         else:
             gain_values = None
 
@@ -1444,6 +1486,8 @@ def getHardwareGain(hardware_type: str, tx_rx: str):
             gain_values = [0, 59, 0]  # attenuation, not gain
         elif hardware_type == "RSPdx R2":
             gain_values = [0, 59, 0]  # attenuation, not gain
+        elif hardware_type == "CaribouLite":
+            gain_values = [0, 31, 20]            
         else:
             gain_values = None
 
@@ -1496,6 +1540,8 @@ def getHardwareAntennas(hardware_type: str, tx_rx: str):
             antenna_values = None
         elif hardware_type == "RSPdx R2":
             antenna_values = None
+        elif hardware_type == "CaribouLite":
+            antenna_values = None            
         else:
             antenna_values = None
 
@@ -1540,6 +1586,8 @@ def getHardwareAntennas(hardware_type: str, tx_rx: str):
             antenna_values = ["A", "B", "C"]
         elif hardware_type == "RSPdx R2":
             antenna_values = ["A", "B", "C"]
+        elif hardware_type == "CaribouLite":
+            antenna_values = None            
         else:
             antenna_values = None
 
@@ -1592,6 +1640,8 @@ def getHardwareChannels(hardware_type: str, tx_rx: str):
             channel_values = None
         elif hardware_type == "RSPdx R2":
             channel_values = None
+        elif hardware_type == "CaribouLite":
+            channel_values = ["HiF", "S1G"]
         else:
             channel_values = None
 
@@ -1636,6 +1686,8 @@ def getHardwareChannels(hardware_type: str, tx_rx: str):
             channel_values = [""]
         elif hardware_type == "RSPdx R2":
             channel_values = [""]
+        elif hardware_type == "CaribouLite":
+            channel_values = ["HiF", "S1G"]
         else:
             channel_values = None
 
@@ -1925,6 +1977,24 @@ async def probe80211x():
         output, _ = await proc.communicate()
         output = output.decode()
 
+    except Exception as e:
+        output = f"Error: {str(e)}"
+
+    return output
+
+
+async def probeCaribouLite():
+    """
+    Asynchronously probes a CaribouLite SDR device using SoapySDRUtil.
+    """
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            "SoapySDRUtil --find",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        output, _ = await proc.communicate()
+        output = output.decode()
     except Exception as e:
         output = f"Error: {str(e)}"
 

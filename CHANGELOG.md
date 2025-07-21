@@ -1,6 +1,29 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-7-15
+
+Fixing installer for password prompt exceptions.
+
+### Fixed
+
+- Changed "USER_NAME" to "USERNAME" in password prompt exceptions template to allow sed command to work for $USER
+
+## 2025-7-11
+
+Preliminary support for CaribouLite.
+
+### Added
+
+- Preliminary support for CaribouLite
+
+### Fixed
+
+- Stop button now halts autorun playlist before repetition interval pause
+- Recompiled RTL2832U fixed threshold detector to get rid of SDRplay artifacts caused by unintential overwriting
+- Updated Raspberry Pi installer to replace tensorflow-cpu package (does not exist) with tensorflow
+- findRSPdx now returns RSPdx instead of RSPdx R2
+
 ## 2025-5-21
 
 Merging pull request #84: Meshtastic GPS reading from log to fix stale reading issue.

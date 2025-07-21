@@ -14746,7 +14746,7 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow-cpu --break-system-packages
+sudo python3 -m pip install tensorflow --break-system-packages
 
 sudo apt install -y nodejs npm build-essential libgtk-3-dev libwebkit2gtk-4.0-dev  # netron
 mkdir -p ~/Installed_by_FISSURE  # netron
@@ -14774,6 +14774,7 @@ sudo python3 -m pip install msgpack --break-system-packages
 sudo python3 -m pip install eventlet --break-system-packages
 sudo python3 -m pip install psycopg2-binary --break-system-packages
 sudo python3 -m pip install python-dotenv --break-system-packages
+sudo python3 -m pip install "numpy<2.0" --force-reinstall --break-system-packages  # newer versions cause issues
 . ~/.bashrc
 """,True,"Minimum Install"))
 

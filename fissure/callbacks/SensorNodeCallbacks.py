@@ -892,6 +892,11 @@ async def probeHardware(component: object, tab_index=0, table_row_text=[]):
         if not output.startswith("Error:"):
             height_width = [300, 500]
 
+    elif get_hardware == "CaribouLite":
+        output = await fissure.utils.hardware.probeCaribouLite()
+        if not output.startswith("Error:"):
+            height_width = [300, 500]
+
     # Return the Text
     PARAMETERS = {"tab_index": tab_index, "output": output, "height_width": height_width}
     msg = {
@@ -946,6 +951,8 @@ async def scanHardware(component: object, tab_index=0, hardware_list=[]):
             all_scan_results.append(fissure.utils.hardware.findRSPdx()[0])
         elif get_hardware == "RSPdx R2":
             all_scan_results.append(fissure.utils.hardware.findRSPdxR2()[0])
+        elif get_hardware == "CaribouLite":
+            all_scan_results.append(fissure.utils.hardware.findCaribouLite())            
 
     # Return Scan Results
     PARAMETERS = {"tab_index": tab_index, "hardware_scan_results": all_scan_results}
@@ -1028,7 +1035,10 @@ async def guessHardware(component: object, tab_index=0, table_row=[], table_row_
 
     elif get_hardware == "RSPdx R2":
         get_serial = str(table_row_text[3])
-        scan_results, new_guess_index = fissure.utils.hardware.findRSPdxR2(get_serial, guess_index)        
+        scan_results, new_guess_index = fissure.utils.hardware.findRSPdxR2(get_serial, guess_index)
+
+    elif get_hardware == "CaribouLite":
+        scan_results = fissure.utils.hardware.findCaribouLite()
 
     # Return Guess Results
     PARAMETERS = {

@@ -1691,6 +1691,14 @@ p, li { white-space: pre-wrap; }
           <enum>Unchecked</enum>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>CaribouLite</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
        </widget>
        <widget class="QPushButton" name="pushButton_scan_1">
         <property name="enabled">

@@ -625,6 +625,12 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             table_item.setTextAlignment(QtCore.Qt.AlignCenter)
             scan_results_tables[tab_index].setItem(get_row, 3, table_item)
 
+        elif get_hardware == "CaribouLite":
+            new_uuid = str(get_row_text[1])
+            table_item = QtWidgets.QTableWidgetItem(new_uuid)
+            table_item.setTextAlignment(QtCore.Qt.AlignCenter)
+            scan_results_tables[tab_index].setItem(get_row, 1, table_item)            
+
         # Highlight
         self.highlight_hardware_id(scan_results_tables[tab_index], get_row)
             
