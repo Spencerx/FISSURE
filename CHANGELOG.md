@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-7-21
+
+More remote actions for sensor nodes.
+
+### Added
+
+- Querying the sensor node to report uptime, memory usage, disk usage, CPU percentage, processes, and reboot
+
+### Fixed
+
+- PlutoSDR installer for Raspberry Pi OS and Ubuntu 24.04
+
 ## 2025-7-15
 
 Fixing installer for password prompt exceptions.

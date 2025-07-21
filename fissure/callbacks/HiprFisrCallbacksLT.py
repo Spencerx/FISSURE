@@ -388,3 +388,178 @@ async def gpsBeaconDisableMeshtasticLT(component: object, sensor_node_id: str):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def rebootMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to reboot the computer.
+    """
+    # Send Message
+    PARAMETERS = {}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "rebootMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def uptimeMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the uptime of the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "uptimeMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def uptimeMeshtasticReturnLT(component: object, sensor_node_id: str, uptime: str):
+    """
+    Forwards uptimeMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "uptime": uptime,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "uptimeMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def memoryMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the memory usage of the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "memoryMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def memoryMeshtasticReturnLT(component: object, sensor_node_id: str, memory: list):
+    """
+    Forwards memoryMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "memory": memory,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "memoryMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def diskMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the disk usage of the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "diskMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def diskMeshtasticReturnLT(component: object, sensor_node_id: str, disk: dict):
+    """
+    Forwards diskMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "disk": disk,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "diskMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def cpuMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the CPU percentage of the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "cpuMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def cpuMeshtasticReturnLT(component: object, sensor_node_id: str, cpu: str):
+    """
+    Forwards cpuMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "cpu": cpu,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "cpuMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def processesMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the processes on the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "processesMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def processesMeshtasticReturnLT(component: object, sensor_node_id: str, processes: str):
+    """
+    Forwards processesMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "processes": processes,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "processesMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg) 

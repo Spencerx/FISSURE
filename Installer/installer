@@ -15113,17 +15113,36 @@ mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/pcercuei/libini.git
 cd libini
-mkdir build && cd build && cmake ../ && make && sudo make install
+sed -i 's/cmake_minimum_required(VERSION 3.1.0)/cmake_minimum_required(VERSION 3.5)/' ~/Installed_by_FISSURE/libini/CMakeLists.txt
+mkdir build
+cd build
+cmake ../
+make
+sudo make install
+sudo ldconfig
 cd ~/Installed_by_FISSURE
-git clone https://github.com/analogdevicesinc/libiio.git
+git clone https://github.com/analogdevicesinc/libiio.git -b v0.23
 cd libiio
-mkdir build && cd build && cmake ../ && make && sudo make install
+sed -i 's/cmake_minimum_required(VERSION 2.8.7)/cmake_minimum_required(VERSION 3.5)/' \
+    ~/Installed_by_FISSURE/libiio/iiod/CMakeLists.txt \
+    ~/Installed_by_FISSURE/libiio/tests/CMakeLists.txt \
+    ~/Installed_by_FISSURE/libiio/CMakeLists.txt
+mkdir build && cd build 
+cmake ../ 
+make 
+sudo make install
+sudo ldconfig
 cd ~/Installed_by_FISSURE
 git clone https://github.com/analogdevicesinc/libad9361-iio.git
 cd libad9361-iio
-cmake ./
-make
+git checkout libad9361-iio-v0
+sed -i 's/cmake_minimum_required(VERSION 2.8.12)/cmake_minimum_required(VERSION 3.5)/' ~/Installed_by_FISSURE/libad9361-iio/CMakeLists.txt
+mkdir build && cd build
+cmake .. -DLIBIIO_INCLUDEDIR=/usr/local/include
+make -j$(nproc)
 sudo make install
+sudo ldconfig
+
 #cd ~/Installed_by_FISSURE
 #git clone https://github.com/analogdevicesinc/iio-oscilloscope.git  # IIO oscilloscope is broken. /usr/include/gtkdatabox_graph.h:100:38: error: unknown type name ‘GdkRGBA’; did you mean ‘GdkGC’?
 #cd iio-oscilloscope
@@ -19973,17 +19992,36 @@ mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/pcercuei/libini.git
 cd libini
-mkdir build && cd build && cmake ../ && make && sudo make install
+sed -i 's/cmake_minimum_required(VERSION 3.1.0)/cmake_minimum_required(VERSION 3.5)/' ~/Installed_by_FISSURE/libini/CMakeLists.txt
+mkdir build
+cd build
+cmake ../
+make
+sudo make install
+sudo ldconfig
 cd ~/Installed_by_FISSURE
-git clone https://github.com/analogdevicesinc/libiio.git
+git clone https://github.com/analogdevicesinc/libiio.git -b v0.23
 cd libiio
-mkdir build && cd build && cmake ../ && make && sudo make install
+sed -i 's/cmake_minimum_required(VERSION 2.8.7)/cmake_minimum_required(VERSION 3.5)/' \
+    ~/Installed_by_FISSURE/libiio/iiod/CMakeLists.txt \
+    ~/Installed_by_FISSURE/libiio/tests/CMakeLists.txt \
+    ~/Installed_by_FISSURE/libiio/CMakeLists.txt
+mkdir build && cd build 
+cmake ../ 
+make 
+sudo make install
+sudo ldconfig
 cd ~/Installed_by_FISSURE
 git clone https://github.com/analogdevicesinc/libad9361-iio.git
 cd libad9361-iio
-cmake ./
-make
+git checkout libad9361-iio-v0
+sed -i 's/cmake_minimum_required(VERSION 2.8.12)/cmake_minimum_required(VERSION 3.5)/' ~/Installed_by_FISSURE/libad9361-iio/CMakeLists.txt
+mkdir build && cd build
+cmake .. -DLIBIIO_INCLUDEDIR=/usr/local/include
+make -j$(nproc)
 sudo make install
+sudo ldconfig
+
 #cd ~/Installed_by_FISSURE
 #git clone https://github.com/analogdevicesinc/iio-oscilloscope.git  # IIO oscilloscope is broken. /usr/include/gtkdatabox_graph.h:100:38: error: unknown type name ‘GdkRGBA’; did you mean ‘GdkGC’?
 #cd iio-oscilloscope

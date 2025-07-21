@@ -1766,13 +1766,37 @@ async def gpsBeaconEnableDisableIP_Return(component: object, sensor_node_id:str,
     """
     # Populate Location
     enable_disable_button = [
-        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_1,
-        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_2,
-        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_3,
-        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_4,
-        component.frontend.popups["HardwareSelectDialog"].pushButton_ip_gps_beacon_enable_disable_5
+        component.frontend.popups["HardwareSelectDialog"].pushButton_remote_actions_ip_gps_beacon_enable_disable_1,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_remote_actions_ip_gps_beacon_enable_disable_2,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_remote_actions_ip_gps_beacon_enable_disable_3,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_remote_actions_ip_gps_beacon_enable_disable_4,
+        component.frontend.popups["HardwareSelectDialog"].pushButton_remote_actions_ip_gps_beacon_enable_disable_5
     ]
     if gps_tak_beacon_status == True:
         enable_disable_button[int(sensor_node_id)].setText("Disable")
     else:
         enable_disable_button[int(sensor_node_id)].setText("Enable")
+
+
+async def uptimeIP_Return(component: object, sensor_node_id:str, uptime: str):
+    """
+    Returns the uptime results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], uptime)
+
+
+async def cpuIP_Return(component: object, sensor_node_id:str, cpu: str):
+    """
+    Returns the CPU percentage results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], cpu)
+
+
+async def processesIP_Return(component: object, sensor_node_id:str, processes: str):
+    """
+    Returns the processes results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], processes)
