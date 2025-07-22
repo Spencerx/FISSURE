@@ -234,7 +234,6 @@ FISSURE is most extensively tested on Ubuntu, making it the most validated platf
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
 | BackBox Linux 8 (amd64) | Python3 | maint-3.10 |
-| DragonOS FocalX (x86_64) | Python3 | maint-3.10 |
 | Kali 23.1 (x64) | Python3 | maint-3.10 |
 | KDE neon 5.25 (x64) (6.0 not tested) | Python3 | maint-3.8 |
 | Parrot Security 6.1 (amd64) | Python3 | maint-3.10 |
@@ -252,7 +251,7 @@ These operating systems are still in beta status. They are under development and
 
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
-| None |  |  |
+| DragonOS Noble (24.04) | Python3 | maint-3.10 |
 
 Note: Certain software tools do not work for every OS. Refer to [Known Conflicts and Third-Party Software](https://fissure.readthedocs.io/en/latest/pages/installation.html#known-conflicts)
 
