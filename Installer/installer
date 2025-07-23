@@ -10167,6 +10167,35 @@ ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'web
 
 programs_dragonOS_noble = []
 
+# fissure Commands
+programs_dragonOS_noble.append(('Ubuntu Noble APT Sources',
+f"""# Restore missing APT config directories
+sudo mkdir -p /etc/apt
+sudo mkdir -p /etc/apt/sources.list.d/
+sudo mkdir -p /etc/apt/preferences.d/
+sudo mkdir -p /etc/apt/apt.conf.d/
+
+# Restore base /etc/apt/sources.list (Ubuntu Noble)
+if [ ! -f /etc/apt/sources.list ]; then
+  echo "Restoring missing /etc/apt/sources.list"
+  sudo tee /etc/apt/sources.list > /dev/null <<EOF
+deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu noble-security main restricted universe multiverse
+EOF
+fi
+
+# Add missing public GPG key for Ubuntu Noble
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
+
+# Update package list
+sudo apt-get update
+
+########## Verify ##########
+test -f /etc/apt/sources.list && grep -q '^deb http://archive.ubuntu.com/ubuntu noble' /etc/apt/sources.list && echo "APT config restored"
+""", True, 'Minimum Install'))
+
 # Misc. Dependencies
 programs_dragonOS_noble.append(('Misc. Dependencies',
 """sudo apt-get -y update
