@@ -1,6 +1,23 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-7-23
+
+DragonOS Noble installer fixes, ifconfig and iwconfig remote actions
+
+### Added
+
+- Software sizes for DragonOS installer items
+- ifconfig and iwconfig remote actions for sensor nodes
+
+### Changed
+
+- Updated README to remove git submodule lines from the installer
+
+### Fixed
+
+- Ubuntu Noble APT Sources installer item for DragonOS
+
 ## 2025-7-22
 
 DragonOS Noble beta and installer updates.

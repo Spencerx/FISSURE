@@ -562,4 +562,68 @@ async def processesMeshtasticReturnLT(component: object, sensor_node_id: str, pr
         fissure.comms.MessageFields.MESSAGE_NAME: "processesMeshtasticReturnLT",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def ifconfigMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the ifconfig output on the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def ifconfigMeshtasticReturnLT(component: object, sensor_node_id: str, ifconfig: str):
+    """
+    Forwards ifconfigMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "ifconfig": ifconfig,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def iwconfigMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Signals sensor node to retrieve the iwconfig output on the computer.
+    """
+    # Send Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.SOURCE: component.identifierLT,
+        fissure.comms.MessageFields.DESTINATION: sensor_node_id,                
+        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigMeshtasticLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def iwconfigMeshtasticReturnLT(component: object, sensor_node_id: str, iwconfig: str):
+    """
+    Forwards iwconfigMeshtasticReturnLT message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "iwconfig": iwconfig,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigMeshtasticReturnLT",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg) 

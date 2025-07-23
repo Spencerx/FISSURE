@@ -2166,6 +2166,40 @@ class DashboardBackend:
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+    async def ifconfigIP(self, sensor_node_id):
+        """
+        Sends a message to the HIPRFISR to retrieve the ifconfig output on the sensor node computer.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def iwconfigIP(self, sensor_node_id):
+        """
+        Sends a message to the HIPRFISR to retrieve the iwconfig output on the sensor node computer.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)            
+
+
 #######################################################################################
 ############################## Low Throughput Messages ################################
 #######################################################################################
@@ -2446,4 +2480,38 @@ class DashboardBackend:
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def ifconfigMeshtasticLT(self, sensor_node_id: str):
+        """
+        Sends a message to retrieve the ifconfig output on the sensor node computer.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigMeshtasticLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+    
+    async def iwconfigMeshtasticLT(self, sensor_node_id: str):
+        """
+        Sends a message to retrieve the iwconfig output on the sensor node computer.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigMeshtasticLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)            
 

@@ -2482,7 +2482,69 @@ async def processesIP_Return(component: object, sensor_node_id:str, processes: s
         fissure.comms.MessageFields.MESSAGE_NAME: "processesIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def ifconfigIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the ifconfig output on the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def ifconfigIP_Return(component: object, sensor_node_id:str, ifconfig: str):
+    """
+    Forwards the ifconfigIP_Return message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "ifconfig": ifconfig,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def iwconfigIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the iwconfig output on the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def iwconfigIP_Return(component: object, sensor_node_id:str, iwconfig: str):
+    """
+    Forwards the iwconfigIP_Return message to the Dashboard.
+    """
+    # Forward to Dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "iwconfig": iwconfig,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg) 
 
 
 ##########################################################################

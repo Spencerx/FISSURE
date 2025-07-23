@@ -32,7 +32,11 @@ MESSAGE_CODE_MAP = {
     "R1": "cpuMeshtasticLT",
     "R2": "cpuMeshtasticReturnLT",
     "S1": "processesMeshtasticLT",
-    "S2": "processesMeshtasticReturnLT",     
+    "S2": "processesMeshtasticReturnLT",
+    "T1": "ifconfigMeshtasticLT",
+    "T2": "ifconfigMeshtasticReturnLT",
+    "U1": "iwconfigMeshtasticLT",
+    "U2": "iwconfigMeshtasticReturnLT",     
 }
 
 # Reverse mapping for sending messages

@@ -609,3 +609,81 @@ async def processesMeshtasticLT(component: object, sensor_node_id: str):
     }
 
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)
+
+
+async def ifconfigMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Retrieves an abbreviated ifconfig output: only physical Ethernet/Wi-Fi interfaces with their IPv4 address or '-'.
+    """
+    cmd = r"""
+    ifconfig | awk '
+    /^[a-z]/ {
+        iface=$1
+        sub(":", "", iface)
+        ip="-"
+        if (iface ~ /^(br|docker|veth|lo)/) {
+            skip=1
+        } else if (iface ~ /^(en|eth|wl)/) {
+            skip=0
+            interfaces[iface] = "-"
+        } else {
+            skip=1
+        }
+    }
+    /inet / && $2 != "127.0.0.1" && !skip {
+        interfaces[iface] = $2
+    }
+    END {
+        for (i in interfaces) print i, interfaces[i]
+    }'
+    """
+
+    try:
+        ifconfig_result = subprocess.check_output(cmd, shell=True, text=True).strip()
+    except subprocess.CalledProcessError as e:
+        ifconfig_result = f"Error: {e}"
+
+    # Return the Text
+    PARAMETERS = {"sensor_node_id": sensor_node_id, "ifconfig": ifconfig_result}
+    response_message = {
+        MessageFields.SOURCE: component.identifier,
+        MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
+        MessageFields.MESSAGE_NAME: "ifconfigMeshtasticReturnLT",
+        MessageFields.PARAMETERS: PARAMETERS,
+    }
+
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)
+
+
+async def iwconfigMeshtasticLT(component: object, sensor_node_id: str):
+    """
+    Retrieves the wireless interface name and mode (Managed or Monitor) on the sensor node computer.
+    """
+    cmd = r"""
+    iwconfig 2>/dev/null | awk '
+    /^[a-z]/ {iface=$1}
+    /Mode:/ {
+      for (i = 1; i <= NF; i++) {
+        if ($i ~ /^Mode:/) {
+          split($i, a, ":")
+          print iface, a[2]
+        }
+      }
+    }'
+    """
+
+    try:
+        iwconfig_result = subprocess.check_output(cmd, shell=True, text=True).strip()
+    except subprocess.CalledProcessError as e:
+        iwconfig_result = f"Error: {e}"
+
+    # Return the Text
+    PARAMETERS = {"sensor_node_id": sensor_node_id, "iwconfig": iwconfig_result}
+    response_message = {
+        MessageFields.SOURCE: component.identifier,
+        MessageFields.DESTINATION: Identifiers.HIPRFISR_LT,
+        MessageFields.MESSAGE_NAME: "iwconfigMeshtasticReturnLT",
+        MessageFields.PARAMETERS: PARAMETERS,
+    }
+
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, response_message)

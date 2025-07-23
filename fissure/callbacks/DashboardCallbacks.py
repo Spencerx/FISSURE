@@ -1800,3 +1800,19 @@ async def processesIP_Return(component: object, sensor_node_id:str, processes: s
     """
     # Open a Text Dialog
     ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], processes)
+
+
+async def ifconfigIP_Return(component: object, sensor_node_id:str, ifconfig: str):
+    """
+    Returns the ifconfig results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], ifconfig)
+
+
+async def iwconfigIP_Return(component: object, sensor_node_id:str, iwconfig: str):
+    """
+    Returns the iwconfig results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], iwconfig)

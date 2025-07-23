@@ -10167,37 +10167,20 @@ ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'web
 
 programs_dragonOS_noble = []
 
-# fissure Commands
-programs_dragonOS_noble.append(('Ubuntu Noble APT Sources',
-f"""# Restore missing APT config directories
-sudo mkdir -p /etc/apt
-sudo mkdir -p /etc/apt/sources.list.d/
-sudo mkdir -p /etc/apt/preferences.d/
-sudo mkdir -p /etc/apt/apt.conf.d/
-
-# Restore base /etc/apt/sources.list (Ubuntu Noble)
-if [ ! -f /etc/apt/sources.list ]; then
-  echo "Restoring missing /etc/apt/sources.list"
-  sudo tee /etc/apt/sources.list > /dev/null <<EOF
-deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu noble-backports main restricted universe multiverse
-deb http://security.ubuntu.com/ubuntu noble-security main restricted universe multiverse
-EOF
-fi
-
-# Add missing public GPG key for Ubuntu Noble
+# Ubuntu Noble APT Sources
+programs_dragonOS_noble.append(('Ubuntu Noble APT Sources (391.27 MB)',
+"""# Add missing public GPG key for Ubuntu Noble
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 871920D1991BC93C
 
 # Update package list
 sudo apt-get update
 
 ########## Verify ##########
-test -f /etc/apt/sources.list && grep -q '^deb http://archive.ubuntu.com/ubuntu noble' /etc/apt/sources.list && echo "APT config restored"
+find /etc/apt/trusted.gpg.d/ -name '*.gpg' -exec gpg --no-default-keyring --keyring {} --list-keys 2>/dev/null \; | grep -F '871920D1991BC93C'
 """, True, 'Minimum Install'))
 
 # Misc. Dependencies
-programs_dragonOS_noble.append(('Misc. Dependencies',
+programs_dragonOS_noble.append(('Misc. Dependencies (2.36 GB)',
 """sudo apt-get -y update
 sudo apt-get install -y ubuntu-standard
 sudo apt-get install -y eog
@@ -10289,7 +10272,7 @@ sudo python3 -m pip install python-dotenv --break-system-packages
 """,True,"Minimum Install"))
 
 # fissure Commands
-programs_dragonOS_noble.append(('fissure Commands',
+programs_dragonOS_noble.append(('fissure Commands (20.00 kB)',
 f"""mkdir -p ~/.local/bin
 if grep -Fq "~/.local/bin" ~/.bashrc
 then
@@ -10320,12 +10303,12 @@ ls ~/.local/bin/fissure ~/.local/bin/fissure-sensor-node
 """, True, 'Minimum Install'))
 
 # expect Command Fix
-programs_dragonOS_noble.append(('expect Command Fix',
+programs_dragonOS_noble.append(('expect Command Fix (0.00 kB)',
 """sudo sed -i 's/lindex $argv 0/lindex $argv/g' """ + fissure_directory + """/Tools/expect_script
 """, True, "Minimum Install"))
 
 # Password Prompt Exceptions
-programs_dragonOS_noble.append(('Password Prompt Exceptions',
+programs_dragonOS_noble.append(('Password Prompt Exceptions (8.00 kB)',
 f"""# Replace placeholder in the template file directly into a temporary file
 sed "s/__USERNAME__/$(whoami)/g" "{fissure_directory}/Installer/password_prompt_exceptions.txt" > /tmp/password_prompt_exceptions
 
@@ -10376,7 +10359,7 @@ ls -l /etc/sudoers.d/fissure
 # """,True,"Minimum Install"))
 
 # Scapy
-programs_dragonOS_noble.append(('Scapy',
+programs_dragonOS_noble.append(('Scapy (14.74 MB)',
 """sudo apt-get install -y python3-scapy
 #sudo python3 -m pip install scapy --break-system-packages  # Causes errors
 sudo python2 -m pip install scapy==2.4.5
@@ -10386,7 +10369,7 @@ python2 -c "import scapy" && python3 -c "import scapy"
 """,True,"Minimum Install"))
 
 # Wireshark
-programs_dragonOS_noble.append(('Wireshark',
+programs_dragonOS_noble.append(('Wireshark (52.00 kB)',
 """#sudo add-apt-repository --y ppa:wireshark-dev/stable  # Gets installed with Misc. Dependencies (tshark), ESP32 Bluetooth Classic Sniffer
 # sudo apt-get update
 # sudo apt install -y wireshark wireshark-dev  # Yes
@@ -10403,7 +10386,7 @@ wireshark --help
 """,True,"Minimum Install"))
 
 # PostgreSQL Database 
-programs_dragonOS_noble.append(('PostgreSQL Database',
+programs_dragonOS_noble.append(('PostgreSQL Database (1.46 GB)',
 """sudo python3 -m pip install python-dotenv --break-system-packages
 sudo apt-get install -y libpq-dev
 sudo python3 -m pip install psycopg2 --break-system-packages
@@ -10436,7 +10419,7 @@ bash -c '
 """,True,'Minimum Install'))
 
 # Meshtastic
-programs_dragonOS_noble.append(('Meshtastic',
+programs_dragonOS_noble.append(('Meshtastic (15.35 MB)',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
 sudo apt-get install -y python3-pyserial
@@ -10451,7 +10434,7 @@ python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
-programs_dragonOS_noble.append(('Network Certificates (3.51 kB)',
+programs_dragonOS_noble.append(('Network Certificates  (4.40 MB)',
 """cd '""" + fissure_directory + """'
 export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
 python3 ./fissure/generate_certificates.py
@@ -10501,7 +10484,7 @@ ls "$HOME/.config/autostart/fissure-sensor-node.desktop"
 # """,True,'Hardware'))
 
 # USRP X300 Series
-programs_dragonOS_noble.append(('USRP X300 Series',
+programs_dragonOS_noble.append(('USRP X300 Series (0.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE  # Set MTU to 9000 and run uhd_image_loader command
 cd ~/Installed_by_FISSURE
 #wget https://codeload.github.com/EttusResearch/uhd/zip/release_003_010_003_000 -O uhd.zip
@@ -10554,7 +10537,7 @@ sudo sysctl -w net.core.wmem_max=24862979
 # """,True,'Hardware'))
 
 # 8812au Driver
-programs_dragonOS_noble.append(('8812au Driver',
+programs_dragonOS_noble.append(('8812au Driver (202.46 MB)',
 """sudo apt-get -y install dkms
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -10564,7 +10547,7 @@ sudo make dkms_install
 """,True,'Hardware'))
 
 # Zigbee Sniffer
-programs_dragonOS_noble.append(('Zigbee Sniffer',
+programs_dragonOS_noble.append(('Zigbee Sniffer (124.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cp -R """ + fissure_directory + """/Tools/OpenSniffer-0.1/ ~/Installed_by_FISSURE/
 cd ~/Installed_by_FISSURE/OpenSniffer-0.1/
@@ -10603,7 +10586,7 @@ ls /usr/local/bin/fl2k_test
 """,True,'Hardware'))
 
 # Proxmark3
-programs_dragonOS_noble.append(('Proxmark3',
+programs_dragonOS_noble.append(('Proxmark3 (3.52 GB)',
 """sudo apt-get install -y p7zip git build-essential libreadline8 libreadline-dev libusb-0.1-4 libusb-dev perl pkg-config wget libncurses5-dev gcc-arm-none-eabi libreadline-dev libpcsclite-dev gcc-arm-none-eabi
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -10671,7 +10654,7 @@ ls ~/Installed_by_FISSURE/proxmark3/client/proxmark3
 # """,True,'Hardware'))
 
 # qFlipper
-programs_dragonOS_noble.append(('qFlipper',
+programs_dragonOS_noble.append(('qFlipper (26.40 MB)',
 """mkdir -p ~/Installed_by_FISSURE/qFlipper
 cd ~/Installed_by_FISSURE/qFlipper
 wget -r -np -nd -A "qFlipper-x86_64-dev*.AppImage" https://update.flipperzero.one/builds/qFlipper/dev/
@@ -10681,7 +10664,7 @@ ls ~/Installed_by_FISSURE/qFlipper/qFlipper*
 """,True,'Hardware'))
 
 # gr-acars-3.10ng
-programs_dragonOS_noble.append(('gr-acars-3.10ng',
+programs_dragonOS_noble.append(('gr-acars-3.10ng (4.94 MB)',
 """cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-acars-3.10ng/
 sudo rm -Rf build
 mkdir build
@@ -10695,7 +10678,7 @@ ls /usr/local/lib/python*/*/acars
 """,True,'Out-of-Tree Modules'))
 
 # gr-adsb
-programs_dragonOS_noble.append(('gr-adsb',
+programs_dragonOS_noble.append(('gr-adsb (4.44 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
@@ -10721,7 +10704,7 @@ ls /usr/local/lib/python*/*/gnuradio/adsb
 """,True,'Out-of-Tree Modules'))
 
 # gr-ainfosec
-programs_dragonOS_noble.append(('gr-ainfosec',
+programs_dragonOS_noble.append(('gr-ainfosec (5.13 MB)',
 """cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ainfosec/
 sudo rm -Rf build
 mkdir build
@@ -10735,7 +10718,7 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 """,True,'Minimum Install'))
 
 # gr-ais
-programs_dragonOS_noble.append(('gr-ais',
+programs_dragonOS_noble.append(('gr-ais (9.48 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
@@ -10764,7 +10747,7 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 """,True,'Out-of-Tree Modules'))
 
 # gr-aistx
-programs_dragonOS_noble.append(('gr-aistx',
+programs_dragonOS_noble.append(('gr-aistx (15.60 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
@@ -10827,7 +10810,7 @@ ls /usr/local/bin/btrx
 """,False,'Out-of-Tree Modules'))
 
 # gr-clapper_plus
-programs_dragonOS_noble.append(('gr-clapper_plus',
+programs_dragonOS_noble.append(('gr-clapper_plus (7.73 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
@@ -10853,7 +10836,7 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 """,True,'Out-of-Tree Modules'))
 
 # gr-dect2
-programs_dragonOS_noble.append(('gr-dect2',
+programs_dragonOS_noble.append(('gr-dect2 (9.97 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
@@ -10879,7 +10862,7 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 """,True,'Out-of-Tree Modules'))
 
 # gr-foo
-programs_dragonOS_noble.append(('gr-foo',
+programs_dragonOS_noble.append(('gr-foo (22.18 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
@@ -10906,7 +10889,7 @@ ls /usr/local/lib/python*/*/foo
 """,True,'Out-of-Tree Modules'))
 
 # gr-fuzzer
-programs_dragonOS_noble.append(('gr-fuzzer',
+programs_dragonOS_noble.append(('gr-fuzzer (5.10 MB)',
 """cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-fuzzer/
 sudo rm -Rf build
 mkdir build
@@ -10920,7 +10903,7 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 """,True,'Out-of-Tree Modules'))
 
 # gr-garage_door
-programs_dragonOS_noble.append(('gr-garage_door',
+programs_dragonOS_noble.append(('gr-garage_door (5.34 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
@@ -11004,7 +10987,7 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 # """,True,'Out-of-Tree Modules'))
 
 # gr-ieee802-15-4
-programs_dragonOS_noble.append(('gr-ieee802-15-4',
+programs_dragonOS_noble.append(('gr-ieee802-15-4 (54.02 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
@@ -11033,7 +11016,7 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 """,True,'Out-of-Tree Modules'))
 
 # gr-iridium
-programs_dragonOS_noble.append(('gr-iridium',
+programs_dragonOS_noble.append(('gr-iridium (44.19 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
@@ -11060,7 +11043,7 @@ ls /usr/local/lib/python*/*/iridium
 """,True,'Out-of-Tree Modules'))
 
 # gr-j2497
-programs_dragonOS_noble.append(('gr-j2497',
+programs_dragonOS_noble.append(('gr-j2497 (5.80 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
@@ -11112,7 +11095,7 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 # """,True,'Out-of-Tree Modules'))
 
 # gr-mixalot
-programs_dragonOS_noble.append(('gr-mixalot',
+programs_dragonOS_noble.append(('gr-mixalot (49.39 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
@@ -11139,7 +11122,7 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 """,True,'Out-of-Tree Modules'))
 
 # gr-nrsc5
-programs_dragonOS_noble.append(('gr-nrsc5',
+programs_dragonOS_noble.append(('gr-nrsc5 (55.45 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
@@ -11167,7 +11150,7 @@ ls /usr/local/lib/python*/*/nrsc5
 """,True,'Out-of-Tree Modules'))
 
 # gr-paint
-programs_dragonOS_noble.append(('gr-paint',
+programs_dragonOS_noble.append(('gr-paint (17.54 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
@@ -11197,7 +11180,7 @@ ls /usr/local/lib/python*/*/paint
 """,True,'Out-of-Tree Modules'))
 
 # gr-rds
-programs_dragonOS_noble.append(('gr-rds',
+programs_dragonOS_noble.append(('gr-rds (21.93 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
@@ -11249,7 +11232,7 @@ ls /usr/local/lib/python*/*/*/sidekiq
 """,False,'Out-of-Tree Modules'))
 
 # gr-sdrplay3
-programs_dragonOS_noble.append(('gr-sdrplay3',
+programs_dragonOS_noble.append(('gr-sdrplay3 (24.12 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
@@ -11275,7 +11258,7 @@ ls /usr/local/lib/python*/*/*/sdrplay3
 """,True,'Out-of-Tree Modules'))
 
 # gr-tpms
-programs_dragonOS_noble.append(('gr-tpms',
+programs_dragonOS_noble.append(('gr-tpms (10.49 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
@@ -11302,7 +11285,7 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 """,True,'Out-of-Tree Modules'))
 
 # gr-tpms_poore
-programs_dragonOS_noble.append(('gr-tpms_poore',
+programs_dragonOS_noble.append(('gr-tpms_poore (10.86 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
@@ -11328,7 +11311,7 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 """,True,'Out-of-Tree Modules'))
 
 # gr-X10
-programs_dragonOS_noble.append(('gr-X10',
+programs_dragonOS_noble.append(('gr-X10 (7.89 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
@@ -11354,7 +11337,7 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 """,True,'Out-of-Tree Modules'))
 
 # gr-zwave_poore
-programs_dragonOS_noble.append(('gr-zwave_poore',
+programs_dragonOS_noble.append(('gr-zwave_poore (6.85 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
@@ -11380,7 +11363,7 @@ ls /usr/local/lib/python*/*/gnuradio/zwave_poore
 """,True,'Out-of-Tree Modules'))
 
 # QSpectrumAnalyzer
-programs_dragonOS_noble.append(('QSpectrumAnalyzer',
+programs_dragonOS_noble.append(('QSpectrumAnalyzer (2.89 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers
 #sudo apt-get -y update
 sudo apt-get install -y python3-pip python3-pyqt5 python3-numpy python3-scipy python3-soapysdr  # No package: soapysdr
@@ -11432,7 +11415,7 @@ ls ~/.local/bin/qspectrumanalyzer
 # """,True,'Development'))
 
 # Grip
-programs_dragonOS_noble.append(('Grip',
+programs_dragonOS_noble.append(('Grip (1.02 MB)',
 """sudo python3 -m pip install grip --break-system-packages
 ########## Verify ##########
 ls /usr/local/bin/grip
@@ -11450,7 +11433,7 @@ ls /usr/local/bin/grip
 # """,True,'802.11'))
 
 # UDP Replay
-programs_dragonOS_noble.append(('UDP Replay',
+programs_dragonOS_noble.append(('UDP Replay (692.00 kB)',
 """sudo apt-get install -y libpcap-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -11466,7 +11449,7 @@ ls /usr/local/bin/udpreplay
 """,True,'802.11'))
 
 # V2Verifier
-programs_dragonOS_noble.append(('V2Verifier',
+programs_dragonOS_noble.append(('V2Verifier (2.08 MB)',
 """sudo apt-get install -y libgmp3-dev python3-tk python3-pil.imagetk
 sudo python3 -m pip install fastecdsa --break-system-packages
 sudo python3 -m pip install -U pyyaml --break-system-packages
@@ -11557,14 +11540,14 @@ cp """ + fissure_directory + """/Tools/LTE-ciphercheck/ciphercheck.conf ../srsue
 # """,True,'802.11'))
 
 # Geany
-programs_dragonOS_noble.append(('Geany',
+programs_dragonOS_noble.append(('Geany (17.31 MB)',
 """sudo apt-get install -y geany
 ########## Verify ##########
 geany --help
 """,True,'Development'))
 
 # Arduino IDE
-programs_dragonOS_noble.append(('Arduino IDE',
+programs_dragonOS_noble.append(('Arduino IDE (600.91 MB)',
 """wget -P ~/Installed_by_FISSURE/ https://downloads.arduino.cc/arduino-1.8.15-linux64.tar.xz
 cd ~/Installed_by_FISSURE
 tar -xf arduino-1.8.15-linux64.tar.xz
@@ -11577,21 +11560,21 @@ arduino --version
 """,True,'Development'))
 
 # Minicom
-programs_dragonOS_noble.append(('Minicom',
+programs_dragonOS_noble.append(('Minicom (1.65 MB)',
 """sudo apt-get install -y minicom
 ########## Verify ##########
 ls /usr/bin/minicom
 """,True,'Hardware'))
 
 # PuTTY
-programs_dragonOS_noble.append(('PuTTY',
+programs_dragonOS_noble.append(('PuTTY (6.64 MB)',
 """sudo apt-get install -y putty
 ########## Verify ##########
 putty --help
 """,True,'Hardware'))
 
 # openHAB - FIX
-programs_dragonOS_noble.append(('openHAB',
+programs_dragonOS_noble.append(('openHAB (610.36 MB)',
 """sudo apt-get -yq install gnupg curl
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
 cd ~/Downloads
@@ -11610,7 +11593,7 @@ ls /usr/bin/openhab-cli
 """,True,'Z-Wave'))
 
 # rtl-zwave
-programs_dragonOS_noble.append(('rtl-zwave',
+programs_dragonOS_noble.append(('rtl-zwave (112.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 sudo apt-get install -y libpcap-dev
 cp -R """ + fissure_directory + """/Tools/rtl-zwave-master ~/Installed_by_FISSURE/
@@ -11621,7 +11604,7 @@ ls ~/Installed_by_FISSURE/rtl-zwave-master/rtl_zwave
 """,True,'Z-Wave'))
 
 # waving-z
-programs_dragonOS_noble.append(('waving-z',
+programs_dragonOS_noble.append(('waving-z (2.12 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/baol/waving-z.git
@@ -11662,7 +11645,7 @@ rm baudline_1.08_linux_x86_64.tar.gz
 # """,True,'SDR'))
 
 # OpenCPN
-programs_dragonOS_noble.append(('OpenCPN',
+programs_dragonOS_noble.append(('OpenCPN (161.47 MB)',
 """sudo add-apt-repository -y ppa:opencpn/opencpn
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C865EB40  # FIX
 sudo apt-get update
@@ -11672,7 +11655,7 @@ ls /usr/bin/opencpn
 """,True,'AIS'))
 
 # Kalibrate
-programs_dragonOS_noble.append(('Kalibrate',
+programs_dragonOS_noble.append(('Kalibrate (1.97 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/steve-m/kalibrate-rtl.git
@@ -11683,7 +11666,7 @@ ls ~/Installed_by_FISSURE/kalibrate-rtl/src/kal
 """,True,'GSM'))
 
 # retrogram-rtlsdr
-programs_dragonOS_noble.append(('retrogram-rtlsdr',
+programs_dragonOS_noble.append(('retrogram-rtlsdr (1.62 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 sudo apt-get install -y librtlsdr-dev libncurses5-dev libboost-program-options-dev
 cp -R """ + fissure_directory + """/Tools/retrogram-rtlsdr-master ~/Installed_by_FISSURE/
@@ -11694,7 +11677,7 @@ ls ~/Installed_by_FISSURE/retrogram-rtlsdr-master/retrogram-rtlsdr
 """,True,'SDR'))
 
 # RTLSDR-Airband
-programs_dragonOS_noble.append(('RTLSDR-Airband',
+programs_dragonOS_noble.append(('RTLSDR-Airband (7.07 MB)',
 """sudo apt-get install -y build-essential cmake pkg-config libmp3lame-dev libshout3-dev libconfig++-dev libfftw3-dev libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -11711,7 +11694,7 @@ rtl_airband -h
 """,True,'SDR'))
 
 # Spektrum
-programs_dragonOS_noble.append(('Spektrum',
+programs_dragonOS_noble.append(('Spektrum (230.65 MB)',
 """echo 'blacklist dvb_usb_rtl28xxu' | sudo tee /etc/modprobe.d/rtl-sdr.conf  # Restart computer to use RTL device
 echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="adm", MODE="0666"' | sudo tee /etc/udev/rules.d/20.rtlsdr.rules
 mkdir -p ~/Installed_by_FISSURE
@@ -11743,7 +11726,7 @@ ls ~/Installed_by_FISSURE/spektrum/spektrum
 # """,True,'Trunked Radio'))
 
 # Audacity
-programs_dragonOS_noble.append(('Audacity',
+programs_dragonOS_noble.append(('Audacity (47.15 MB)',
 """sudo apt-get install -y audacity
 ########## Verify ##########
 audacity --version
@@ -11764,7 +11747,7 @@ audacity --version
 # """,True,'Audio'))
 
 # mpv
-programs_dragonOS_noble.append(('mpv',
+programs_dragonOS_noble.append(('mpv (41.89 MB)',
 """sudo apt-get install -y mpv
 ########## Verify ##########
 mpv --version
@@ -11778,7 +11761,7 @@ mpv --version
 # """,True,'Audio'))
 
 # MPlayer
-programs_dragonOS_noble.append(('MPlayer',
+programs_dragonOS_noble.append(('MPlayer (7.80 MB)',
 """sudo apt-get install -y mplayer
 ########## Verify ##########
 ls /usr/bin/mplayer
@@ -11799,7 +11782,7 @@ ls /usr/bin/mplayer
 # """,False,'Video'))
 
 # radiosonde_auto_rx
-programs_dragonOS_noble.append(('radiosonde_auto_rx',
+programs_dragonOS_noble.append(('radiosonde_auto_rx (39.20 MB)',
 """sudo apt-get install -y python3 python3-numpy python3-setuptools python3-crcmod python3-requests python3-dateutil python3-pip python3-flask sox git build-essential libtool cmake usbutils libusb-1.0-0-dev rng-tools libsamplerate-dev libatlas3-base libgfortran5
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -11813,7 +11796,7 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_dragonOS_noble.append(('SdrGlut',
+programs_dragonOS_noble.append(('SdrGlut (63.21 MB)',
 """sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -11827,7 +11810,7 @@ ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
 """,True,'SDR'))
 
 # rehex
-programs_dragonOS_noble.append(('rehex',
+programs_dragonOS_noble.append(('rehex (646.61 MB)',
 """sudo apt-get install -y build-essential git libwxgtk3.2-dev libjansson-dev libcapstone-dev liblua5.3-dev lua5.3 lua5.2 libunistring-dev libgtk-3-dev lua-busted libbotan-2-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -11841,7 +11824,7 @@ ls /usr/local/bin/rehex
 """,True,'Data'))
 
 # ZEPASSD
-programs_dragonOS_noble.append(('ZEPASSD',
+programs_dragonOS_noble.append(('ZEPASSD (8.66 MB)',
 """#sudo apt-get install -y # boost.program-options, boost.crc, boost.circular-buffer, libfftw3, libuhd 3.9.5 or later
 sudo apt-get install -y libuhd-dev
 mkdir -p ~/Installed_by_FISSURE
@@ -11854,7 +11837,7 @@ ls ~/Installed_by_FISSURE/zepassd/zepassd
 """,True,'RFID'))
 
 # iridium-toolkit
-programs_dragonOS_noble.append(('iridium-toolkit',
+programs_dragonOS_noble.append(('iridium-toolkit (3.64 MB)',
 """#Python (2.7), NumPy (scipy), crcmod
 sudo apt-get install -y mplayer
 mkdir -p ~/Installed_by_FISSURE
@@ -11869,7 +11852,7 @@ ls ~/Installed_by_FISSURE/osmo-ir77/codec/ir77_ambe_decode
 """,True,'Satellite'))
 
 # IridiumLive
-programs_dragonOS_noble.append(('IridiumLive',
+programs_dragonOS_noble.append(('IridiumLive (92.71 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/microp11/iridiumlive.git
@@ -11899,7 +11882,7 @@ sudo dpkg -i python-nfqueue_0.6-1build2_amd64.deb
 """,False,'802.11'))
 
 # Wifite
-programs_dragonOS_noble.append(('Wifite',
+programs_dragonOS_noble.append(('Wifite (159.01 MB)',
 """echo "macchanger macchanger/automatically_run boolean false" | sudo debconf-set-selections
 # python, iwconfig, ifconfig, Aircrack-ng, tshark, reaver, bully, coWPAtty, pyrit, hashcat, hcxdumptool, hcxpcaptool
 sudo apt-get install -y build-essential libpcap-dev aircrack-ng pixiewps libssl-dev hashcat libcurl4-openssl-dev pkg-config macchanger python-is-python3
@@ -11967,7 +11950,7 @@ sudo sed -i 's/python/python3/g' ~/Installed_by_FISSURE/wifite2/Wifite.py
 # """,True,'433 MHz'))
 
 # RouterSploit
-programs_dragonOS_noble.append(('RouterSploit',
+programs_dragonOS_noble.append(('RouterSploit (359.61 MB)',
 """sudo apt-get install -y python3-pip libglib2.0-dev rustc
 sudo python3 -m pip install setuptools-rust --break-system-packages
 mkdir -p ~/Installed_by_FISSURE
@@ -11982,7 +11965,7 @@ python3 -m pip install bluepy --break-system-packages
 """,True,'802.11'))
 
 # Metasploit
-programs_dragonOS_noble.append(('Metasploit',
+programs_dragonOS_noble.append(('Metasploit (1.28 GB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 mkdir metasploit
@@ -11993,7 +11976,7 @@ ls /usr/bin/msfconsole
 """,True,'802.11'))
 
 # monitor_rtl433
-programs_dragonOS_noble.append(('monitor_rtl433',
+programs_dragonOS_noble.append(('monitor_rtl433 (54.96 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mcbridejc/monitor_rtl433.git
@@ -12006,7 +11989,7 @@ ls /usr/local/bin/monitor_rtl433
 """,True,'433 MHz'))
 
 # scan-ssid
-programs_dragonOS_noble.append(('scan-ssid',
+programs_dragonOS_noble.append(('scan-ssid (240.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 sudo apt-get install -y iw
@@ -12019,7 +12002,7 @@ scan-ssid --help
 """,True,'802.11'))
 
 # minimodem
-programs_dragonOS_noble.append(('minimodem',
+programs_dragonOS_noble.append(('minimodem (108.00 kB)',
 """sudo apt-get install -y minimodem
 ########## Verify ##########
 minimodem --version
@@ -12033,7 +12016,7 @@ minimodem --version
 # """,True,'Ham Radio'))
 
 # Google Earth Pro
-programs_dragonOS_noble.append(('Google Earth Pro',
+programs_dragonOS_noble.append(('Google Earth Pro (300.18 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
@@ -12043,7 +12026,7 @@ ls /usr/bin/google-earth-pro
 """,True,'Mapping'))
 
 # gr-air-modes
-programs_dragonOS_noble.append(('gr-air-modes',
+programs_dragonOS_noble.append(('gr-air-modes (3.06 MB)',
 """sudo apt-get install -y gr-air-modes
 sudo sed -i 's/numpy.float)/numpy.float32)/g' /usr/lib/python3/dist-packages/air_modes/mlat.py  # Deprecated numpy type: np.float->np.float32 or np.float64
 ########## Verify ##########
@@ -12051,7 +12034,7 @@ modes_rx --help
 """,True,'Aircraft'))
 
 # ESP8266 Deauther v2
-programs_dragonOS_noble.append(('ESP8266 Deauther v2',
+programs_dragonOS_noble.append(('ESP8266 Deauther v2 (5.90 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget https://github.com/SpacehuhnTech/esp8266_deauther/archive/v2.zip
@@ -12060,7 +12043,7 @@ rm v2.zip
 """,True,'802.11'))
 
 # Viking
-programs_dragonOS_noble.append(('Viking',
+programs_dragonOS_noble.append(('Viking (306.61 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone git://git.code.sf.net/p/viking/code viking
@@ -12078,7 +12061,7 @@ viking --help
 """,True,'Mapping'))
 
 # PyGPSClient
-programs_dragonOS_noble.append(('PyGPSClient',
+programs_dragonOS_noble.append(('PyGPSClient (12.54 MB)',
 """sudo apt install -y python3-pip python3-tk python3-pil python3-pil.imagetk
 sudo apt remove -y python3-cryptography
 sudo python3 -m pip install --upgrade PyGPSClient --break-system-packages
@@ -12094,7 +12077,7 @@ ls /usr/local/bin/pygpsclient
 # """,True,'GPS'))
 
 # FoxtrotGPS
-programs_dragonOS_noble.append(('FoxtrotGPS',
+programs_dragonOS_noble.append(('FoxtrotGPS (2.14 MB)',
 """sudo apt-get install -y foxtrotgps
 ########## Verify ##########
 foxtrotgps --help
@@ -12117,7 +12100,7 @@ foxtrotgps --help
 # """,True,'POCSAG'))
 
 # Xastir
-programs_dragonOS_noble.append(('Xastir',
+programs_dragonOS_noble.append(('Xastir (41.37 MB)',
 """echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
@@ -12142,28 +12125,28 @@ sudo xastir -V
 # """,True,'LTE'))
 
 # btscanner
-programs_dragonOS_noble.append(('btscanner',
+programs_dragonOS_noble.append(('btscanner (1.12 MB)',
 """sudo apt-get install -y btscanner
 ########## Verify ##########
 btscanner --help
 """,True,'Bluetooth'))
 
 # hcidump
-programs_dragonOS_noble.append(('hcidump',
+programs_dragonOS_noble.append(('hcidump (560.00 kB)',
 """sudo apt-get install -y bluez-hcidump
 ########## Verify ##########
 hcidump --help
 """,True,'Bluetooth'))
 
 # GraphicsMagick
-programs_dragonOS_noble.append(('GraphicsMagick',
+programs_dragonOS_noble.append(('GraphicsMagick (5.24 MB)',
 """sudo apt-get install -y graphicsmagick-imagemagick-compat
 ########## Verify ##########
 gm -help
 """,True,'SDR'))
 
 # Spectrum Painter
-programs_dragonOS_noble.append(('Spectrum Painter',
+programs_dragonOS_noble.append(('Spectrum Painter (7.40 MB)',
 """sudo python3 -m pip install numpy imageio --break-system-packages 
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -12173,7 +12156,7 @@ git clone https://github.com/polygon/spectrum_painter.git
 """,True,'SDR'))
 
 # nrsc5 and nrsc5-gui
-programs_dragonOS_noble.append(('nrsc5',
+programs_dragonOS_noble.append(('nrsc5 (135.57 MB)',
 """sudo apt install -y git build-essential cmake autoconf libtool libao-dev libfftw3-dev librtlsdr-dev libgsl-dev python3-pyaudio
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -12196,7 +12179,7 @@ nrsc5 -v
 """,True,'HD Radio'))
 
 # HAM2MON
-programs_dragonOS_noble.append(('HAM2MON',
+programs_dragonOS_noble.append(('HAM2MON (876.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/bkerler/ham2mon.git
@@ -12204,7 +12187,7 @@ cp -f """ + fissure_directory + """/Tools/ham2mon/cursesgui.py ~/Installed_by_FI
 """,True,'Ham Radio'))
 
 # Anki
-programs_dragonOS_noble.append(('Anki',
+programs_dragonOS_noble.append(('Anki (10.85 MB)',
 """sudo apt-get install -y anki
 ########## Verify ##########
 anki -h
@@ -12219,7 +12202,7 @@ snap list bless-unofficial
 """,True,'Data'))
 
 # trackerjacker - Fix (needs newer scapy version, something else (netattack2?) resets it, some pieces don't work while running it)
-programs_dragonOS_noble.append(('trackerjacker',
+programs_dragonOS_noble.append(('trackerjacker (2.51 MB)',
 """sudo ln -s -f /usr/lib/x86_64-linux-gnu/libc.a /usr/lib/x86_64-linux-gnu/liblibc.a  # Python3.9 missing file
 sudo sed -i 's/tostring/tobytes/g' /usr/local/lib/python3.10/dist-packages/scapy/arch/linux.py
 sudo python3 -m pip install trackerjacker --break-system-packages
@@ -12228,7 +12211,7 @@ sudo trackerjacker --help
 """,True,'802.11'))
 
 # airgeddon
-programs_dragonOS_noble.append(('airgeddon',
+programs_dragonOS_noble.append(('airgeddon (200.43 MB)',
 """sudo apt-get install -y crunch mdk3 hostapd lighttpd ruby-dev xterm isc-dhcp-server ettercap-text-only john
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -12257,14 +12240,14 @@ sudo make install
 """,True,'802.11'))
 
 # Hydra
-programs_dragonOS_noble.append(('Hydra',
+programs_dragonOS_noble.append(('Hydra (19.06 MB)',
 """sudo apt-get install -y hydra
 ########## Verify ##########
 ls /usr/bin/hydra
 """,True,'SSH'))
 
 # Enscribe
-programs_dragonOS_noble.append(('Enscribe',
+programs_dragonOS_noble.append(('Enscribe (88.00 kB)',
 """sudo apt-get install -y enscribe
 ########## Verify ##########
 ls /usr/bin/enscribe
@@ -12340,14 +12323,14 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
 # """,True,'Ham Radio'))
 
 # pyFDA
-programs_dragonOS_noble.append(('pyFDA',
+programs_dragonOS_noble.append(('pyFDA (107.33 MB)',
 """sudo python3 -m pip install pyfda --use-pep517 --break-system-packages  # Has PEP issues with Python 3.10
 ########## Verify ##########
 pyfdax -h
 """,True,'Filters'))
 
 # Bootable USB
-programs_dragonOS_noble.append(('Bootable USB',
+programs_dragonOS_noble.append(('Bootable USB (64.18 MB)',
 """sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 382003C2C8B7B4AB813E915B14E4942973C62A1B
 sudo add-apt-repository -y "deb http://ppa.launchpad.net/nemh/systemback/ubuntu xenial main"
 sudo apt update
@@ -12377,21 +12360,21 @@ ls /usr/bin/systemback && ls /usr/bin/guidus
 # """,True,'Ham Radio'))
 
 # Meld
-programs_dragonOS_noble.append(('Meld',
+programs_dragonOS_noble.append(('Meld (11.35 MB)',
 """sudo apt-get -y install meld
 ########## Verify ##########
 ls /usr/bin/meld
 """,True,'Data'))
 
 # nwdiag
-programs_dragonOS_noble.append(('nwdiag',
+programs_dragonOS_noble.append(('nwdiag (29.34 MB)',
 """sudo python3 -m pip install nwdiag --break-system-packages
 ########## Verify ##########
 packetdiag -h
 """,True,'Data'))
 
 # HamClock
-programs_dragonOS_noble.append(('HamClock',
+programs_dragonOS_noble.append(('HamClock (47.96 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget https://www.clearskyinstitute.com/ham/HamClock/ESPHamClock.zip
@@ -12422,7 +12405,7 @@ ls /usr/local/bin/hamclock
 # """,True,'Bluetooth'))
 
 # dump978
-programs_dragonOS_noble.append(('dump978',
+programs_dragonOS_noble.append(('dump978 (1.15 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mutability/dump978.git
@@ -12452,7 +12435,7 @@ ls ~/Installed_by_FISSURE/dump978/dump978
 # """,False,'SDR'))
 
 # CRC RevEng
-programs_dragonOS_noble.append(('CRC RevEng',
+programs_dragonOS_noble.append(('CRC RevEng (884.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget -T 10 https://sourceforge.net/projects/reveng/files/3.0.5/reveng-3.0.5.zip/download
@@ -12465,7 +12448,7 @@ ls ~/Installed_by_FISSURE/reveng-3.0.5/bin/i386-linux/reveng
 """,True,'Data'))
 
 # wl-color-picker
-programs_dragonOS_noble.append(('wl-color-picker',
+programs_dragonOS_noble.append(('wl-color-picker (440.00 kB)',
 """sudo apt-get install -y slurp grim wl-clipboard
 cd ~/Installed_by_FISSURE
 git clone https://github.com/jgmdev/wl-color-picker.git
@@ -12474,7 +12457,7 @@ ls ~/Installed_by_FISSURE/wl-color-picker/wl-color-picker.sh
 """,True,'Development'))
 
 # GHex
-programs_dragonOS_noble.append(('GHex',
+programs_dragonOS_noble.append(('GHex (3.35 MB)',
 """sudo apt-get install -y ghex
 ########## Verify ##########
 ls /usr/bin/ghex
@@ -12541,14 +12524,14 @@ find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # pyais
-programs_dragonOS_noble.append(('pyais',
+programs_dragonOS_noble.append(('pyais (684.00 kB)',
 """sudo python3 -m pip install pyais --break-system-packages
 ########## Verify ##########
 ls /usr/local/lib/python3*/dist-packages/pyais
 """,True,'AIS'))
 
 # HAMRS
-programs_dragonOS_noble.append(('HAMRS',
+programs_dragonOS_noble.append(('HAMRS (100.91 MB)',
 """mkdir -p ~/Installed_by_FISSURE/HAMRS
 cd ~/Installed_by_FISSURE/HAMRS
 wget https://hamrs-releases.s3.us-east-2.amazonaws.com/1.0.6/hamrs-1.0.6-linux-x86_64.AppImage
@@ -12558,14 +12541,14 @@ ls ~/Installed_by_FISSURE/HAMRS/hamrs*
 """,True,'Ham Radio'))
 
 # Binwalk
-programs_dragonOS_noble.append(('Binwalk',
+programs_dragonOS_noble.append(('Binwalk (29.34 MB)',
 """sudo apt-get install -y python3-binwalk binwalk  # prone to nfqueue issue, use: sudo apt --fix-broken
 ########## Verify ##########
 ls /usr/bin/binwalk
 """,True,'Data'))
 
 # Read the Docs
-programs_dragonOS_noble.append(('Read the Docs',
+programs_dragonOS_noble.append(('Read the Docs (53.64 MB)',
 """sudo python3 -m pip install sphinx --break-system-packages
 sudo python3 -m pip install sphinx_rtd_theme --break-system-packages
 ########## Verify ##########
@@ -12573,7 +12556,7 @@ sudo python3 -m pip show sphinx_rtd_theme
 """,True,'Development'))
 
 # IQEngine
-programs_dragonOS_noble.append(('IQEngine',
+programs_dragonOS_noble.append(('IQEngine (48.32 MB)',
 """if command -v docker > /dev/null 2>&1; then
   echo "Docker is installed."
 else

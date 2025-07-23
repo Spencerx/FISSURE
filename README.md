@@ -273,13 +273,11 @@ git clone https://github.com/ainfosec/FISSURE.git
 Preparing the installer:
 ```
 cd FISSURE
-git checkout Python3  # or Python2_maint-3.7 for legacy third-party tools
-git submodule update --init
+git checkout Python3  # Optional, or Python2_maint-3.7 for select legacy third-party tools
 ./install
 ```
 
 Notes:
-- The git submodule command will download all missing GNU Radio out-of-tree modules from their online repositories and is required to install the GNU Radio out-of-tree modules.
 - The installer will ask to install PyQt software dependencies required to launch the installation GUIs if they are not found. 
 - Select the operating option in the GUI that best matches your operating system (should be detected automatically if your OS matches an option).
 - Periodically answer prompts regarding third-party software throughout the install. Use your best judgment, the answers will not likely impact FISSURE.

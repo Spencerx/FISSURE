@@ -2320,6 +2320,38 @@ p, li { white-space: pre-wrap; }
             <string>Processes</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_ifconfig_1">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_iwconfig_1">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="page_meshtastic">
           <widget class="QLabel" name="label2_remote_actions_meshtastic_gps_beacon_1">
@@ -2553,6 +2585,38 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Processes</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_iwconfig_1">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_ifconfig_1">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
            </property>
           </widget>
          </widget>
@@ -4910,6 +4974,38 @@ p, li { white-space: pre-wrap; }
             <string>Processes</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_iwconfig_2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_ifconfig_2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="page_meshtastic_3">
           <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_recall_hardware_2">
@@ -5143,6 +5239,38 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Processes</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_ifconfig_2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_iwconfig_2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
            </property>
           </widget>
          </widget>
@@ -7500,6 +7628,38 @@ p, li { white-space: pre-wrap; }
             <string>Processes</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_iwconfig_3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_ifconfig_3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="page_meshtastic_5">
           <widget class="QLabel" name="label2_remote_actions_meshtastic_recall_3">
@@ -7733,6 +7893,38 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Processes</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_ifconfig_3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_iwconfig_3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
            </property>
           </widget>
          </widget>
@@ -10112,6 +10304,38 @@ p, li { white-space: pre-wrap; }
             <string>Processes</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_iwconfig_4">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_ifconfig_4">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="page_meshtastic_7">
           <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_gps_beacon_disable_4">
@@ -10345,6 +10569,38 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Processes</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_ifconfig_4">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_iwconfig_4">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
            </property>
           </widget>
          </widget>
@@ -12702,6 +12958,38 @@ p, li { white-space: pre-wrap; }
             <string>Processes</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_iwconfig_5">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_ip_ifconfig_5">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="page_meshtastic_9">
           <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_gps_beacon_enable_5">
@@ -12935,6 +13223,38 @@ p, li { white-space: pre-wrap; }
            </property>
            <property name="text">
             <string>Processes</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_ifconfig_5">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>725</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>ifconfig</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_remote_actions_meshtastic_iwconfig_5">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>830</x>
+             <y>80</y>
+             <width>99</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>iwconfig</string>
            </property>
           </widget>
          </widget>

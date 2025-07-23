@@ -1514,3 +1514,43 @@ async def processesIP(component: object, sensor_node_id: str):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def ifconfigIP(component: object, sensor_node_id: str):
+    """
+    Retrieves the ifconfig output on the sensor node computer.
+    """
+    # Get Processes
+    ifconfig_result = subprocess.check_output("ifconfig", shell=True, text=True).strip()
+
+    # Send Status
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "ifconfig": ifconfig_result
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def iwconfigIP(component: object, sensor_node_id: str):
+    """
+    Retrieves the iwconfig output on the sensor node computer.
+    """
+    # Get Processes
+    iwconfig_result = subprocess.check_output("iwconfig", shell=True, text=True).strip()
+
+    # Send Status
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "iwconfig": iwconfig_result
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

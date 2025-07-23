@@ -2778,6 +2778,46 @@ async def ip_processes(HWSelect: QtCore.QObject):
     """
     # Send Message to Backend
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    await HWSelect.dashboard.backend.processesIP(str(tab_index))  
+    await HWSelect.dashboard.backend.processesIP(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_ifconfig(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve the ifconfig output on the sensor node.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.ifconfigMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def ip_ifconfig(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve the ifconfig output on the sensor node.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.ifconfigprocessesIP(str(tab_index))  
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def meshtastic_iwconfig(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve the iwconfig output on the sensor node.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.iwconfigMeshtasticLT(str(tab_index))
+
+
+@qasync.asyncSlot(QtCore.QObject)
+async def ip_iwconfig(HWSelect: QtCore.QObject):
+    """
+    Sends a message to the HIPRFISR to retrieve the iwconfig output on the sensor node.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.iwconfigIP(str(tab_index))  
 
 
