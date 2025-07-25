@@ -1,6 +1,55 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-7-23
+
+DragonOS Noble installer fixes, ifconfig and iwconfig remote actions
+
+### Added
+
+- Software sizes for DragonOS installer items
+- ifconfig and iwconfig remote actions for sensor nodes
+
+### Changed
+
+- Updated README to remove git submodule lines from the installer
+
+### Fixed
+
+- Ubuntu Noble APT Sources installer item for DragonOS
+
+## 2025-7-22
+
+DragonOS Noble beta and installer updates.
+
+### Added
+
+- Sensor node button in the installer for selecting default items needed for remote sensor/tactical nodes
+- Beta support for DragonOS Noble (24.04) (replacing FocalX, FocalX installer items are still in the installer file and can be uncommented to use)
+- gr-sidekiq OOT git submodule and installer item (maint-3.10)
+
+### Changed
+
+- Replaced checks for DragonOS Focal and FocalX with DragonOS
+
+### Fixed
+
+- Updating installer to grab the latest branch commit for all GNU Radio out-of-tree modules
+
+## 2025-7-21
+
+More remote actions for sensor nodes.
+
+### Added
+
+- Querying the sensor node to report uptime, memory usage, disk usage, CPU percentage, processes, and reboot
+
+### Fixed
+
+- PlutoSDR installer for Raspberry Pi OS and Ubuntu 24.04
+- Ignoring /dev/ttyS* ports when scanning for local meshtastic ports, only filtering for ttyACM and ttyUSB
+- Disabling the network type combobox when connected so the user can't switch between types, enabling after disconnect
+
 ## 2025-7-15
 
 Fixing installer for password prompt exceptions.
