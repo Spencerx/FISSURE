@@ -16,6 +16,7 @@ import yaml
 import asyncio
 import socket
 import shutil
+import zipfile
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -2822,6 +2823,41 @@ async def checkSensorNodePluginResults(component: object, sensor_node_id: int, p
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def savePlugin(component: object, plugin_name: str, plugin_data: str):
+    """Save Plugin to Local HIPRFISR
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Plugin name
+    plugin_data : str
+        Plugin data in hex format (compressed as a zip file)
+    """
+    print(plugin_name)
+    # Decode hex data
+    plugin_data = binascii.a2b_hex(plugin_data)
+
+    # Save file
+    pathname = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name + '.zip')
+    print(pathname)
+    with open(pathname, "wb") as f:
+        f.write(plugin_data)
+    print("Plugin saved to: " + pathname)
+
+    # Create a path for the plugin to be extracted to
+    extract_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+    os.makedirs(extract_path, exist_ok=True)
+
+    # Extract the zip file to the plugin directory
+    with zipfile.ZipFile(pathname, "r") as zip_ref:
+        zip_ref.extractall(extract_path)
+    print("Plugin extracted to: " + extract_path)
+    # Remove the zip file
+    os.remove(pathname)
 
 
 async def transferPlugins(component: object, sensor_node_id: int, plugin_names: List[str], install: bool=False):

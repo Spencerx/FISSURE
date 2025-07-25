@@ -7,6 +7,7 @@ from fissure.Dashboard.Slots import (
     DashboardSlots,
     IQDataTabSlots,
     LibraryTabSlots,
+    LibraryTabPluginManagerTabSlots,
     LogTabSlots,
     MenuBarSlots,
     PDTabSlots,
@@ -4069,6 +4070,9 @@ def connect_library_slots(dashboard: Dashboard):
     dashboard.ui.radioButton_library_search_hex.clicked.connect(
         lambda: LibraryTabSlots._slotLibrarySearchHexClicked(dashboard)
     )
+
+    # Connect library tab plugin manager slots
+    LibraryTabPluginManagerTabSlots.connect_slots(dashboard)
 
 
 def connect_log_slots(dashboard: Dashboard):
