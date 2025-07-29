@@ -1,3 +1,4 @@
+import binascii
 import fissure.comms
 import time
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -12,7 +13,9 @@ from typing import List
 import json
 import qasync
 import datetime
+import zipfile
 
+from fissure.utils.plugin import get_fissure_plugin_editor_plugins_path
 from fissure.Dashboard.UI_Components.Qt5 import MyMessageBox
 # from ..Dashboard.Slots import StatusBarSlots  # how do you go from callbacks to slots?
 from fissure.Dashboard.Slots import (
@@ -1322,9 +1325,65 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
     """
     plugin_names.sort()
     comboBox_library_plugin_selection: QtWidgets.QComboBox = component.frontend.ui.comboBox_library_plugin_selection
+    plugin_manager_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_pkgs_hiprfisr
     comboBox_library_plugin_selection.clear()
+    plugin_manager_table.clearContents()
+    plugin_manager_table.setColumnCount(1)
+    plugin_manager_table.setRowCount(0)
     for plugin_name in plugin_names:
         comboBox_library_plugin_selection.addItem(plugin_name)
+        plugin_manager_table.insertRow(plugin_manager_table.rowCount())
+        plugin_manager_table.setItem(plugin_manager_table.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(plugin_name))
+    plugin_manager_table.setHorizontalHeaderLabels(["Plugin Name"])
+    plugin_manager_table.resizeColumnsToContents()
+    plugin_manager_table.horizontalHeader().setVisible(True)
+    plugin_manager_table.verticalHeader().setVisible(False)
+
+
+async def savePlugin(component: object, plugin_name: str, plugin_data: str) -> None:
+    """Save Plugin Data to File
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Name of the plugin
+    plugin_data : str
+        Plugin data to save
+    """
+    # get the local plugin path from the UI or default to Downloads
+    local_plugin_path = await get_fissure_plugin_editor_plugins_path()
+    if not local_plugin_path:
+        local_plugin_path = os.path.join(os.path.expanduser("~"), "Downloads")
+
+    # Decode hex data
+    plugin_data = binascii.a2b_hex(plugin_data)
+
+    # Save file
+    pathname = os.path.join(local_plugin_path, plugin_name + '.zip')
+    with open(pathname, "wb") as f:
+        f.write(plugin_data)
+
+    # Create a path for the plugin to be extracted to
+    extract_path = os.path.join(local_plugin_path, plugin_name)
+    if os.path.exists(extract_path):
+        copy_num = 1
+        base_name = plugin_name
+        while os.path.exists(extract_path):
+            extract_path = os.path.join(local_plugin_path, f"{base_name} (Copy {copy_num})")
+            copy_num += 1
+    os.makedirs(extract_path, exist_ok=True)
+
+    # Extract the zip file to the plugin directory
+    with zipfile.ZipFile(pathname, "r") as zip_ref:
+        zip_ref.extractall(extract_path)
+
+    # Remove the zip file
+    os.remove(pathname)
+
+    # Refresh the local plugin list in the UI
+    component.frontend.ui.toolButton_plugin_pkg_path_refresh.clicked.emit()
 
 
 async def responsePluginTableData(component: object, plugin_name: str, table_data_json: dict, install_files: List[str]):
@@ -1392,7 +1451,6 @@ async def responsePluginTableData(component: object, plugin_name: str, table_dat
                     target_table.setItem(target_row, col_index, item)
 
     # Populate Support Files Tables
-    # print(install_files) 
     page_mapping = {
         "Single-Stage Flow Graphs": component.frontend.ui.tableWidget_library_plugin_attacks_support,
         "Fuzzing Flow Graphs": component.frontend.ui.tableWidget_library_plugin_attacks_support,
@@ -1499,8 +1557,6 @@ async def responsePluginProtocolParameters(component: object, plugin_name: str, 
     checkBox_protocol_median_packet_lengths: QtWidgets.QCheckBox = component.frontend.ui.checkBox_protocol_median_packet_lengths
     listWidget_plugin_protocol_mod_type_list: QtWidgets.QListWidget = component.frontend.ui.listWidget_plugin_protocol_mod_type_list
     tableWidget_protocol_packet_type: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_protocol_packet_type
-
-    print('PARAMETERS: ' + str(parameters))
 
     # Update Values
     data_rates = parameters.get('data_rates')

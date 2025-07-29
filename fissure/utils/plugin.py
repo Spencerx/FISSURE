@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """Plugin Related Functionality
 """
+import asyncio
 import os
-import sys
 import shutil
 import filecmp
 import csv
@@ -36,6 +36,27 @@ TABLES_FUNCTIONS = [
     ('protocols.csv', addProtocol, removeProtocol),
     ('soi_data.csv', addSOI, removeSOI)
 ]
+
+
+async def get_fissure_plugin_editor_plugins_path() -> str:
+    """Get the path to the FISSURE Plugin Editor plugins directory.
+
+    Returns
+    -------
+    str
+        Path to the FISSURE Plugin Editor plugins directory.
+    """
+    proc = await asyncio.create_subprocess_exec(
+        "fissure-plugin-editor", "plugins", "-d",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, _ = await proc.communicate()
+    output = stdout.decode().strip()
+    if output.startswith("Plugins directory:"):
+        return output.split("Plugins directory:")[1].strip()
+    else:
+        return None
 
 
 def get_local_plugin_names():
