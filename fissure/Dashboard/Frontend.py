@@ -826,68 +826,6 @@ class Dashboard(QtWidgets.QMainWindow):
         # Refresh Browse Table
         LibraryTabSlots._slotLibraryBrowseChanged(self)
 
-        # Plugins Edit Tables Headers
-        get_table_names = list(fissure.utils.DATABASE_TABLE_HEADERS.keys())
-        get_tables = [
-            self.ui.tableWidget_library_plugin_archive_collection,
-            self.ui.tableWidget_library_plugin_archive_favorites,
-            self.ui.tableWidget_library_plugin_attack_categories,
-            self.ui.tableWidget_library_plugin_attacks,
-            self.ui.tableWidget_library_plugin_conditioner_flow_graphs,
-            self.ui.tableWidget_library_plugin_demodulation_flow_graphs,
-            self.ui.tableWidget_library_plugin_detector_flow_graphs,
-            self.ui.tableWidget_library_plugin_inspection_flow_graphs,
-            self.ui.tableWidget_library_plugin_modulation_types,
-            self.ui.tableWidget_library_plugin_packet_types,
-            self.ui.tableWidget_library_plugin_protocols,
-            self.ui.tableWidget_library_plugin_soi_data,
-            self.ui.tableWidget_library_plugin_triggers,
-        ]
-        for idx, table in enumerate(get_tables):
-            table.setColumnCount(len(fissure.utils.DATABASE_TABLE_HEADERS[get_table_names[idx]]))
-            for index, header in enumerate(fissure.utils.DATABASE_TABLE_HEADERS[get_table_names[idx]]):
-                header_item = QtWidgets.QTableWidgetItem(header)
-                header_item.setTextAlignment(QtCore.Qt.AlignCenter)
-                table.setHorizontalHeaderItem(index, header_item)
-            table.resizeColumnsToContents()
-            table.horizontalHeader().setStretchLastSection(False)
-            table.horizontalHeader().setStretchLastSection(True)
-
-        # Plugin Editor Supporting Files Tables
-        get_support_tables = [
-            self.ui.tableWidget_library_plugin_archive_collection_support,
-            self.ui.tableWidget_library_plugin_archive_favorites_support,
-            self.ui.tableWidget_library_plugin_attack_categories_support,
-            self.ui.tableWidget_library_plugin_attacks_support,
-            self.ui.tableWidget_library_plugin_conditioner_flow_graphs_support,
-            self.ui.tableWidget_library_plugin_demodulation_flow_graphs_support,
-            self.ui.tableWidget_library_plugin_detector_flow_graphs_support,
-            self.ui.tableWidget_library_plugin_inspection_flow_graphs_support,
-            self.ui.tableWidget_library_plugin_modulation_types_support,
-            self.ui.tableWidget_library_plugin_packet_types_support,
-            self.ui.tableWidget_library_plugin_protocols_support,
-            self.ui.tableWidget_library_plugin_soi_data_support,
-            self.ui.tableWidget_library_plugin_triggers_support,
-        ]
-        for idx, table in enumerate(get_support_tables):
-            table.setColumnWidth(0, 534)  #535
-            table.setColumnWidth(1, 74)
-            table.setColumnWidth(2, 534)
-            table.setColumnWidth(3, 36)  #36
-            # table.resizeColumnsToContents()
-            # table.horizontalHeader().setStretchLastSection(False)
-            # table.horizontalHeader().setStretchLastSection(True)
-
-            # component.frontend.ui.tableWidget1_tsi_wideband.resizeColumnsToContents()
-            # component.frontend.ui.tableWidget1_tsi_wideband.resizeRowsToContents()
-            # component.frontend.ui.tableWidget1_tsi_wideband.horizontalHeader().setStretchLastSection(False)
-            # component.frontend.ui.tableWidget1_tsi_wideband.horizontalHeader().setStretchLastSection(True)
-
-        # Plugin Widgets
-        self.ui.comboBox_library_plugin_new_existing.setCurrentText("Existing")
-        self.ui.stackedWidget_library_plugin_selection.setCurrentIndex(0)
-        LibraryTabSlots._slotLibraryPluginNewExistingChanged(self)
-
 
     def __init_signals__(self):
         """
@@ -3947,12 +3885,6 @@ def connect_library_slots(dashboard: Dashboard):
     dashboard.ui.comboBox_library_browse.currentIndexChanged.connect(
         lambda: LibraryTabSlots._slotLibraryBrowseChanged(dashboard)
     )
-    dashboard.ui.comboBox_library_plugin_edit.currentIndexChanged.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginEditChanged(dashboard)
-    )
-    dashboard.ui.comboBox_library_plugin_new_existing.currentIndexChanged.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginNewExistingChanged(dashboard)
-    )
     
     # List Widget
     dashboard.ui.listWidget_library_gallery.currentItemChanged.connect(
@@ -4005,59 +3937,8 @@ def connect_library_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_library_browse_delete_row.clicked.connect(
         lambda: LibraryTabSlots._slotLibraryBrowseDeleteRowClicked(dashboard)
     )
-    dashboard.ui.pushButton_library_plugin_add_row.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginAddRowClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_delete_row.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginDeleteRowClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_clear_table.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginClearTableClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_clear_all_tables.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginClearAllTablesClicked(dashboard)
-    )
     dashboard.ui.pushButton_library_browse_copy_row.clicked.connect(
         lambda: LibraryTabSlots._slotLibraryBrowseCopyClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_import.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginImportClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_export_tables.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginExportTablesClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_export_zip.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginExportZipClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_apply_changes.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginApplyChangesClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_append.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginAppendClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_create.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginCreate(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_selection_open_close.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginOpenClose(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_refresh.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginPluginRefresh(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_delete.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginPluginDelete(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_support_add_row.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginSupportAddClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_support_delete_row.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginSupportDeleteClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_support_reset.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginSupportResetClicked(dashboard)
-    )
-    dashboard.ui.pushButton_library_plugin_support_reset_all.clicked.connect(
-        lambda: LibraryTabSlots._slotLibraryPluginSupportResetAllClicked(dashboard)
     )
     dashboard.ui.pushButton_library_browse_refresh.clicked.connect(
         lambda: LibraryTabSlots._slotLibraryBrowseRefreshClicked(dashboard)

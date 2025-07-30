@@ -1324,14 +1324,11 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
         Component
     """
     plugin_names.sort()
-    comboBox_library_plugin_selection: QtWidgets.QComboBox = component.frontend.ui.comboBox_library_plugin_selection
     plugin_manager_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_pkgs_hiprfisr
-    comboBox_library_plugin_selection.clear()
     plugin_manager_table.clearContents()
     plugin_manager_table.setColumnCount(1)
     plugin_manager_table.setRowCount(0)
     for plugin_name in plugin_names:
-        comboBox_library_plugin_selection.addItem(plugin_name)
         plugin_manager_table.insertRow(plugin_manager_table.rowCount())
         plugin_manager_table.setItem(plugin_manager_table.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(plugin_name))
     plugin_manager_table.setHorizontalHeaderLabels(["Plugin Name"])

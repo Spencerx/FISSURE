@@ -242,6 +242,7 @@ async def _slot_plugin_pkg_path_changed(dashboard: QtCore.QObject):
         plugin_manager_table.resizeColumnsToContents()    
         plugin_manager_table.horizontalHeader().setVisible(True)
         plugin_manager_table.verticalHeader().setVisible(False)
+        dashboard.ui.toolButton_plugin_pkg_path_refresh.setEnabled(True)
     else:
         dashboard.ui.toolButton_plugin_pkg_path_refresh.setEnabled(False)
 
