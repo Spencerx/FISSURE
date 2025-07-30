@@ -1257,7 +1257,13 @@ def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM1", re
         # **Clear any processes using the serial port**
         subprocess.run(["sudo", "fuser", "-k", serial_port], check=False)
         time.sleep(0.1)
-
+   
+        # ** Stop the gpsd service and socket**
+        subprocess.run(["sudo", "systemctl", "stop", "gpsd.socket", "gpsd.service"], check=False)
+        time.sleep(0.1)
+        subprocess.run(["sudo", "systemctl", "disable", "gpsd.socket", "gpsd.service"], check=False)
+        time.sleep(0.1)
+        
         # **Start gpsd only if the device exists**
         gpsd_command = [
             "sudo", "gpsd", "-n", "-D", "4", "-F", "/var/run/gpsd.sock", serial_port
@@ -1333,6 +1339,7 @@ def probe_gpsd(logger: logging.Logger, format="", serial_port="/dev/ttyACM1", re
     finally:
         if session:
             try:
+                subprocess.run(["sudo", "killall", "gpsd"], check=False)
                 session.close()
                 logger.info("GPS session closed cleanly.")
             except Exception as e:
