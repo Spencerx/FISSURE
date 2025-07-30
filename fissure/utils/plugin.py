@@ -8,7 +8,7 @@ import filecmp
 import csv
 import logging
 from typing import List
-from subprocess import run
+from subprocess import Popen, run
 from psycopg2.extensions import connection
 from fissure.utils import FISSURE_ROOT, PLUGIN_DIR
 from fissure.utils.library import (
@@ -58,6 +58,20 @@ async def get_fissure_plugin_editor_plugins_path() -> str:
     else:
         return None
 
+def launch_fissure_plugin_editor() -> bool:
+    """Launch the FISSURE Plugin Editor.
+
+    Returns
+    -------
+    bool
+        True if the editor was launched successfully, False otherwise.
+    """
+    # Launch the FISSURE Plugin Editor in a new terminal
+    Popen(["fissure-plugin-editor", "gui"])
+
+    # Check if the process is running
+    result = run(["pgrep", "-f", "fissure-plugin-editor"], capture_output=True)
+    return bool(result.stdout.strip())
 
 def get_local_plugin_names():
     """

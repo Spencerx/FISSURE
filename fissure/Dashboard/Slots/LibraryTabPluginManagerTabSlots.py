@@ -7,7 +7,7 @@ import tempfile
 import zipfile
 
 import fissure.comms
-from fissure.utils.plugin import get_fissure_plugin_editor_plugins_path
+from fissure.utils.plugin import get_fissure_plugin_editor_plugins_path, launch_fissure_plugin_editor
 from fissure.Dashboard.UI_Components.Qt5 import async_yes_no_dialog
 
 def connect_slots(dashboard: QtCore.QObject):
@@ -47,6 +47,9 @@ def connect_slots(dashboard: QtCore.QObject):
         )
         dashboard.ui.toolButton_plugin_download_dir_manual.setIcon(
             style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DirOpenIcon)
+        )
+        dashboard.ui.toolButton_plugin_editor.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_FileDialogInfoView)
         )
 
     dashboard.ui.toolButton_plugin_pkg_path_auto.clicked.connect(
@@ -95,6 +98,10 @@ def connect_slots(dashboard: QtCore.QObject):
 
     dashboard.ui.lineEdit_plugin_download_dir.textChanged.connect(
         lambda: _slot_plugin_download_dir_changed(dashboard)
+    )
+
+    dashboard.ui.toolButton_plugin_editor.clicked.connect(
+        lambda: _slot_plugin_editor(dashboard)
     )
 
     # trigger hiprfisr automatic plugin list refresh on tab change
@@ -385,3 +392,19 @@ async def _slot_request_hipfisr_plugin_download(dashboard: QtCore.QObject):
                 await dashboard.backend.hiprfisr_socket.send_msg(
                     fissure.comms.MessageTypes.COMMANDS, msg
                 )
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slot_plugin_editor(dashboard: QtCore.QObject):
+    """Launch the FISSURE Plugin Editor
+
+    Parameters
+    ----------
+    dashboard : QtCore.QObject
+        FISSURE dashboard
+    """
+    if not launch_fissure_plugin_editor():
+        QtCore.QMessageBox.warning(
+            dashboard,
+            "Plugin Editor Launch Failed",
+            "Failed to launch the FISSURE Plugin Editor. Please check if it is installed."
+        )
