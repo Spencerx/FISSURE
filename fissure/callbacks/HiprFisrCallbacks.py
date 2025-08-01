@@ -3364,3 +3364,53 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+
+async def run_plugin_operation(component: object, sensor_node_id: int, plugin: str, operation: str, parameters: dict = {}):
+    """Run a plugin operation on the sensor node.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    plugin : str
+        Plugin name
+    operation : str
+        Script relative path within the plugin's install_file directory
+    parameters : dict, optional
+        Additional parameters for the operation, by default {}
+    """
+    PARAMETERS = {
+        "plugin": plugin,
+        "operation": operation,
+        "parameters": parameters,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "run_plugin_operation",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def stop_plugin_operation(component: object, sensor_node_id: int, operation_id: str):
+    """Stop a running plugin operation on the sensor node.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Unique identifier for the operation to stop
+    """
+    PARAMETERS = {
+        "operation_id": operation_id,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "stop_plugin_operation",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

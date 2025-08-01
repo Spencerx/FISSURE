@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import importlib.util
 import time
 import random
 import yaml
@@ -21,12 +22,13 @@ import json
 
 from inspect import isfunction
 from types import ModuleType
-from typing import Dict, List, Union, Callable, Optional
+from typing import Dict, List, Union, Callable, Optional, Any
 
 import asyncio
 import fissure.callbacks
 import fissure.comms
 import fissure.utils
+from fissure.utils import PLUGIN_DIR
 
 import uuid
 import logging
@@ -141,7 +143,7 @@ async def main(local_flag):
         sys.exit()
 
 
-class SensorNode():
+class SensorNode(object):
     """ 
     Class that contains the functions for the sensor node.
     """
@@ -246,6 +248,10 @@ class SensorNode():
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacksLT)
+        
+        # Register plugin operation callbacks
+        self.callbacks['run_plugin_operation'] = self.run_plugin_operation
+        self.callbacks['stop_plugin_operation'] = self.stop_plugin_operation
 
         # Initialize GPS Coordinates
         self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
@@ -257,6 +263,8 @@ class SensorNode():
         self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
         self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(self.gps_position['latitude'], self.gps_position['longitude'])
 
+        # Initialize operations tracking
+        self.operations = {}
 
     def initialize_comms(self):
         """
@@ -299,6 +307,126 @@ class SensorNode():
             self.logger.debug(f"registered callback: {cb_name} (from {cb_func.__module__})")
             self.callbacks[cb_name] = cb_func
 
+
+    async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any]) -> None:
+        """
+        Runs a plugin operation on the Sensor Node
+
+        Parameters
+        ----------
+        plugin : str
+            The name of the plugin.
+        operation : str
+            The plugin filename to run relative to the plugin directory.
+        parameters : dict
+            The operation parameters.
+        
+        Returns
+        -------
+        None
+        """
+        """
+        TODO:
+        - Get resources needed for the plugin operation
+        """
+        self.logger.info(f"Running plugin operation: {plugin} - {operation} with parameters: {parameters}")
+
+        # Get the plugin path using the plugin name
+        plugin_path = os.path.join(PLUGIN_DIR, plugin)
+        if not os.path.exists(plugin_path):
+            self.logger.error(f"Plugin path does not exist: {plugin_path}")
+            return        
+        self.logger.info(f"Plugin path resolved: {plugin_path}")
+        
+        # Get the plugin script path using the plugin name and operation
+        plugin_script_path = os.path.join(plugin_path, 'install_files', operation)
+        if not os.path.exists(plugin_script_path):
+            self.logger.error(f"Plugin script does not exist: {plugin_script_path}")
+            return
+        self.logger.info(f"Plugin script resolved: {plugin_script_path}")
+
+        # Import and run the main function from the plugin script
+        spec = importlib.util.spec_from_file_location("plugin_module", plugin_script_path)
+        plugin_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(plugin_module)
+
+        # Get the resources required by the plugin script
+        resources = plugin_module.get_resources() if hasattr(plugin_module, "get_resources") else {}
+        if not isinstance(resources, dict):
+            self.logger.error(f"get_resources() did not return a dictionary: {resources}")
+            return
+
+        # Initialize the plugin script with parameters
+        if hasattr(plugin_module, "main") and callable(plugin_module.main):
+            script_class = plugin_module.main(**parameters)
+        else:
+            self.logger.error(f"No callable main() found in {plugin_script_path}")
+
+        # Check that the plugin script class has the running flag
+        if not hasattr(script_class, "running") or not isinstance(script_class.running, bool):
+            self.logger.error(f"No running flag found in {plugin_script_path}")
+            return
+
+        # Check that the plugin script class has the stop method
+        if not hasattr(script_class, "stop") or not callable(script_class.stop):
+            self.logger.error(f"No callable stop() method found in {plugin_script_path}")
+            return
+
+        # Run the plugin script
+        if hasattr(script_class, "run") and callable(script_class.run):
+            try:
+                # Register the operation in the operations dictionary
+                operation_id = '1c08f5b2-6ba9-4fb2-8a84-48fd4011045f'#str(uuid.uuid4())
+                self.operations[operation_id] = {
+                    "plugin": plugin,
+                    "operation": operation,
+                    "parameters": parameters,
+                    "resources": resources,
+                    "status": script_class.running,
+                    "stop": script_class.stop,
+                    "start_time": time.time(),
+                }
+
+                # Run the plugin operation in the background
+                asyncio.create_task(script_class.run())
+            except Exception as e:
+                self.logger.error(f"Error running plugin script {plugin_script_path}: {e}")
+                return
+        else:
+            self.logger.error(f"No callable run() method found in {plugin_script_path}")
+            return
+
+    async def stop_plugin_operation(self, component: object, operation_id: str) -> None:
+        """
+        Stops a plugin operation on the Sensor Node.
+
+        Parameters
+        ----------
+        operation_id : str
+            The ID of the operation to stop.
+        
+        Returns
+        -------
+        None
+        """
+        self.logger.info(f"Stopping plugin operation with ID: {operation_id}")
+        if operation_id not in self.operations:
+            self.logger.error(f"Operation ID {operation_id} not found.")
+            return
+        
+        operation = self.operations[operation_id]
+        if "stop" in operation and callable(operation["stop"]):
+            try:
+                await operation["stop"]()
+            except Exception as e:
+                self.logger.error(f"Error stopping plugin operation {operation_id}: {e}")
+        else:
+            self.logger.error(f"No callable stop method for operation {operation_id}.")
+        self.logger.info(f"Operation {operation_id} stop requested.")
+        while operation["status"]:
+            self.logger.info(f"Operation {operation_id} is still running.")
+        _ = self.operations.pop(operation_id)
+        self.logger.info(f"Operation {operation_id} has stopped.")
 
     async def shutdown_comms(self):
         """

@@ -1436,3 +1436,43 @@ def _slotSensorNodesReportsSaveClicked(dashboard: QtCore.QObject):
             dashboard.logger.error(f"Error saving file: {e}")
     else:
         dashboard.logger.debug("File save dialog was canceled.")
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesDummyRun(dashboard: QtCore.QObject):
+    """ 
+    Slot to run a dummy plugin operation.
+    This is a placeholder for testing purposes and should be replaced with actual functionality.
+    """
+    PARAMETERS = {
+        "sensor_node_id": dashboard.active_sensor_node,
+        "plugin": 'plugin_template',
+        "operation": 'plugin_example.py',
+        "parameters": {
+            "example_arg": "option1",
+            "example_arg2": 43,
+            "example_arg3": [3,4,5]
+        }
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+        fissure.comms.MessageFields.MESSAGE_NAME: "run_plugin_operation",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesDummyStop(dashboard: QtCore.QObject):
+    """ 
+    Slot to stop a dummy plugin operation.
+    This is a placeholder for testing purposes and should be replaced with actual functionality.
+    """
+    PARAMETERS = {
+        "sensor_node_id": dashboard.active_sensor_node,
+        "operation_id": '1c08f5b2-6ba9-4fb2-8a84-48fd4011045f',  # hard coded for testing
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+        fissure.comms.MessageFields.MESSAGE_NAME: "stop_plugin_operation",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
