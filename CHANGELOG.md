@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-8-03
+
+Fixing remote IP actions.
+
+### Fixed
+
+- Correcting sockets used for remote IP actions in HiprFisrCallbacks.py
+- Changing typo for backend function from "ifconfigprocessesIP" to "ifconfigIP"
+- Disabled/enabled network type combobox on IP connect/disconnect in sensor node configuration dialog
+
+## 2025-7-30
+
+Merging pull request #85: Fixing gpsd
+
+### Changed
+
+- Created more password prompt exceptions used in remote sensor node commands
+
+### Fixed
+
+- Stopping gpsd service when probing a GPS device on a specific serial port and killing gpsd when done
+
 ## 2025-7-23
 
 DragonOS Noble installer fixes, ifconfig and iwconfig remote actions

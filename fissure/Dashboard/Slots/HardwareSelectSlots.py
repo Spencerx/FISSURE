@@ -1695,6 +1695,13 @@ async def connect(HWSelect: QtCore.QObject):
         HWSelect.pushButton_connect_4,
         HWSelect.pushButton_connect_5,
     ]
+    network_type_widgets = [
+        HWSelect.comboBox_network_type_1,
+        HWSelect.comboBox_network_type_2,
+        HWSelect.comboBox_network_type_3,
+        HWSelect.comboBox_network_type_4,
+        HWSelect.comboBox_network_type_5,
+    ]
 
     get_ip = str(ip_widgets[tab_index].toPlainText())
     get_msg_port = str(msg_port_widgets[tab_index].toPlainText())
@@ -1714,6 +1721,7 @@ async def connect(HWSelect: QtCore.QObject):
     ip_widgets[tab_index].setEnabled(False)
     msg_port_widgets[tab_index].setEnabled(False)
     hb_port_widgets[tab_index].setEnabled(False)
+    network_type_widgets[tab_index].setEnabled(False)
     QtWidgets.QApplication.processEvents()
 
     # Send Message for HIPRFISR to Sensor Node Connections
@@ -1799,7 +1807,7 @@ async def disconnect(HWSelect: QtCore.QObject, delete_node=False):
 
             # Send Message for HIPRFISR to end Meshtastic Serial Connection
             await HWSelect.dashboard.backend.disconnectFromMeshtastic(str(tab_index))
-
+    
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def remove_all(HWSelect: QtCore.QObject):
@@ -2798,7 +2806,7 @@ async def ip_ifconfig(HWSelect: QtCore.QObject):
     """
     # Send Message to Backend
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    await HWSelect.dashboard.backend.ifconfigprocessesIP(str(tab_index))  
+    await HWSelect.dashboard.backend.ifconfigIP(str(tab_index))  
 
 
 @qasync.asyncSlot(QtCore.QObject)

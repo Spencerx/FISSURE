@@ -1210,11 +1210,12 @@ async def sensorNodeConnectTimeout(component: object, sensor_node_id=0):
     """
     # Gather Widgets
     tab_index = int(sensor_node_id)
-    ip_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_ip_addr_{int(sensor_node_id) + 1}")
-    hb_port_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_hb_port_{int(sensor_node_id) + 1}")
-    msg_port_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_msg_port_{int(sensor_node_id) + 1}")
-    recall_settings_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"checkBox_recall_settings_remote_{int(sensor_node_id) + 1}")
-    connect_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"pushButton_connect_{int(sensor_node_id) + 1}")
+    ip_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_ip_addr_{tab_index + 1}")
+    hb_port_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_hb_port_{tab_index + 1}")
+    msg_port_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"textEdit_msg_port_{tab_index + 1}")
+    recall_settings_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"checkBox_recall_settings_remote_{tab_index + 1}")
+    connect_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"pushButton_connect_{tab_index + 1}")
+    network_type_widget = getattr(component.frontend.popups["HardwareSelectDialog"], f"comboBox_network_type_{tab_index + 1}")
 
     # Restore Widgets
     ip_widget.setEnabled(True)
@@ -1222,6 +1223,7 @@ async def sensorNodeConnectTimeout(component: object, sensor_node_id=0):
     msg_port_widget.setEnabled(True)
     recall_settings_widget.setEnabled(True)
     connect_widget.setEnabled(True)
+    network_type_widget.setEnabled(True)
 
     # Warning
     component.logger.warning("Timeout occurred establishing connection to remote sensor node")
