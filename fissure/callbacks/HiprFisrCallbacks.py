@@ -1819,6 +1819,122 @@ async def gpsBeaconRefreshIP(component: object, sensor_node_id: str):
     await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+
+
+
+
+async def rebootIP(component: object, sensor_node_id=0):
+    """
+    Forwards the message to reboot the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "rebootIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def uptimeIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the uptime of the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "uptimeIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def memoryIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the memory usage of the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "memoryIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def diskIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the disk usage of the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "diskIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+    
+async def cpuIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the CPU percentage of the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "cpuIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+    
+async def processesIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the processes on the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "processesIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+    
+async def ifconfigIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the ifconfig output on the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def iwconfigIP(component: object, sensor_node_id: str):
+    """
+    Forwards the message to retrieve the iwconfig output on the sensor node computer.
+    """
+    # Send the Message
+    PARAMETERS = {"sensor_node_id": sensor_node_id}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
 ##########################################################################
 ########################### From Sensor Node #############################
 ##########################################################################
@@ -2318,34 +2434,6 @@ async def gpsBeaconEnableDisableIP_Return(component: object, sensor_node_id:str,
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def rebootIP(component: object, sensor_node_id=0):
-    """
-    Forwards the message to reboot the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "rebootIP",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-async def uptimeIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the uptime of the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "uptimeIP",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
 async def uptimeIP_Return(component: object, sensor_node_id:str, uptime: str):
     """
     Forwards the uptimeIP_Return message to the Dashboard.
@@ -2358,20 +2446,6 @@ async def uptimeIP_Return(component: object, sensor_node_id:str, uptime: str):
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "uptimeIP_Return",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-async def memoryIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the memory usage of the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "memoryIP",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
@@ -2394,20 +2468,6 @@ async def memoryIP_Return(component: object, sensor_node_id:str, memory: str):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def diskIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the disk usage of the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "diskIP",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
 async def diskIP_Return(component: object, sensor_node_id:str, disk: str):
     """
     Forwards the diskIP_Return message to the Dashboard.
@@ -2420,20 +2480,6 @@ async def diskIP_Return(component: object, sensor_node_id:str, disk: str):
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "diskIP_Return",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-async def cpuIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the CPU percentage of the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "cpuIP",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
@@ -2456,20 +2502,6 @@ async def cpuIP_Return(component: object, sensor_node_id:str, cpu: str):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def processesIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the processes on the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "processesIP",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
 async def processesIP_Return(component: object, sensor_node_id:str, processes: str):
     """
     Forwards the processesIP_Return message to the Dashboard.
@@ -2487,20 +2519,6 @@ async def processesIP_Return(component: object, sensor_node_id:str, processes: s
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def ifconfigIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the ifconfig output on the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
 async def ifconfigIP_Return(component: object, sensor_node_id:str, ifconfig: str):
     """
     Forwards the ifconfigIP_Return message to the Dashboard.
@@ -2513,20 +2531,6 @@ async def ifconfigIP_Return(component: object, sensor_node_id:str, ifconfig: str
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP_Return",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-async def iwconfigIP(component: object, sensor_node_id: str):
-    """
-    Forwards the message to retrieve the iwconfig output on the sensor node computer.
-    """
-    # Send the Message
-    PARAMETERS = {"sensor_node_id": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
