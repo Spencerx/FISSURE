@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../../../../../.designer/backup/fissure_icon.png</normaloff>../../../../../../../../../../../.designer/backup/fissure_icon.png</iconset>
+    <normaloff>../../../../../../../../../../../../../.designer/backup/fissure_icon.png</normaloff>../../../../../../../../../../../../../.designer/backup/fissure_icon.png</iconset>
   </property>
   <widget class="QFrame" name="frame4_top">
    <property name="geometry">
@@ -37394,7 +37394,7 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="pushButton_7">
        <property name="geometry">
         <rect>
-         <x>60</x>
+         <x>20</x>
          <y>40</y>
          <width>88</width>
          <height>27</height>
@@ -37407,7 +37407,7 @@ p, li { white-space: pre-wrap; }
       <widget class="QPushButton" name="pushButton_8">
        <property name="geometry">
         <rect>
-         <x>180</x>
+         <x>120</x>
          <y>40</y>
          <width>88</width>
          <height>27</height>
@@ -37415,6 +37415,32 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="text">
         <string>Stop</string>
+       </property>
+      </widget>
+      <widget class="QTableWidget" name="tableWidget_dummy_plugin_params">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>851</width>
+         <height>311</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_9">
+       <property name="geometry">
+        <rect>
+         <x>780</x>
+         <y>50</y>
+         <width>88</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Dummy button to simulate selecting and opening a plugin script</string>
+       </property>
+       <property name="text">
+        <string>Open Script</string>
        </property>
       </widget>
      </widget>

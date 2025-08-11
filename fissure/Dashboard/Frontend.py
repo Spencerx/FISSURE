@@ -3872,6 +3872,9 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_8.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesDummyStop(dashboard)
     )
+    dashboard.ui.pushButton_9.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesDummyOpen(dashboard)
+    )
 
 
 def connect_library_slots(dashboard: Dashboard):

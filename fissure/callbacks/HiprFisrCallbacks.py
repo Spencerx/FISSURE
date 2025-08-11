@@ -18,6 +18,7 @@ import socket
 import shutil
 import tempfile
 import zipfile
+import importlib
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -3368,6 +3369,65 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+
+async def plugin_get_operation_parameters(component: object, plugin: str, operation: str):
+    """Get parameters for a plugin operation.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    operation : str
+        Script relative path within the plugin's install_file directory
+    """
+    # get the plugin path
+    plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin)
+    if not os.path.exists(plugin_path):
+        component.logger.error(f"Plugin {plugin} does not exist in {fissure.utils.PLUGIN_DIR}")
+        return
+
+    # TODO: Check the plugin version and confirm that it is the same as the sensor node version
+
+    # get the operation path
+    operation_path = os.path.join(plugin_path, "install_files", operation)
+    if not os.path.exists(operation_path):
+        component.logger.error(f"Operation {operation} does not exist in plugin {plugin}")
+        return
+    
+    # import and run the get_arguments function from the operation script
+    try:
+        spec = importlib.util.spec_from_file_location("operation_module", operation_path)
+        operation_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(operation_module)
+        get_arguments = getattr(operation_module, "get_arguments", None)
+        if callable(get_arguments):
+            parameters = get_arguments()
+        else:
+            component.logger.error(f"get_arguments function not found in {operation}")
+            return
+    except Exception as e:
+        component.logger.error(f"Error importing operation script {operation}: {e}")
+        return
+
+    # cast all values to strings (ensures json serializability)
+    for key, value in parameters.items():
+        for subkey, subvalue in value.items():
+            parameters[key][subkey] = str(subvalue)
+
+    # send the plugin operation parameters to the dashboard
+    PARAMETERS = {
+        "plugin": plugin,
+        "operation": operation,
+        "parameters": parameters
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationParameters",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 async def run_plugin_operation(component: object, sensor_node_id: int, plugin: str, operation: str, parameters: dict = {}):
     """Run a plugin operation on the sensor node.

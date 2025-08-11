@@ -14,6 +14,7 @@ import json
 import qasync
 import datetime
 import zipfile
+import numpy as np
 
 from fissure.utils.plugin import get_fissure_plugin_editor_plugins_path
 from fissure.Dashboard.UI_Components.Qt5 import MyMessageBox
@@ -1338,6 +1339,64 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
     plugin_manager_table.horizontalHeader().setVisible(True)
     plugin_manager_table.verticalHeader().setVisible(False)
 
+
+async def responsePluginOperationParameters(component: object, plugin: str, operation: str, parameters: dict):
+    """Handle Request for Plugin Operation Parameters
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    parameters : dict
+        Parameters for the operation
+    """
+    params_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_dummy_plugin_params
+
+    keys = []
+    for key, value in parameters.items():
+        keys = np.union1d(keys, [str(k) for k in value.keys()])
+
+    # Move "help" to the end of the keys list if present
+    if "help" in keys:
+        keys = [k for k in keys if k != "help"] + ["help"]
+    
+    # Record position for each key
+    key_positions = {key: (i+1) for i, key in enumerate(keys)}
+
+    # Make the first letter for each key uppercase
+    keys = [key.capitalize() for key in keys]
+
+    # Prepare the column names for the table
+    columns = ["Value"] + keys
+
+    # configure table
+    params_table.clearContents()
+    params_table.setColumnCount(len(columns))
+    params_table.setHorizontalHeaderLabels(columns)
+    params_table.horizontalHeader().setVisible(True)
+    params_table.verticalHeader().setVisible(True)
+    params_table.setSortingEnabled(True)
+
+    # Populate the table with parameters
+    params_table.setRowCount(0)  # Clear existing rows
+    for row_index, (key, value) in enumerate(parameters.items()):
+        row_index = params_table.rowCount()
+        params_table.insertRow(row_index)
+        params_table.setVerticalHeaderItem(row_index, QtWidgets.QTableWidgetItem(key))
+        for subkey, subvalue in value.items():
+            col_index = key_positions.get(subkey, 0)
+            item = QtWidgets.QTableWidgetItem(str(subvalue))
+            item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)  # Make item non-editable
+            params_table.setItem(row_index, col_index, item)
+   
+    # Resize the table to fit contents
+    params_table.resizeColumnsToContents()
+    params_table.resizeRowsToContents()
+    
 
 async def savePlugin(component: object, plugin_name: str, plugin_data: str) -> None:
     """Save Plugin Data to File

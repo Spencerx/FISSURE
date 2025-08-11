@@ -1476,3 +1476,20 @@ async def _slotSensorNodesDummyStop(dashboard: QtCore.QObject):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+@qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesDummyOpen(dashboard: QtCore.QObject):
+    """ 
+    Slot to open a dummy plugin operation.
+    This is a placeholder for testing purposes and should be replaced with actual functionality.
+    """
+    PARAMETERS = {
+        "plugin": 'plugin_template',
+        "operation": 'plugin_example.py'
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+        fissure.comms.MessageFields.MESSAGE_NAME: "plugin_get_operation_parameters",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
