@@ -1443,15 +1443,28 @@ async def _slotSensorNodesDummyRun(dashboard: QtCore.QObject):
     Slot to run a dummy plugin operation.
     This is a placeholder for testing purposes and should be replaced with actual functionality.
     """
+    # Get parameters for the dummy plugin operation
+    parameters = {}
+    params_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_params
+    for row in range(params_table.rowCount()):
+        value_item = params_table.item(row, 0)  # User entered value
+        if value_item is None:
+            required = bool(params_table.item(row, 2)) # get required state
+            if required:
+                value_item = params_table.item(row, 1)  # default value
+                if value_item is None:
+                    fissure.Dashboard.UI_Components.Qt5.errorMessage(f"Parameter '{params_table.verticalHeaderItem(row).text()}' is required but not provided.")
+                    return
+                parameters[params_table.verticalHeaderItem(row).text()] = value_item.text()
+
+        else:
+            parameters[params_table.verticalHeaderItem(row).text()] = value_item.text()
+
     PARAMETERS = {
         "sensor_node_id": dashboard.active_sensor_node,
         "plugin": 'plugin_template',
         "operation": 'plugin_example.py',
-        "parameters": {
-            "example_arg": "option1",
-            "example_arg2": 43,
-            "example_arg3": [3,4,5]
-        }
+        "parameters": parameters
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,

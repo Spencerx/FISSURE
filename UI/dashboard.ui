@@ -37391,57 +37391,61 @@ p, li { white-space: pre-wrap; }
       <attribute name="title">
        <string>Dummy Runner</string>
       </attribute>
-      <widget class="QPushButton" name="pushButton_7">
+      <widget class="QWidget" name="verticalLayoutWidget_6">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>40</y>
-         <width>88</width>
-         <height>27</height>
+         <x>1</x>
+         <y>13</y>
+         <width>1201</width>
+         <height>361</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Run</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_8">
-       <property name="geometry">
-        <rect>
-         <x>120</x>
-         <y>40</y>
-         <width>88</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Stop</string>
-       </property>
-      </widget>
-      <widget class="QTableWidget" name="tableWidget_dummy_plugin_params">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>80</y>
-         <width>851</width>
-         <height>311</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_9">
-       <property name="geometry">
-        <rect>
-         <x>780</x>
-         <y>50</y>
-         <width>88</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>Dummy button to simulate selecting and opening a plugin script</string>
-       </property>
-       <property name="text">
-        <string>Open Script</string>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="pushButton_7">
+            <property name="text">
+             <string>Run</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_8">
+            <property name="text">
+             <string>Stop</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_9">
+            <property name="toolTip">
+             <string>Dummy button to simulate selecting and opening a plugin script</string>
+            </property>
+            <property name="text">
+             <string>Open Script</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_dummy_plugin_params"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>

@@ -1360,6 +1360,18 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     for key, value in parameters.items():
         keys = np.union1d(keys, [str(k) for k in value.keys()])
 
+    if "required" in keys:
+        # Move required to first position if present (second position later)
+        keys = ["required"] + [k for k in keys if k != "required"]
+    else:
+        keys = ["required"] + list(keys)
+
+    if "default" in keys:
+        # Move default to first position if present
+        keys = ["default"] + [k for k in keys if k != "default"]
+    else:
+        keys = ["default"] + list(keys)
+
     # Move "help" to the end of the keys list if present
     if "help" in keys:
         keys = [k for k in keys if k != "help"] + ["help"]
