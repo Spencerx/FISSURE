@@ -3,7 +3,11 @@
 This script serves as an example of how to create a plugin script for FISSURE. The script can directly implement functionality or wrap existing code.
 """
 import asyncio
+import os
 from typing import List, Dict, Any
+import uuid
+
+from fissure.Sensor_Node.utils.resources import Resource
 
 # Optional: Define default values for arguments
 EXAMPLE_ARG = "default_value"
@@ -25,6 +29,7 @@ class PluginExample(object):
         **kwargs : dict
             Keyword arguments for the plugin script.
         """
+        self.opid = str(uuid.uuid4())  # Generate a unique operation ID
         self.example_arg = example_arg
         self.example_arg2 = example_arg2
         self.example_arg3 = example_arg3
@@ -37,6 +42,17 @@ class PluginExample(object):
 
         This method must be modified to implement specific functionality for the plugin.
         """
+        # Allocate resources if needed
+        self.resource = [
+            Resource.request_resource(
+                pid=os.getpid(),
+                op_uuid=self.opid,
+                type='example',
+                model='example_model',
+                serial='example_serial'
+            )
+        ]
+
         self.running = True
         counter = 0
         while not self._stop:
@@ -57,6 +73,11 @@ class PluginExample(object):
         """
         print("Stopping Example Plugin.")
         self._stop = True
+
+        # Release resources
+        if hasattr(self, 'resource'):
+            for res in self.resource:
+                res.release()
 
 def main(**kwargs) -> object:
     """
@@ -125,8 +146,11 @@ def get_resources() -> Dict[str, Any]:
     """
     # Example resources, modify as needed
     return {
-        'example_resource': {
-            'type': 'file',
-            'description': 'This is an example resource for the plugin script.',
-        },
+        'example_sdr': {
+            'type': 'example',
+            'model': 'example_model',
+            'serial': 'example_serial',
+            'description': 'This is an example resource for the plugin script with a specific model and serial number.',
+            'required': True
+        }
     }

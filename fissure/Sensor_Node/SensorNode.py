@@ -376,7 +376,7 @@ class SensorNode(object):
         if hasattr(script_class, "run") and callable(script_class.run):
             try:
                 # Register the operation in the operations dictionary
-                operation_id = '1c08f5b2-6ba9-4fb2-8a84-48fd4011045f'#str(uuid.uuid4())
+                operation_id = '1c08f5b2-6ba9-4fb2-8a84-48fd4011045f'#script_class.opid
                 self.operations[operation_id] = {
                     "plugin": plugin,
                     "operation": operation,
