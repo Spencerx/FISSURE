@@ -11,6 +11,7 @@ import ast
 from fissure.Dashboard.Slots import AttackTabSlots
 import json
 import csv
+import re
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotSensorNodeAutorunTableDelayChecked(state: int, dashboard: QtCore.QObject):
@@ -1479,9 +1480,23 @@ async def _slotSensorNodesDummyStop(dashboard: QtCore.QObject):
     Slot to stop a dummy plugin operation.
     This is a placeholder for testing purposes and should be replaced with actual functionality.
     """
+    ops_table: QtWidgets.QListWidget = dashboard.ui.listWidget_operations
+    selected_items = ops_table.selectedItems()
+    if not selected_items:
+        fissure.Dashboard.UI_Components.Qt5.errorMessage("Please select an operation to stop.")
+        return
+    selected_item = selected_items[0]
+    selected_text = selected_item.text()
+    match = re.search(r"\(ID:\s*([a-fA-F0-9\-]+)\)", selected_text)
+    if match:
+        operation_id = match.group(1)
+    else:
+        fissure.Dashboard.UI_Components.Qt5.errorMessage("Could not extract operation ID from selection.")
+        return
+
     PARAMETERS = {
         "sensor_node_id": dashboard.active_sensor_node,
-        "operation_id": '1c08f5b2-6ba9-4fb2-8a84-48fd4011045f',  # hard coded for testing
+        "operation_id": operation_id,
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,

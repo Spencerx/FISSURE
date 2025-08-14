@@ -308,7 +308,7 @@ class SensorNode(object):
             self.callbacks[cb_name] = cb_func
 
 
-    async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any]) -> None:
+    async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: int | str = 0) -> None:
         """
         Runs a plugin operation on the Sensor Node
 
@@ -363,7 +363,7 @@ class SensorNode(object):
             self.logger.error(f"No callable main() found in {plugin_script_path}")
 
         # Check that the plugin script class has the running flag
-        if not hasattr(script_class, "running") or not isinstance(script_class.running, bool):
+        if not hasattr(script_class, "running") or not callable(script_class.running):
             self.logger.error(f"No running flag found in {plugin_script_path}")
             return
 
@@ -375,8 +375,14 @@ class SensorNode(object):
         # Run the plugin script
         if hasattr(script_class, "run") and callable(script_class.run):
             try:
+                # Set up the operation environment
+                env_ready = await script_class.setup()
+                if not env_ready:
+                    self.logger.error(f"Plugin operation {operation} setup failed.")
+                    return
+
                 # Register the operation in the operations dictionary
-                operation_id = '1c08f5b2-6ba9-4fb2-8a84-48fd4011045f'#script_class.opid
+                operation_id = script_class.opid
                 self.operations[operation_id] = {
                     "plugin": plugin,
                     "operation": operation,
@@ -384,11 +390,39 @@ class SensorNode(object):
                     "resources": resources,
                     "status": script_class.running,
                     "stop": script_class.stop,
+                    "teardown": script_class.teardown,
                     "start_time": time.time(),
                 }
 
                 # Run the plugin operation in the background
                 asyncio.create_task(script_class.run())
+
+                self.logger.info(f"Plugin operation {operation_id} starting.")
+
+                # Check if the operation is running
+                while script_class.running() is None:
+                    await asyncio.sleep(0.1)
+                if not script_class.running():
+                    self.logger.error(f"Plugin operation {operation} did not start successfully.")
+                    await script_class.stop()
+                    await script_class.teardown()
+                    return
+
+                # Send a message to the Dashboard indicating the operation has started
+                PARAMETERS = {
+                    "sensor_node_id": sensor_node_id,
+                    "operation_id": operation_id,
+                    "plugin": plugin,
+                    "operation": operation,
+                    "parameters": parameters,
+                }
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStarted",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
             except Exception as e:
                 self.logger.error(f"Error running plugin script {plugin_script_path}: {e}")
                 return
@@ -396,7 +430,7 @@ class SensorNode(object):
             self.logger.error(f"No callable run() method found in {plugin_script_path}")
             return
 
-    async def stop_plugin_operation(self, component: object, operation_id: str) -> None:
+    async def stop_plugin_operation(self, component: object, operation_id: str, sensor_node_id: int | str = 0) -> None:
         """
         Stops a plugin operation on the Sensor Node.
 
@@ -423,10 +457,31 @@ class SensorNode(object):
         else:
             self.logger.error(f"No callable stop method for operation {operation_id}.")
         self.logger.info(f"Operation {operation_id} stop requested.")
-        while operation["status"]:
+        while operation["status"]():
+            await asyncio.sleep(1)
             self.logger.info(f"Operation {operation_id} is still running.")
-        _ = self.operations.pop(operation_id)
+
         self.logger.info(f"Operation {operation_id} has stopped.")
+        if "teardown" in operation and callable(operation["teardown"]):
+            try:
+                await operation["teardown"]()
+            except Exception as e:
+                self.logger.error(f"Error tearing down plugin operation {operation_id}: {e}")
+        self.logger.info(f"Operation {operation_id} has completed teardown.")
+
+        # Send a message to the Dashboard indicating the operation has started
+        PARAMETERS = {
+            "sensor_node_id": sensor_node_id,
+            "operation_id": operation_id,
+            "plugin": operation.get("plugin"),
+            "operation": operation.get("operation"),
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStopped",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     async def shutdown_comms(self):
         """

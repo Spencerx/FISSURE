@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../../../../../../../.designer/backup/fissure_icon.png</normaloff>../../../../../../../../../../../../../.designer/backup/fissure_icon.png</iconset>
+    <normaloff>../../../../../../../../../../../../../../.designer/backup/fissure_icon.png</normaloff>../../../../../../../../../../../../../../.designer/backup/fissure_icon.png</iconset>
   </property>
   <widget class="QFrame" name="frame4_top">
    <property name="geometry">
@@ -37391,59 +37391,91 @@ p, li { white-space: pre-wrap; }
       <attribute name="title">
        <string>Dummy Runner</string>
       </attribute>
-      <widget class="QWidget" name="verticalLayoutWidget_6">
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
        <property name="geometry">
         <rect>
-         <x>1</x>
-         <y>13</y>
-         <width>1201</width>
-         <height>361</height>
+         <x>9</x>
+         <y>9</y>
+         <width>1191</width>
+         <height>791</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_6">
+       <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="2,1">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
-           <widget class="QPushButton" name="pushButton_7">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QPushButton" name="pushButton_7">
+              <property name="text">
+               <string>Run</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_8">
+              <property name="text">
+               <string>Stop</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_9">
+              <property name="toolTip">
+               <string>Dummy button to simulate selecting and opening a plugin script</string>
+              </property>
+              <property name="text">
+               <string>Open Script</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label1_operations_2">
             <property name="text">
-             <string>Run</string>
+             <string>Parameters</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_8">
-            <property name="text">
-             <string>Stop</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_9">
-            <property name="toolTip">
-             <string>Dummy button to simulate selecting and opening a plugin script</string>
-            </property>
-            <property name="text">
-             <string>Open Script</string>
-            </property>
-           </widget>
+           <widget class="QTableWidget" name="tableWidget_dummy_plugin_params"/>
           </item>
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="tableWidget_dummy_plugin_params"/>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLabel" name="label1_operations">
+            <property name="text">
+             <string>Operations</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="listWidget_operations">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="isWrapping" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -37470,7 +37502,7 @@ p, li { white-space: pre-wrap; }
       </font>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab_11">
       <attribute name="title">

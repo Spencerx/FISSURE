@@ -2,13 +2,14 @@
 """Sensor Node Resource Management"""
 
 from datetime import datetime, timezone
+import logging
 import os
 
 class Resource(object):
     """
     Represents a resource allocated to a sensor node operation.
     """
-    def __init__(self, pid: str, op_uuid: str, type: str, model: str, serial: str = None):
+    def __init__(self, pid: str, op_uuid: str, type: str, model: str, serial: str = None, logger: logging.Logger = None) -> None:
         """
         Initialize the resource parameters.
 
@@ -25,11 +26,13 @@ class Resource(object):
         serial : str, optional
             The serial number of the resource. If not applicable, it can be None.
         """
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
         self.pid = pid
         self.op_uuid = op_uuid
         self.type = type
         self.model = model
         self.serial = serial
+        self.allocated = False
 
         # TODO: Check if resource exists on system
 
@@ -72,17 +75,26 @@ class Resource(object):
         res.allocate()
         return res
 
-    def allocate(self) -> None:
+    def allocate(self) -> bool:
         """
         Allocate the resource by creating a lock file.
 
         This method creates a lock file to indicate that the resource is allocated.
+
+        Returns
+        -------
+        bool
+            True if the resource was successfully allocated, False otherwise.
         """
         if os.path.exists(self.lock_filename):
-            raise FileExistsError(f"Resource lock file already exists: {self.lock_filename}")
+            self.logger.warning(f"Resource lock file already exists: {self.lock_filename}")
+            return False
 
-        with open(self.lock_filename, 'w') as lock_file:
-            lock_file.write(f"pid: {self.pid}\nfissure_op_id: {self.op_uuid}\ncreated: {datetime.now(timezone.utc).isoformat()}\n")
+        else:
+            with open(self.lock_filename, 'w') as lock_file:
+                lock_file.write(f"pid: {self.pid}\nfissure_op_id: {self.op_uuid}\ncreated: {datetime.now(timezone.utc).isoformat()}\n")
+            self.allocated = True
+            return True
 
     def release(self) -> None:
         """
@@ -93,7 +105,7 @@ class Resource(object):
         if os.path.exists(self.lock_filename):
             os.remove(self.lock_filename)
         else:
-            raise FileNotFoundError(f"Resource lock file does not exist: {self.lock_filename}")
+            self.logger.warning(f"Resource lock file does not exist: {self.lock_filename}")
 
 def resource_available(type: str, model: str, serial: str = None) -> bool:
     """

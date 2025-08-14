@@ -3449,6 +3449,7 @@ async def run_plugin_operation(component: object, sensor_node_id: int, plugin: s
         "plugin": plugin,
         "operation": operation,
         "parameters": parameters,
+        "sensor_node_id": sensor_node_id,
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -3478,3 +3479,66 @@ async def stop_plugin_operation(component: object, sensor_node_id: int, operatio
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def pluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict):
+    """Handle Plugin Operation Started Event
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Unique identifier for the operation
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    parameters : dict
+        Parameters for the operation
+    """
+    # Forward message to dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "operation_id": operation_id,
+        "plugin": plugin,
+        "operation": operation,
+        "parameters": parameters,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStarted",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def pluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
+    """Handle Plugin Operation Stopped Event
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Unique identifier for the operation
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    """
+    # Forward message to dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "operation_id": operation_id,
+        "plugin": plugin,
+        "operation": operation,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStopped",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

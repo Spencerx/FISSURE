@@ -1410,6 +1410,55 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     params_table.resizeRowsToContents()
     
 
+async def responsePluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict) -> None:
+    """Handle Request for Plugin Operation Started
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Operation ID
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    parameters : dict
+        Parameters for the operation
+    """
+    # Add the operation to the operations list view
+    operations_list: QtWidgets.QListWidget = component.frontend.ui.listWidget_operations
+    operations_list.addItem(f"{plugin} - {operation} (ID: {operation_id})")
+    operations_list.setWrapping(True)
+    operations_list.scrollToBottom()
+
+
+async def responsePluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
+    """Handle Request for Plugin Operation Stopped
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Operation ID
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    """
+    # Remove the operation from the operations list view
+    operations_list: QtWidgets.QListWidget = component.frontend.ui.listWidget_operations
+    items = operations_list.findItems(f"{plugin} - {operation} (ID: {operation_id})", QtCore.Qt.MatchExactly)
+    if items:
+        for item in items:
+            operations_list.takeItem(operations_list.row(item))
+
+
 async def savePlugin(component: object, plugin_name: str, plugin_data: str) -> None:
     """Save Plugin Data to File
 

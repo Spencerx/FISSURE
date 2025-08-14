@@ -3,6 +3,7 @@
 This script serves as an example of how to create a plugin script for FISSURE. The script can directly implement functionality or wrap existing code.
 """
 import asyncio
+import logging
 import os
 from typing import List, Dict, Any
 import uuid
@@ -20,7 +21,7 @@ class PluginExample(object):
 
     This class can be modified to implement specific functionality for the plugin.
     """
-    def __init__(self, example_arg: str = EXAMPLE_ARG, example_arg2: int = EXAMPLE_ARG2, example_arg3: List[int] = EXAMPLE_ARG3) -> None:
+    def __init__(self, example_arg: str = EXAMPLE_ARG, example_arg2: int = EXAMPLE_ARG2, example_arg3: List[int] = EXAMPLE_ARG3, logger: logging.Logger = None) -> None:
         """
         Initialize the plugin with given keyword arguments.
 
@@ -29,22 +30,17 @@ class PluginExample(object):
         **kwargs : dict
             Keyword arguments for the plugin script.
         """
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
         self.opid = str(uuid.uuid4())  # Generate a unique operation ID
         self.example_arg = example_arg
         self.example_arg2 = example_arg2
         self.example_arg3 = example_arg3
         self._stop = False
-        self.running = False
+        self._running = None # Use None to indicate that the operation has not started yet
 
-    async def run(self) -> None:
-        """
-        Run the plugin functionality.
-
-        This method must be modified to implement specific functionality for the plugin.
-        """
-        # Allocate resources if needed
+        # define resources if needed
         self.resource = [
-            Resource.request_resource(
+            Resource(
                 pid=os.getpid(),
                 op_uuid=self.opid,
                 type='example',
@@ -53,7 +49,44 @@ class PluginExample(object):
             )
         ]
 
-        self.running = True
+    async def setup(self) -> None:
+        """
+        Setup the environment for the operation.
+
+        This method can be modified to implement specific setup functionality for the plugin.
+        """
+        self.logger.info("Setting up operation environment...")
+        
+        for res in self.resource:
+            if not res.allocated:
+                if not res.allocate():
+                    self.logger.error(f"Failed to allocate resource: {res}")
+                    await self.teardown()
+                    return False
+        self.logger.info("Operation environment setup complete.")
+        return True
+
+    async def teardown(self) -> None:
+        """
+        Teardown the environment for the operation.
+
+        This method can be modified to implement specific teardown functionality for the plugin.
+        """
+        self.logger.info("Tearing down operation environment...")
+
+        if hasattr(self, 'resource'):
+            for res in self.resource:
+                res.release()
+
+        self.logger.info("Operation environment teardown complete.")
+
+    async def run(self) -> None:
+        """
+        Run the plugin functionality.
+
+        This method must be modified to implement specific functionality for the plugin.
+        """
+        self._running = True
         counter = 0
         while not self._stop:
             # Plugin logic goes here
@@ -61,9 +94,21 @@ class PluginExample(object):
             print("\texample_arg:", self.example_arg)
             print("\texample_arg2:", self.example_arg2)
             print("\texample_arg3:", self.example_arg3)
-            await asyncio.sleep(1)  # Simulate work being done
+            await asyncio.sleep(1)
             counter += 1
-        self.running = False
+        print("Example Plugin stopped.")
+        self._running = False
+
+    def running(self) -> bool:
+        """
+        Check if the plugin is currently running.
+
+        Returns
+        -------
+        bool
+            True if the plugin is running, False otherwise.
+        """
+        return self._running
 
     async def stop(self) -> None:
         """
@@ -71,13 +116,7 @@ class PluginExample(object):
 
         This method must be modified to implement specific stop functionality for the plugin.
         """
-        print("Stopping Example Plugin.")
         self._stop = True
-
-        # Release resources
-        if hasattr(self, 'resource'):
-            for res in self.resource:
-                res.release()
 
 def main(**kwargs) -> object:
     """
