@@ -1340,7 +1340,7 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
     plugin_manager_table.verticalHeader().setVisible(False)
 
 
-async def responsePluginOperationParameters(component: object, plugin: str, operation: str, parameters: dict):
+async def responsePluginOperationParameters(component: object, plugin: str, operation: str, parameters: dict, resources: dict, interfaces: dict) -> None:
     """Handle Request for Plugin Operation Parameters
 
     Parameters
@@ -1372,10 +1372,10 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     else:
         keys = ["default"] + list(keys)
 
-    # Move "help" to the end of the keys list if present
-    if "help" in keys:
-        keys = [k for k in keys if k != "help"] + ["help"]
-    
+    # Move "description" to the end of the keys list if present
+    if "description" in keys:
+        keys = [k for k in keys if k != "description"] + ["description"]
+
     # Record position for each key
     key_positions = {key: (i+1) for i, key in enumerate(keys)}
 
@@ -1409,6 +1409,86 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     params_table.resizeColumnsToContents()
     params_table.resizeRowsToContents()
     
+    # Get keys for resources
+    keys = []
+    for key, value in resources.items():
+        keys = np.union1d(keys, [str(k) for k in value.keys()])
+
+    # Move "description" to the end of the keys list if present
+    if "description" in keys:
+        keys = [k for k in keys if k != "description"] + ["description"]
+
+    # Record position for each key
+    key_positions = {key: i for i, key in enumerate(keys)}
+
+    # Make the first letter for each key uppercase
+    keys = [key.capitalize() for key in keys]
+
+    # Configure resources table
+    res_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_dummy_plugin_resources
+    res_table.clearContents()
+    res_table.setColumnCount(len(keys))
+    res_table.setHorizontalHeaderLabels(keys)
+    res_table.horizontalHeader().setVisible(True)
+    res_table.verticalHeader().setVisible(True)
+    res_table.setSortingEnabled(True)
+
+    # Populate the resources table
+    res_table.setRowCount(0)  # Clear existing rows
+    for row_index, (key, value) in enumerate(resources.items()):
+        row_index = res_table.rowCount()
+        res_table.insertRow(row_index)
+        res_table.setVerticalHeaderItem(row_index, QtWidgets.QTableWidgetItem(key))
+        for subkey, subvalue in value.items():
+            col_index = key_positions.get(subkey, 0)
+            item = QtWidgets.QTableWidgetItem(str(subvalue))
+            item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)  # Make item non-editable
+            res_table.setItem(row_index, col_index, item)
+    
+    # Resize the resources table to fit contents
+    res_table.resizeColumnsToContents()
+    res_table.resizeRowsToContents()
+
+    # Get keys for interfaces
+    keys = []
+    for key, value in interfaces.items():
+        keys = np.union1d(keys, [str(k) for k in value.keys()])
+
+    # Move "description" to the end of the keys list if present
+    if "description" in keys:
+        keys = [k for k in keys if k != "description"] + ["description"]
+
+    # Record position for each key
+    key_positions = {key: i for i, key in enumerate(keys)}
+
+    # Make the first letter for each key uppercase
+    keys = [key.capitalize() for key in keys]
+
+    # Configure interfaces table
+    iface_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_dummy_plugin_interfaces
+    iface_table.clearContents()
+    iface_table.setColumnCount(len(keys))
+    iface_table.setHorizontalHeaderLabels(keys)
+    iface_table.horizontalHeader().setVisible(True)
+    iface_table.verticalHeader().setVisible(True)
+    iface_table.setSortingEnabled(True)
+
+    # Populate the interfaces table
+    iface_table.setRowCount(0)  # Clear existing rows
+    for row_index, (key, value) in enumerate(interfaces.items()):
+        row_index = iface_table.rowCount()
+        iface_table.insertRow(row_index)
+        iface_table.setVerticalHeaderItem(row_index, QtWidgets.QTableWidgetItem(key))
+        for subkey, subvalue in value.items():
+            col_index = key_positions.get(subkey, 0)
+            item = QtWidgets.QTableWidgetItem(str(subvalue))
+            item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)  # Make item non-editable
+            iface_table.setItem(row_index, col_index, item)
+
+    # Resize the resources table to fit contents
+    res_table.resizeColumnsToContents()
+    res_table.resizeRowsToContents()
+
 
 async def responsePluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict) -> None:
     """Handle Request for Plugin Operation Started

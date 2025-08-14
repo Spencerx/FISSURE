@@ -3407,6 +3407,18 @@ async def plugin_get_operation_parameters(component: object, plugin: str, operat
         else:
             component.logger.error(f"get_arguments function not found in {operation}")
             return
+        get_resources = getattr(operation_module, "get_resources", None)
+        if callable(get_resources):
+            resources = get_resources()
+        else:
+            component.logger.warning(f"get_resources function not found in {operation}, resources will not be included")
+            resources = {}
+        get_interfaces = getattr(operation_module, "get_interfaces", None)
+        if callable(get_interfaces):
+            interfaces = get_interfaces()
+        else:
+            component.logger.warning(f"get_interfaces function not found in {operation}, interfaces will not be included")
+            interfaces = {}
     except Exception as e:
         component.logger.error(f"Error importing operation script {operation}: {e}")
         return
@@ -3420,7 +3432,9 @@ async def plugin_get_operation_parameters(component: object, plugin: str, operat
     PARAMETERS = {
         "plugin": plugin,
         "operation": operation,
-        "parameters": parameters
+        "parameters": parameters,
+        "resources": resources,
+        "interfaces": interfaces
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,

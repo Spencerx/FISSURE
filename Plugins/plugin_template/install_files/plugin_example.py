@@ -155,20 +155,20 @@ def get_arguments() -> dict:
         'example_arg': {
             'default': EXAMPLE_ARG,
             'type': str,
-            'help': 'This is an example argument for the plugin script.',
+            'description': 'This is an example argument for the plugin script.',
             'required': True,
             'choices': ['option1', 'option2', 'default_value'],
         },
         'example_arg2': {
             'default': EXAMPLE_ARG2,
             'type': int,
-            'help': 'This is another example argument for the plugin script.',
+            'description': 'This is another example argument for the plugin script.',
             'required': False,
         },
         'example_arg3': {
             'default': EXAMPLE_ARG3,
             'type': List[int],
-            'help': 'This is a list argument for the plugin script. Using Typing for type hinting.',
+            'description': 'This is a list argument for the plugin script. Using Typing for type hinting.',
             'required': False,
             'nargs': '*', # use regex quanitifiers, e.g. '*', '+', '?', or dict {'min': 1, 'max': 3}
         },
@@ -193,5 +193,25 @@ def get_resources() -> Dict[str, Any]:
             'serial': 'example_serial',
             'description': 'This is an example resource for the plugin script with a specific model and serial number.',
             'required': True
+        }
+    }
+
+def get_interfaces() -> Dict[str, Any]:
+    """
+    Get the interfaces available for the plugin script.
+
+    This function should be modified to return specific interfaces required by the plugin script. If no interfaces are needed, it can return an empty dictionary.
+
+    Returns
+    -------
+    Dict[str, Any]
+        A dictionary containing the interfaces for the plugin script.
+    """
+    return {
+        'example_interface': {
+            'type': 'alert',
+            'channel': 'fissure', # FISSURE zmq
+            'direction': 'out',
+            'description': 'This is an example interface for the plugin script.'
         }
     }

@@ -37454,6 +37454,26 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QTableWidget" name="tableWidget_dummy_plugin_params"/>
           </item>
+          <item>
+           <widget class="QLabel" name="label1_operations_3">
+            <property name="text">
+             <string>Resources</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidget_dummy_plugin_resources"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label1_operations_4">
+            <property name="text">
+             <string>Interfaces</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidget_dummy_plugin_interfaces"/>
+          </item>
          </layout>
         </item>
         <item>
