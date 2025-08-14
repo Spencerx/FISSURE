@@ -38,16 +38,18 @@ class PluginExample(object):
         self._stop = False
         self._running = None # Use None to indicate that the operation has not started yet
 
-        # define resources if needed
+        # define resources
+        pid = os.getpid()  # Get the current process ID
+        resources = get_resources()
         self.resource = [
             Resource(
-                pid=os.getpid(),
+                pid=pid,
                 op_uuid=self.opid,
-                type='example',
-                model='example_model',
-                serial='example_serial'
+                type=res_info.get('type'),
+                model=res_info.get('model'),
+                serial=res_info.get('serial')
             )
-        ]
+        for res_name, res_info in resources.items()]
 
     async def setup(self) -> None:
         """
