@@ -308,6 +308,31 @@ class SensorNode(object):
             self.callbacks[cb_name] = cb_func
 
 
+    async def send_alert(self, sensor_node_id: int | str, opid: str, message: str) -> None:
+        """
+        Send an alert message.
+
+        This method is meant to be provided as a callback for plugin operations to send alert messages.
+
+        Parameters
+        ----------
+        opid : str
+            The operation ID. Unused placeholder for future use.
+        message : str
+            The alert message.
+        """
+        PARAMETERS = {
+            "sensor_node_id": sensor_node_id,
+            "alert_text": message
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER if self.network_type == "IP" else fissure.comms.MessageFields.SOURCE: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn" if self.network_type == "IP" else "alertReturnLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS if self.network_type == "IP" else { "sensor_node_id": sensor_node_id, "alert_text": PARAMETERS["alert_text"][:100] },
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
     async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: int | str = 0) -> None:
         """
         Runs a plugin operation on the Sensor Node
@@ -355,6 +380,14 @@ class SensorNode(object):
         if not isinstance(resources, dict):
             self.logger.error(f"get_resources() did not return a dictionary: {resources}")
             return
+
+        # Record user parameters
+        user_parameters = parameters.copy()
+
+        # Add the logger and alert callback to the parameters
+        parameters["sensor_node_id"] = sensor_node_id
+        parameters["alert_callback"] = self.send_alert
+        parameters["logger"] = self.logger
 
         # Initialize the plugin script with parameters
         if hasattr(plugin_module, "main") and callable(plugin_module.main):
@@ -414,7 +447,7 @@ class SensorNode(object):
                     "operation_id": operation_id,
                     "plugin": plugin,
                     "operation": operation,
-                    "parameters": parameters,
+                    "parameters": user_parameters,
                 }
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,

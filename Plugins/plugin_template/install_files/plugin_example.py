@@ -21,7 +21,7 @@ class PluginExample(object):
 
     This class can be modified to implement specific functionality for the plugin.
     """
-    def __init__(self, example_arg: str = EXAMPLE_ARG, example_arg2: int = EXAMPLE_ARG2, example_arg3: List[int] = EXAMPLE_ARG3, logger: logging.Logger = None) -> None:
+    def __init__(self, example_arg: str = EXAMPLE_ARG, example_arg2: int = EXAMPLE_ARG2, example_arg3: List[int] = EXAMPLE_ARG3, sensor_node_id: int | str = 0, logger: logging.Logger = None, alert_callback: callable = None) -> None:
         """
         Initialize the plugin with given keyword arguments.
 
@@ -31,6 +31,8 @@ class PluginExample(object):
             Keyword arguments for the plugin script.
         """
         self.logger = logger if logger is not None else logging.getLogger(__name__)
+        self.sensor_node_id = sensor_node_id
+        self.alert_callback = alert_callback
         self.opid = str(uuid.uuid4())  # Generate a unique operation ID
         self.example_arg = example_arg
         self.example_arg2 = example_arg2
@@ -47,7 +49,8 @@ class PluginExample(object):
                 op_uuid=self.opid,
                 type=res_info.get('type'),
                 model=res_info.get('model'),
-                serial=res_info.get('serial')
+                serial=res_info.get('serial'),
+                logger=self.logger
             )
         for res_name, res_info in resources.items()]
 
@@ -59,12 +62,14 @@ class PluginExample(object):
         """
         self.logger.info("Setting up operation environment...")
         
+        self._resources = [] # track resources that were successfully allocated
         for res in self.resource:
             if not res.allocated:
                 if not res.allocate():
                     self.logger.error(f"Failed to allocate resource: {res}")
                     await self.teardown()
                     return False
+                self._resources.append(res)
         self.logger.info("Operation environment setup complete.")
         return True
 
@@ -76,8 +81,9 @@ class PluginExample(object):
         """
         self.logger.info("Tearing down operation environment...")
 
-        if hasattr(self, 'resource'):
-            for res in self.resource:
+        if hasattr(self, '_resources'):
+            while len(self._resources) > 0:
+                res = self._resources.pop()
                 res.release()
 
         self.logger.info("Operation environment teardown complete.")
@@ -92,10 +98,9 @@ class PluginExample(object):
         counter = 0
         while not self._stop:
             # Plugin logic goes here
-            print(f"{counter:<2} Example Plugin is running...")
-            print("\texample_arg:", self.example_arg)
-            print("\texample_arg2:", self.example_arg2)
-            print("\texample_arg3:", self.example_arg3)
+            report_str = f"{counter:<2} Example Plugin is running...\n\texample_arg: {self.example_arg}\n\texample_arg2: {self.example_arg2}\n\texample_arg3: {self.example_arg3}"
+            print(report_str)
+            await self.alert_callback(self.sensor_node_id, self.opid, report_str)
             await asyncio.sleep(1)
             counter += 1
         print("Example Plugin stopped.")
