@@ -131,6 +131,7 @@ def _alert_sender(
                     "lon": data.get('lon'),
                     "alt": data.get('alt'),
                     "time": data.get('time'),
+                    "type": data.get('type'),
                     "remarks": data.get('remarks'),
                 }
                 is_gps_update = PARAMETERS["remarks"] == "GPS UPDATE"
@@ -139,15 +140,16 @@ def _alert_sender(
                     name += "LT"
                     PARAMETERS = {
                         "msg": [
-                            PARAMETERS["uid"],
+                            PARAMETERS["uid"][:17],
                             PARAMETERS["lat"],
                             PARAMETERS["lon"],
                             PARAMETERS["alt"],
                             PARAMETERS["time"],
-                            PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
+                            PARAMETERS["remarks"][:10] if PARAMETERS["remarks"] else None,
+                            PARAMETERS["type"]
                         ]
                     }
-
+                print(str(len(PARAMETERS.get("msg"))) + ":" + str(PARAMETERS.get("msg")))
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER if network_type == "IP" else fissure.comms.MessageFields.SOURCE: identifier,
                     fissure.comms.MessageFields.MESSAGE_NAME: name,
