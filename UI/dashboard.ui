@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1280</width>
-    <height>980</height>
+    <height>981</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37406,16 +37406,28 @@ p, li { white-space: pre-wrap; }
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QPushButton" name="pushButton_7">
+             <widget class="QToolButton" name="toolButton_plugin_pkgs_hiprfisr_refresh_2">
+              <property name="toolTip">
+               <string>Refresh List</string>
+              </property>
               <property name="text">
-               <string>Run</string>
+               <string>...</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_8">
+             <widget class="QComboBox" name="comboBox_select_plugin"/>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_select_plugin_op"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_9">
+              <property name="toolTip">
+               <string>Dummy button to simulate selecting and opening a plugin script</string>
+              </property>
               <property name="text">
-               <string>Stop</string>
+               <string>Open</string>
               </property>
              </widget>
             </item>
@@ -37433,12 +37445,9 @@ p, li { white-space: pre-wrap; }
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_9">
-              <property name="toolTip">
-               <string>Dummy button to simulate selecting and opening a plugin script</string>
-              </property>
+             <widget class="QPushButton" name="pushButton_7">
               <property name="text">
-               <string>Open Script</string>
+               <string>Run</string>
               </property>
              </widget>
             </item>
@@ -37486,6 +37495,13 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="pushButton_8">
+            <property name="text">
+             <string>Stop</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QListWidget" name="listWidget_operations">
             <property name="editTriggers">
              <set>QAbstractItemView::NoEditTriggers</set>
@@ -37522,7 +37538,7 @@ p, li { white-space: pre-wrap; }
       </font>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tab_11">
       <attribute name="title">
@@ -40712,7 +40728,7 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QTabWidget" name="tab_plugin_local_hiprfisr">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_22">
            <attribute name="title">

@@ -1339,6 +1339,30 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
     plugin_manager_table.horizontalHeader().setVisible(True)
     plugin_manager_table.verticalHeader().setVisible(False)
 
+    # TODO: for plugin testing purposes, remove when done
+    combobox: QtWidgets.QComboBox = component.frontend.ui.comboBox_select_plugin
+    combobox.clear()
+    combobox.addItems(plugin_names)
+
+
+async def responsePluginOperations(component: object, plugin: str, operations: List[str]) -> None:
+    """Handle Request for Plugin Operations
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    operations : List[str]
+        List of operations for the plugin
+    """
+    print(f"Plugin: {plugin}, Operations: {operations}")
+    operations.sort()
+    combobox: QtWidgets.QComboBox = component.frontend.ui.comboBox_select_plugin_op
+    combobox.clear()
+    combobox.addItems(operations)
+
 
 async def responsePluginOperationParameters(component: object, plugin: str, operation: str, parameters: dict, resources: dict, interfaces: dict) -> None:
     """Handle Request for Plugin Operation Parameters

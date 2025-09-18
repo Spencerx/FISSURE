@@ -3873,7 +3873,13 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
         lambda: SensorNodesTabSlots._slotSensorNodesDummyStop(dashboard)
     )
     dashboard.ui.pushButton_9.clicked.connect(
-        lambda: SensorNodesTabSlots._slotSensorNodesDummyOpen(dashboard)
+        lambda: SensorNodesTabSlots._slotSensorNodesPluginOperationOpen(dashboard)
+    )
+    dashboard.ui.toolButton_plugin_pkgs_hiprfisr_refresh_2.clicked.connect(
+        lambda: LibraryTabPluginManagerTabSlots._slot_request_hiprfisr_plugin_list(dashboard)
+    )
+    dashboard.ui.comboBox_select_plugin.currentIndexChanged.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesPluginSelected(dashboard)
     )
 
 

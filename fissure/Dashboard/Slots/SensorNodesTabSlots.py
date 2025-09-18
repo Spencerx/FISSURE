@@ -1439,6 +1439,40 @@ def _slotSensorNodesReportsSaveClicked(dashboard: QtCore.QObject):
         dashboard.logger.debug("File save dialog was canceled.")
 
 @qasync.asyncSlot(QtCore.QObject)
+async def _slotSensorNodesPluginSelected(dashboard: QtCore.QObject):
+    """ 
+    Slot to handle the selection of a plugin from the dropdown.
+    This will populate the operations list with the available operations for the selected plugin.
+    """
+    # Get selected plugin
+    selected_plugin = str(dashboard.ui.comboBox_select_plugin.currentText())
+
+    # Clear previous operations
+    combobox_ops: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin_op
+    combobox_ops.clear()
+    params_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_params
+    params_table.setRowCount(0)  # Clear previous parameters
+    res_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_resources
+    res_table.setRowCount(0)  # Clear previous resources
+    iface_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_interfaces
+    iface_table.setRowCount(0)  # Clear previous interface
+
+    # If no plugin is selected, return
+    if not selected_plugin:
+        return
+
+    # Send request to get plugin parameters
+    PARAMETERS = {
+        "plugin": selected_plugin,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+        fissure.comms.MessageFields.MESSAGE_NAME: "plugin_get_operations",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+@qasync.asyncSlot(QtCore.QObject)
 async def _slotSensorNodesDummyRun(dashboard: QtCore.QObject):
     """ 
     Slot to run a dummy plugin operation.
@@ -1506,14 +1540,16 @@ async def _slotSensorNodesDummyStop(dashboard: QtCore.QObject):
     await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 @qasync.asyncSlot(QtCore.QObject)
-async def _slotSensorNodesDummyOpen(dashboard: QtCore.QObject):
+async def _slotSensorNodesPluginOperationOpen(dashboard: QtCore.QObject):
     """ 
-    Slot to open a dummy plugin operation.
+    Slot to open a plugin operation.
     This is a placeholder for testing purposes and should be replaced with actual functionality.
     """
+    combobox_plugin: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin
+    combobox_op: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin_op
     PARAMETERS = {
-        "plugin": 'plugin_template',
-        "operation": 'plugin_example.py'
+        "plugin": combobox_plugin.currentText(),
+        "operation": combobox_op.currentText(),
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
