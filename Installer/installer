@@ -22891,7 +22891,7 @@ sudo python3 -m pip install cmake --upgrade --break-system-packages
 sudo apt install -y python3-testresources
 sudo python3 -m pip install --upgrade setuptools --break-system-packages
 sudo python3 -m pip install --upgrade virtualenv --break-system-packages
-#sudo python3 -m pip install matplotlib --break-system-packages  # This version conflicts with yellowbrick
+#sudo python3 -m pip install "matplotlib==3.6.3" --break-system-packages  # This version conflicts with yellowbrick
 sudo python3 -m pip install PyYAML==5.1 --break-system-packages
 sudo python3 -m pip install pyyaml --break-system-packages
 wget http://archive.ubuntu.com/ubuntu/pool/universe/p/python-scipy/python-scipy_0.19.1-2ubuntu1_amd64.deb
@@ -22924,7 +22924,7 @@ sudo python2 -m pip install netaddr
 sudo python3 -m pip install psutil --break-system-packages
 sudo python3 -m pip install pyserial --break-system-packages
 sudo apt-get install -y gpsd-clients python3-gi-cairo
-sudo python3 -m pip install pandas --break-system-packages
+sudo python3 -m pip install "pandas==2.3.1" --break-system-packages
 sudo apt-get install -y dsniff
 sudo apt-get install -y ncurses-term
 sudo python3 -m pip install yellowbrick --break-system-packages
@@ -22935,7 +22935,7 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow-cpu --break-system-packages
+sudo python3 -m pip install "tensorflow-cpu==2.15.0" --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython --break-system-packages
@@ -23107,7 +23107,7 @@ programs_ubuntu24_04.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
 sudo apt-get install -y python3-pyserial
-sudo python3 -m pip install meshtastic --break-system-packages
+sudo python3 -m pip install "meshtastic==2.6.4" --break-system-packages
 sudo usermod -aG dialout $USER  # log out & in/reboot
 sudo usermod -aG tty $USER
 echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
@@ -24832,7 +24832,7 @@ gm -help
 
 # Spectrum Painter
 programs_ubuntu24_04.append(('Spectrum Painter (7.39 MB)',
-"""sudo python3 -m pip install numpy imageio --break-system-packages 
+"""sudo python3 -m pip install "numpy==1.26.4" imageio --break-system-packages 
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/polygon/spectrum_painter.git
