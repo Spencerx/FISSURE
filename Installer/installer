@@ -23121,6 +23121,7 @@ python3 -c "import meshtastic"
 programs_ubuntu24_04.append(('Network Certificates (3.51 kB)',
 """cd '""" + fissure_directory + """'
 export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
+python3 -m pip install tensorflow_cpu --break-system-packages
 python3 ./fissure/generate_certificates.py
 ########## Verify ##########
 ls '""" + fissure_directory + """/certificates'
@@ -25416,7 +25417,15 @@ fi
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
+programs_ubuntu24_04.append(('System Cleanup',
+### Cleanup system
 
+sudo apt remove -y xtrx-dkms
+sudo apt purge -y casper
+sudo apt remove -y gdm3
+sudo apt install -y gdm3
+sudo reboot
+""",True,'Video'))
 ########################################################################
 ############################ Arch Linux ################################
 ########################################################################
