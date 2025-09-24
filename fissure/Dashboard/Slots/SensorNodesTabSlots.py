@@ -1495,10 +1495,12 @@ async def _slotSensorNodesDummyRun(dashboard: QtCore.QObject):
         else:
             parameters[params_table.verticalHeaderItem(row).text()] = value_item.text()
 
+    combobox_plugin: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin
+    combobox_op: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin_op
     PARAMETERS = {
         "sensor_node_id": dashboard.active_sensor_node,
-        "plugin": 'plugin_template',
-        "operation": 'plugin_example.py',
+        "plugin": combobox_plugin.currentText(),
+        "operation": combobox_op.currentText(),
         "parameters": parameters
     }
     msg = {

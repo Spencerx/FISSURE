@@ -9,6 +9,7 @@ from typing import List, Dict, Any
 import uuid
 
 from fissure.Sensor_Node.utils.resources import Resource
+import inspect
 
 # Optional: Define default values for arguments
 EXAMPLE_ARG = "default_value"
@@ -141,7 +142,15 @@ def main(**kwargs) -> object:
     object
         An instance of the PluginExample class with the provided arguments.
     """
-    print(f"Initializing Example Plugin with arguments: {kwargs}")
+    # Get input arguments for PluginExample.__init__ from kwargs
+    # Only pass arguments that are accepted by PluginExample.__init__
+    sig = inspect.signature(PluginExample.__init__)
+    valid_args = {k: v for k, v in kwargs.items() if k in sig.parameters and k != 'self'}
+    for arg in kwargs:
+        if arg not in valid_args:
+            kwargs["logger"].warning(f"Warning: Argument '{arg}' is not used by PluginExample and will be ignored.")
+    kwargs = valid_args
+    kwargs["logger"].info(f"Initializing Example Plugin with arguments: {kwargs}")
     example_plugin = PluginExample(**kwargs)
     return example_plugin
 

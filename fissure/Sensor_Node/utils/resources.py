@@ -9,7 +9,7 @@ class Resource(object):
     """
     Represents a resource allocated to a sensor node operation.
     """
-    def __init__(self, pid: str, op_uuid: str, type: str, model: str, serial: str = None, logger: logging.Logger = None) -> None:
+    def __init__(self, pid: str, op_uuid: str, type: str, model: str | None = None, serial: str = None, logger: logging.Logger = None) -> None:
         """
         Initialize the resource parameters.
 
@@ -21,35 +21,41 @@ class Resource(object):
             The unique identifier for the operation.
         type : str
             The type of the resource (e.g., 'sdr', 'file', etc.).
-        model : str
-            The model of the resource (e.g., 'usrp b2x0', 'hackrf', etc.).
+        model : str, optional
+            The model of the resource (e.g., 'usrp b2x0', 'hackrf', etc.). If not applicable, it can be None.
         serial : str, optional
             The serial number of the resource. If not applicable, it can be None.
         """
-        self.logger = logger if logger is not None else logging.getLogger(__name__)
-        self.pid = pid
-        self.op_uuid = op_uuid
-        self.type = type
-        self.model = model
-        self.serial = serial
-        self.allocated = False
+        try:
+            self.logger = logger if logger is not None else logging.getLogger(__name__)
+            self.pid = pid
+            self.op_uuid = op_uuid
+            self.type = type
+            self.model = model
+            self.serial = serial
+            self.allocated = False
 
-        # TODO: Check if resource exists on system
-
-        # get the lock filename
-        type_str = str(type).replace(' ', '_').replace('-', '_').lower()
-        model_str = '_' + str(model).replace(' ', '_').replace('-', '_').lower()
-        if serial is None:
-            serial_str = ''
-        else:
-            serial_str = '_' + str(serial).replace(' ', '_').replace('-', '_').lower()
-        self.lock_filename = f"/tmp/{type_str}{model_str}{serial_str}.lock"
+            # get the lock filename
+            type_str = str(type).replace(' ', '_').replace('-', '_').lower()
+            if model is None or model == '':
+                model_str = ''
+            else:
+                model_str = '_' + str(model).replace(' ', '_').replace('-', '_').lower()
+            if serial is None or serial == '':
+                serial_str = ''
+            else:
+                serial_str = '_' + str(serial).replace(' ', '_').replace('-', '_').lower()
+            self.lock_filename = f"/tmp/{type_str}{model_str}{serial_str}.lock"
+        except Exception as e:
+            if logger is not None:
+                logger.error(f"Error initializing Resource: {e}")
+            raise e
 
     def __repr__(self):
         return f"Resource(pid={self.pid}, op_uuid={self.op_uuid}, type={self.type}, model={self.model}, serial={self.serial})"
 
     @staticmethod
-    def request_resource(pid: str, op_uuid: str, type: str, model: str, serial: str = None) -> 'Resource':
+    def request_resource(pid: str, op_uuid: str, type: str, model: str | None = None, serial: str | None = None) -> 'Resource':
         """
         Request a resource for a sensor node operation.
 
@@ -61,8 +67,8 @@ class Resource(object):
             The unique identifier for the operation.
         type : str
             The type of the resource to request.
-        model : str
-            The model of the resource to request.
+        model : str, optional
+            The model of the resource to request. If not applicable, it can be None.
         serial : str, optional
             The serial number of the resource to request. If not applicable, it can be None.
 
@@ -107,7 +113,7 @@ class Resource(object):
         else:
             self.logger.warning(f"Resource lock file does not exist: {self.lock_filename}")
 
-def resource_available(type: str, model: str, serial: str = None) -> bool:
+def resource_available(type: str, model: str | None = None, serial: str | None = None) -> bool:
     """
     Check if a resource is available.
 
@@ -115,8 +121,8 @@ def resource_available(type: str, model: str, serial: str = None) -> bool:
     ----------
     type : str
         The type of the resource to check.
-    model : str
-        The model of the resource to check.
+    model : str, optional
+        The model of the resource to check. If not applicable, it can be None.
     serial : str, optional
         The serial number of the resource to check. If not applicable, it can be None.
 

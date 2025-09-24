@@ -856,13 +856,10 @@ class HiprFisr:
         asyncio.run(sensor.close())
 
 
-    async def send_cot(self, uid, lat, lon, alt, time, remarks):
+    async def send_cot(self, uid, lat, lon, alt, time, remarks, type:str="a-f-G-U-H"):
         """
         Sends CoT message to TAK server. Used for alerts but not for the sensor node GPS beacon.
         """
-
-        #print("IN TAK SEND FUNCTION")
-        
         # Get TAK server settings
         settings: dict = fissure.utils.get_fissure_config()
         s_addr = settings["tak"]["ip_addr"]
@@ -871,7 +868,7 @@ class HiprFisr:
         tak_key = settings["tak"]["key"]
 
         cot_msg = f"""<?xml version="1.0" encoding="UTF-8"?>
-        <event version="2.0" type="a-f-G-U-H" uid="{uid}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
+        <event version="2.0" type="{type}" uid="{uid}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
             <detail>
                 <contact callsign="{uid}"/>
                 <remarks>"{remarks}"</remarks>

@@ -333,6 +333,82 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+    async def send_tak_cot(self, sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H") -> None:
+        """Send a TAK message.
+
+        Parameters
+        ----------
+        sensor_node_id : int | str
+            Sensor node ID
+        opid : str
+            Operation ID
+        uid : str
+            Unique ID for the TAK message.
+        remarks : str
+            Remarks to include in the TAK message.
+        lat : float | bool, optional
+            Latitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
+        lon : float | bool, optional
+            Longitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
+        alt : float | bool, optional
+            Altitude in meters, by default True to use current Sensor Node GPS position. False to omit.
+        time : float | bool, optional
+            Timestamp as a Unix epoch float, by default True to use current time. False to omit.
+        type : str, optional
+            Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
+        """
+        # Prepare inputs
+        if lat is True:
+            lat = self.gps_position.get('latitude', 0.0)
+        if lon is True:
+            lon = self.gps_position.get('longitude', 0.0)
+        if alt is True:
+            alt = self.gps_position.get('altitude', 0.0)
+        if time is True:
+            time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        if remarks == "GPS UPDATE":
+            msg_name = "takPlotGpsUpdate"
+        else:
+            msg_name = "takPlot"
+
+        # Prepare values
+        if self.network_type == "IP":
+            PARAMETERS = {
+                "uid": uid,
+                "lat": lat,
+                "lon": lon,
+                "alt": alt,
+                "time": time,
+                "type": type,
+                "remarks": remarks
+            }
+        elif self.network_type == "Meshtastic":
+            if lat is False or lon is False or alt is False:
+                self.logger.error("TAK message requires latitude, longitude, and altitude.")
+                return
+            if time is False:
+                time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            msg_name += "LT"
+            PARAMETERS = {
+                "msg": [
+                    PARAMETERS["uid"],
+                    PARAMETERS["lat"],
+                    PARAMETERS["lon"],
+                    PARAMETERS["alt"],
+                    PARAMETERS["time"],
+                    PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
+                ]
+            }
+
+        # Send message
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
     async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: int | str = 0) -> None:
         """
         Runs a plugin operation on the Sensor Node
@@ -380,6 +456,7 @@ class SensorNode(object):
         if not isinstance(resources, dict):
             self.logger.error(f"get_resources() did not return a dictionary: {resources}")
             return
+        self.logger.info(f"Plugin operation resources: {resources}")
 
         # Record user parameters
         user_parameters = parameters.copy()
@@ -387,13 +464,21 @@ class SensorNode(object):
         # Add the logger and alert callback to the parameters
         parameters["sensor_node_id"] = sensor_node_id
         parameters["alert_callback"] = self.send_alert
+        parameters["tak_cot_callback"] = self.send_tak_cot
         parameters["logger"] = self.logger
 
         # Initialize the plugin script with parameters
         if hasattr(plugin_module, "main") and callable(plugin_module.main):
+            self.logger.info(f"Initializing plugin script main() from {plugin_script_path} with parameters: {parameters}")
             script_class = plugin_module.main(**parameters)
+            self.logger.info(f"Plugin script class initialized: {script_class}")
         else:
             self.logger.error(f"No callable main() found in {plugin_script_path}")
+
+        # Check that the plugin has operation ID attribute
+        if not hasattr(script_class, "opid"):
+            self.logger.error(f"No operation ID (opid) found in {plugin_script_path}")
+            return
 
         # Check that the plugin script class has the running flag
         if not hasattr(script_class, "running") or not callable(script_class.running):
@@ -413,6 +498,7 @@ class SensorNode(object):
                 if not env_ready:
                     self.logger.error(f"Plugin operation {operation} setup failed.")
                     return
+                self.logger.info(f"Plugin operation environment for {operation} is ready.")
 
                 # Register the operation in the operations dictionary
                 operation_id = script_class.opid
@@ -428,6 +514,7 @@ class SensorNode(object):
                 }
 
                 # Run the plugin operation in the background
+                self.logger.info(f"Starting plugin operation {operation_id}")
                 asyncio.create_task(script_class.run())
 
                 self.logger.info(f"Plugin operation {operation_id} starting.")
