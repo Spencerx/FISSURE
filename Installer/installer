@@ -25418,7 +25418,7 @@ fi
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
 programs_ubuntu24_04.append(('System Cleanup',
-### Cleanup system
+"""### Cleanup system
 
 sudo apt remove -y xtrx-dkms
 sudo apt purge -y casper
