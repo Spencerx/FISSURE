@@ -165,5 +165,8 @@ fi
 #        Run the Full Installer        #
 ########################################
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+mkdir $DIR/FISSURE_Install
+LOGFILE="$DIR/FISSURE_Install/install.log"
+exec > >(tee -a "$LOGFILE") 2>&1
 $DIR/Installer/installer
 
