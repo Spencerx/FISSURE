@@ -25424,6 +25424,7 @@ sudo apt remove -y xtrx-dkms
 sudo apt purge -y casper
 sudo apt remove -y gdm3
 sudo apt install -y gdm3
+sudo apt install -y nautilus
 sudo reboot
 """,True,'Video'))
 ########################################################################
