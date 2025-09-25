@@ -6,6 +6,13 @@ This module provides functions to look up Organizationally Unique Identifiers (O
 import csv
 import os
 
+# vendor plain text (reduced from variants)
+# (search term, plain output)
+VENDOR_PLAIN = [
+    ('d-link', 'd-link'),
+    ('tp-link', 'tp-link')
+]
+
 class OUILookup(object):
     def __init__(self):
         """
@@ -36,3 +43,23 @@ class OUILookup(object):
         tmp_mac = mac.replace(":", "").upper()
         found_mac = tmp_mac[:6]
         return self._table.get(found_mac)
+
+def get_vendor_common_name(name: str) -> str | None:
+    """
+    Get the common name for a vendor.
+
+    Parameters
+    ----------
+    name : str
+        The name of the vendor.
+
+    Returns
+    -------
+    str | None
+        Common name of the vendor if found, otherwise None.
+    """
+    common_name = None
+    for pair in VENDOR_PLAIN:
+        if name is not None and pair[0] in name.lower():
+            common_name = pair[1]
+    return common_name

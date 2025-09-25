@@ -470,7 +470,11 @@ class SensorNode(object):
         # Initialize the plugin script with parameters
         if hasattr(plugin_module, "main") and callable(plugin_module.main):
             self.logger.info(f"Initializing plugin script main() from {plugin_script_path} with parameters: {parameters}")
-            script_class = plugin_module.main(**parameters)
+            try:
+                script_class = plugin_module.main(**parameters)
+            except Exception as e:
+                self.logger.error(f"Error initializing plugin script {plugin_script_path}: {e}")
+                return
             self.logger.info(f"Plugin script class initialized: {script_class}")
         else:
             self.logger.error(f"No callable main() found in {plugin_script_path}")
@@ -589,7 +593,7 @@ class SensorNode(object):
                 self.logger.error(f"Error tearing down plugin operation {operation_id}: {e}")
         self.logger.info(f"Operation {operation_id} has completed teardown.")
 
-        # Send a message to the Dashboard indicating the operation has started
+        # Send a message to the Dashboard indicating the operation has stopped
         PARAMETERS = {
             "sensor_node_id": sensor_node_id,
             "operation_id": operation_id,
