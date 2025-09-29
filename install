@@ -56,6 +56,7 @@ fi
 if [[ -n "$ubuntu22_04" ]]
 then
     echo "Ubuntu 22.04 detected"
+    installer_file="ubuntu22_04"
     ubuntu_arm=$(lscpu 2>&1 | grep "ARM")
     if [[ -n "$ubuntu_arm" ]]
     then
