@@ -99,9 +99,14 @@ class WifiScanAP(Operation):
         self.oui_lookup = OUILookup()
 
     @setup_decorator
-    async def setup(self) -> None:
+    async def setup(self) -> bool:
         """
         Setup the environment to run the operation.
+
+        Returns
+        -------
+        bool
+            True if setup is successful, False otherwise.
         """
         # set monitor mode
         configured = set_monitor_mode(self.dev, raise_error=True, logger=self.logger)
