@@ -39,6 +39,7 @@ from fissure.utils.alert_sender import alertSender
 from datetime import datetime, timezone
 
 import warnings
+import traceback
 warnings.filterwarnings("ignore", category=DeprecationWarning)  # Scapy warnings
 
 IP_ADDRESS = "127.0.0.1"
@@ -473,7 +474,8 @@ class SensorNode(object):
             try:
                 script_class = plugin_module.main(**parameters)
             except Exception as e:
-                self.logger.error(f"Error initializing plugin script {plugin_script_path}: {e}")
+                tb_str = traceback.format_exc()
+                self.logger.error(f"Error initializing plugin script {plugin_script_path}: {e}\n{tb_str}")
                 return
             self.logger.info(f"Plugin script class initialized: {script_class}")
         else:
@@ -548,7 +550,8 @@ class SensorNode(object):
                 await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
             except Exception as e:
-                self.logger.error(f"Error running plugin script {plugin_script_path}: {e}")
+                tb_str = traceback.format_exc()
+                self.logger.error(f"Error running plugin script {plugin_script_path}: {e}\n{tb_str}")
                 return
         else:
             self.logger.error(f"No callable run() method found in {plugin_script_path}")
