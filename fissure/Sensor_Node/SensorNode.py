@@ -2649,7 +2649,7 @@ class SensorNode(object):
             with open(filename) as yaml_library_file:
                 playlist_dict = yaml.load(yaml_library_file, yaml.FullLoader)
                 trigger_dict = playlist_dict['trigger_values']
-            self.autorunPlaylistStart('', playlist_dict, trigger_dict)
+            self.autorunPlaylistStart(sensor_node_id, playlist_dict, trigger_dict)
 
 
     def autorunPlaylistThreadStart(self, sensor_node_id, playlist_dict):
