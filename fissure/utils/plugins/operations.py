@@ -93,6 +93,46 @@ def teardown_decorator(func):
         self.logger.info(f"Operation environment teardown complete for {self.__class__.__name__}.")
     return wrapper
 
+async def send_alert(sensor_node_id: int | str, opid: str, message: str, logger=logging.getLogger(__name__)) -> None:
+    """Placeholder for alert callback if none is provided.
+
+    Parameters
+    ----------
+    sensor_node_id : int | str
+        The sensor node ID
+    opid : str
+        The operation ID
+    message : str
+        The alert message.
+    """
+    logger.info(f"Alert {sensor_node_id}, {opid}: {message}")
+
+async def send_tak_cot(sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H", logger=logging.getLogger(__name__)) -> None:
+    """Placeholder for TAK CoT callback if none is provided.
+
+    Parameters
+    ----------
+    sensor_node_id : int | str
+        The sensor node ID
+    opid : str
+        The operation ID
+    uid : str
+        The unique ID
+    remarks : str
+        The remarks
+    lat : float | bool, optional
+        The latitude, by default True
+    lon : float | bool, optional
+        The longitude, by default True
+    alt : float | bool, optional
+        The altitude, by default True
+    time : float | bool, optional
+        The time, by default True
+    type : str, optional
+        The type, by default "a-f-G-U-H"
+    """
+    logger.info(f"TAK CoT {sensor_node_id}, {opid}: uid={uid}, lat={lat}, lon={lon}, alt={alt}, time={time}, type={type}, remarks={remarks}")
+
 class Operation(object):
     """Base class for plugin operations.
     """
@@ -113,6 +153,10 @@ class Operation(object):
         # input parameters
         self.sensor_node_id = sensor_node_id
         self.logger = logger
+        if alert_callback is None:
+            alert_callback = send_alert
+        if tak_cot_callback is None:
+            tak_cot_callback = send_tak_cot
         self.alert_callback = alert_callback
         self.tak_cot_callback = tak_cot_callback
 

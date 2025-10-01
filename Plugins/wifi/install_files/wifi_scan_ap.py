@@ -137,6 +137,8 @@ class WifiScanAP(Operation):
                     break
                 if time.time() + self.dwell > tend:
                     # stop scan
+                    self.logger.debug("Scan duration reached. Stopping scan...")
+                    await self.stop()
                     return
 
                 # set channel
@@ -215,10 +217,10 @@ class WifiScanAP(Operation):
             }
 
             # send alert
-            await self.alert_callback(self.sensor_node_id, self.opid, f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm')
+            await self.alert_callback(self.sensor_node_id, self.opid, f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', logger=self.logger)
 
             # send tak cot
-            await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=ssid, remarks=f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S')
+            await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=ssid, remarks=f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S', logger=self.logger)
 
 def get_resources(dev: str = '') -> Dict[str, Any]:
     """
@@ -300,3 +302,39 @@ def main(*args, **kwargs) -> object:
         An instance of the WifiScanAP class with the provided arguments.
     """
     return WifiScanAP(*args, **kwargs)
+
+if __name__ == "__main__":
+    """Run the plugin script as a standalone program for testing purposes.
+    """
+    import traceback
+
+    # set up logging
+    logger = logging.getLogger(__file__.split('/')[-1])
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
+
+    # create operation instance
+    # adjust parameters as needed for testing
+    logger.debug("Initializing...")
+    op = main(
+        dev='wlx00c0cab5f8c9',
+        duration=-1,
+        dwell=1,
+        power=-100,
+        channels=None,
+        logger=logger
+    )
+    logger.debug("Running...")
+
+    # run operation
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(op.setup())
+        logger.debug("Setup complete.")
+        loop.run_until_complete(op.run())
+    except Exception as e:
+        loop.run_until_complete(op.stop())
+        logger.error(f"Error occurred: {e}")
+        logger.debug(traceback.format_exc())
+    finally:
+        loop.run_until_complete(op.teardown())

@@ -309,7 +309,7 @@ class SensorNode(object):
             self.callbacks[cb_name] = cb_func
 
 
-    async def send_alert(self, sensor_node_id: int | str, opid: str, message: str) -> None:
+    async def send_alert(self, sensor_node_id: int | str, opid: str, message: str, logger: None = None) -> None:
         """
         Send an alert message.
 
@@ -317,10 +317,14 @@ class SensorNode(object):
 
         Parameters
         ----------
+        sensor_node_id : int | str
+            Sensor node ID
         opid : str
             The operation ID. Unused placeholder for future use.
         message : str
             The alert message.
+        logger : None
+            Unused placeholder for debugging.
         """
         PARAMETERS = {
             "sensor_node_id": sensor_node_id,
@@ -334,7 +338,7 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def send_tak_cot(self, sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H") -> None:
+    async def send_tak_cot(self, sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H", logger: None = None) -> None:
         """Send a TAK message.
 
         Parameters
@@ -357,6 +361,8 @@ class SensorNode(object):
             Timestamp as a Unix epoch float, by default True to use current time. False to omit.
         type : str, optional
             Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
+        logger : None, optional
+            Unused placeholder for debugging.
         """
         # Prepare inputs
         if lat is True:

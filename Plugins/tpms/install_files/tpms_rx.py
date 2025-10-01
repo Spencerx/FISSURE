@@ -150,15 +150,13 @@ class TPMSReceiver(Operation):
                     self.logger.debug(f"TPMS id={id} {pressure_key}={data.get(pressure_key)}")
 
                     if pressure_key is not None:
-                        if self.alert_callback is not None:
-                            await self.alert_callback(self.sensor_node_id, self.opid, f"TPMS id={id} {pressure_key}={data.get(pressure_key)}")
+                        await self.alert_callback(self.sensor_node_id, self.opid, f"TPMS id={id} {pressure_key}={data.get(pressure_key)}")
 
-                        if self.tak_cot_callback is not None:
-                            # remove time field to avoid confusion with TAK time field
-                            if 'time' in data.keys():
-                                _ = data.pop('time')
+                        # remove time field to avoid confusion with TAK time field
+                        if 'time' in data.keys():
+                            _ = data.pop('time')
 
-                            await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=id, remarks=json.dumps(data, separators=(',', ':')), lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S')
+                        await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=id, remarks=json.dumps(data, separators=(',', ':')), lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S')
 
     @stop_decorator
     async def stop(self) -> None:
