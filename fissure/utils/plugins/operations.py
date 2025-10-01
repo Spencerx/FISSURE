@@ -16,7 +16,7 @@ from fissure.Sensor_Node.utils.resources import Resource
 _base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback']
 
 def setup_decorator(func):
-    async def wrapper(self, *args, **kwargs):
+    async def wrapper(self, *args, **kwargs) -> bool:
         self.logger.info("Setting up operation environment...")
 
         # allocate resources
@@ -46,7 +46,7 @@ def setup_decorator(func):
     return wrapper
 
 def run_decorator(func):
-    async def wrapper(self, *args, **kwargs):
+    async def wrapper(self, *args, **kwargs) -> None:
         if not self._setup_complete:
             self.logger.error("Operation environment not set up. Call setup() before run().")
             return
@@ -59,6 +59,38 @@ def run_decorator(func):
         self.logger.info(f"Operation {self.__class__.__name__} run complete.")
         self._running = False
         return
+    return wrapper
+
+def stop_decorator(func):
+    async def wrapper(self, *args, **kwargs) -> None:
+        self.logger.info(f"Stopping {self.__class__.__name__}...")
+        self._stop = True
+        while self.running():
+            await asyncio.sleep(0.1)
+            self.logger.debug(f"Waiting for {self.__class__.__name__} to stop...")
+        await func(self, *args, **kwargs)
+        self.logger.info(f"{self.__class__.__name__} stopped.")
+    return wrapper
+
+def teardown_decorator(func):
+    async def wrapper(self, *args, **kwargs) -> None:
+        self.logger.info(f"Tearing down operation environment for {self.__class__.__name__}...")
+
+        self._setup_complete = False
+
+        await func(self, *args, **kwargs)
+
+        if hasattr(self, '_resources'):
+            self.logger.debug(f"Releasing {len(self._resources)} resources for {self.__class__.__name__}...")
+            while len(self._resources) > 0:
+                try:
+                    res = self._resources.pop()
+                    self.logger.debug(f"Releasing resource: {res}")
+                    res.release()
+                except Exception as e:
+                    self.logger.error(f"Error releasing resource {res}: {e}")
+
+        self.logger.info(f"Operation environment teardown complete for {self.__class__.__name__}.")
     return wrapper
 
 class Operation(object):
@@ -156,33 +188,19 @@ class Operation(object):
         """
         return self._running
 
+    @stop_decorator
     async def stop(self) -> None:
         """
         Stop the operation.
         """
-        self.logger.info(f"Stopping {self.__class__.__name__}...")
-        self._stop = True
-        while self.running():
-            await asyncio.sleep(0.1)
-            self.logger.debug(f"Waiting for {self.__class__.__name__} to stop...")
-        self.logger.info(f"{self.__class__.__name__} stopped.")
+        return
 
+    @teardown_decorator
     async def teardown(self) -> None:
         """
         Teardown the environment for the operation.
         """
-        self.logger.info(f"Tearing down operation environment for {self.__class__.__name__}...")
-
-        self._setup_complete = False
-
-        if hasattr(self, '_resources'):
-            self.logger.debug(f"Releasing {len(self._resources)} resources for {self.__class__.__name__}...")
-            while len(self._resources) > 0:
-                res = self._resources.pop()
-                self.logger.debug(f"Releasing resource: {res}")
-                res.release()
-
-        self.logger.info(f"Operation environment teardown complete for {self.__class__.__name__}.")
+        return
 
 def get_arguments(Operation: Operation, logger: logging.Logger = logging.getLogger(__name__)) -> Dict[str, Any]:
     """Get the arguments required to initialize the operation.

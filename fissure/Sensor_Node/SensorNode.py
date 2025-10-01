@@ -580,7 +580,8 @@ class SensorNode(object):
             try:
                 await operation["stop"]()
             except Exception as e:
-                self.logger.error(f"Error stopping plugin operation {operation_id}: {e}")
+                tb_str = traceback.format_exc()
+                self.logger.error(f"Error stopping plugin operation {operation_id}: {e}\n{tb_str}")
         else:
             self.logger.error(f"No callable stop method for operation {operation_id}.")
         self.logger.info(f"Operation {operation_id} stop requested.")

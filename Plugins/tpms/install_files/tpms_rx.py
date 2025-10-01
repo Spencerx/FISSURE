@@ -11,7 +11,7 @@ import subprocess
 from typing import Any, Dict
 
 from fissure.utils.hardware import findRTL2832U
-from fissure.utils.plugins.operations import Operation, setup_decorator, run_decorator
+from fissure.utils.plugins.operations import Operation, setup_decorator, run_decorator, stop_decorator
 from fissure.utils.plugins.operations import get_arguments as get_arguments_base
 
 class TPMSReceiver(Operation):
@@ -77,65 +77,97 @@ class TPMSReceiver(Operation):
     async def run(self) -> None:
         """Run the operation
         """
-        p = Process(target=subprocess.run, args=(' '.join(self.cmd),), kwargs={'shell': True})
-        p.start()
-        await asyncio.sleep(1) # let rtl_433 start
+        # start rtl_433 process
+        self.logger.debug(f"Starting rtl_433 with command: {' '.join(self.cmd)}")
+        self.rtl_433_stdout = asyncio.Queue()
+        def run_rtl_433(cmd, queue):
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            for line in proc.stdout:
+                queue.put_nowait(line)
+            proc.stdout.close()
+            proc.wait()
+        self.rtl_433 = Process(target=run_rtl_433, args=(' '.join(self.cmd), self.rtl_433_stdout))
+        self.rtl_433.start()
 
         # parse messages
+        self.logger.debug("Binding to UDP socket on localhost:1514...")
         try:
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.client_socket.bind(('localhost', 1514))
+            self.client_socket.setblocking(False)
+            self.client_socket.settimeout(0)
+        except OSError as e:
+            if 'Errno 98' in str(e): # address already in use
+                subprocess.run(['fuser', '-k', '1514/udp']) # kill as user
+                try:
+                    self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    self.client_socket.bind(('localhost', 1514))
+                except OSError as e:
+                    if 'Errno 98' in str(e): # address already in use
+                        subprocess.run(['sudo', 'fuser', '-k', '1514/udp']) # kill as sudo
+                        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                        self.client_socket.bind(('localhost', 1514))
+                    else:
+                        self.logger.error(f"Failed to bind UDP socket: {e}")
+            else:
+                self.logger.error(f"Failed to bind UDP socket: {e}")
+
+        self.logger.info("TPMS Receiver started and listening for data.")
+        while not self._stop:
+            await asyncio.sleep(0)
+            if self._stop:
+                self.logger.info(f"Stop signal received. Stopping {self.__class__.__name__} channel scan...")
+                break
+
+            # non-blocking receive
             try:
-                client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                client_socket.bind(('localhost', 1514))
-            except OSError as e:
-                if 'Errno 98' in str(e): # address already in use
-                    subprocess.run(['fuser', '-k', '1514/udp']) # kill as user
-                    try:
-                        client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                        client_socket.bind(('localhost', 1514))
-                    except OSError as e:
-                        if 'Errno 98' in str(e): # address already in use
-                            subprocess.run(['sudo', 'fuser', '-k', '1514/udp']) # kill as sudo
-                            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                            client_socket.bind(('localhost', 1514))
-                        else:
-                            raise OSError(e)
-                else:
-                    raise OSError(e)
-            while not self._stop:
-                await asyncio.sleep(0.1)
-                if self._stop:
-                    self.logger.info(f"Stop signal received. Stopping {self.__class__.__name__} channel scan...")
+                data = self.client_socket.recvfrom(512)
+            except BlockingIOError:
+                continue
+            except socket.timeout:
+                continue
+            except Exception as e:
+                self.logger.error(f"Socket error: {e}")
+                return
+            if not data:
+                continue
+
+            self.logger.debug(f"Received data: {data}")
+            data = data[0].decode('utf-8')
+            data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
+
+            # Find the actual key that matches "id" (case-insensitive)
+            id_key = None
+            for key in data.keys():
+                if 'id' in key.lower():
+                    id_key = key
                     break
-                data = client_socket.recvfrom(512)
-                data = data[0].decode('utf-8')
-                data = json.loads(data[data.index('rtl_433 - - - {') + 14:])
+            if id_key is not None:
+                id = data.pop(id_key)
+                if self.whitelist is None or id in self.whitelist:
+                    # Find any key that contains "pressure" (case-insensitive)
+                    pressure_key = next((key for key in data.keys() if "pressure" in key.lower()), None)
+                    self.logger.debug(f"TPMS id={id} {pressure_key}={data.get(pressure_key)}")
 
-                print('data:', data)
-
-                # Find the actual key that matches "id" (case-insensitive)
-                id_key = None
-                for key in data.keys():
-                    if 'id' in key.lower():
-                        id_key = key
-                        break
-                if id_key is not None:
-                    id = data.pop(id_key)
-                    if self.whitelist is None or id in self.whitelist:
-                        # Find any key that contains "pressure" (case-insensitive)
-                        pressure_key = next((key for key in data.keys() if "pressure" in key.lower()), None)
-
-                        print(f"TPMS id={id} {pressure_key}={data.get(pressure_key)}")
-
-                        if pressure_key is not None:
+                    if pressure_key is not None:
+                        if self.alert_callback is not None:
                             await self.alert_callback(self.sensor_node_id, self.opid, f"TPMS id={id} {pressure_key}={data.get(pressure_key)}")
 
-                        if 'time' in data.keys():
-                            _ = data.pop('time')
+                        if self.tak_cot_callback is not None:
+                            # remove time field to avoid confusion with TAK time field
+                            if 'time' in data.keys():
+                                _ = data.pop('time')
 
-                        await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=id, remarks=json.dumps(data, separators=(',', ':')), lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S')
-        finally:
-            client_socket.close()
-            p.terminate()
+                            await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=id, remarks=json.dumps(data, separators=(',', ':')), lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S')
+
+    @stop_decorator
+    async def stop(self) -> None:
+        """Stop the operation
+        """
+        if hasattr(self, 'client_socket') and self.client_socket:
+            self.client_socket.close()
+        if hasattr(self, 'rtl_433'):
+            self.rtl_433.terminate()
 
 def get_resources(dev: str = '') -> Dict[str, Any]:
     """Get resources for the operation
@@ -216,3 +248,37 @@ def main(*args, **kwargs) -> object:
         An instance of the TPMSReceiver class with the provided arguments.
     """
     return TPMSReceiver(*args, **kwargs)
+
+if __name__ == "__main__":
+    """Run the plugin script directly for testing purposes.
+    """
+    # set up logging
+    import traceback
+    logger = logging.getLogger('TPMSReceiver')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
+
+    # create operation instance
+    # adjust parameters as needed for testing
+    logger.debug("Initializing TPMS Receiver...")
+    op = main(
+        '00000001',
+        frequency=315e6,
+        gain=49,
+        whitelist=None,
+        logger=logger
+    )
+    logger.debug("TPMS Receiver initialized.")
+
+    # run the operation
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(op.setup())
+        logger.debug("Setup complete, starting operation...")
+        loop.run_until_complete(op.run())
+    except Exception as e:
+        loop.run_until_complete(op.stop())
+        logger.error(f"Error occurred: {e}")
+        logger.debug(traceback.format_exc())
+    finally:
+        loop.run_until_complete(op.teardown())

@@ -135,3 +135,34 @@ def main(*args, **kwargs) -> object:
         An instance of the WifiScanAP class with the provided arguments.
     """
     return TPMSTransmitter(*args, **kwargs)
+
+if __name__ == "__main__":
+    """Run the plugin script directly for testing purposes.
+    """
+    # set up logging
+    import traceback
+    logger = logging.getLogger('TPMS Transmitter')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
+
+    # create operation instance
+    # adjust parameters as needed for testing
+    logger.debug("Initializing TPMS Transmitter...")
+    op = main(
+        '31EABF4',
+        logger=logger
+    )
+    logger.debug("TPMS Transmitter initialized.")
+
+    # run the operation
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(op.setup())
+        logger.debug("TPMS Transmitter setup complete.")
+        loop.run_until_complete(op.run())
+    except Exception as e:
+        loop.run_until_complete(op.stop())
+        logger.error(f"Error occurred: {e}")
+        logger.debug(traceback.format_exc())
+    finally:
+        loop.run_until_complete(op.teardown())
