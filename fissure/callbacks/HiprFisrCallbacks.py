@@ -16,6 +16,8 @@ import yaml
 import asyncio
 import socket
 import shutil
+import tempfile
+import zipfile
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -2353,7 +2355,7 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
     """
     Forwards the GPS coordinate results message to TAK.
     """
@@ -2366,7 +2368,7 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
 
     time = time.replace(" ", "T")'''
     
-    await component.send_cot(uid, lat, lon, alt, time, remarks)
+    await component.send_cot(uid, lat, lon, alt, time, remarks, type)
 
 
 async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
@@ -2828,6 +2830,83 @@ async def checkSensorNodePluginResults(component: object, sensor_node_id: int, p
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+async def savePlugin(component: object, plugin_name: str, plugin_data: str):
+    """Save Plugin to Local HIPRFISR
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Plugin name
+    plugin_data : str
+        Plugin data in hex format (compressed as a zip file)
+    """
+    # Decode hex data
+    plugin_data = binascii.a2b_hex(plugin_data)
+
+    # Save file
+    pathname = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name + '.zip')
+    with open(pathname, "wb") as f:
+        f.write(plugin_data)
+
+    # Create a path for the plugin to be extracted to
+    extract_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+    if os.path.exists(extract_path):
+        copy_num = 1
+        base_name = plugin_name
+        while os.path.exists(extract_path):
+            extract_path = os.path.join(fissure.utils.PLUGIN_DIR, f"{base_name} (Copy {copy_num})")
+            copy_num += 1
+    os.makedirs(extract_path, exist_ok=True)
+
+    # Extract the zip file to the plugin directory
+    with zipfile.ZipFile(pathname, "r") as zip_ref:
+        zip_ref.extractall(extract_path)
+
+    # Remove the zip file
+    os.remove(pathname)
+
+
+async def sendPlugin(component: object, plugin_name: str) -> None:
+    """Send Plugin to Dashboard
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Plugin name
+    """
+    plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+    if not os.path.exists(plugin_path):
+        component.logger.error(f"Plugin {plugin_name} does not exist in {fissure.utils.PLUGIN_DIR}")
+        return
+
+    # Create a temporary zip file for the plugin directory
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as temp_zip:
+        with zipfile.ZipFile(temp_zip.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(plugin_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, plugin_path)
+                    zipf.write(file_path, arcname)
+        with open(temp_zip.name, "rb") as f:
+            zip_data = f.read()
+        hex_zip_data = binascii.hexlify(zip_data).decode("utf-8").upper()
+
+    # Send the plugin to the dashboard
+    PARAMETERS = {
+        "plugin_name": plugin_name,
+        "plugin_data": hex_zip_data,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "savePlugin",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 async def transferPlugins(component: object, sensor_node_id: int, plugin_names: List[str], install: bool=False):
     """Send Plugin to Sensor Node
 
@@ -3214,7 +3293,6 @@ async def pluginAddProtocolHiprfisr(component: object, protocol_name: str):
         "protocol_name": protocol_name,
         "parameters": component.pluginAddProtocolHiprfisr(protocol_name)
     }
-    print(PARAMETERS)
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3232,7 +3310,6 @@ async def pluginSetProtocolParameters(component: object, protocol_name: str, par
         "protocol_name": protocol_name,
         "parameters": component.pluginAddProtocolHiprfisr(protocol_name)
     }
-    print(PARAMETERS)
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3250,7 +3327,6 @@ async def pluginAddProtocolModType(component: object, protocol_name: str, mod_ty
         "protocol_name": protocol_name,
         "parameters": component.plugin_editor.get_protocol_parameters(protocol_name)
     }
-    print('PARAMETERS: ' + str(component.plugin_editor.get_protocol_parameters(protocol_name)))
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3268,7 +3344,6 @@ async def pluginRemoveProtocolModTypes(component: object, protocol_name: str, mo
         "protocol_name": protocol_name,
         "parameters": component.plugin_editor.get_protocol_parameters(protocol_name)
     }
-    print('PARAMETERS: ' + str(component.plugin_editor.get_protocol_parameters(protocol_name)))
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3286,7 +3361,6 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
         "protocol_name": protocol_name,
         "parameters": component.plugin_editor.get_protocol_parameters(protocol_name)
     }
-    print('PARAMETERS: ' + str(component.plugin_editor.get_protocol_parameters(protocol_name)))
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
