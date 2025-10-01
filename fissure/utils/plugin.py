@@ -46,12 +46,16 @@ async def get_fissure_plugin_editor_plugins_path() -> str:
     str
         Path to the FISSURE Plugin Editor plugins directory.
     """
-    proc = await asyncio.create_subprocess_exec(
-        "fissure-plugin-editor", "plugins", "-d",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    stdout, _ = await proc.communicate()
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "fissure-plugin-editor", "plugins", "-d",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await proc.communicate()
+    except FileNotFoundError:
+        return None
+
     output = stdout.decode().strip()
     if output.startswith("Plugins directory:"):
         return output.split("Plugins directory:")[1].strip()
@@ -66,8 +70,11 @@ def launch_fissure_plugin_editor() -> bool:
     bool
         True if the editor was launched successfully, False otherwise.
     """
-    # Launch the FISSURE Plugin Editor in a new terminal
-    Popen(["fissure-plugin-editor", "gui"])
+    try:
+        # Launch the FISSURE Plugin Editor in a new terminal
+        Popen(["fissure-plugin-editor", "gui"])
+    except FileNotFoundError:
+        return False
 
     # Check if the process is running
     result = run(["pgrep", "-f", "fissure-plugin-editor"], capture_output=True)
