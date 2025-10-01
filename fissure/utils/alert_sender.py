@@ -125,12 +125,16 @@ def _alert_sender(
                 asyncio.run(hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg))
 
             elif msg_type == 'tak':
+                if 'type' not in data:
+                    data['type'] = "a-f-G-U-H" # default to assumed friendly ground unit headquarters
+
                 PARAMETERS = {
                     "uid": data.get('uid'),
                     "lat": data.get('lat'),
                     "lon": data.get('lon'),
                     "alt": data.get('alt'),
                     "time": data.get('time'),
+                    "type": data.get('type'),
                     "remarks": data.get('remarks'),
                 }
                 is_gps_update = PARAMETERS["remarks"] == "GPS UPDATE"

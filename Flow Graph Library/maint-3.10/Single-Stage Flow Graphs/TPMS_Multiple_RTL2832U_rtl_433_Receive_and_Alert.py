@@ -96,6 +96,7 @@ def main(device:int=DEVICE, frequency:float=FREQUENCY, gain:float=GAIN, whitelis
                         'lon': '%(longitude)f',
                         'alt': '%(altitude)f',
                         'time': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                        'type': 'a-n-G-U-V',
                         'remarks': '"' + json.dumps(data, separators=(',', ':')) + '"'
                     }) + '\n')
                     sys.stdout.flush()
