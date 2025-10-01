@@ -121,11 +121,7 @@ async def _slot_local_plugin_pkg_path_auto(dashboard: QtCore.QObject, verbose: b
     """
     plugin_dir = await get_fissure_plugin_editor_plugins_path()
     if plugin_dir is None and verbose:
-        QtCore.QMessageBox.warning(
-            dashboard,
-            "Plugin Editor Not Found",
-            "fissure-plugin-editor is not installed or not found in PATH."
-        )
+        dashboard.logger.warning("FISSURE Plugin Editor `fissure-plugin-editor` is not installed or not found in PATH.")
     elif plugin_dir:
         dashboard.ui.textEdit_plugin_pkg_path.setText(plugin_dir)
 
@@ -142,11 +138,7 @@ async def _slot_plugin_download_dir_auto(dashboard: QtCore.QObject, verbose: boo
     """
     plugin_dir = await get_fissure_plugin_editor_plugins_path()
     if plugin_dir is None and verbose:
-        QtCore.QMessageBox.warning(
-            dashboard,
-            "Plugin Editor Not Found",
-            "fissure-plugin-editor is not installed or not found in PATH."
-        )
+        dashboard.logger.warning("FISSURE Plugin Editor `fissure-plugin-editor` is not installed or not found in PATH.")
     elif plugin_dir and os.path.exists(plugin_dir):
         dashboard.ui.lineEdit_plugin_download_dir.setText(plugin_dir)
 
@@ -404,8 +396,4 @@ async def _slot_plugin_editor(dashboard: QtCore.QObject):
         FISSURE dashboard
     """
     if not launch_fissure_plugin_editor():
-        QtCore.QMessageBox.warning(
-            dashboard,
-            "Plugin Editor Launch Failed",
-            "Failed to launch the FISSURE Plugin Editor. Please check if it is installed."
-        )
+        dashboard.logger.warning("FISSURE Plugin Editor `fissure-plugin-editor` is not installed or not found in PATH.")
