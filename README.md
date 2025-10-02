@@ -4,21 +4,93 @@
 
 **Frequency Independent SDR-based Signal Understanding and Reverse Engineering**
 
-FISSURE is an open-source RF and reverse engineering framework designed for all skill levels with hooks for signal detection and classification, protocol discovery, attack execution, IQ manipulation, vulnerability analysis, automation, and AI/ML integration. The framework was built to promote the rapid integration of software modules, radios, protocols, signal data, scripts, flow graphs, reference material, and third-party tools. FISSURE streamlines workflows by centralizing software and enabling teams to quickly get up to speed while sharing a proven baseline configuration for specific Linux distributions.
+[![Watch the video](https://img.youtube.com/vi/abc123XYZ/0.jpg)](https://youtu.be/vUJakWBVnwY)
 
-The framework and tools included with FISSURE are designed to detect the presence of RF energy, understand the characteristics of a signal, collect and analyze samples, develop transmit and/or injection techniques, and craft custom payloads or messages. FISSURE contains a growing library of protocol and signal information to assist in identification, packet crafting, and fuzzing. FISSURE includes online archive capabilities for downloading signal files and building playlists to simulate traffic and test systems. 
+## Introduction
 
-The friendly Python codebase and user interface allows beginners to quickly learn about popular tools and techniques involving RF and reverse engineering. Educators in cybersecurity and engineering can take advantage of the built-in material or utilize the framework to demonstrate their own real-world applications. Developers and researchers can use FISSURE for their daily tasks or to expose their cutting-edge solutions to a wider audience. As awareness and usage of FISSURE grows in the community, so will the extent of its capabilities and the breadth of the technology it encompasses.
+FISSURE is an **open-source RF framework** that supports both **operational deployments** and **research and education**.
+- For **operators**, it provides a rapidly deployable toolkit for signal detection, classification, protocol discovery, fuzzing, vulnerability analysis, and real-time integration with TAK.
+- For **educators and researchers**, it lowers the barrier to entry for SDR and reverse engineering, offering a shared environment for learning, experimentation, and publishing new methods.
 
-FISSURE is particularly effective in two key domains: 1) it provides hooks for RF reverse engineering techniques and 2) it supports multiple deployment options to expand its operational relevance by integrating different types of user interfaces, networks, hardware/software processing, and distributed remote sensor nodes. 
+FISSURE streamlines complex SDR workflows by centralizing software, libraries, and reference material into one consistent framework that runs on desktops, laptops, single-board computers, and ruggedized systems, or scales to distributed tactical nodes networked in the field.
 
 <p align="center">
 <img src="/docs/Icons/README/rf_re.png" width="400" height="400">
 </p>
 
+## Key Capabilities
+
+- Detect, classify, and analyze RF signals
+- Collect, replay, and manipulate IQ data
+- Discover protocols and craft custom packets
+- Execute fuzzing and vulnerability testing
+- Automate workflows with AI and ML integration
+- Archive signals and build playlists for testing
+- Integrate alerts and data into TAK for team awareness
+
+<p align="center">
+<img src="/docs/Icons/README/ecosystem.png" style="max-width: 858px; width: 100%; height: auto;">
+</p>
+
+## Deployment Options
+
 <p align="center">
 <img src="/docs/Icons/README/fissure_deployments.jpg" style="max-width: 858px; width: 100%; height: auto;">
 </p>
+
+- Desktop GUI for visualization and prototyping
+- Headless nodes for remote sensing and autonomous operations
+- Dockerized services for scalable and repeatable installs
+- TAK integration for mission relevance and shared situational awareness
+
+<p align="center">
+<img src="/docs/Icons/README/system_overview.png" style="max-width: 858px; width: 100%; height: auto;">
+</p>
+
+## Dual-Use Relevance
+
+- **Operators:** detect, geolocate, and respond to RF activity in the field
+- **Researchers:** test new algorithms, automation, and AI and ML approaches
+- **Educators:** teach SDR, RF security, and reverse engineering in the classroom
+- **Students and Hobbyists:** explore SDR workflows without steep setup overhead
+
+## Roadmap and Development
+
+FISSURE’s roadmap evolves with customer demand and community feedback.  
+For the most up-to-date view, explore the interactive roadmap:  
+
+👉 [View Interactive Roadmap](https://your-plotly-link)  
+
+### Current Priorities
+
+- Expanding support for distributed tactical nodes and remote deployments  
+- Improving automation and information sharing between components  
+- Enhancing TAK integration and real-time alerting  
+- Adding new protocol libraries, analysis tools, and training material  
+
+## White Papers
+
+FISSURE is supported by a series of white papers that explore both technical and operational applications across different domains.
+
+1. [Overview](link_here)
+2. [Counter-UAS](link_here)
+3. [Drone Payloads & Aerial Ops](link_here)
+4. [Maritime & Port Protection](link_here)
+5. [Vehicle & Mobility Systems](link_here)
+6. [Perimeter & Infrastructure Defense](link_here)
+7. [ATAK & Mobile Integration](link_here)
+8. [Training & Education](link_here)
+9. [Technical Details & Architecture](link_here)
+
+## Blog Posts
+
+AIS has published several articles highlighting FISSURE’s applications, updates, and use cases:
+- [Demonstrating FISSURE as a Drone Payload at Northern Strike 2025](https://www.ainfosec.com/fissure-demo-at-northern-strike)
+- [A Recap of My DEF CON 2024 Presentation on FISSURE Updates](https://www.ainfosec.com/a-recap-of-my-def-con-2024-presentation-on-fissure-updates)
+- [FISSURE: Navigating the Open-Source Realm](https://www.ainfosec.com/fissure-navigating-the-open-source-realm)
+- [FISSURE: The RF Framework for Everyone](https://www.ainfosec.com/fissure-the-rf-framework-for-everyone)
+
+[See all AIS blog posts](https://www.ainfosec.com/blog/)
 
 ## News
 
@@ -252,6 +324,7 @@ These operating systems are still in beta status. They are under development and
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
 | DragonOS Noble (24.04) | Python3 | maint-3.10 |
+| Ubuntu for Raspberry Pi | Python3 | maint-3.10 |
 
 Note: Certain software tools do not work for every OS. Refer to [Known Conflicts and Third-Party Software](https://fissure.readthedocs.io/en/latest/pages/installation.html#known-conflicts)
 
@@ -395,68 +468,7 @@ FISSURE comes with several helpful guides to become familiar with different tech
 - [Lesson13: Z-Wave](/docs/Lessons/Markdown/Lesson13_Z-Wave.md)
 - [Lesson14: Ceiling Fans](/docs/Lessons/Markdown/Lesson14_Ceiling_Fans.md)
 
-## Roadmap
-
-### Phase I
-
-- [x] Provide links to videos in the README and AIS website
-- [x] Create new FISSURE logo
-- [ ] Update documentation to instruct users how to work within the framework
-- [ ] Provide base support for hardware already on the market
-- [ ] Identify the most desirable third-party tools within the community
-- [x] Identify the most desirable operating systems within the community
-- [x] Release a signal conditioner that allows users to select and add techniques for isolating and conditioning signals from large streams of IQ data
-- [x] Release a feature extractor that allows users to select and add techniques for extracting features from isolated signals for use in protocol and emitter classification
-- [x] Release a signal classifier that allows users to select and add AI/ML techniques. In addition, a decision tree with adjustable features and weights.
-- [ ] Implement recursive demodulation mechanisms for producing a bitstream from unknown signals
-- [x] Increase the online signal archive, support download of selectable collections
-- [x] Support the addition of both closed source and user-developed plugins
-- [ ] Improve the look for different resolutions and window sizes, dark mode
-- [x] Group third-party programs in the installer by type
-- [x] Resolve DragonOS conflicts
-
-### Phase II
-
-- [x] Transition the main FISSURE components to a generic sensor node deployment scheme
-- [ ] Increase automation and information exchange between components
-- [x] Transition the FISSURE library into a database
-- [ ] Support alternative FISSURE packaging options
-- [ ] Add automatic modulation classification (AMC) techniques to the feature extractor
-- [ ] Support user selection of binary data and pattern analysis techniques
-- [ ] Improve custom Wireshark dissectors to be protocol-based and not message-based
-- [ ] Produce confidence levels against bit sequences for protocols and messages already in the library
-- [ ] Insert vulnerability analysis and automation to attacks
-- [ ] Improve the mechanism for fuzzing
-- [ ] Improve measurement, analysis, and visualization in IQ Data tab: radar data, frequency deviation, SigMF annotations
-- [ ] Create archive playlists to simulate environments
-- [ ] Develop formal classes around FISSURE (RF Attacks, Wi-Fi, GNU Radio, PyQt, etc.)
-- [ ] Expand on other untouched areas for RF and cyber (tracking, direction finding, war driving, etc.)
-
-### Phase III
-
-- [ ] Improve operational performance
-- [ ] Expand to other platforms
-- [ ] Insert customization for different RF environments and applications
-- [ ] Offer professional training
-
-### Concurrent
-
-- [ ] Clean up code, remove bugs
-- [ ] Add new help material
-- [ ] Improve status messages, system feedback, and visualization for the user
-- [ ] Integrate new hardware types as they are released
-- [ ] Expand RF protocols in list and library
-- [ ] Expand signal parameters in library
-- [ ] Expand third-party analysis tools and reference material
-- [ ] Expand support for specific operating systems
-- [ ] Produce and modify lesson material
-- [ ] Test and distribute attacks across existing hardware types (where applicable)
-- [ ] Improve installer: clean up commands, add more checks, fix broken installations
-- [ ] Provide yearly capture-the-flag contests around FISSURE
-- [ ] Support new GNU Radio releases
-- [ ] Update the project idea list every year
-
-## FISSURE Challenge
+## FISSURE Challenge - Continuous Capture the Flag
 
 <p align="center">
   <a href="https://fissure.ainfosec.com/">
@@ -464,13 +476,13 @@ FISSURE comes with several helpful guides to become familiar with different tech
   </a>
 </p>
 
-The "FISSURE Challenge" capture-the-flag contest has been updated to be an indefinite learning tool instead of an annual event. Challenges will be added over time to showcase new features and RF protocols. Solutions will be posted periodically on YouTube. You are welcome to submit your own challenges for others to try.
+The **FISSURE Challenge** is a continuous capture-the-flag contest built around the FISSURE framework. It is designed as an open learning tool where anyone can practice RF reverse engineering, explore new features, and tackle protocol-focused challenges.  
+
+- New challenges are added over time as FISSURE evolves.  
+- Solutions and walkthroughs are posted periodically on YouTube. [Solutions 1](https://www.youtube.com/watch?v=jYtqWwG_-kI)
+- Community members are encouraged to **submit their own challenges** for others to solve.
 
 Access the challenges at: [FISSURE Challenge](https://fissure.ainfosec.com/)
-
-Can't figure something out? View solutions at:
-- [Solutions 1](https://www.youtube.com/watch?v=jYtqWwG_-kI)
-
 
 ## Contributing
 
@@ -520,6 +532,17 @@ Connect on LinkedIn: [FISSURE - The RF Framework](https://www.linkedin.com/compa
 Chris Poore - Assured Information Security, Inc. - poorec@ainfosec.com
 
 Business Development - Assured Information Security, Inc. - bd@ainfosec.com
+
+## Testimonials
+
+> “FISSURE is a powerful and versatile RF software platform suitable for both education and practical applications.  
+> It supports a wide range of commonly used hardware and offers intuitive IQ data analysis tools.  
+> These features enable us to visualize, interpret, and directly modify RF signal messages in our project.”  
+> – Dylan R.
+
+> “We really enjoyed using FISSURE in our engineering project.  
+> This software is an incredibly comprehensive collection of tools to manipulate radio frequencies and was an amazing aid to our studies involving wireless communications.”  
+> – University Senior Project Team
 
 ## Acknowledgments
 

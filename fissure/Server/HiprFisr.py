@@ -1,5 +1,4 @@
 from inspect import isfunction
-import pytak
 from types import ModuleType
 from typing import Dict, List, Union
 
@@ -122,6 +121,8 @@ class HiprFisr:
     callbacks: Dict = {}
     shutdown: bool
     alert_listeners: Dict = {}
+    tak_mode: str
+    tak_connected: bool
 
 
     def __init__(self, address: fissure.comms.Address):
@@ -194,6 +195,10 @@ class HiprFisr:
         self.initialize_sensor_nodes()
         self.message_counter = 0
         self.shutdown = False
+
+        # Initialize TAK Variables
+        self.tak_connected = False
+        self.tak_mode = "disabled"
 
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
@@ -311,21 +316,39 @@ class HiprFisr:
         # Start Heartbeat Loop
         heartbeat_task = asyncio.create_task(self.heartbeat_loop())
 
-        # Initialize TAK worker queues and tasks
+        # Load TAK config and connection mode
         tak_config = load_tak_config()
-        clitool = pytak.CLITool(tak_config)
-        await clitool.setup()
+        self.tak_mode = tak_config.get("connect_mode", "disabled").lower()  # auto/manual/disabled
+
+        clitool = None
+        if self.tak_mode == "auto":
+            try:
+                import pytak
+                clitool = pytak.CLITool(tak_config)
+                await clitool.setup()
+                self.tak_connected = True
+                # TODO Send message to all connected Dashboards with connected status
+                self.logger.info("TAK auto-connect: setup complete.")
+            except Exception as e:
+                self.logger.warning(f"TAK auto-connect failed: {e}")
+                clitool = None
+        elif self.tak_mode == "manual":
+            self.logger.info("TAK manual-connect mode: waiting for user trigger.")
+        else:
+            self.logger.info("TAK integration disabled in config.")
 
         # Start Event Loop
-        while self.shutdown is False:
-            if self.connect_loop is False:
-                # Add your serializer to the asyncio task list.
-                clitool.add_tasks(
-                    set([TakReceiver(clitool.rx_queue, tak_config, self, self.logger)])
-                )
-
-                # Start all tasks.
-                await clitool.run()
+        while not self.shutdown:
+            if not self.connect_loop:
+                if clitool:
+                    try:
+                        clitool.add_tasks(
+                            {TakReceiver(clitool.rx_queue, tak_config, self, self.logger)}
+                        )
+                        await clitool.run()
+                    except Exception as e:
+                        self.logger.warning(f"TAK client error: {e}")
+                        clitool = None
 
                 # Process Incoming Messages
                 if self.dashboard_connected:
@@ -334,15 +357,14 @@ class HiprFisr:
                     await self.read_backend_messages()
 
                 for sensor_node in self.sensor_nodes:
-                    if sensor_node:
-                        if sensor_node.connected is True:
-                            await self.read_sensor_node_messages()
-                            break
-                
-                await asyncio.sleep(EVENT_LOOP_DELAY)
+                    if sensor_node and sensor_node.connected:
+                        await self.read_sensor_node_messages()
+                        break
 
+                await asyncio.sleep(EVENT_LOOP_DELAY)
             else:
                 await self.connect_components()
+
         self.logger.debug("Shutdown reached in HIPRFISR event loop")
 
         # Ensure the Heartbeat Loop is Stopped
@@ -350,9 +372,8 @@ class HiprFisr:
         try:
             await heartbeat_task
         except asyncio.CancelledError:
-            pass  # Heartbeat task was cancelled cleanly
+            pass
 
-        # Shut Down Comms
         await self.shutdown_comms()
         self.logger.info("=== SHUTDOWN ===")
 
