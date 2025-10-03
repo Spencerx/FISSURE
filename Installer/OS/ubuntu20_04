@@ -88,6 +88,7 @@ sudo python3 -m pip install bitarray
 sudo apt install net-tools
 sudo python3 -m pip install crcmod
 sudo python3 -m pip install pycrypto
+sudo python3 -m pip install --upgrade cryptography
 sudo apt-get install -y python-tk
 sudo python3 -m pip install pyzmq
 sudo apt-get install -y libosmocore-dev
@@ -2508,6 +2509,9 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
     "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
 
+    # Install pytak library
+    python3 -m pip install pytak --break-system-packages
+    
     # Import webadmin.p12:
 
     # Google Chrome/Edge
