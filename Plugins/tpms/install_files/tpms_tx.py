@@ -8,14 +8,14 @@ import sys
 from typing import Any, Dict
 import logging
 
-from fissure.utils.plugins.operations import Operation, setup_decorator, run_decorator
+from fissure.utils.plugins.operations_gr import OperationGR
 from fissure.utils.plugins.operations import get_arguments as get_arguments_base
 
 # add gr_flowgraphs
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from gr_flowgraphs.TPMS_FSK_USRPB210_Transmit import TPMS_FSK_USRPB210_Transmit
 
-class TPMSTransmitter(Operation):
+class TPMSTransmitter(OperationGR):
     """TPMS Transmitter
     """
     def __init__(self, dev: str = '', sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
@@ -33,40 +33,12 @@ class TPMSTransmitter(Operation):
         tak_cot_callback : Callable, optional
             TAK CoT callback function, by default None
         """
-        super().__init__(sensor_node_id=sensor_node_id, logger=logger, alert_callback=alert_callback, tak_cot_callback=tak_cot_callback)
+        super().__init__(TPMS_FSK_USRPB210_Transmit, sensor_node_id, logger, alert_callback, tak_cot_callback)
         self.dev = dev
 
         # defined and prepare resources
         resources = get_resources(self.dev)
         super().prepare_resources(resources)
-
-    @setup_decorator
-    async def setup(self) -> bool:
-        """Setup the operation
-
-        Returns
-        -------
-        bool
-            True if setup was successful, False otherwise
-        """
-        return True
-    
-    @run_decorator
-    async def run(self) -> None:
-        """Run the operation
-        """
-        tb = TPMS_FSK_USRPB210_Transmit()
-        try:
-            tb.start()
-            self.logger.info("TPMS Transmitter started.")
-            while not self._stop:
-                await asyncio.sleep(0.1)
-        except KeyboardInterrupt:
-            self.logger.info("TPMS Transmitter stopping...")
-        finally:
-            tb.stop()
-            tb.wait()
-            self.logger.info("TPMS Transmitter stopped.")
 
 def get_resources(dev: str = '') -> Dict[str, Any]:
     """
@@ -161,8 +133,8 @@ if __name__ == "__main__":
         logger.debug("TPMS Transmitter setup complete.")
         loop.run_until_complete(op.run())
     except Exception as e:
-        loop.run_until_complete(op.stop())
         logger.error(f"Error occurred: {e}")
         logger.debug(traceback.format_exc())
     finally:
+        loop.run_until_complete(op.stop())
         loop.run_until_complete(op.teardown())
