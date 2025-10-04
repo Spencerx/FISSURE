@@ -2085,7 +2085,7 @@ anki -h
 
 # Bless
 programs_dragonOS_noble.append(('Bless',
-"""sudo apt-get install -y snapd
+"""sudo apt-get install -y --alow-change-held-packages snapd
 sudo snap install bless-unofficial
 ########## Verify ##########
 snap list bless-unofficial
