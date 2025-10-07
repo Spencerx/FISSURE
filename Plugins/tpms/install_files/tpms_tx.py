@@ -2,20 +2,18 @@
 # -*- coding: utf-8 -*-
 """TPMS transmitter
 """
-import asyncio
 import os
 import sys
 from typing import Any, Dict
 import logging
 
 from fissure.utils.plugins.operations_gr import OperationGR
-from fissure.utils.plugins.operations import get_arguments as get_arguments_base
 
 # add gr_flowgraphs
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from gr_flowgraphs.TPMS_FSK_USRPB210_Transmit import TPMS_FSK_USRPB210_Transmit
 
-class TPMSTransmitter(OperationGR):
+class OperationMain(OperationGR):
     """TPMS Transmitter
     """
     def __init__(self, dev: str = '', sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
@@ -36,105 +34,45 @@ class TPMSTransmitter(OperationGR):
         super().__init__(TPMS_FSK_USRPB210_Transmit, sensor_node_id, logger, alert_callback, tak_cot_callback)
         self.dev = dev
 
-        # defined and prepare resources
-        resources = get_resources(self.dev)
-        super().prepare_resources(resources)
-
-def get_resources(dev: str = '') -> Dict[str, Any]:
-    """
-    Get the resources required by the plugin script.
-
-    Parameters
-    ----------
-    dev : str
-        The network device name (e.g., 'wlan0').
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary containing the resources for the plugin script.
-    """
-    return {
-        'usrp': {
-            'type': 'sdr',
-            'model': 'USRP B2x0',
-            'serial': dev,
-            'description': 'Ettus USRP B2x0.',
-            'required': True
+        self.resource_args = {
+            'dev': self.dev
         }
-    }
 
-def get_interfaces() -> Dict[str, Any]:
-    """
-    Get the interfaces available for the plugin script.
+    @staticmethod
+    def get_resources(dev: str = '') -> Dict[str, Any]:
+        """
+        Get the resources required by the plugin script.
 
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary containing the interfaces for the plugin script.
-    """
-    return {}
+        Parameters
+        ----------
+        dev : str
+            The network device name (e.g., 'wlan0').
 
-def get_arguments(logger: logging.Logger = logging.getLogger(__name__)) -> Dict[str, Any]:
-    """Get the arguments required to initialize the operation.
-
-    Parameters
-    ----------
-    Operation : Operation
-        The operation class to inspect.
-    logger : logging.Logger, optional
-        Logger instance for logging, by default logging.getLogger(__name__)
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary specifying the arguments required to initialize the operation. The keys are argument names, and the values are dictionaries with key, value pairs with keys `default`, `type`, `description`, and `required`. All values are cast to strings to facilitate JSON serialization.
-    """
-    return get_arguments_base(TPMSTransmitter, logger)
-
-def main(*args, **kwargs) -> object:
-    """
-    Main function to run the plugin script.
-
-    Parameters
-    ----------
-    **kwargs : dict
-        Keyword arguments for variables in WifiScanAP.
-
-    Returns
-    -------
-    object
-        An instance of the WifiScanAP class with the provided arguments.
-    """
-    return TPMSTransmitter(*args, **kwargs)
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary containing the resources for the plugin script.
+        """
+        return {
+            'usrp': {
+                'type': 'sdr',
+                'model': 'USRP B2x0',
+                'serial': dev,
+                'description': 'Ettus USRP B2x0.',
+                'required': True
+            }
+        }
 
 if __name__ == "__main__":
     """Run the plugin script directly for testing purposes.
     """
-    # set up logging
-    import traceback
-    logger = logging.getLogger('TPMS Transmitter')
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
-
-    # create operation instance
-    # adjust parameters as needed for testing
-    logger.debug("Initializing TPMS Transmitter...")
-    op = main(
-        '31EABF4',
-        logger=logger
+    from fissure.utils.plugins.test_operation import run_test
+    run_test(
+        OperationMain,
+        {
+            'dev': '31EABF4'
+        },
+        {
+            'dev': '31EABF4'
+        }
     )
-    logger.debug("TPMS Transmitter initialized.")
-
-    # run the operation
-    loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(op.setup())
-        logger.debug("TPMS Transmitter setup complete.")
-        loop.run_until_complete(op.run())
-    except Exception as e:
-        logger.error(f"Error occurred: {e}")
-        logger.debug(traceback.format_exc())
-    finally:
-        loop.run_until_complete(op.stop())
-        loop.run_until_complete(op.teardown())

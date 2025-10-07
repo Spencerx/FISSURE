@@ -2,39 +2,35 @@
 """GNU Radio Flowgraph Plugin Operations Base Class and Decorators
 """
 import asyncio
-import logging
 from gnuradio import gr
+import logging
 
-from fissure.utils.plugins.operations import setup_decorator as setup_decorator_base
-from fissure.utils.plugins.operations import run_decorator as run_decorator_base
-from fissure.utils.plugins.operations import stop_decorator as stop_decorator_base
-from fissure.utils.plugins.operations import teardown_decorator as teardown_decorator_base
 from fissure.utils.plugins.operations import Operation
 
 def setup_decorator(func):
     """Decorator for setup method in OperationGR class
     """
-    @setup_decorator_base
     async def wrapper(self, *args, **kwargs) -> bool:
+        self.logger.debug(f"{self.__class__.__name__} setting up GR top block...")
         # initialize the gr top block
         self.tb_obj = self.tb()
 
         # call the decorated setup function
         status = await func(self, *args, **kwargs)
+        self.logger.debug(f"{self.__class__.__name__} GR top block set up.")
         return status
     return wrapper
 
 def run_decorator(func):
     """Decorator for run method in OperationGR class
     """
-    @run_decorator_base
     async def wrapper(self, *args, **kwargs) -> None:
         # call the decorated run function
         await func(self, *args, **kwargs)
 
-        self.logger.debug(f"{self.__class__.__name__} starting...")
+        self.logger.debug(f"{self.__class__.__name__} GR top block starting...")
         self.tb_obj.start()
-        self.logger.debug(f"{self.__class__.__name__} started.")
+        self.logger.debug(f"{self.__class__.__name__} GR top block started.")
         while not self._stop:
             await asyncio.sleep(0.1)
     return wrapper
@@ -42,12 +38,11 @@ def run_decorator(func):
 def stop_decorator(func):
     """Decorator for stop method in OperationGR class
     """
-    @stop_decorator_base
     async def wrapper(self, *args, **kwargs) -> None:
-        self.logger.debug(f"{self.__class__.__name__} top block stopping...")
+        self.logger.debug(f"{self.__class__.__name__} GR top block stopping...")
         self.tb_obj.stop()
         self.tb_obj.wait()
-        self.logger.debug(f"{self.__class__.__name__} top block stopped.")
+        self.logger.debug(f"{self.__class__.__name__} GR top block stopped.")
 
         # call the decorated stop function
         await func(self, *args, **kwargs)
@@ -56,7 +51,6 @@ def stop_decorator(func):
 def teardown_decorator(func):
     """Decorator for teardown method in OperationGR class
     """
-    @teardown_decorator_base
     async def wrapper(self, *args, **kwargs) -> None:
         # call the decorated teardown function
         await func(self, *args, **kwargs)
@@ -76,31 +70,19 @@ class OperationGR(Operation):
             logger.error(f"tb {tb} is not a subclass of gr.top_block")
         self.tb = tb
 
-    @setup_decorator
-    async def setup(self) -> bool:
-        """Setup the operation
+    def __init_subclass__(cls, **kwargs):
+        # apply decorators to subclass methods
+        setattr(cls, 'setup', setup_decorator(cls.setup))
+        setattr(cls, 'stop', stop_decorator(cls.stop))
+        setattr(cls, 'teardown', teardown_decorator(cls.teardown))
 
-        Returns
-        -------
-        bool
-            True if setup was successful, False otherwise
-        """
-        return True
-
-    @run_decorator
     async def run(self) -> None:
         """Run the operation
-        """
-        return
 
-    @stop_decorator
-    async def stop(self) -> None:
-        """Stop the operation
+        The default run method starts the GNU Radio top block and keeps it running until stop is called.
         """
-        return
-
-    @teardown_decorator
-    async def teardown(self) -> None:
-        """Teardown the operation
-        """
-        return
+        self.logger.debug(f"{self.__class__.__name__} GR top block starting...")
+        self.tb_obj.start()
+        self.logger.debug(f"{self.__class__.__name__} GR top block started.")
+        while not self._stop:
+            await asyncio.sleep(0.1)
