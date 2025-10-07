@@ -829,6 +829,8 @@ then
   make 
   sudo make install
   sudo ldconfig
+  sudo apt purge -y xtrx-dkms
+  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
@@ -856,6 +858,8 @@ then
   make
   sudo make install
   sudo ldconfig
+  sudo purge -y xtrx-dkms
+  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
@@ -912,6 +916,8 @@ then
   make
   sudo make install
   sudo ldconfig
+  sudo apt purge -y xtrx-dkms
+  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
@@ -991,6 +997,8 @@ then
   make
   sudo make install
   sudo ldconfig
+  sudo apt purge -y xtrx-dkms
+  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
@@ -1019,6 +1027,8 @@ then
   make
   sudo make install
   sudo ldconfig
+  sudo apt purge -y xtrx-dkms
+  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
@@ -1154,6 +1164,8 @@ then
   make
   sudo make install
   sudo ldconfig
+  sudo apt purge -y xtrx-dkms
+  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
