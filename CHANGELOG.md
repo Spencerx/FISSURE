@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-06
+
+Updating README roadmap and white papers.
+
+### Added
+
+- Interactive roadmap link and current priorities in README Roadmap section
+- FISSURE white papers and updated links in README White Papers section
+
 ## 2025-10-02
 
 Merging pull requests #86-#90, #92: TAK, plugins, GPS, and Raspberry Pi updates.

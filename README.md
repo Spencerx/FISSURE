@@ -82,13 +82,17 @@ FISSURE streamlines complex SDR workflows by centralizing software, libraries, a
 
 FISSURE’s roadmap evolves with customer demand and community feedback.
 
-For the most up-to-date view, explore the interactive roadmap:  
+For the most up-to-date view, explore the interactive roadmap:
 
-- [View Interactive Roadmap (Coming Soon)](https://your-plotly-link)  
+- [View Interactive Roadmap](https://ainfosec.github.io/FISSURE/Roadmap/)  
 
 ### Current Priorities
 
-- Coming soon
+- **Plugin Ecosystem:** Redefining plugin boundaries and execution, developing a standalone plugin editor, converting existing flow graph libraries into plugins, and improving how plugins are deployed on sensor nodes and loaded into TAK.
+- **TAK Integration:** Creating a WinTAK application, enhancing the bridge between TAK and FISSURE’s hub, enabling plugin/action selection directly in TAK, and strengthening alerting and coordination features.
+- **Installer & Packaging:** Breaking out installers by operating system, improving error logging, delivering prebuilt ISOs and VM images for popular platforms, and exploring Docker and Apptainer for deployable FISSURE components.
+- **Tactical Node Orchestration:** Expanding plugin support on nodes, integrating new sensor types, laying the foundation for multi-node coordination, and improving artifact recording/synchronization and networking resilience.
+- **Electronic Support / Monitoring:** Extending direction-finding and monitoring capabilities, with emphasis on practical electronic support workflows.
 
 ## Videos
 
@@ -99,15 +103,15 @@ For the most up-to-date view, explore the interactive roadmap:
 
 FISSURE is supported by a series of white papers that explore both technical and operational applications across different domains.
 
-1. [Overview (Coming Soon)](link_here)
-2. [Counter-UAS (Coming Soon)](link_here)
-3. [Drone Payloads & Aerial Ops (Coming Soon)](link_here)
-4. [Maritime & Port Protection (Coming Soon)](link_here)
-5. [Vehicle & Mobility Systems (Coming Soon)](link_here)
-6. [Perimeter & Infrastructure Defense (Coming Soon)](link_here)
-7. [ATAK & Mobile Integration (Coming Soon)](link_here)
-8. [Training & Education (Coming Soon)](link_here)
-9. [Technical Details & Architecture (Coming Soon)](link_here)
+1. [FISSURE Overview](/docs/White_Papers/FISSURE_Overview.pdf)
+2. [FISSURE for Counter-UAS](/docs/White_Papers/FISSURE_CUAS.pdf)
+3. [FISSURE for UAS Payloads & Aerial Operations](/docs/White_Papers/FISSURE_UAS_Payload_Aerial_Ops.pdf)
+4. [FISSURE for Maritime](/docs/White_Papers/FISSURE_Maritime.pdf)
+5. [FISSURE for Vehicle & Mobility Systems](/docs/White_Papers/FISSURE_Vehicle_Mobility_Systems.pdf)
+6. [FISSURE for Perimeter & Infrastructure Defense](/docs/White_Papers/FISSURE_Perimeter_Infrastructure_Defense.pdf)
+7. [FISSURE for TAK & Mobile](/docs/White_Papers/FISSURE_TAK_Mobile_Integration.pdf)
+8. [FISSURE for Training & Education](/docs/White_Papers/FISSURE_Training_Education.pdf)
+9. [FISSURE Technical Details & Architecture](/docs/White_Papers/FISSURE_Technical_Details_Architecture.pdf)
 
 ## Blog Posts
 
