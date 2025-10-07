@@ -2208,13 +2208,18 @@ pyfdax -h
 
 # Bootable USB
 programs_ubuntu24_04.append(('Bootable USB (90.13 MB)',
-"""sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 382003C2C8B7B4AB813E915B14E4942973C62A1B
-sudo add-apt-repository -y "deb http://ppa.launchpad.net/nemh/systemback/ubuntu xenial main"
-sudo apt update
-sudo apt install -y systemback
-sudo add-apt-repository -y ppa:mkusb/ppa
-sudo apt-get update
-sudo apt-get install -y mkusb usb-pack-efi mkusb-plug guidus
+"""
+output = subprocess.check_output("cat /sys/class/dmi/id/product_name", shell=True).decode().lower()
+if "none" in output.lower():
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 382003C2C8B7B4AB813E915B14E4942973C62A1B
+    sudo add-apt-repository -y "deb http://ppa.launchpad.net/nemh/systemback/ubuntu xenial main"
+    sudo apt update
+    sudo apt install -y systemback
+    sudo add-apt-repository -y ppa:mkusb/ppa
+    sudo apt-get update
+    sudo apt-get install -y mkusb usb-pack-efi mkusb-plug guidus
+else:
+    print("Running in a VM, not installing")
 ########## Verify ##########
 ls /usr/bin/systemback && ls /usr/bin/guidus
 """,True,'Development'))
