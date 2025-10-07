@@ -458,8 +458,20 @@ class SensorNode(object):
         plugin_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(plugin_module)
 
+        # Get the main operation class
+        operation_main = getattr(plugin_module, "OperationMain", None)
+        if operation_main is None:
+            self.logger.error(f"No OperationMain class found in {plugin_script_path}")
+            return
+        if not inspect.isclass(operation_main):
+            self.logger.error(f"OperationMain is not a class in {plugin_script_path}")
+            return
+
         # Get the resources required by the plugin script
-        resources = plugin_module.get_resources() if hasattr(plugin_module, "get_resources") else {}
+        if not hasattr(operation_main, "get_resources") or not callable(getattr(operation_main, "get_resources")):
+            self.logger.error(f"No callable get_resources() found in {plugin_script_path} OperationMain class")
+            return
+        resources = operation_main.get_resources()
         if not isinstance(resources, dict):
             self.logger.error(f"get_resources() did not return a dictionary: {resources}")
             return
@@ -474,71 +486,68 @@ class SensorNode(object):
         parameters["tak_cot_callback"] = self.send_tak_cot
         parameters["logger"] = self.logger
 
-        # Initialize the plugin script with parameters
-        if hasattr(plugin_module, "main") and callable(plugin_module.main):
-            self.logger.info(f"Initializing plugin script main() from {plugin_script_path} with parameters: {parameters}")
-            try:
-                script_class = plugin_module.main(**parameters)
-            except Exception as e:
-                tb_str = traceback.format_exc()
-                self.logger.error(f"Error initializing plugin script {plugin_script_path}: {e}\n{tb_str}")
-                return
-            self.logger.info(f"Plugin script class initialized: {script_class}")
-        else:
-            self.logger.error(f"No callable main() found in {plugin_script_path}")
+        # Initialize the operation class instance
+        try:
+            operation_inst = operation_main(**parameters)
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            self.logger.error(f"Error initializing operation class from {plugin_script_path}: {e}\n{tb_str}")
+            return
+        self.logger.info(f"Plugin operation initialized: {operation}")
 
         # Check that the plugin has operation ID attribute
-        if not hasattr(script_class, "opid"):
+        if not hasattr(operation_inst, "opid"):
             self.logger.error(f"No operation ID (opid) found in {plugin_script_path}")
             return
 
         # Check that the plugin script class has the running flag
-        if not hasattr(script_class, "running") or not callable(script_class.running):
+        if not hasattr(operation_inst, "running") or not callable(operation_inst.running):
             self.logger.error(f"No running flag found in {plugin_script_path}")
             return
 
         # Check that the plugin script class has the stop method
-        if not hasattr(script_class, "stop") or not callable(script_class.stop):
+        if not hasattr(operation_inst, "stop") or not callable(operation_inst.stop):
             self.logger.error(f"No callable stop() method found in {plugin_script_path}")
             return
 
         # Run the plugin script
-        if hasattr(script_class, "run") and callable(script_class.run):
+        if hasattr(operation_inst, "run") and callable(operation_inst.run):
             try:
                 # Set up the operation environment
-                env_ready = await script_class.setup()
+                env_ready = await operation_inst.setup()
                 if not env_ready:
                     self.logger.error(f"Plugin operation {operation} setup failed.")
                     return
                 self.logger.info(f"Plugin operation environment for {operation} is ready.")
 
                 # Register the operation in the operations dictionary
-                operation_id = script_class.opid
+                operation_id = operation_inst.opid
                 self.operations[operation_id] = {
                     "plugin": plugin,
                     "operation": operation,
                     "parameters": parameters,
                     "resources": resources,
-                    "status": script_class.running,
-                    "stop": script_class.stop,
-                    "teardown": script_class.teardown,
+                    "status": operation_inst.running,
+                    "stop": operation_inst.stop,
+                    "teardown": operation_inst.teardown,
                     "start_time": time.time(),
                 }
 
                 # Run the plugin operation in the background
                 self.logger.info(f"Starting plugin operation {operation_id}")
-                asyncio.create_task(script_class.run())
+                asyncio.create_task(operation_inst.run())
 
-                self.logger.info(f"Plugin operation {operation_id} starting.")
+                self.logger.info(f"Plugin operation {operation_id} starting...")
 
                 # Check if the operation is running
-                while script_class.running() is None:
+                while operation_inst.running() is None:
                     await asyncio.sleep(0.1)
-                if not script_class.running():
+                if not operation_inst.running():
                     self.logger.error(f"Plugin operation {operation} did not start successfully.")
-                    await script_class.stop()
-                    await script_class.teardown()
+                    await operation_inst.stop()
+                    await operation_inst.teardown()
                     return
+                self.logger.info(f"Plugin operation {operation_id} running.")
 
                 # Send a message to the Dashboard indicating the operation has started
                 PARAMETERS = {
@@ -560,7 +569,7 @@ class SensorNode(object):
                 self.logger.error(f"Error running plugin script {plugin_script_path}: {e}\n{tb_str}")
                 return
         else:
-            self.logger.error(f"No callable run() method found in {plugin_script_path}")
+            self.logger.error(f"No callable run() method found in {plugin_script_path} OperationMain class")
             return
 
     async def stop_plugin_operation(self, component: object, operation_id: str, sensor_node_id: int | str = 0) -> None:

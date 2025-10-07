@@ -15,84 +15,6 @@ from fissure.Sensor_Node.utils.resources import Resource
 
 _base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback']
 
-def setup_decorator(func):
-    async def wrapper(self, *args, **kwargs) -> bool:
-        self.logger.info("Setting up operation environment...")
-
-        # allocate resources
-        self._resources = [] # track resources that were successfully allocated
-        for res in self.resources:
-            if not res.allocated:
-                if not res.allocate():
-                    self.logger.error(f"Failed to allocate resource: {res}")
-                    self.logger.info("Operation environment setup failed.")
-                    await self.teardown()
-                    return False
-                self._resources.append(res)
-                self.logger.info(f"Allocated resource: {res}")
-
-        # call the decorated setup function
-        status = await func(self, *args, **kwargs)
-
-        if not status:
-            self.logger.info("Operation environment setup failed.")
-            await self.teardown()
-            return False
-        
-        # create flag to indicate successful setup
-        self._setup_complete = True
-        self.logger.info("Operation environment setup complete.")
-        return True
-    return wrapper
-
-def run_decorator(func):
-    async def wrapper(self, *args, **kwargs) -> None:
-        if not self._setup_complete:
-            self.logger.error("Operation environment not set up. Call setup() before run().")
-            return
-        self._running = True
-        try:
-            self.logger.info(f"Running operation {self.__class__.__name__}...")
-            await func(self, *args, **kwargs)
-        except Exception as e:
-            self.logger.error(f"Error during operation run: {e}")
-        self.logger.info(f"Operation {self.__class__.__name__} run complete.")
-        self._running = False
-        return
-    return wrapper
-
-def stop_decorator(func):
-    async def wrapper(self, *args, **kwargs) -> None:
-        self.logger.info(f"Stopping {self.__class__.__name__}...")
-        self._stop = True
-        while self.running():
-            await asyncio.sleep(0.1)
-            self.logger.debug(f"Waiting for {self.__class__.__name__} to stop...")
-        await func(self, *args, **kwargs)
-        self.logger.info(f"{self.__class__.__name__} stopped.")
-    return wrapper
-
-def teardown_decorator(func):
-    async def wrapper(self, *args, **kwargs) -> None:
-        self.logger.info(f"Tearing down operation environment for {self.__class__.__name__}...")
-
-        self._setup_complete = False
-
-        await func(self, *args, **kwargs)
-
-        if hasattr(self, '_resources'):
-            self.logger.debug(f"Releasing {len(self._resources)} resources for {self.__class__.__name__}...")
-            while len(self._resources) > 0:
-                try:
-                    res = self._resources.pop()
-                    self.logger.debug(f"Releasing resource: {res}")
-                    res.release()
-                except Exception as e:
-                    self.logger.error(f"Error releasing resource {res}: {e}")
-
-        self.logger.info(f"Operation environment teardown complete for {self.__class__.__name__}.")
-    return wrapper
-
 async def send_alert(sensor_node_id: int | str, opid: str, message: str, logger=logging.getLogger(__name__)) -> None:
     """Placeholder for alert callback if none is provided.
 
@@ -133,6 +55,125 @@ async def send_tak_cot(sensor_node_id: int | str, opid: str, uid: str, remarks: 
     """
     logger.info(f"TAK CoT {sensor_node_id}, {opid}: uid={uid}, lat={lat}, lon={lon}, alt={alt}, time={time}, type={type}, remarks={remarks}")
 
+def setup_decorator(func):
+    async def wrapper(self) -> bool:
+        self.logger.info("Setting up operation environment...")
+
+        # allocate resources
+        self._resources = [] # track resources that were successfully allocated
+        for res in self.resources:
+            if not res.allocated:
+                if not res.allocate():
+                    self.logger.error(f"Failed to allocate resource: {res}")
+                    self.logger.info("Operation environment setup failed.")
+                    await self.teardown()
+                    return False
+                self._resources.append(res)
+                self.logger.info(f"Allocated resource: {res}")
+
+        # call the decorated setup function
+        status = await func(self)
+
+        if not status:
+            self.logger.info("Operation environment setup failed.")
+            await self.teardown()
+            return False
+        
+        # create flag to indicate successful setup
+        self._setup_complete = True
+        self.logger.info("Operation environment setup complete.")
+        return True
+    return wrapper
+
+def run_decorator(func):
+    """Decorator to wrap the run() method of Operation class.
+    """
+    async def wrapper(self) -> None:
+        self._running = None
+        if not self._setup_complete:
+            self.logger.error("Operation environment not set up. Call setup() before run().")
+            return
+        self.logger.info(f"Operation {self.__class__.__name__} run started.")
+        self._running = True
+        try:
+            self.logger.info(f"Running operation {self.__class__.__name__}...")
+            await func(self)
+        except Exception as e:
+            self.logger.error(f"Error during operation run: {e}")
+        self.logger.info(f"Operation {self.__class__.__name__} run complete.")
+        self._running = False
+        return
+    return wrapper
+
+def stop_decorator(func) -> None:
+    async def wrapper(self) -> None:
+        self.logger.info(f"Stopping {self.__class__.__name__}...")
+        self._stop = True
+        while self.running():
+            await asyncio.sleep(0.1)
+            self.logger.debug(f"Waiting for {self.__class__.__name__} to stop...")
+        await func(self)
+        self.logger.info(f"{self.__class__.__name__} stopped.")
+    return wrapper
+
+def teardown_decorator(func) -> None:
+    async def wrapper(self) -> None:
+        self.logger.info(f"Tearing down operation environment for {self.__class__.__name__}...")
+
+        self._setup_complete = False
+
+        await func(self)
+
+        if hasattr(self, '_resources'):
+            self.logger.debug(f"Releasing {len(self._resources)} resources for {self.__class__.__name__}...")
+            while len(self._resources) > 0:
+                try:
+                    res = self._resources.pop()
+                    self.logger.debug(f"Releasing resource: {res}")
+                    res.release()
+                except Exception as e:
+                    self.logger.error(f"Error releasing resource {res}: {e}")
+
+        self.logger.info(f"Operation environment teardown complete for {self.__class__.__name__}.")
+    return wrapper
+
+def operation_class_decorator(cls):
+    """Class decorator to apply method decorators to Operation class methods.
+    """
+    def dec_init(self, *args, **kwargs):
+        if not hasattr(self, 'logger'):
+            self.logger = logging.getLogger(__name__)
+
+        # original __init__ method
+        cls.__init_original(self, *args, **kwargs)
+
+        if not hasattr(self, 'opid'):
+            self.opid = str(uuid.uuid4())  # Generate a unique operation ID
+
+        # status tracking
+        if not hasattr(self, '_setup_complete'):
+            self._setup_complete = False
+        if not hasattr(self, '_stop'):
+            self._stop = False
+        if not hasattr(self, '_running'):
+            self._running = None # Use None to indicate that the operation has not started yet
+
+        # prepare resources
+        self.prepare_resources()
+
+        # log initialization
+        self.logger.debug(f"Initialized operation {self.__class__.__name__} with sensor_node_id={self.sensor_node_id}, opid={self.opid}")
+
+    if not hasattr(cls, '__init_original'):
+        cls.__init_original = cls.__init__
+        cls.__init__ = dec_init
+        cls.__init__.__doc__ = cls.__init_original.__doc__
+        cls.__init__.__type_params__ = cls.__init_original.__type_params__
+        cls.__init__.__kwdefaults__ = cls.__init_original.__kwdefaults__
+
+    return cls
+
+@operation_class_decorator
 class Operation(object):
     """Base class for plugin operations.
     """
@@ -160,15 +201,14 @@ class Operation(object):
         self.alert_callback = alert_callback
         self.tak_cot_callback = tak_cot_callback
 
-        # operation ID
-        self.opid = str(uuid.uuid4())  # Generate a unique operation ID
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
 
-        # status tracking
-        self._setup_complete = False
-        self._stop = False
-        self._running = None # Use None to indicate that the operation has not started yet
-
-        self.logger.debug(f"Initialized operation {self.__class__.__name__} with sensor_node_id={self.sensor_node_id}, opid={self.opid}")
+        # apply decorators to subclass methods
+        setattr(cls, 'setup', setup_decorator(cls.setup))
+        setattr(cls, 'run', run_decorator(cls.run))
+        setattr(cls, 'stop', stop_decorator(cls.stop))
+        setattr(cls, 'teardown', teardown_decorator(cls.teardown))
 
     def __repr__(self):
         sig = inspect.signature(self.__init__)
@@ -177,17 +217,129 @@ class Operation(object):
             if p in params:
                 params.remove(p)
         return f"{self.__class__.__name__}(sensor_node_id={self.sensor_node_id}" + ''.join([f", {p}={getattr(self, p)}" for p in params]) + ")"
-    
-    def prepare_resources(self, resources: Dict[str, Any]) -> None:
-        """Prepare resources for the operation.
 
-        This method can be overridden by subclasses to implement specific resource preparation logic.
+    @classmethod
+    def get_arguments(cls, logger: logging.Logger = logging.getLogger(__name__)) -> Dict[str, Any]:
+        """Get the arguments required to initialize the operation.
 
         Parameters
         ----------
-        resources : Dict[str, Any]
-            A dictionary of resources to prepare.
+        cls : Operation
+            The operation class to inspect.
+        logger : logging.Logger, optional
+            Logger instance for logging, by default logging.getLogger(__name__)
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary specifying the arguments required to initialize the operation. The keys are argument names, and the values are dictionaries with key, value pairs with keys `default`, `type`, `description`, and `required`. All values are cast to strings to facilitate JSON serialization.
         """
+        # Get the argument types of cls.__init__ method
+        sig = signature(cls.__init__)
+        input_types = {k: v.annotation for k, v in sig.parameters.items() if k != 'self'}
+
+        # Get default values of cls.__init__ parameters
+        sig = signature(cls.__init__)
+        defaults = {}
+        for name, param in sig.parameters.items():
+            if name == 'self':
+                continue
+            if param.default is not _empty:
+                defaults[name] = param.default
+            else:
+                defaults[name] = ''
+
+        # Load the docstring
+        docstring = cls.__init__.__doc__
+        params = {}
+        if not docstring:
+            logger.error("No docstring found.")
+            sys.exit(0)
+
+        # Find the Parameters section
+        param_section = re.search(r'Parameters\s*-+\s*(.*?)(?=\n\S|\Z)', docstring, re.DOTALL)
+        if not param_section:
+            logger.error("No Parameters section found in docstring. Use numpy style docstring format.")
+            sys.exit(0) 
+
+        # Split by parameter blocks
+        param_blocks = re.split(r'\n(?=\s*\w+\s*:\s*)', param_section.group(1))
+        params = {}
+        for block in param_blocks:
+            # split the parameter lines
+            lines = block.strip().split('\n')
+            if not lines or ':' not in lines[0]:
+                continue
+
+            # First line: param : type, optional
+            first = lines[0]
+            name_type_optional = first.split(':', 1)
+            name = name_type_optional[0].strip()
+            if name in _base_params:
+                continue
+            type_optional = name_type_optional[1].strip().split(',', 1)
+            if len(type_optional) == 1:
+                required = True
+            else:
+                required = 'optional' not in type_optional[1].strip().lower()
+
+            # get the description
+            desc = ' '.join(line.strip() for line in lines[1:]).strip()
+
+            # add to params
+            params[name] = {
+                'default': defaults.get(name, None),
+                'type': input_types.get(name, str),
+                'description': desc,
+                'required': required
+            }
+
+        return params
+
+    @staticmethod
+    def get_resources(*args, **kwargs) -> Dict[str, Any]:
+        """Get resources for the operation
+
+        Returns
+        -------
+        Dict[str, Any]
+            Resources dictionary
+        """
+        return {}
+
+    @staticmethod
+    def get_interfaces() -> Dict[str, Any]:
+        """Get the interfaces required for the operation.
+
+        This function should be implemented in the plugin operation module to specify the interfaces required for the operation.
+
+        Common interface types include:
+
+        'alert': {
+            'type': 'alert',
+            'channel': 'fissure', # FISSURE zmq
+            'direction': 'out',
+            'description': 'Wifi AP detections.'
+        }
+
+        'tak': {
+            'type': 'tak',
+            'channel': 'fissure', # FISSURE zmq
+            'direction': 'out',
+            'description': 'Wifi AP detections in TAK CoT format.'
+        }
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary specifying the interfaces required for the operation. The keys are interface names, and the values are dictionaries with key, value pairs (`type`, str), (`channel`, str), (`direction`, str), and (`description`, str).
+        """
+        return {}
+
+    def prepare_resources(self) -> None:
+        """Prepare resources for the operation.
+        """
+        resources = self.get_resources(**self.resource_args) if hasattr(self, 'resource_args') else self.get_resources()
         self.logger.info(f"Resources defined: {resources}")
         self.resources = [
             Resource(
@@ -200,16 +352,19 @@ class Operation(object):
             )
         for _, res_info in resources.items()]
 
-    @setup_decorator
-    async def setup(self) -> None:
+    async def setup(self) -> bool:
         """
         Setup the environment to run the operation.
 
         Setup includes allocating resources for use by the operation. The developer can override this method to implement additional setup to prepare for running the operation.
+
+        Returns
+        -------
+        bool
+            True if setup was successful, False otherwise.
         """
         return True
 
-    @run_decorator
     async def run(self) -> None:
         """
         Run the operation.
@@ -219,7 +374,7 @@ class Operation(object):
         - the method should periodically check the `self._stop` flag to determine if it should exit gracefully
         - the method should call `await asyncio.sleep(0)` within loops to allow for cooperative multitasking
         """
-        self.logger.error("The run() method must be implemented by the subclass.")
+        self.logger.warning("The run() method should be implemented by the subclass.")
 
     def running(self) -> bool:
         """
@@ -232,136 +387,17 @@ class Operation(object):
         """
         return self._running
 
-    @stop_decorator
     async def stop(self) -> None:
         """
         Stop the operation.
         """
         return
 
-    @teardown_decorator
     async def teardown(self) -> None:
         """
         Teardown the environment for the operation.
         """
         return
-
-def get_arguments(Operation: Operation, logger: logging.Logger = logging.getLogger(__name__)) -> Dict[str, Any]:
-    """Get the arguments required to initialize the operation.
-
-    Parameters
-    ----------
-    Operation : Operation
-        The operation class to inspect.
-    logger : logging.Logger, optional
-        Logger instance for logging, by default logging.getLogger(__name__)
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary specifying the arguments required to initialize the operation. The keys are argument names, and the values are dictionaries with key, value pairs with keys `default`, `type`, `description`, and `required`. All values are cast to strings to facilitate JSON serialization.
-    """
-    # Get the argument types of Operation.__init__ method
-    sig = signature(Operation.__init__)
-    input_types = {k: v.annotation for k, v in sig.parameters.items() if k != 'self'}
-
-    # Get default values of Operation.__init__ parameters
-    sig = signature(Operation.__init__)
-    defaults = {}
-    for name, param in sig.parameters.items():
-        if name == 'self':
-            continue
-        if param.default is not _empty:
-            defaults[name] = param.default
-        else:
-            defaults[name] = ''
-
-    # Load the docstring
-    docstring = Operation.__init__.__doc__
-    params = {}
-    if not docstring:
-        logger.error("No docstring found.")
-        sys.exit(0)
-
-    # Find the Parameters section
-    param_section = re.search(r'Parameters\s*-+\s*(.*?)(?=\n\S|\Z)', docstring, re.DOTALL)
-    if not param_section:
-        logger.error("No Parameters section found in docstring. Use numpy style docstring format.")
-        sys.exit(0) 
-
-    # Split by parameter blocks
-    param_blocks = re.split(r'\n(?=\s*\w+\s*:\s*)', param_section.group(1))
-    params = {}
-    for block in param_blocks:
-        # split the parameter lines
-        lines = block.strip().split('\n')
-        if not lines or ':' not in lines[0]:
-            continue
-
-        # First line: param : type, optional
-        first = lines[0]
-        name_type_optional = first.split(':', 1)
-        name = name_type_optional[0].strip()
-        if name in _base_params:
-            continue
-        type_optional = name_type_optional[1].strip().split(',', 1)
-        if len(type_optional) == 1:
-            required = True
-        else:
-            required = 'optional' not in type_optional[1].strip().lower()
-
-        # get the description
-        desc = ' '.join(line.strip() for line in lines[1:]).strip()
-
-        # add to params
-        params[name] = {
-            'default': defaults.get(name, None),
-            'type': input_types.get(name, str),
-            'description': desc,
-            'required': required
-        }
-
-    return params
-
-def get_resources() -> Dict[str, Any]:
-    """Get the resources required for the operation.
-
-    This function should be implemented in the plugin operation module to specify the resources required for the operation.
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary specifying the resources required for the operation. The keys are resource names, and the values are dictionaries with key, value pairs (`type`, str), (`model`, str), (`serial`, str), (`description`, str), and (`required`, bool).
-    """
-    return {}
-
-def get_interfaces() -> Dict[str, Any]:
-    """Get the interfaces required for the operation.
-
-    This function should be implemented in the plugin operation module to specify the interfaces required for the operation.
-
-    Common interface types include:
-
-    'alert': {
-        'type': 'alert',
-        'channel': 'fissure', # FISSURE zmq
-        'direction': 'out',
-        'description': 'Wifi AP detections.'
-    }
-
-    'tak': {
-        'type': 'tak',
-        'channel': 'fissure', # FISSURE zmq
-        'direction': 'out',
-        'description': 'Wifi AP detections in TAK CoT format.'
-    }
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary specifying the interfaces required for the operation. The keys are interface names, and the values are dictionaries with key, value pairs (`type`, str), (`channel`, str), (`direction`, str), and (`description`, str).
-    """
-    return {}
 
 def main(*args, **kwargs) -> object:
     """Create an instance of the operation class.

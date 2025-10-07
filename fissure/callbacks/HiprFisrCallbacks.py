@@ -3392,23 +3392,25 @@ async def plugin_get_operation_parameters(component: object, plugin: str, operat
         spec = importlib.util.spec_from_file_location("operation_module", operation_path)
         operation_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(operation_module)
-        get_arguments = getattr(operation_module, "get_arguments", None)
-        if callable(get_arguments):
-            parameters = get_arguments()
+        OperationMain = getattr(operation_module, "OperationMain", None)
+        if OperationMain is not None:
+            if callable(OperationMain.get_arguments):
+                parameters = OperationMain.get_arguments()
+            else:
+                component.logger.error(f"OperationMain.get_arguments function not found in {operation}")
+                return
         else:
-            component.logger.error(f"get_arguments function not found in {operation}")
+            component.logger.error(f"OperationMain class not found in {operation}")
             return
-        get_resources = getattr(operation_module, "get_resources", None)
-        if callable(get_resources):
-            resources = get_resources()
+        if callable(OperationMain.get_resources):
+            resources = OperationMain.get_resources()
         else:
-            component.logger.warning(f"get_resources function not found in {operation}, resources will not be included")
+            component.logger.warning(f"OperationMain.get_resources function not found in {operation}, resources will not be included")
             resources = {}
-        get_interfaces = getattr(operation_module, "get_interfaces", None)
-        if callable(get_interfaces):
-            interfaces = get_interfaces()
+        if callable(OperationMain.get_interfaces):
+            interfaces = OperationMain.get_interfaces()
         else:
-            component.logger.warning(f"get_interfaces function not found in {operation}, interfaces will not be included")
+            component.logger.warning(f"OperationMain.get_interfaces function not found in {operation}, interfaces will not be included")
             interfaces = {}
     except Exception as e:
         component.logger.error(f"Error importing operation script {operation}: {e}")
