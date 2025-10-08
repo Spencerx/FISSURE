@@ -327,7 +327,6 @@ class HiprFisr:
                 clitool = pytak.CLITool(tak_config)
                 await clitool.setup()
                 self.tak_connected = True
-                # TODO Send message to all connected Dashboards with connected status
                 self.logger.info("TAK auto-connect: setup complete.")
             except Exception as e:
                 self.logger.warning(f"TAK auto-connect failed: {e}")
@@ -395,7 +394,6 @@ class HiprFisr:
             await self.read_backend_messages()
 
             # Tell Dashboard everything is connected
-            # TODO: Update this message
             if self.dashboard_connected and self.pd_connected and self.tsi_connected:
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
@@ -895,7 +893,7 @@ class HiprFisr:
     async def send_cot(self, uid, lat, lon, alt, time, remarks, type:str="a-f-G-U-H"):
         """
         Sends CoT message to TAK server. Used for alerts but not for the sensor node GPS beacon.
-        """       
+        """
         # Get TAK server settings
         settings: dict = fissure.utils.get_fissure_config()
         s_addr = settings["tak"]["ip_addr"]

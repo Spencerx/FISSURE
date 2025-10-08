@@ -3864,6 +3864,27 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     # create connections for sensor nodes pluginsList tab
     SensorNodesPluginsTabSlots.connect_plugins_slots(dashboard)
 
+    style = dashboard.style()
+    if style is not None:
+        dashboard.ui.toolButton_plugin_pkgs_hiprfisr_refresh_2.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload))
+
+    # Connect buttons for sensor nodes plugin operations
+    dashboard.ui.pushButton_7.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesOperationRun(dashboard)
+    )
+    dashboard.ui.pushButton_8.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesOperationStop(dashboard)
+    )
+    dashboard.ui.pushButton_9.clicked.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesPluginOperationOpen(dashboard)
+    )
+    dashboard.ui.toolButton_plugin_pkgs_hiprfisr_refresh_2.clicked.connect(
+        lambda: LibraryTabPluginManagerTabSlots._slot_request_hiprfisr_plugin_list(dashboard)
+    )
+    dashboard.ui.comboBox_select_plugin.currentIndexChanged.connect(
+        lambda: SensorNodesTabSlots._slotSensorNodesPluginSelected(dashboard)
+    )
+
 
 def connect_library_slots(dashboard: Dashboard):
     # Combo Box

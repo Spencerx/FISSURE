@@ -14,6 +14,7 @@ import json
 import qasync
 import datetime
 import zipfile
+import numpy as np
 
 from fissure.utils.plugin import get_fissure_plugin_editor_plugins_path
 from fissure.Dashboard.UI_Components.Qt5 import MyMessageBox
@@ -1337,6 +1338,228 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
     plugin_manager_table.resizeColumnsToContents()
     plugin_manager_table.horizontalHeader().setVisible(True)
     plugin_manager_table.verticalHeader().setVisible(False)
+
+    # Also update the combobox in the Plugin Operations tab
+    combobox: QtWidgets.QComboBox = component.frontend.ui.comboBox_select_plugin
+    combobox.clear()
+    combobox.addItems(plugin_names)
+
+
+async def responsePluginOperations(component: object, plugin: str, operations: List[str]) -> None:
+    """Handle Request for Plugin Operations
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    operations : List[str]
+        List of operations for the plugin
+    """
+    operations.sort()
+    combobox: QtWidgets.QComboBox = component.frontend.ui.comboBox_select_plugin_op
+    combobox.clear()
+    combobox.addItems(operations)
+
+
+async def responsePluginOperationParameters(component: object, plugin: str, operation: str, parameters: dict, resources: dict, interfaces: dict) -> None:
+    """Handle Request for Plugin Operation Parameters
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    parameters : dict
+        Parameters for the operation
+    """
+    params_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_op_params
+
+    keys = []
+    for key, value in parameters.items():
+        keys = np.union1d(keys, [str(k) for k in value.keys()])
+
+    if "required" in keys:
+        # Move required to first position if present (second position later)
+        keys = ["required"] + [k for k in keys if k != "required"]
+    else:
+        keys = ["required"] + list(keys)
+
+    if "default" in keys:
+        # Move default to first position if present
+        keys = ["default"] + [k for k in keys if k != "default"]
+    else:
+        keys = ["default"] + list(keys)
+
+    # Move "description" to the end of the keys list if present
+    if "description" in keys:
+        keys = [k for k in keys if k != "description"] + ["description"]
+
+    # Record position for each key
+    key_positions = {key: (i+1) for i, key in enumerate(keys)}
+
+    # Make the first letter for each key uppercase
+    keys = [key.capitalize() for key in keys]
+
+    # Prepare the column names for the table
+    columns = ["Value"] + keys
+
+    # configure table
+    params_table.clearContents()
+    params_table.setColumnCount(len(columns))
+    params_table.setHorizontalHeaderLabels(columns)
+    params_table.horizontalHeader().setVisible(True)
+    params_table.verticalHeader().setVisible(True)
+    params_table.setSortingEnabled(True)
+
+    # Populate the table with parameters
+    params_table.setRowCount(0)  # Clear existing rows
+    for row_index, (key, value) in enumerate(parameters.items()):
+        row_index = params_table.rowCount()
+        params_table.insertRow(row_index)
+        params_table.setVerticalHeaderItem(row_index, QtWidgets.QTableWidgetItem(key))
+        for subkey, subvalue in value.items():
+            col_index = key_positions.get(subkey, 0)
+            item = QtWidgets.QTableWidgetItem(str(subvalue))
+            item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)  # Make item non-editable
+            params_table.setItem(row_index, col_index, item)
+   
+    # Resize the table to fit contents
+    params_table.resizeColumnsToContents()
+    params_table.resizeRowsToContents()
+    
+    # Get keys for resources
+    keys = []
+    for key, value in resources.items():
+        keys = np.union1d(keys, [str(k) for k in value.keys()])
+
+    # Move "description" to the end of the keys list if present
+    if "description" in keys:
+        keys = [k for k in keys if k != "description"] + ["description"]
+
+    # Record position for each key
+    key_positions = {key: i for i, key in enumerate(keys)}
+
+    # Make the first letter for each key uppercase
+    keys = [key.capitalize() for key in keys]
+
+    # Configure resources table
+    res_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_op_resources
+    res_table.clearContents()
+    res_table.setColumnCount(len(keys))
+    res_table.setHorizontalHeaderLabels(keys)
+    res_table.horizontalHeader().setVisible(True)
+    res_table.verticalHeader().setVisible(True)
+    res_table.setSortingEnabled(True)
+
+    # Populate the resources table
+    res_table.setRowCount(0)  # Clear existing rows
+    for row_index, (key, value) in enumerate(resources.items()):
+        row_index = res_table.rowCount()
+        res_table.insertRow(row_index)
+        res_table.setVerticalHeaderItem(row_index, QtWidgets.QTableWidgetItem(key))
+        for subkey, subvalue in value.items():
+            col_index = key_positions.get(subkey, 0)
+            item = QtWidgets.QTableWidgetItem(str(subvalue))
+            item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)  # Make item non-editable
+            res_table.setItem(row_index, col_index, item)
+    
+    # Resize the resources table to fit contents
+    res_table.resizeColumnsToContents()
+    res_table.resizeRowsToContents()
+
+    # Get keys for interfaces
+    keys = []
+    for key, value in interfaces.items():
+        keys = np.union1d(keys, [str(k) for k in value.keys()])
+
+    # Move "description" to the end of the keys list if present
+    if "description" in keys:
+        keys = [k for k in keys if k != "description"] + ["description"]
+
+    # Record position for each key
+    key_positions = {key: i for i, key in enumerate(keys)}
+
+    # Make the first letter for each key uppercase
+    keys = [key.capitalize() for key in keys]
+
+    # Configure interfaces table
+    iface_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_op_interfaces
+    iface_table.clearContents()
+    iface_table.setColumnCount(len(keys))
+    iface_table.setHorizontalHeaderLabels(keys)
+    iface_table.horizontalHeader().setVisible(True)
+    iface_table.verticalHeader().setVisible(True)
+    iface_table.setSortingEnabled(True)
+
+    # Populate the interfaces table
+    iface_table.setRowCount(0)  # Clear existing rows
+    for row_index, (key, value) in enumerate(interfaces.items()):
+        row_index = iface_table.rowCount()
+        iface_table.insertRow(row_index)
+        iface_table.setVerticalHeaderItem(row_index, QtWidgets.QTableWidgetItem(key))
+        for subkey, subvalue in value.items():
+            col_index = key_positions.get(subkey, 0)
+            item = QtWidgets.QTableWidgetItem(str(subvalue))
+            item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)  # Make item non-editable
+            iface_table.setItem(row_index, col_index, item)
+
+    # Resize the resources table to fit contents
+    res_table.resizeColumnsToContents()
+    res_table.resizeRowsToContents()
+
+
+async def responsePluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict) -> None:
+    """Handle Request for Plugin Operation Started
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Operation ID
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    parameters : dict
+        Parameters for the operation
+    """
+    # Add the operation to the operations list view
+    operations_list: QtWidgets.QListWidget = component.frontend.ui.listWidget_operations
+    operations_list.addItem(f"{plugin} - {operation} (ID: {operation_id})")
+    operations_list.setWrapping(True)
+    operations_list.scrollToBottom()
+
+
+async def responsePluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
+    """Handle Request for Plugin Operation Stopped
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Operation ID
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    """
+    # Remove the operation from the operations list view
+    operations_list: QtWidgets.QListWidget = component.frontend.ui.listWidget_operations
+    items = operations_list.findItems(f"{plugin} - {operation} (ID: {operation_id})", QtCore.Qt.MatchExactly)
+    if items:
+        for item in items:
+            operations_list.takeItem(operations_list.row(item))
 
 
 async def savePlugin(component: object, plugin_name: str, plugin_data: str) -> None:
