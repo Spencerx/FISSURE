@@ -841,7 +841,7 @@ ls /usr/local/lib/python*/*/gnuradio/gsm
 programs_ubuntu24_04.append(('gr-ieee802-11 (39.38 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
-    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11git "
+    git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
     cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
     git checkout maint-3.10
     git pull origin maint-3.10
@@ -857,8 +857,6 @@ then
   make
   sudo make install
   sudo ldconfig
-  sudo purge -y xtrx-dkms
-  sudo dpkg --configure -a
 else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
