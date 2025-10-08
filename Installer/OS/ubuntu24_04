@@ -2168,7 +2168,7 @@ ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
 # SigDigger
 programs_ubuntu24_04.append(('SigDigger (48.00 kB)',
 """
-#sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
+sudo apt-get install -y libfuse2
 mkdir -p ~/Installed_by_FISSURE/SigDigger
 cd ~/Installed_by_FISSURE/SigDigger
 wget https://github.com/BatchDrake/SigDigger/releases/download/v0.3.0/SigDigger-0.3.0-x86_64-full.AppImage  # Needs newer version of QMake. Above 5.12.8, 5.14?
