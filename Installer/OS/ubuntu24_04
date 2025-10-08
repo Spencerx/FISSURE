@@ -402,7 +402,7 @@ git clone https://gitea.osmocom.org/sdr/gr-osmosdr.git
 cd gr-osmosdr
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_PREFIX_PATH=/usr/local ..
 make
 sudo make install
 sudo ldconfig
@@ -818,7 +818,6 @@ if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/)" ]
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-gsm/
   sudo rm -Rf build
-  sudo apt-get install -y gr-osmosdr
   mkdir build
   cd build
   cmake ..
