@@ -3379,8 +3379,6 @@ async def plugin_get_operation_parameters(component: object, plugin: str, operat
         component.logger.error(f"Plugin {plugin} does not exist in {fissure.utils.PLUGIN_DIR}")
         return
 
-    # TODO: Check the plugin version and confirm that it is the same as the sensor node version
-
     # get the operation path
     operation_path = os.path.join(plugin_path, "install_files", operation)
     if not os.path.exists(operation_path):

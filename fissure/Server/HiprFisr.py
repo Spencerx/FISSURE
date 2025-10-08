@@ -327,7 +327,6 @@ class HiprFisr:
                 clitool = pytak.CLITool(tak_config)
                 await clitool.setup()
                 self.tak_connected = True
-                # TODO Send message to all connected Dashboards with connected status
                 self.logger.info("TAK auto-connect: setup complete.")
             except Exception as e:
                 self.logger.warning(f"TAK auto-connect failed: {e}")
@@ -395,7 +394,6 @@ class HiprFisr:
             await self.read_backend_messages()
 
             # Tell Dashboard everything is connected
-            # TODO: Update this message
             if self.dashboard_connected and self.pd_connected and self.tsi_connected:
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,

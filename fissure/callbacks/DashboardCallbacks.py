@@ -1339,7 +1339,7 @@ async def responsePluginNamesHiprfisr(component: object, plugin_names: List[str]
     plugin_manager_table.horizontalHeader().setVisible(True)
     plugin_manager_table.verticalHeader().setVisible(False)
 
-    # TODO: for plugin testing purposes, remove when done
+    # Also update the combobox in the Plugin Operations tab
     combobox: QtWidgets.QComboBox = component.frontend.ui.comboBox_select_plugin
     combobox.clear()
     combobox.addItems(plugin_names)
@@ -1357,7 +1357,6 @@ async def responsePluginOperations(component: object, plugin: str, operations: L
     operations : List[str]
         List of operations for the plugin
     """
-    print(f"Plugin: {plugin}, Operations: {operations}")
     operations.sort()
     combobox: QtWidgets.QComboBox = component.frontend.ui.comboBox_select_plugin_op
     combobox.clear()
@@ -1378,7 +1377,7 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     parameters : dict
         Parameters for the operation
     """
-    params_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_dummy_plugin_params
+    params_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_op_params
 
     keys = []
     for key, value in parameters.items():
@@ -1449,7 +1448,7 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     keys = [key.capitalize() for key in keys]
 
     # Configure resources table
-    res_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_dummy_plugin_resources
+    res_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_op_resources
     res_table.clearContents()
     res_table.setColumnCount(len(keys))
     res_table.setHorizontalHeaderLabels(keys)
@@ -1489,7 +1488,7 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     keys = [key.capitalize() for key in keys]
 
     # Configure interfaces table
-    iface_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_dummy_plugin_interfaces
+    iface_table: QtWidgets.QTableWidget = component.frontend.ui.tableWidget_plugin_op_interfaces
     iface_table.clearContents()
     iface_table.setColumnCount(len(keys))
     iface_table.setHorizontalHeaderLabels(keys)

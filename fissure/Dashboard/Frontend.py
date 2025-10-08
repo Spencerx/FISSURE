@@ -3864,13 +3864,16 @@ def connect_sensor_nodes_slots(dashboard: Dashboard):
     # create connections for sensor nodes pluginsList tab
     SensorNodesPluginsTabSlots.connect_plugins_slots(dashboard)
 
-    # Connect dummy buttons for sensor nodes plugins
-    # WARNING: This is for testing purposes only
+    style = dashboard.style()
+    if style is not None:
+        dashboard.ui.toolButton_plugin_pkgs_hiprfisr_refresh_2.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload))
+
+    # Connect buttons for sensor nodes plugin operations
     dashboard.ui.pushButton_7.clicked.connect(
-        lambda: SensorNodesTabSlots._slotSensorNodesDummyRun(dashboard)
+        lambda: SensorNodesTabSlots._slotSensorNodesOperationRun(dashboard)
     )
     dashboard.ui.pushButton_8.clicked.connect(
-        lambda: SensorNodesTabSlots._slotSensorNodesDummyStop(dashboard)
+        lambda: SensorNodesTabSlots._slotSensorNodesOperationStop(dashboard)
     )
     dashboard.ui.pushButton_9.clicked.connect(
         lambda: SensorNodesTabSlots._slotSensorNodesPluginOperationOpen(dashboard)

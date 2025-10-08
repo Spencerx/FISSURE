@@ -1450,11 +1450,11 @@ async def _slotSensorNodesPluginSelected(dashboard: QtCore.QObject):
     # Clear previous operations
     combobox_ops: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin_op
     combobox_ops.clear()
-    params_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_params
+    params_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_plugin_op_params
     params_table.setRowCount(0)  # Clear previous parameters
-    res_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_resources
+    res_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_plugin_op_resources
     res_table.setRowCount(0)  # Clear previous resources
-    iface_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_interfaces
+    iface_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_plugin_op_interfaces
     iface_table.setRowCount(0)  # Clear previous interface
 
     # If no plugin is selected, return
@@ -1473,14 +1473,13 @@ async def _slotSensorNodesPluginSelected(dashboard: QtCore.QObject):
     await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 @qasync.asyncSlot(QtCore.QObject)
-async def _slotSensorNodesDummyRun(dashboard: QtCore.QObject):
+async def _slotSensorNodesOperationRun(dashboard: QtCore.QObject):
     """ 
-    Slot to run a dummy plugin operation.
-    This is a placeholder for testing purposes and should be replaced with actual functionality.
+    Slot to run a plugin operation.
     """
-    # Get parameters for the dummy plugin operation
+    # Get parameters for the plugin operation
     parameters = {}
-    params_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_dummy_plugin_params
+    params_table: QtWidgets.QTableWidget = dashboard.ui.tableWidget_plugin_op_params
     for row in range(params_table.rowCount()):
         value_item = params_table.item(row, 0)  # User entered value
         if value_item is None:
@@ -1511,10 +1510,9 @@ async def _slotSensorNodesDummyRun(dashboard: QtCore.QObject):
     await dashboard.backend.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 @qasync.asyncSlot(QtCore.QObject)
-async def _slotSensorNodesDummyStop(dashboard: QtCore.QObject):
+async def _slotSensorNodesOperationStop(dashboard: QtCore.QObject):
     """ 
-    Slot to stop a dummy plugin operation.
-    This is a placeholder for testing purposes and should be replaced with actual functionality.
+    Slot to stop a plugin operation.
     """
     ops_table: QtWidgets.QListWidget = dashboard.ui.listWidget_operations
     selected_items = ops_table.selectedItems()
@@ -1545,7 +1543,6 @@ async def _slotSensorNodesDummyStop(dashboard: QtCore.QObject):
 async def _slotSensorNodesPluginOperationOpen(dashboard: QtCore.QObject):
     """ 
     Slot to open a plugin operation.
-    This is a placeholder for testing purposes and should be replaced with actual functionality.
     """
     combobox_plugin: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin
     combobox_op: QtWidgets.QComboBox = dashboard.ui.comboBox_select_plugin_op

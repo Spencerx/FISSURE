@@ -433,10 +433,6 @@ class SensorNode(object):
         -------
         None
         """
-        """
-        TODO:
-        - Get resources needed for the plugin operation
-        """
         self.logger.info(f"Running plugin operation: {plugin} - {operation} with parameters: {parameters}")
 
         # Get the plugin path using the plugin name
