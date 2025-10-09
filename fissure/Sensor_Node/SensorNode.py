@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import importlib.util
 import time
 import random
 import yaml
@@ -21,12 +22,13 @@ import json
 
 from inspect import isfunction
 from types import ModuleType
-from typing import Dict, List, Union, Callable, Optional
+from typing import Dict, List, Union, Callable, Optional, Any
 
 import asyncio
 import fissure.callbacks
 import fissure.comms
 import fissure.utils
+from fissure.utils import PLUGIN_DIR
 
 import uuid
 import logging
@@ -37,6 +39,7 @@ from fissure.utils.alert_sender import alertSender
 from datetime import datetime, timezone
 
 import warnings
+import traceback
 warnings.filterwarnings("ignore", category=DeprecationWarning)  # Scapy warnings
 
 IP_ADDRESS = "127.0.0.1"
@@ -141,7 +144,7 @@ async def main(local_flag):
         sys.exit()
 
 
-class SensorNode():
+class SensorNode(object):
     """ 
     Class that contains the functions for the sensor node.
     """
@@ -246,6 +249,10 @@ class SensorNode():
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacksLT)
+        
+        # Register plugin operation callbacks
+        self.callbacks['run_plugin_operation'] = self.run_plugin_operation
+        self.callbacks['stop_plugin_operation'] = self.stop_plugin_operation
 
         # Initialize GPS Coordinates
         self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
@@ -257,6 +264,8 @@ class SensorNode():
         self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
         self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(self.gps_position['latitude'], self.gps_position['longitude'])
 
+        # Initialize operations tracking
+        self.operations = {}
 
     def initialize_comms(self):
         """
@@ -299,6 +308,319 @@ class SensorNode():
             self.logger.debug(f"registered callback: {cb_name} (from {cb_func.__module__})")
             self.callbacks[cb_name] = cb_func
 
+
+    async def send_alert(self, sensor_node_id: int | str, opid: str, message: str, logger: None = None) -> None:
+        """
+        Send an alert message.
+
+        This method is meant to be provided as a callback for plugin operations to send alert messages.
+
+        Parameters
+        ----------
+        sensor_node_id : int | str
+            Sensor node ID
+        opid : str
+            The operation ID. Unused placeholder for future use.
+        message : str
+            The alert message.
+        logger : None
+            Unused placeholder for debugging.
+        """
+        PARAMETERS = {
+            "sensor_node_id": sensor_node_id,
+            "alert_text": message
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER if self.network_type == "IP" else fissure.comms.MessageFields.SOURCE: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn" if self.network_type == "IP" else "alertReturnLT",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS if self.network_type == "IP" else { "sensor_node_id": sensor_node_id, "alert_text": PARAMETERS["alert_text"][:100] },
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def send_tak_cot(self, sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H", logger: None = None) -> None:
+        """Send a TAK message.
+
+        Parameters
+        ----------
+        sensor_node_id : int | str
+            Sensor node ID
+        opid : str
+            Operation ID
+        uid : str
+            Unique ID for the TAK message.
+        remarks : str
+            Remarks to include in the TAK message.
+        lat : float | bool, optional
+            Latitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
+        lon : float | bool, optional
+            Longitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
+        alt : float | bool, optional
+            Altitude in meters, by default True to use current Sensor Node GPS position. False to omit.
+        time : float | bool, optional
+            Timestamp as a Unix epoch float, by default True to use current time. False to omit.
+        type : str, optional
+            Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
+        logger : None, optional
+            Unused placeholder for debugging.
+        """
+        # Prepare inputs
+        if lat is True:
+            lat = self.gps_position.get('latitude', 0.0)
+        if lon is True:
+            lon = self.gps_position.get('longitude', 0.0)
+        if alt is True:
+            alt = self.gps_position.get('altitude', 0.0)
+        if time is True:
+            time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        if remarks == "GPS UPDATE":
+            msg_name = "takPlotGpsUpdate"
+        else:
+            msg_name = "takPlot"
+
+        # Prepare values
+        if self.network_type == "IP":
+            PARAMETERS = {
+                "uid": uid,
+                "lat": lat,
+                "lon": lon,
+                "alt": alt,
+                "time": time,
+                "type": type,
+                "remarks": remarks
+            }
+        elif self.network_type == "Meshtastic":
+            if lat is False or lon is False or alt is False:
+                self.logger.error("TAK message requires latitude, longitude, and altitude.")
+                return
+            if time is False:
+                time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            msg_name += "LT"
+            PARAMETERS = {
+                "msg": [
+                    PARAMETERS["uid"],
+                    PARAMETERS["lat"],
+                    PARAMETERS["lon"],
+                    PARAMETERS["alt"],
+                    PARAMETERS["time"],
+                    PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
+                ]
+            }
+
+        # Send message
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: int | str = 0) -> None:
+        """
+        Runs a plugin operation on the Sensor Node
+
+        Parameters
+        ----------
+        plugin : str
+            The name of the plugin.
+        operation : str
+            The plugin filename to run relative to the plugin directory.
+        parameters : dict
+            The operation parameters.
+        
+        Returns
+        -------
+        None
+        """
+        self.logger.info(f"Running plugin operation: {plugin} - {operation} with parameters: {parameters}")
+
+        # Get the plugin path using the plugin name
+        plugin_path = os.path.join(PLUGIN_DIR, plugin)
+        if not os.path.exists(plugin_path):
+            self.logger.error(f"Plugin path does not exist: {plugin_path}")
+            return        
+        self.logger.info(f"Plugin path resolved: {plugin_path}")
+        
+        # Get the plugin script path using the plugin name and operation
+        plugin_script_path = os.path.join(plugin_path, 'install_files', operation)
+        if not os.path.exists(plugin_script_path):
+            self.logger.error(f"Plugin script does not exist: {plugin_script_path}")
+            return
+        self.logger.info(f"Plugin script resolved: {plugin_script_path}")
+
+        # Import and run the main function from the plugin script
+        spec = importlib.util.spec_from_file_location("plugin_module", plugin_script_path)
+        plugin_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(plugin_module)
+
+        # Get the main operation class
+        operation_main = getattr(plugin_module, "OperationMain", None)
+        if operation_main is None:
+            self.logger.error(f"No OperationMain class found in {plugin_script_path}")
+            return
+        if not inspect.isclass(operation_main):
+            self.logger.error(f"OperationMain is not a class in {plugin_script_path}")
+            return
+
+        # Get the resources required by the plugin script
+        if not hasattr(operation_main, "get_resources") or not callable(getattr(operation_main, "get_resources")):
+            self.logger.error(f"No callable get_resources() found in {plugin_script_path} OperationMain class")
+            return
+        resources = operation_main.get_resources()
+        if not isinstance(resources, dict):
+            self.logger.error(f"get_resources() did not return a dictionary: {resources}")
+            return
+        self.logger.info(f"Plugin operation resources: {resources}")
+
+        # Record user parameters
+        user_parameters = parameters.copy()
+
+        # Add the logger and alert callback to the parameters
+        parameters["sensor_node_id"] = sensor_node_id
+        parameters["alert_callback"] = self.send_alert
+        parameters["tak_cot_callback"] = self.send_tak_cot
+        parameters["logger"] = self.logger
+
+        # Initialize the operation class instance
+        try:
+            operation_inst = operation_main(**parameters)
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            self.logger.error(f"Error initializing operation class from {plugin_script_path}: {e}\n{tb_str}")
+            return
+        self.logger.info(f"Plugin operation initialized: {operation}")
+
+        # Check that the plugin has operation ID attribute
+        if not hasattr(operation_inst, "opid"):
+            self.logger.error(f"No operation ID (opid) found in {plugin_script_path}")
+            return
+
+        # Check that the plugin script class has the running flag
+        if not hasattr(operation_inst, "running") or not callable(operation_inst.running):
+            self.logger.error(f"No running flag found in {plugin_script_path}")
+            return
+
+        # Check that the plugin script class has the stop method
+        if not hasattr(operation_inst, "stop") or not callable(operation_inst.stop):
+            self.logger.error(f"No callable stop() method found in {plugin_script_path}")
+            return
+
+        # Run the plugin script
+        if hasattr(operation_inst, "run") and callable(operation_inst.run):
+            try:
+                # Set up the operation environment
+                env_ready = await operation_inst.setup()
+                if not env_ready:
+                    self.logger.error(f"Plugin operation {operation} setup failed.")
+                    return
+                self.logger.info(f"Plugin operation environment for {operation} is ready.")
+
+                # Register the operation in the operations dictionary
+                operation_id = operation_inst.opid
+                self.operations[operation_id] = {
+                    "plugin": plugin,
+                    "operation": operation,
+                    "parameters": parameters,
+                    "resources": resources,
+                    "status": operation_inst.running,
+                    "stop": operation_inst.stop,
+                    "teardown": operation_inst.teardown,
+                    "start_time": time.time(),
+                }
+
+                # Run the plugin operation in the background
+                self.logger.info(f"Starting plugin operation {operation_id}")
+                asyncio.create_task(operation_inst.run())
+
+                self.logger.info(f"Plugin operation {operation_id} starting...")
+
+                # Check if the operation is running
+                while operation_inst.running() is None:
+                    await asyncio.sleep(0.1)
+                if not operation_inst.running():
+                    self.logger.error(f"Plugin operation {operation} did not start successfully.")
+                    await operation_inst.stop()
+                    await operation_inst.teardown()
+                    return
+                self.logger.info(f"Plugin operation {operation_id} running.")
+
+                # Send a message to the Dashboard indicating the operation has started
+                PARAMETERS = {
+                    "sensor_node_id": sensor_node_id,
+                    "operation_id": operation_id,
+                    "plugin": plugin,
+                    "operation": operation,
+                    "parameters": user_parameters,
+                }
+                msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStarted",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                }
+                await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+            except Exception as e:
+                tb_str = traceback.format_exc()
+                self.logger.error(f"Error running plugin script {plugin_script_path}: {e}\n{tb_str}")
+                return
+        else:
+            self.logger.error(f"No callable run() method found in {plugin_script_path} OperationMain class")
+            return
+
+    async def stop_plugin_operation(self, component: object, operation_id: str, sensor_node_id: int | str = 0) -> None:
+        """
+        Stops a plugin operation on the Sensor Node.
+
+        Parameters
+        ----------
+        operation_id : str
+            The ID of the operation to stop.
+        
+        Returns
+        -------
+        None
+        """
+        self.logger.info(f"Stopping plugin operation with ID: {operation_id}")
+        if operation_id not in self.operations:
+            self.logger.error(f"Operation ID {operation_id} not found.")
+            return
+        
+        operation = self.operations[operation_id]
+        if "stop" in operation and callable(operation["stop"]):
+            try:
+                await operation["stop"]()
+            except Exception as e:
+                tb_str = traceback.format_exc()
+                self.logger.error(f"Error stopping plugin operation {operation_id}: {e}\n{tb_str}")
+        else:
+            self.logger.error(f"No callable stop method for operation {operation_id}.")
+        self.logger.info(f"Operation {operation_id} stop requested.")
+        while operation["status"]():
+            await asyncio.sleep(1)
+            self.logger.info(f"Operation {operation_id} is still running.")
+
+        self.logger.info(f"Operation {operation_id} has stopped.")
+        if "teardown" in operation and callable(operation["teardown"]):
+            try:
+                await operation["teardown"]()
+            except Exception as e:
+                self.logger.error(f"Error tearing down plugin operation {operation_id}: {e}")
+        self.logger.info(f"Operation {operation_id} has completed teardown.")
+
+        # Send a message to the Dashboard indicating the operation has stopped
+        PARAMETERS = {
+            "sensor_node_id": sensor_node_id,
+            "operation_id": operation_id,
+            "plugin": operation.get("plugin"),
+            "operation": operation.get("operation"),
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStopped",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     async def shutdown_comms(self):
         """

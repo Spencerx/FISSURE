@@ -1,6 +1,51 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-06
+
+Updating README roadmap and white papers.
+
+### Added
+
+- Interactive roadmap link and current priorities in README Roadmap section
+- FISSURE white papers and updated links in README White Papers section
+
+## 2025-10-02
+
+Merging pull requests #86-#90, #92: TAK, plugins, GPS, and Raspberry Pi updates.
+
+### Added
+
+- Update hardware.py #88
+  - Update to gpsd receive to not kill and restart the service on each read attempt
+- Tak integration #89
+  - TAK server module added
+  - Hipfisr TAK server monitor interface added
+  - Hipfisr send_cot now accepts TAK type string
+  - Beacon stale time changed to 60 seconds instead of 60 minutes
+  - Beacon cot message switched to provide track
+- Sensor node updates #90
+  - Sensor node updates based on Raspberry Pi 4 Ubuntu 24.04 installation and operation as a sensor node. TPMS, Wifi AP detection and Wifi reboot playlists included for reference. Alert sender handling of types in TAK messages added.
+  - TPMS alert: dropped snreport, added type to TAK report
+  - Wifi AP finder and autorun playlist added
+  - Added iwlist to password exception commands
+  - Added raspberry pi remote sensor node config for reference
+  - Alert sender now handles type arguments on TAK messages
+  - Added wifi reboot autorun playlist
+- Fixed error on fissure dashboard launch if fissure-plugin-editor is n… #92
+  - Fixed error on fissure dashboard launch if fissure-plugin-editor is not found
+- TAK connect_mode variable in config files to choose auto/manual/disabled for connecting the HIPRFISR to a TAK server
+- TAK menu for starting/stopping a local TAK server and for connecting/disconnecting to a TAK server (preconfigured in YAML config files)
+
+### Changed
+
+- Moved TAK menu items from Tools to TAK
+- Updated README with videos, intros, diagrams, white papers, blog posts, TAK setup, testimonials
+
+### Fixed
+
+- Made config file checks to determine if the HIPRFISR should connect to a TAK server on boot
+
 ## 2025-8-03
 
 Fixing remote IP actions.

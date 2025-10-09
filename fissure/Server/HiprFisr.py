@@ -7,7 +7,8 @@ import fissure.callbacks
 import fissure.comms
 import fissure.utils
 from fissure.utils.plugin_editor import PluginEditor
-import logging
+from fissure.utils.tak_server import load_config as load_tak_config
+from fissure.utils.tak_server import TakReceiver
 import sys
 import time
 import uuid
@@ -120,6 +121,8 @@ class HiprFisr:
     callbacks: Dict = {}
     shutdown: bool
     alert_listeners: Dict = {}
+    tak_mode: str
+    tak_connected: bool
 
 
     def __init__(self, address: fissure.comms.Address):
@@ -192,6 +195,10 @@ class HiprFisr:
         self.initialize_sensor_nodes()
         self.message_counter = 0
         self.shutdown = False
+
+        # Initialize TAK Variables
+        self.tak_connected = False
+        self.tak_mode = "disabled"
 
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
@@ -308,10 +315,40 @@ class HiprFisr:
 
         # Start Heartbeat Loop
         heartbeat_task = asyncio.create_task(self.heartbeat_loop())
-        
+
+        # Load TAK config and connection mode
+        tak_config = load_tak_config()
+        self.tak_mode = tak_config.get("connect_mode", "disabled").lower()  # auto/manual/disabled
+
+        clitool = None
+        if self.tak_mode == "auto":
+            try:
+                import pytak
+                clitool = pytak.CLITool(tak_config)
+                await clitool.setup()
+                self.tak_connected = True
+                self.logger.info("TAK auto-connect: setup complete.")
+            except Exception as e:
+                self.logger.warning(f"TAK auto-connect failed: {e}")
+                clitool = None
+        elif self.tak_mode == "manual":
+            self.logger.info("TAK manual-connect mode: waiting for user trigger.")
+        else:
+            self.logger.info("TAK integration disabled in config.")
+
         # Start Event Loop
-        while self.shutdown is False:
-            if self.connect_loop is False:
+        while not self.shutdown:
+            if not self.connect_loop:
+                if clitool:
+                    try:
+                        clitool.add_tasks(
+                            {TakReceiver(clitool.rx_queue, tak_config, self, self.logger)}
+                        )
+                        await clitool.run()
+                    except Exception as e:
+                        self.logger.warning(f"TAK client error: {e}")
+                        clitool = None
+
                 # Process Incoming Messages
                 if self.dashboard_connected:
                     await self.read_dashboard_messages()
@@ -319,15 +356,14 @@ class HiprFisr:
                     await self.read_backend_messages()
 
                 for sensor_node in self.sensor_nodes:
-                    if sensor_node:
-                        if sensor_node.connected is True:
-                            await self.read_sensor_node_messages()
-                            break
-                
-                await asyncio.sleep(EVENT_LOOP_DELAY)
+                    if sensor_node and sensor_node.connected:
+                        await self.read_sensor_node_messages()
+                        break
 
+                await asyncio.sleep(EVENT_LOOP_DELAY)
             else:
                 await self.connect_components()
+
         self.logger.debug("Shutdown reached in HIPRFISR event loop")
 
         # Ensure the Heartbeat Loop is Stopped
@@ -335,9 +371,8 @@ class HiprFisr:
         try:
             await heartbeat_task
         except asyncio.CancelledError:
-            pass  # Heartbeat task was cancelled cleanly
+            pass
 
-        # Shut Down Comms
         await self.shutdown_comms()
         self.logger.info("=== SHUTDOWN ===")
 
@@ -359,7 +394,6 @@ class HiprFisr:
             await self.read_backend_messages()
 
             # Tell Dashboard everything is connected
-            # TODO: Update this message
             if self.dashboard_connected and self.pd_connected and self.tsi_connected:
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
@@ -856,13 +890,10 @@ class HiprFisr:
         asyncio.run(sensor.close())
 
 
-    async def send_cot(self, uid, lat, lon, alt, time, remarks):
+    async def send_cot(self, uid, lat, lon, alt, time, remarks, type:str="a-f-G-U-H"):
         """
         Sends CoT message to TAK server. Used for alerts but not for the sensor node GPS beacon.
         """
-
-        #print("IN TAK SEND FUNCTION")
-        
         # Get TAK server settings
         settings: dict = fissure.utils.get_fissure_config()
         s_addr = settings["tak"]["ip_addr"]
@@ -870,8 +901,10 @@ class HiprFisr:
         tak_cert = settings["tak"]["cert"]
         tak_key = settings["tak"]["key"]
 
+        self.logger.debug(f"Sending CoT to TAK server with type {type}")
+
         cot_msg = f"""<?xml version="1.0" encoding="UTF-8"?>
-        <event version="2.0" type="a-f-G-U-H" uid="{uid}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
+        <event version="2.0" type="{type}" uid="{uid}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
             <detail>
                 <contact callsign="{uid}"/>
                 <remarks>"{remarks}"</remarks>
@@ -936,7 +969,7 @@ class SensorNodeTracker:
 
         # Generate stale time (5 minutes ahead)
         time_format = "%Y-%m-%dT%H:%M:%SZ"
-        stale_time = (datetime.now(timezone.utc) + timedelta(minutes=60)).strftime(time_format)  # stale_time="2029-08-09T18:18:06.521956Z"
+        stale_time = (datetime.now(timezone.utc) + timedelta(seconds=60)).strftime(time_format)
 
         # Get TAK server settings
         settings: dict = fissure.utils.get_fissure_config()
@@ -945,21 +978,18 @@ class SensorNodeTracker:
         tak_cert = settings["tak"]["cert"]
         tak_key = settings["tak"]["key"]
 
-        # # Live Position CoT
-        # cot_msg = f"""<?xml version="1.0" encoding="UTF-8"?>
-        # <event version="2.0" type="b-m-p-w" uid="{uid}{time}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
-        #     <detail>
-        #         <contact callsign="{uid}"/>
-        #         <remarks>"{remarks}"</remarks>
-        #     </detail>
-        #     <point lat="{lat}" lon="{lon}" ce="0" le="0" hae="0"/>
-        # </event>"""
-
         # List to hold CoT messages
         cot_messages = []
 
+        # head of cot message
+        message = f"""<?xml version="1.0" encoding="utf-16"?>
+        <event version="2.0" uid="{uid}" type="b-m-r" how="h-e" time="{time}" start="{time}" stale="{stale_time}">
+            <point lat="0" lon="0" hae="0" ce="9999999" le="9999999" />
+            <detail>
+                <contact callsign=""/>""" # message for single message
+
         # **Loop through past positions and add them to CoT messages**
-        for i, past_entry in enumerate(reversed(self.past_positions[uid])):  # Reverse order for logical labeling
+        for i, past_entry in enumerate(self.past_positions[uid]):
             if len(past_entry) == 4:
                 p_lat, p_lon, p_alt, p_time = past_entry
             elif len(past_entry) == 3:
@@ -969,20 +999,21 @@ class SensorNodeTracker:
                 self.logger.error(f"Skipping malformed entry: {past_entry}")
                 continue  # Skip invalid entries
 
-            # First entry gets the base UID, others are numbered
-            position_number = "" if i == 0 else f"-{i}"
+            # append position to linked message
+            message += f"""
+                    <link type="b-m-p-w" point="{p_lat}, {p_lon}" />"""
 
-            past_cot = f"""<?xml version="1.0" encoding="UTF-8"?>
-            <event version="2.0" type="b-m-p-w" uid="{uid}{position_number}" how="m-g"
-                time="{p_time}" start="{p_time}" stale="{stale_time}">
-                <detail>
-                    <contact callsign="{uid} {position_number}"/>
-                    <remarks>"{remarks}"</remarks>
-                </detail>
-                <point lat="{p_lat}" lon="{p_lon}" ce="5" le="5" hae="{p_alt}"/>
-            </event>"""
-            
-            cot_messages.append(past_cot)
+        # close cot message
+        message += f"""
+                <link_attr color="-16776961" method="Driving" direction="Advance" routetype="Primary" order="Ascending Check Points" />
+                <remarks>"{remarks}"</remarks>
+                <archive />
+                <__routeinfo>
+                    <__navcues />
+                </__routeinfo>
+            </detail>
+        </event>"""
+        cot_messages.append(message)
 
         # Use Single Persistent Connection
         context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
@@ -1007,8 +1038,6 @@ class SensorNodeTracker:
             root_ca_path = os.path.join(takserver_path, "tak/certs/files/root-ca.pem")
         else:
             root_ca_path = None  # No TAK server found
-
-        #print("Using TAK Root CA:", root_ca_path)
 
         context.load_verify_locations(root_ca_path)
         context.check_hostname = False

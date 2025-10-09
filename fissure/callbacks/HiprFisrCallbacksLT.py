@@ -315,10 +315,11 @@ async def takPlotLT(component: object, msg=[]):
     alt = float(msg[3])
     time = str(msg[4])
     remarks = str(msg[5])
+    type = str(msg[6]) if len(msg) > 6 else "a-f-G-U-H"
 
     time = time.replace(" ", "T")
     
-    await component.send_cot(uid, lat, lon, alt, time, remarks)
+    await component.send_cot(uid, lat, lon, alt, time, remarks, type)
     
 
 async def exploitLT(component: object, msg=[]):

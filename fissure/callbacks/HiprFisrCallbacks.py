@@ -16,6 +16,9 @@ import yaml
 import asyncio
 import socket
 import shutil
+import tempfile
+import zipfile
+import importlib
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -2353,20 +2356,11 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
     """
     Forwards the GPS coordinate results message to TAK.
-    """
-    '''uid = str(msg[0])
-    lat = float(msg[1])
-    lon = float(msg[2])
-    alt = float(msg[3])
-    time = str(msg[4])
-    remarks = str(msg[5])
-
-    time = time.replace(" ", "T")'''
-    
-    await component.send_cot(uid, lat, lon, alt, time, remarks)
+    """   
+    await component.send_cot(uid, lat, lon, alt, time, remarks, type)
 
 
 async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
@@ -2828,6 +2822,83 @@ async def checkSensorNodePluginResults(component: object, sensor_node_id: int, p
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+async def savePlugin(component: object, plugin_name: str, plugin_data: str):
+    """Save Plugin to Local HIPRFISR
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Plugin name
+    plugin_data : str
+        Plugin data in hex format (compressed as a zip file)
+    """
+    # Decode hex data
+    plugin_data = binascii.a2b_hex(plugin_data)
+
+    # Save file
+    pathname = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name + '.zip')
+    with open(pathname, "wb") as f:
+        f.write(plugin_data)
+
+    # Create a path for the plugin to be extracted to
+    extract_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+    if os.path.exists(extract_path):
+        copy_num = 1
+        base_name = plugin_name
+        while os.path.exists(extract_path):
+            extract_path = os.path.join(fissure.utils.PLUGIN_DIR, f"{base_name} (Copy {copy_num})")
+            copy_num += 1
+    os.makedirs(extract_path, exist_ok=True)
+
+    # Extract the zip file to the plugin directory
+    with zipfile.ZipFile(pathname, "r") as zip_ref:
+        zip_ref.extractall(extract_path)
+
+    # Remove the zip file
+    os.remove(pathname)
+
+
+async def sendPlugin(component: object, plugin_name: str) -> None:
+    """Send Plugin to Dashboard
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Plugin name
+    """
+    plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+    if not os.path.exists(plugin_path):
+        component.logger.error(f"Plugin {plugin_name} does not exist in {fissure.utils.PLUGIN_DIR}")
+        return
+
+    # Create a temporary zip file for the plugin directory
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as temp_zip:
+        with zipfile.ZipFile(temp_zip.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(plugin_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, plugin_path)
+                    zipf.write(file_path, arcname)
+        with open(temp_zip.name, "rb") as f:
+            zip_data = f.read()
+        hex_zip_data = binascii.hexlify(zip_data).decode("utf-8").upper()
+
+    # Send the plugin to the dashboard
+    PARAMETERS = {
+        "plugin_name": plugin_name,
+        "plugin_data": hex_zip_data,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "savePlugin",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 async def transferPlugins(component: object, sensor_node_id: int, plugin_names: List[str], install: bool=False):
     """Send Plugin to Sensor Node
 
@@ -3214,7 +3285,6 @@ async def pluginAddProtocolHiprfisr(component: object, protocol_name: str):
         "protocol_name": protocol_name,
         "parameters": component.pluginAddProtocolHiprfisr(protocol_name)
     }
-    print(PARAMETERS)
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3232,7 +3302,6 @@ async def pluginSetProtocolParameters(component: object, protocol_name: str, par
         "protocol_name": protocol_name,
         "parameters": component.pluginAddProtocolHiprfisr(protocol_name)
     }
-    print(PARAMETERS)
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3250,7 +3319,6 @@ async def pluginAddProtocolModType(component: object, protocol_name: str, mod_ty
         "protocol_name": protocol_name,
         "parameters": component.plugin_editor.get_protocol_parameters(protocol_name)
     }
-    print('PARAMETERS: ' + str(component.plugin_editor.get_protocol_parameters(protocol_name)))
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3268,7 +3336,6 @@ async def pluginRemoveProtocolModTypes(component: object, protocol_name: str, mo
         "protocol_name": protocol_name,
         "parameters": component.plugin_editor.get_protocol_parameters(protocol_name)
     }
-    print('PARAMETERS: ' + str(component.plugin_editor.get_protocol_parameters(protocol_name)))
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3286,7 +3353,6 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
         "protocol_name": protocol_name,
         "parameters": component.plugin_editor.get_protocol_parameters(protocol_name)
     }
-    print('PARAMETERS: ' + str(component.plugin_editor.get_protocol_parameters(protocol_name)))
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
@@ -3294,3 +3360,232 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+
+async def plugin_get_operation_parameters(component: object, plugin: str, operation: str):
+    """Get parameters for a plugin operation.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    operation : str
+        Script relative path within the plugin's install_file directory
+    """
+    # get the plugin path
+    plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin)
+    if not os.path.exists(plugin_path):
+        component.logger.error(f"Plugin {plugin} does not exist in {fissure.utils.PLUGIN_DIR}")
+        return
+
+    # get the operation path
+    operation_path = os.path.join(plugin_path, "install_files", operation)
+    if not os.path.exists(operation_path):
+        component.logger.error(f"Operation {operation} does not exist in plugin {plugin}")
+        return
+    
+    # import and run the get_arguments function from the operation script
+    try:
+        spec = importlib.util.spec_from_file_location("operation_module", operation_path)
+        operation_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(operation_module)
+        OperationMain = getattr(operation_module, "OperationMain", None)
+        if OperationMain is not None:
+            if callable(OperationMain.get_arguments):
+                parameters = OperationMain.get_arguments()
+            else:
+                component.logger.error(f"OperationMain.get_arguments function not found in {operation}")
+                return
+        else:
+            component.logger.error(f"OperationMain class not found in {operation}")
+            return
+        if callable(OperationMain.get_resources):
+            resources = OperationMain.get_resources()
+        else:
+            component.logger.warning(f"OperationMain.get_resources function not found in {operation}, resources will not be included")
+            resources = {}
+        if callable(OperationMain.get_interfaces):
+            interfaces = OperationMain.get_interfaces()
+        else:
+            component.logger.warning(f"OperationMain.get_interfaces function not found in {operation}, interfaces will not be included")
+            interfaces = {}
+    except Exception as e:
+        component.logger.error(f"Error importing operation script {operation}: {e}")
+        return
+
+    # cast all values to strings (ensures json serializability)
+    for key, value in parameters.items():
+        for subkey, subvalue in value.items():
+            parameters[key][subkey] = str(subvalue)
+
+    # send the plugin operation parameters to the dashboard
+    PARAMETERS = {
+        "plugin": plugin,
+        "operation": operation,
+        "parameters": parameters,
+        "resources": resources,
+        "interfaces": interfaces
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationParameters",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def plugin_get_operations(component: object, plugin: str):
+    """Get operations for a plugin.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin : str
+        Plugin name
+    """
+    # get the plugin path
+    plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin)
+    if not os.path.exists(plugin_path):
+        component.logger.error(f"Plugin {plugin} does not exist in {fissure.utils.PLUGIN_DIR}")
+        return
+    
+    # get the install_files path
+    install_files_path = os.path.join(plugin_path, "install_files")
+    if not os.path.exists(install_files_path):
+        component.logger.error(f"Plugin {plugin} does not have an install_files directory")
+        return
+    
+    # get the list of operations (python scripts) in the install_files directory
+    operations = []
+    for filename in os.listdir(install_files_path):
+        if filename.endswith(".py"):
+            operations += [filename]
+
+    # send the plugin operations to the dashboard
+    PARAMETERS = {
+        "plugin": plugin,
+        "operations": operations,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperations",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def run_plugin_operation(component: object, sensor_node_id: int, plugin: str, operation: str, parameters: dict = {}):
+    """Run a plugin operation on the sensor node.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    plugin : str
+        Plugin name
+    operation : str
+        Script relative path within the plugin's install_file directory
+    parameters : dict, optional
+        Additional parameters for the operation, by default {}
+    """
+    PARAMETERS = {
+        "plugin": plugin,
+        "operation": operation,
+        "parameters": parameters,
+        "sensor_node_id": sensor_node_id,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "run_plugin_operation",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def stop_plugin_operation(component: object, sensor_node_id: int, operation_id: str):
+    """Stop a running plugin operation on the sensor node.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Unique identifier for the operation to stop
+    """
+    PARAMETERS = {
+        "operation_id": operation_id,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "stop_plugin_operation",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def pluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict):
+    """Handle Plugin Operation Started Event
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Unique identifier for the operation
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    parameters : dict
+        Parameters for the operation
+    """
+    # Forward message to dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "operation_id": operation_id,
+        "plugin": plugin,
+        "operation": operation,
+        "parameters": parameters,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStarted",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+async def pluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
+    """Handle Plugin Operation Stopped Event
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    operation_id : str
+        Unique identifier for the operation
+    plugin : str
+        Plugin name
+    operation : str
+        Operation name
+    """
+    # Forward message to dashboard
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "operation_id": operation_id,
+        "plugin": plugin,
+        "operation": operation,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStopped",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

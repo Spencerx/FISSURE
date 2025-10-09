@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 """Plugin Related Functionality
 """
+import asyncio
 import os
-import sys
 import shutil
 import filecmp
 import csv
 import logging
 from typing import List
-from subprocess import run
+from subprocess import Popen, run
 from psycopg2.extensions import connection
 from fissure.utils import FISSURE_ROOT, PLUGIN_DIR
 from fissure.utils.library import (
@@ -37,6 +37,48 @@ TABLES_FUNCTIONS = [
     ('soi_data.csv', addSOI, removeSOI)
 ]
 
+
+async def get_fissure_plugin_editor_plugins_path() -> str:
+    """Get the path to the FISSURE Plugin Editor plugins directory.
+
+    Returns
+    -------
+    str
+        Path to the FISSURE Plugin Editor plugins directory.
+    """
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "fissure-plugin-editor", "plugins", "-d",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await proc.communicate()
+    except FileNotFoundError:
+        return None
+
+    output = stdout.decode().strip()
+    if output.startswith("Plugins directory:"):
+        return output.split("Plugins directory:")[1].strip()
+    else:
+        return None
+
+def launch_fissure_plugin_editor() -> bool:
+    """Launch the FISSURE Plugin Editor.
+
+    Returns
+    -------
+    bool
+        True if the editor was launched successfully, False otherwise.
+    """
+    try:
+        # Launch the FISSURE Plugin Editor in a new terminal
+        Popen(["fissure-plugin-editor", "gui"])
+    except FileNotFoundError:
+        return False
+
+    # Check if the process is running
+    result = run(["pgrep", "-f", "fissure-plugin-editor"], capture_output=True)
+    return bool(result.stdout.strip())
 
 def get_local_plugin_names():
     """
