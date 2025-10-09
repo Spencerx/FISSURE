@@ -295,8 +295,8 @@ bash -c '
 programs_kali.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
-sudo apt-get install -y python3-pyserial
-sudo python3 -m pip install meshtastic --break-system-packages
+sudo apt-get install -y python3-serial
+sudo python3 -m pip install meshtastic --gnore-installed --break-system-packages
 sudo usermod -aG dialout $USER  # log out & in/reboot
 sudo usermod -aG tty $USER
 echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
@@ -1813,7 +1813,7 @@ cd ~/Installed_by_FISSURE
 git clone https://www.github.com/threat9/routersploit
 cd routersploit
 python3 -m pip install setuptools --break-system-packages
-python3 -m pip install -r requirements.txt --break-system-packages
+python3 -m pip install -r requirements.txt --break-system-packages ##### needs telnetlib3 but the module specifically calls for telnetlib, needs updating
 python3 -m pip install bluepy --break-system-packages
 ########## Verify ##########
 ~/Installed_by_FISSURE/routersploit/rsf.py --help
@@ -1920,7 +1920,7 @@ viking --help
 programs_kali.append(('PyGPSClient (5.29 MB)',
 """sudo apt install -y python3-pip python3-tk python3-pil python3-pil.imagetk
 sudo apt remove -y python3-cryptography
-sudo python3 -m pip install --upgrade PyGPSClient --break-system-packages
+sudo python3 -m pip install --upgrade PyGPSClient --break-system-packages --ignore-installed
 ########## Verify ##########
 ls /usr/local/bin/pygpsclient
 """,True,'GPS'))
