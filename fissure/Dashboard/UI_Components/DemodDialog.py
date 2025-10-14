@@ -105,21 +105,27 @@ class DemodDialog(QtWidgets.QDialog, UI_Types.Demod):
         center = float(self.center)
         threshold = float(self.threshold)
         sps = max(1, int(self.samples_per_symbol))
+        sample_offset = max(0, int(self.sample_offset))  # <— include this!
 
+        # Apply decimation if needed
         if decimation > 1:
             fm_data, fs = self.get_decimated_data()
 
+        # Time axis
         t = np.arange(len(fm_data)) / fs
 
+        # Clear and plot base signal
         self.ax.clear()
         self.ax.plot(t, fm_data, linewidth=0.8, color='deepskyblue', label="FM Demod")
 
+        # Grid and labels
         self.ax.grid(True, alpha=0.3)
         self.ax.set_xlabel("Time (s)")
         if str(self.comboBox_demod_type.currentText()) == "FM":
             self.ax.set_ylabel("Frequency deviation (Hz)")
         self.ax.set_title("FM Signal with Threshold and Bit Overlay")
 
+        # Threshold lines
         upper = center + threshold
         lower = center - threshold
         self.ax.axhline(y=center, color='gray', linestyle='--', alpha=0.6, label='Center')
@@ -127,6 +133,7 @@ class DemodDialog(QtWidgets.QDialog, UI_Types.Demod):
         self.ax.axhline(y=lower, color='orange', linestyle='--', alpha=0.7, label='-Threshold')
         self.ax.fill_between(t, lower, upper, color='orange', alpha=0.08)
 
+        # --- Bit detection and visualization ---
         if threshold > 0:
             bits = np.zeros(len(fm_data), dtype=int)
             state = 0
@@ -137,14 +144,22 @@ class DemodDialog(QtWidgets.QDialog, UI_Types.Demod):
                     state = 0
                 bits[i] = state
 
-            indices = np.arange(sps // 2, len(bits), sps)
+            # Incorporate sample offset here
+            start_idx = sample_offset
+            if start_idx >= len(bits):
+                start_idx = 0  # avoid going out of range
+
+            indices = np.arange(start_idx + sps // 2, len(bits), sps)
             symbol_bits = bits[indices]
             symbol_times = t[indices]
 
             bit_amp = threshold * 0.7 if threshold != 0 else (np.max(fm_data) - np.min(fm_data)) * 0.05
             bit_wave = center + (symbol_bits * 2 - 1) * bit_amp
+
+            # Plot detected bits
             self.ax.plot(symbol_times, bit_wave, color='black', linewidth=1.0, alpha=0.8, label="Detected Bits")
 
+            # Dots for symbol sampling points
             colors = np.where(symbol_bits == 1, 'green', 'red')
             max_pts = 5000
             if len(symbol_times) > max_pts:
@@ -153,7 +168,7 @@ class DemodDialog(QtWidgets.QDialog, UI_Types.Demod):
             else:
                 self.ax.scatter(symbol_times, bit_wave, c=colors, s=10, zorder=3, label="Sample Points")
 
-        # --- Restore user view only if we have one recorded ---
+        # Restore saved zoom (if any)
         if self._saved_xlim is not None and self._saved_ylim is not None:
             self.ax.set_xlim(self._saved_xlim)
             self.ax.set_ylim(self._saved_ylim)
@@ -161,8 +176,8 @@ class DemodDialog(QtWidgets.QDialog, UI_Types.Demod):
         self.ax.legend(loc='upper right', fontsize=8)
         self.canvas.draw_idle()
 
+        # Extract bitstream for display
         self.extract_bits()
-
 
     def extract_bits(self):
         """

@@ -7,8 +7,6 @@ import fissure.callbacks
 import fissure.comms
 import fissure.utils
 from fissure.utils.plugin_editor import PluginEditor
-from fissure.utils.tak_server import load_config as load_tak_config
-from fissure.utils.tak_server import TakReceiver
 import sys
 import time
 import uuid
@@ -316,13 +314,15 @@ class HiprFisr:
         # Start Heartbeat Loop
         heartbeat_task = asyncio.create_task(self.heartbeat_loop())
 
-        # Load TAK config and connection mode
-        tak_config = load_tak_config()
-        self.tak_mode = tak_config.get("connect_mode", "disabled").lower()  # auto/manual/disabled
+        # Check For TAK Auto-Connect
+        self.tak_mode = self.settings["tak"]["connect_mode"].lower()
 
         clitool = None
         if self.tak_mode == "auto":
             try:
+                from fissure.utils.tak_server import load_config as load_tak_config
+                from fissure.utils.tak_server import TakReceiver
+                tak_config = load_tak_config()
                 import pytak
                 clitool = pytak.CLITool(tak_config)
                 await clitool.setup()

@@ -232,7 +232,7 @@ def _slotSpinBoxSampleOffsetChanged(DemodDlg: QtCore.QObject):
     DemodDlg.horizontalSlider_sample_offset.blockSignals(True)
     DemodDlg.horizontalSlider_sample_offset.setValue(DemodDlg.sample_offset)
     DemodDlg.horizontalSlider_sample_offset.blockSignals(False)
-    DemodDlg.extract_bits()
+    DemodDlg.plot_signal()
 
 
 @QtCore.pyqtSlot(QtCore.QObject)

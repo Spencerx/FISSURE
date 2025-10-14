@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-14
+
+Fixing pytak import errors on install and sample offset slider in demod tool.
+
+### Fixed
+
+- Moving pytak imports away from the start of the HiprFisr.py
+- Adding sample_offset to plotting function in demod tool
+- Removing extra disk_usage.txt file in Installer folder
+
 ## 2025-10-13
 
 Adding simple FM demodulation tool in IQ Data tab.
