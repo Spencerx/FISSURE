@@ -1,133 +1,70 @@
 #!/usr/bin/env python3
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
 
-from PyQt5.QtGui import QPainter, QPen, QBrush
-
-import subprocess
 import os
-import sys
-import time
-import re
-
 this_file_directory = os.path.dirname(os.path.realpath(__file__))
 fissure_directory = os.path.abspath(os.path.join(this_file_directory, os.pardir, os.pardir))
 
-form_class = uic.loadUiType(fissure_directory + "/UI/install.ui")[0]
-form_class2 = uic.loadUiType(fissure_directory + "/UI/install2.ui")[0]
-
-# Program Format: ('name','command',checked/default, parent_category)
-
-larger_categories = [
-    'Minimum Install',
-    'Remote Sensor Node',
-    'Hardware',
-    'Out-of-Tree Modules',
-    'Compile Flow Graphs',
-    '433 MHz','802.11',
-    'Aircraft',
-    'AIS',
-    'Audio',
-    'Bluetooth',
-    'Data',
-    'Development',
-    'Filters',
-    'GPS',
-    'GSM',
-    'Ham Radio',
-    'HD Radio',
-    'LTE',
-    'M17',
-    'Mapping',
-    'POCSAG',
-    'Radiosonde',
-    'RFID',
-    'Satellite',
-    'SDR',
-    'SSH',
-    'Trunked Radio',
-    'V2V',
-    'Video',
-    'Z-Wave'
-]
-
-
 ########################################################################
-####################### Parrot Security/OS 6.1 #########################
+############################ Kali 2024.3 ###############################
 ########################################################################
 
-programs_parrot_os_6_1 = []
+programs_kali = []
 
 # Misc. Dependencies
-programs_parrot_os_6_1.append(('Misc. Dependencies',
+programs_kali.append(('Misc. Dependencies (3.33 GB)',
 """sudo apt-get -y update
 sudo apt-get -y install cmake
-sudo apt-get install -y python-dev-is-python3 build-essential  # python-setuptools
+sudo apt-get install -y python-setuptools 
+sudo apt-get install -y python-dev-is-python3 
+sudo apt-get isntall -y build-essential
 sudo apt-get install -y curl
-
-# Python2
-#curl https://bootstrap.pypa.io./pip/2.7/get-pip.py | sudo python2  # Installs pip 20.3.4
-sudo apt-get install -y build-essential libssl-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libreadline-dev libffi-dev libsqlite3-dev wget
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
-tar -xzf Python-2.7.18.tgz
-cd Python-2.7.18
-./configure --prefix=/usr/local
-make
-sudo make install
-cd ~/Installed_by_FISSURE
-wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
-python2.7 get-pip.py
-sudo python2 -m ensurepip
-
-sudo apt-get install -y libnetfilter-queue-dev
-sudo apt-get install -y libcom-err2=1.47.0-2 --allow-downgrades
-sudo apt-get install -y comerr-dev
-sudo apt-get install -y libzmq3-dev
-
+sudo apt-get install -y python2
+curl https://bootstrap.pypa.io./pip/2.7/get-pip.py | sudo python2  # Installs pip 20.3.4
 sudo apt-get install -y python3-pip
 sudo python3 -m pip install cmake --upgrade --break-system-packages
 sudo apt install -y python3-testresources
-sudo apt-get install -y python3-setuptools  #sudo python3 -m pip install --upgrade setuptools --break-system-packages
-sudo apt-get install -y python3-virtualenv  #sudo python3 -m pip install --upgrade virtualenv --break-system-packages
+sudo python3 -m pip install --upgrade setuptools --break-system-packages
+sudo python3 -m pip install --upgrade virtualenv --break-system-packages
 #sudo python3 -m pip install matplotlib  # This version conflicts with yellowbrick
 sudo python3 -m pip install PyYAML==5.1 --break-system-packages
 sudo python3 -m pip install pyyaml --break-system-packages
-#wget http://archive.ubuntu.com/ubuntu/pool/universe/p/python-scipy/python-scipy_0.19.1-2ubuntu1_amd64.deb
-#sudo apt-get install -y ./python-scipy_0.19.1-2ubuntu1_amd64.deb  # FIX?
-#rm python-scipy_0.19.1-2ubuntu1_amd64.deb
+wget http://archive.ubuntu.com/ubuntu/pool/universe/p/python-scipy/python-scipy_0.19.1-2ubuntu1_amd64.deb
+sudo apt-get install -y ./python-scipy_0.19.1-2ubuntu1_amd64.deb  # FIX?
+rm python-scipy_0.19.1-2ubuntu1_amd64.deb
 sudo apt-get install -y gedit
 sudo apt-get install -y software-properties-common #python-software-properties # does Python3
-#sudo add-apt-repository -y ppa:git-core/ppa
+sudo add-apt-repository -y ppa:git-core/ppa
 sudo apt-get -y update
 sudo apt-get install -y git 
 sudo apt-get install -y libcanberra-gtk-module
-sudo apt-get install -y python3-bitarray  #sudo python3 -m pip install bitarray --break-system-packages
+sudo python3 -m pip install bitarray --break-system-packages
 sudo apt install net-tools
-sudo apt-get install -y python3-crcmod  #sudo python3 -m pip install crcmod --break-system-packages
+sudo python3 -m pip install crcmod --break-system-packages
 sudo python3 -m pip install pycrypto --break-system-packages
-#sudo apt-get install -y python-tk
+sudo apt-get install -y python-tk
 sudo python3 -m pip install pyzmq --break-system-packages
 sudo apt-get install -y libosmocore-dev
 sudo apt-get install -y liborc-0.4-dev
 sudo apt-get install -y expect
-#sudo add-apt-repository --y ppa:wireshark-dev/stable  # Latest Wireshark
-#sudo apt-get update
+sudo add-apt-repository --y ppa:wireshark-dev/stable  # Latest Wireshark
+sudo apt-get update
 sudo python3 -m pip install pyshark --break-system-packages
 sudo apt install -y debconf
 echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt install -y tshark
 sudo python3 -m pip install pypcapfile --break-system-packages
-#sudo python2 -m pip install pypcapfile
-#sudo python2 -m pip install netaddr
-sudo apt-get install -y python3-psutil  #sudo python3 -m pip install psutil --break-system-packages
+sudo python2 -m pip install pypcapfile
+sudo python2 -m pip install netaddr
+sudo python3 -m pip install psutil --break-system-packages
 sudo python3 -m pip install pyserial --break-system-packages
 sudo apt-get install -y gpsd-clients python3-gi-cairo
-sudo apt-get install -y python3-pandas  #sudo python3 -m pip install pandas --break-system-packages
+sudo python3 -m pip install pandas --break-system-packages
 sudo apt-get install -y dsniff
 sudo apt-get install -y ncurses-term
+sudo apt-get install -y eog
+sudo python2 -m pip install cryptography
 sudo python3 -m pip install yellowbrick --break-system-packages
-sudo apt-get install -y python3-seaborn  #sudo python3 -m pip install seaborn --break-system-packages
+sudo python3 -m pip install seaborn --break-system-packages
 sudo apt-get install -y rtl-sdr
 sudo python3 -m pip install gpsd-py3 --break-system-packages
 sudo python3 -m pip install geopy --break-system-packages
@@ -146,6 +83,8 @@ sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
 sudo python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
+sudo apt-get install -y libzmq3-dev
+sudo apt-get install -y zstd
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
 sudo python3 -m pip install watchdog --break-system-packages
@@ -158,14 +97,14 @@ sudo python3 -m pip install python-dotenv --break-system-packages
 . ~/.bashrc
 """,True,"Minimum Install"))
 
-# fissure Commands
-programs_parrot_os_6_1.append(('fissure Commands',
+# fissure Commands 
+programs_kali.append(('fissure Commands',
 f"""mkdir -p ~/.local/bin
-if grep -Fq "~/.local/bin" ~/.bashrc
+if grep -Fq "~/.local/bin" ~/.zshrc
 then
-  echo "~/.local/bin is already in ~/.bashrc"
+  echo "~/.local/bin is already in ~/.zshrc"
 else
-  printf "\\n%s\\n" "export PATH=~/.local/bin:$PATH" >> ~/.bashrc
+  printf "\\n%s\\n" "export PATH=~/.local/bin:$PATH" >> ~/.zshrc
 fi
 
 # Create fissure command
@@ -182,15 +121,15 @@ echo "Exec=/home/$USER/.local/bin/fissure" >> {fissure_directory}/Installer/fiss
 echo "Icon={fissure_directory}/docs/Icons/logo_f.png" >> {fissure_directory}/Installer/fissure.desktop
 sudo cp {fissure_directory}/Installer/fissure.desktop /usr/share/applications/
 
-# Reload bashrc to update PATH
-. ~/.bashrc
+# Reload zshrc to update PATH
+. ~/.zshrc
 
 ########## Verify ##########
 ls ~/.local/bin/fissure ~/.local/bin/fissure-sensor-node
 """, True, 'Minimum Install'))
 
 # Password Prompt Exceptions
-programs_parrot_os_6_1.append(('Password Prompt Exceptions',
+programs_kali.append(('Password Prompt Exceptions',
 f"""# Replace placeholder in the template file directly into a temporary file
 sed "s/__USERNAME__/$(whoami)/g" "{fissure_directory}/Installer/password_prompt_exceptions.txt" > /tmp/password_prompt_exceptions
 
@@ -211,18 +150,18 @@ ls -l /etc/sudoers.d/fissure
 """, True, 'Minimum Install'))
 
 # GNU Radio
-programs_parrot_os_6_1.append(('GNU Radio',
+programs_kali.append(('GNU Radio (1.44 GB)',
 """#sudo add-apt-repository -y ppa:gnuradio/gnuradio-releases
 #sudo apt-get update
 sudo apt-get install -y gnuradio  # =3.10.5.1-0~gnuradio~jammy-2  # Check for changes here: https://launchpad.net/~gnuradio/+archive/ubuntu/gnuradio-releases
 sudo apt-get install -y uhd-host
 
 # Configure GNU Radio
-(gnuradio-companion &) && sleep 5 && killall gnuradio-companion
-/bin/echo -e "[grc]\nlocal_blocks_path=""" + fissure_directory + """/Custom_Blocks\nxterm_executable=/usr/bin/lxterminal" > ~/.gnuradio/config.conf
-#sudo cp /usr/lib/uhd/utils/uhd-usrp.rules /etc/udev/rules.d/  # For B205 mini
-#sudo udevadm control --reload-rules
-#sudo udevadm trigger
+(gnuradio-companion &) && sleep 5 && pkill -f gnuradio-companion
+/bin/echo -e "[grc]\nlocal_blocks_path=""" + fissure_directory + """/Custom_Blocks\nxterm_executable=/usr/bin/gnome-terminal" > ~/.gnuradio/config.conf
+sudo cp /usr/libexec/uhd/utils/uhd-usrp.rules /etc/udev/rules.d/  # For B205 mini
+sudo udevadm control --reload-rules
+sudo udevadm trigger
 sudo mkdir /usr/share/uhd
 sudo chmod -R 777 /usr/share/uhd
 uhd_images_downloader
@@ -241,39 +180,44 @@ gnuradio-companion --help
 """,True,"Minimum Install"))
 
 # Scapy
-programs_parrot_os_6_1.append(('Scapy',
+programs_kali.append(('Scapy (18.93 MB)',
 """sudo apt-get install -y python3-scapy
-#sudo python3 -m pip install scapy  # Causes errors
-#sudo python2 -m pip install scapy==2.4.5
-#sudo sed -i 's/tostring/tobytes/g' /usr/local/lib/python3.10/dist-packages/scapy/arch/linux.py
+sudo python2 -m pip install setuptools
+#sudo python3 -m pip install scapy --break-system-packages  # Causes errors
+sudo python2 -m pip install scapy==2.4.5  # Doesn't work on Kali
 ########## Verify ##########
-python3 -c "import scapy"
+python2 -c "import scapy" && python3 -c "import scapy"
 """,True,"Minimum Install"))
 
-# Wireshark
-programs_parrot_os_6_1.append(('Wireshark',
-"""#sudo add-apt-repository --y ppa:wireshark-dev/stable  # Gets installed with Misc. Dependencies (tshark), ESP32 Bluetooth Classic Sniffer
-#sudo apt-get update
-sudo apt install -y wireshark wireshark-dev  # Yes
-sudo groupadd wireshark
-sudo usermod -a -G wireshark $USER
-sudo chgrp wireshark /usr/bin/dumpcap
-sudo chmod o-rx /usr/bin/dumpcap
-sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
-sudo getcap /usr/bin/dumpcap
-mkdir -p ~/.config/wireshark/plugins
-cp -a """ + fissure_directory + """/Dissectors/. ~/.config/wireshark/plugins
-########## Verify ##########
-wireshark --help
-""",True,"Minimum Install"))
+# ~ # Wireshark
+# ~ programs_kali.append(('Wireshark',
+# ~ """sudo add-apt-repository --y ppa:wireshark-dev/stable  # Gets installed with Misc. Dependencies (tshark), ESP32 Bluetooth Classic Sniffer
+# ~ sudo apt-get update
+# ~ sudo apt install -y wireshark wireshark-dev  # Yes
+# ~ sudo groupadd wireshark
+# ~ sudo usermod -a -G wireshark $USER
+# ~ sudo chgrp wireshark /usr/bin/dumpcap
+# ~ sudo chmod o-rx /usr/bin/dumpcap
+# ~ sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+# ~ sudo getcap /usr/bin/dumpcap
+# ~ mkdir -p ~/.config/wireshark/plugins
+# ~ cp -a """ + fissure_directory + """/Dissectors/. ~/.config/wireshark/plugins
+# ~ ########## Verify ##########
+# ~ wireshark --help
+# ~ """,True,"Minimum Install"))
 
 # PostgreSQL Database 
-programs_parrot_os_6_1.append(('PostgreSQL Database',
-"""sudo python3 -m pip install python-dotenv
+programs_kali.append(('PostgreSQL Database',
+"""sudo python3 -m pip install python-dotenv --break-system-packages
 sudo apt-get install -y libpq-dev
-sudo python3 -m pip install psycopg2
-sudo apt-get install -y docker.io docker-compose-v2
+sudo python3 -m pip install psycopg2 --break-system-packages
+sudo apt-get install -y docker.io
+sudo mkdir -p /usr/libexec/docker/cli-plugins/
+sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/libexec/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+sudo update-rc.d docker enable
+sudo service docker start
 sudo apt install -y postgresql-client
 cd '""" + fissure_directory + """'
 cp example.env .env
@@ -301,11 +245,11 @@ bash -c '
 """,True,'Minimum Install'))
 
 # Meshtastic
-programs_parrot_os_6_1.append(('Meshtastic',
+programs_kali.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
-sudo apt-get install -y python3-pyserial
-sudo python3 -m pip install meshtastic --break-system-packages
+sudo apt-get install -y python3-serial
+sudo python3 -m pip install meshtastic --ignore-installed --break-system-packages
 sudo usermod -aG dialout $USER  # log out & in/reboot
 sudo usermod -aG tty $USER
 echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
@@ -316,8 +260,9 @@ python3 -c "import meshtastic"
 """,True,'Minimum Install'))
 
 # Network Certificates 
-programs_parrot_os_6_1.append(('Network Certificates',
+programs_kali.append(('Network Certificates (1.79 MB)',
 """cd '""" + fissure_directory + """'
+python3 -m pip install tensorflow_cpu --break-system-packages
 export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
 python3 ./fissure/generate_certificates.py
 ########## Verify ##########
@@ -325,7 +270,7 @@ ls '""" + fissure_directory + """/certificates'
 """,True,'Minimum Install'))
 
 # Auto-Launch Sensor Node
-programs_parrot_os_6_1.append(('Auto-Launch Sensor Node',
+programs_kali.append(('Auto-Launch Sensor Node',
 f"""mkdir -p "$HOME/.config/autostart"
 
 cat <<EOF > "$HOME/.config/autostart/fissure-sensor-node.desktop"
@@ -333,7 +278,7 @@ cat <<EOF > "$HOME/.config/autostart/fissure-sensor-node.desktop"
 Type=Application
 Terminal=true
 Name=FISSURE Sensor Node
-Exec=gnome-terminal -- bash -c 'sleep 1; $HOME/.local/bin/fissure-sensor-node; exec bash'
+Exec=qterminal -e bash -c 'sleep 1; $HOME/.local/bin/fissure-sensor-node; exec bash'
 EOF
 
 chmod +x "$HOME/.config/autostart/fissure-sensor-node.desktop"
@@ -343,7 +288,7 @@ ls "$HOME/.config/autostart/fissure-sensor-node.desktop"
 """,False,'Remote Sensor Node'))
 
 # LimeSDR
-programs_parrot_os_6_1.append(('LimeSDR',
+programs_kali.append(('LimeSDR (712.39 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers  # doesn't work
 #sudo apt-get update
 sudo apt-get install -y limesuite liblimesuite-dev limesuite-udev  # No limesuite-images on 22.04
@@ -354,7 +299,7 @@ ls /usr/bin/LimeSuiteGUI
 """,True,'Hardware'))
 
 # BladeRF
-programs_parrot_os_6_1.append(('BladeRF',
+programs_kali.append(('BladeRF (23.16 MB)',
 """sudo apt-get install -y libusb-1.0-0-dev libusb-1.0-0 build-essential cmake libncurses5-dev libtecla1 pkg-config git wget  # no package: libtecla1-dev       
 sudo apt-get install -y bladerf
 sudo apt-get install -y bladerf-fpga-hostedx115
@@ -365,22 +310,22 @@ sudo apt-get install -y bladerf-fpga-hostedxa9
 bladeRF-cli --help
 """,True,'Hardware'))
 
-# # USRP X300 Series - FIX
-# programs_parrot_os_6_1.append(('USRP X300 Series',
-# """mkdir -p ~/Installed_by_FISSURE  # Set MTU to 9000 and run uhd_image_loader command
-# cd ~/Installed_by_FISSURE
-# #wget https://codeload.github.com/EttusResearch/uhd/zip/release_003_010_003_000 -O uhd.zip
-# #unzip uhd.zip
-# #cd uhd-release_003_010_003_000/host/include
-# #sudo cp -Rv uhd/rfnoc /usr/share/uhd/
-# #rm -Rf ~/Installed_by_FISSURE/uhd-release_003_010_003_000
-# /usr/lib/uhd/utils/uhd_images_downloader.py
-# #"/usr/bin/uhd_image_loader" --args="type=x300,addr=192.168.40.2"  # Use your X310 IP
-# sudo sysctl -w net.core.wmem_max=24862979
-# """,False,'Hardware'))
+# USRP X300 Series - FIX
+programs_kali.append(('USRP X300 Series',
+"""mkdir -p ~/Installed_by_FISSURE  # Set MTU to 9000 and run uhd_image_loader command
+cd ~/Installed_by_FISSURE
+#wget https://codeload.github.com/EttusResearch/uhd/zip/release_003_010_003_000 -O uhd.zip
+#unzip uhd.zip
+#cd uhd-release_003_010_003_000/host/include
+#sudo cp -Rv uhd/rfnoc /usr/share/uhd/
+#rm -Rf ~/Installed_by_FISSURE/uhd-release_003_010_003_000
+/usr/lib/uhd/utils/uhd_images_downloader.py
+#"/usr/bin/uhd_image_loader" --args="type=x300,addr=192.168.40.2"  # Use your X310 IP
+sudo sysctl -w net.core.wmem_max=24862979
+""",True,'Hardware'))
 
 # HackRF, gr-osmosdr
-programs_parrot_os_6_1.append(('HackRF, gr-osmosdr',
+programs_kali.append(('HackRF, gr-osmosdr (72.79)',
 """sudo apt-get install -y libusb-1.0-0-dev
 
 # HackRF
@@ -418,8 +363,8 @@ sudo ldconfig
 hackrf_sweep -h #&& ls /usr/local/bin/osmocom_fft
 """,True,'Hardware'))
 
-# 8812au Driver
-programs_parrot_os_6_1.append(('8812au Driver',
+# 8812au Driver - FIX
+programs_kali.append(('8812au Driver',
 """# Still Broken, Needs Replacement Driver
 sudo apt-get -y install dkms
 mkdir -p ~/Installed_by_FISSURE
@@ -427,10 +372,10 @@ cd ~/Installed_by_FISSURE
 git clone https://github.com/aircrack-ng/rtl8812au/
 cd ~/Installed_by_FISSURE/rtl8812au
 sudo make dkms_install
-""",True,'Hardware'))
+""",False,'Hardware'))
 
-# Zigbee Sniffer
-programs_parrot_os_6_1.append(('Zigbee Sniffer',
+# Zigbee Sniffer - FIX
+programs_kali.append(('Zigbee Sniffer',
 """mkdir -p ~/Installed_by_FISSURE
 cp -R """ + fissure_directory + """/Tools/OpenSniffer-0.1/ ~/Installed_by_FISSURE/
 cd ~/Installed_by_FISSURE/OpenSniffer-0.1/
@@ -450,13 +395,13 @@ sudo apt-get install -y mlocate
 """,False,'Hardware'))
 
 # fl2k
-programs_parrot_os_6_1.append(('fl2k',
+programs_kali.append(('fl2k (1.88 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://gitea.osmocom.org/sdr/osmo-fl2k.git  # gets redirected: https://git.osmocom.org/osmo-fl2k.git
 cd osmo-fl2k
 mkdir build
-cd build
+cd build 
 sed -i 's/cmake_minimum_required(VERSION 2.6)/cmake_minimum_required(VERSION 3.5)/' ~/Installed_by_FISSURE/osmo-fl2k/CMakeLists.txt
 cmake ../ -DINSTALL_UDEV_RULES=ON
 make -j 3
@@ -469,7 +414,7 @@ ls /usr/local/bin/fl2k_test
 """,True,'Hardware'))
 
 # Proxmark3
-programs_parrot_os_6_1.append(('Proxmark3',
+programs_kali.append(('Proxmark3 (3.46 GB)',
 """sudo apt-get install -y p7zip git build-essential libreadline8 libreadline-dev libusb-0.1-4 libusb-dev perl pkg-config wget libncurses5-dev gcc-arm-none-eabi libreadline-dev libpcsclite-dev gcc-arm-none-eabi
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -481,7 +426,7 @@ ls ~/Installed_by_FISSURE/proxmark3/client/proxmark3
 """,True,'Hardware'))
 
 # PlutoSDR
-programs_parrot_os_6_1.append(('PlutoSDR',
+programs_kali.append(('PlutoSDR (397.05 MB)',
 """sudo apt-get install -y libglib2.0-dev libgtk2.0-dev libgtkdatabox-dev libmatio-dev libfftw3-dev libxml2 libxml2-dev bison flex libavahi-common-dev libavahi-client-dev libcurl4-openssl-dev libjansson-dev cmake libaio-dev libserialport-dev libcdk5-dev libusb-1.0-0-dev doxygen graphviz git libgmp-dev swig liborc-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -515,10 +460,10 @@ sudo make install
 #sudo ldconfig
 ########## Verify ##########
 ls /usr/lib/python*/*/gnuradio/iio
-""",False,'Hardware'))
+""",True,'Hardware'))
 
 # qFlipper
-programs_parrot_os_6_1.append(('qFlipper',
+programs_kali.append(('qFlipper (26.40)',
 """mkdir -p ~/Installed_by_FISSURE/qFlipper
 cd ~/Installed_by_FISSURE/qFlipper
 wget -r -np -nd -A "qFlipper-x86_64-dev*.AppImage" https://update.flipperzero.one/builds/qFlipper/dev/
@@ -528,7 +473,7 @@ ls ~/Installed_by_FISSURE/qFlipper/qFlipper*
 """,True,'Hardware'))
 
 # gr-acars-3.10ng
-programs_parrot_os_6_1.append(('gr-acars-3.10ng',
+programs_kali.append(('gr-acars-3.10ng (8.3 MB)',
 """cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-acars-3.10ng/
 sudo rm -Rf build
 mkdir build
@@ -542,7 +487,7 @@ ls /usr/local/lib/python*/*/acars
 """,True,'Out-of-Tree Modules'))
 
 # gr-adsb
-programs_parrot_os_6_1.append(('gr-adsb',
+programs_kali.append(('gr-adsb (2.88 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-adsb/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-adsb"
@@ -568,7 +513,7 @@ ls /usr/local/lib/python*/*/gnuradio/adsb
 """,True,'Out-of-Tree Modules'))
 
 # gr-ainfosec
-programs_parrot_os_6_1.append(('gr-ainfosec',
+programs_kali.append(('gr-ainfosec (5.23 MB)',
 """cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ainfosec/
 sudo rm -Rf build
 mkdir build
@@ -582,7 +527,7 @@ ls /usr/local/lib/python*/*/gnuradio/ainfosec
 """,True,'Minimum Install'))
 
 # gr-ais
-programs_parrot_os_6_1.append(('gr-ais',
+programs_kali.append(('gr-ais (1.34 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-ais/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ais"
@@ -593,6 +538,9 @@ fi
 if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ais/
+  sed -i 's/VERSION 3.8/VERSION 3.10/g' ./CMakeLists.txt
+  sed '/project(gr-ais CXX C)/a\set(CMAKE_CXX_STANDARD 17)' ./CMakeLists.txt
+  sed -i 's/add_compile_options(-std=c++11)/set(CMAKE_CXX_STANDARD_REQUIRED ON)/g' ./CMakeLists.txt
   sudo rm -Rf build
   mkdir build
   cd build
@@ -608,7 +556,7 @@ ls /usr/local/lib/python*/*/gnuradio/ais
 """,True,'Out-of-Tree Modules'))
 
 # gr-aistx
-programs_parrot_os_6_1.append(('gr-aistx',
+programs_kali.append(('gr-aistx (18.61 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/ais/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/ais"
@@ -634,7 +582,7 @@ ls /usr/local/lib/python*/*/gnuradio/aistx
 """,True,'Out-of-Tree Modules'))
 
 # gr-bluetooth
-programs_parrot_os_6_1.append(('gr-bluetooth',
+programs_kali.append(('gr-bluetooth (38.0 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-bluetooth/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-bluetooth"
@@ -671,7 +619,7 @@ ls /usr/local/bin/btrx
 """,False,'Out-of-Tree Modules'))
 
 # gr-clapper_plus
-programs_parrot_os_6_1.append(('gr-clapper_plus',
+programs_kali.append(('gr-clapper_plus (2.66 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-clapper_plus/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-clapper_plus"
@@ -697,7 +645,7 @@ ls /usr/local/lib/python*/*/gnuradio/clapper_plus
 """,True,'Out-of-Tree Modules'))
 
 # gr-dect2
-programs_parrot_os_6_1.append(('gr-dect2',
+programs_kali.append(('gr-dect2 (16.49 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-dect2/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-dect2"
@@ -723,7 +671,7 @@ ls /usr/local/lib/python*/*/gnuradio/dect2
 """,True,'Out-of-Tree Modules'))
 
 # gr-foo
-programs_parrot_os_6_1.append(('gr-foo',
+programs_kali.append(('gr-foo (45.20 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-foo/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-foo"
@@ -750,7 +698,7 @@ ls /usr/local/lib/python*/*/foo
 """,True,'Out-of-Tree Modules'))
 
 # gr-fuzzer
-programs_parrot_os_6_1.append(('gr-fuzzer',
+programs_kali.append(('gr-fuzzer (8.07 MB)',
 """cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-fuzzer/
 sudo rm -Rf build
 mkdir build
@@ -764,7 +712,7 @@ ls /usr/local/lib/python*/*/gnuradio/fuzzer
 """,True,'Out-of-Tree Modules'))
 
 # gr-garage_door
-programs_parrot_os_6_1.append(('gr-garage_door',
+programs_kali.append(('gr-garage_door (2.69 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-garage_door/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-garage_door"
@@ -790,7 +738,7 @@ ls /usr/local/lib/python*/*/gnuradio/garage_door
 """,True,'Out-of-Tree Modules'))
 
 # gr-gsm
-programs_parrot_os_6_1.append(('gr-gsm',
+programs_kali.append(('gr-gsm (150.50 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-gsm/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-gsm"
@@ -818,10 +766,10 @@ else
 fi
 ########## Verify ##########
 ls /usr/local/lib/python*/*/gnuradio/gsm
-""",False,'Out-of-Tree Modules'))
+""",True,'Out-of-Tree Modules'))
 
 # gr-ieee802-11
-programs_parrot_os_6_1.append(('gr-ieee802-11',
+programs_kali.append(('gr-ieee802-11 (39.11 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-11/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-11"
@@ -848,7 +796,7 @@ ls /usr/local/lib/python*/*/ieee802_11
 """,True,'Out-of-Tree Modules'))
 
 # gr-ieee802-15-4
-programs_parrot_os_6_1.append(('gr-ieee802-15-4',
+programs_kali.append(('gr-ieee802-15-4 (64.45 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-ieee802-15-4/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-ieee802-15-4"
@@ -877,7 +825,7 @@ ls /usr/local/lib/python*/*/ieee802_15_4
 """,True,'Out-of-Tree Modules'))
 
 # gr-iridium
-programs_parrot_os_6_1.append(('gr-iridium',
+programs_kali.append(('gr-iridium (30.27 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-iridium/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-iridium"
@@ -904,7 +852,7 @@ ls /usr/local/lib/python*/*/iridium
 """,True,'Out-of-Tree Modules'))
 
 # gr-j2497
-programs_parrot_os_6_1.append(('gr-j2497',
+programs_kali.append(('gr-j2497 (2.81 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-j2497/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-j2497"
@@ -930,7 +878,7 @@ ls /usr/local/lib/python*/*/gnuradio/j2497
 """,True,'Out-of-Tree Modules'))
 
 # gr-limesdr
-programs_parrot_os_6_1.append(('gr-limesdr',
+programs_kali.append(('gr-limesdr (13.05 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-limesdr"
@@ -938,7 +886,7 @@ if [ ! -f "Custom_Blocks/maint-3.10/gr-limesdr/.git" ]; then
     git checkout maint-3.10
     git pull origin maint-3.10
 fi
-if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ];  # Needs LimeSDR hardware installed first
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-limesdr/
   sudo rm -Rf build
@@ -956,7 +904,7 @@ ls /usr/local/lib/python*/*/gnuradio/limesdr
 """,True,'Out-of-Tree Modules'))
 
 # gr-mixalot
-programs_parrot_os_6_1.append(('gr-mixalot',
+programs_kali.append(('gr-mixalot (20.41 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-mixalot/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-mixalot"
@@ -983,7 +931,7 @@ ls /usr/local/lib/python*/*/gnuradio/mixalot
 """,True,'Out-of-Tree Modules'))
 
 # gr-nrsc5
-programs_parrot_os_6_1.append(('gr-nrsc5',
+programs_kali.append(('gr-nrsc5 (53.09 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-nrsc5/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-nrsc5"
@@ -1011,7 +959,7 @@ ls /usr/local/lib/python*/*/nrsc5
 """,True,'Out-of-Tree Modules'))
 
 # gr-paint
-programs_parrot_os_6_1.append(('gr-paint',
+programs_kali.append(('gr-paint (9.82 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-paint/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-paint"
@@ -1041,7 +989,7 @@ ls /usr/local/lib/python*/*/paint
 """,True,'Out-of-Tree Modules'))
 
 # gr-rds
-programs_parrot_os_6_1.append(('gr-rds',
+programs_kali.append(('gr-rds (20.99 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-rds"
@@ -1049,8 +997,7 @@ if [ ! -f "Custom_Blocks/maint-3.10/gr-rds/.git" ]; then
     git checkout maint-3.10
     git pull origin maint-3.10
 fi
-sudo apt-get install -y libboost-locale-dev
-if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ];  # Needs hardware installed first
+if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/)" ]; 
 then
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-rds/
   sudo rm -Rf build
@@ -1068,7 +1015,7 @@ ls /usr/local/lib/python*/*/rds
 """,True,'Out-of-Tree Modules'))
 
 # gr-sidekiq
-programs_parrot_os_6_1.append(('gr-sidekiq',
+programs_kali.append(('gr-sidekiq',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-sidekiq/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sidekiq"
@@ -1094,7 +1041,7 @@ ls /usr/local/lib/python*/*/*/sidekiq
 """,False,'Out-of-Tree Modules'))
 
 # gr-sdrplay3
-programs_parrot_os_6_1.append(('gr-sdrplay3',
+programs_kali.append(('gr-sdrplay3 (344.00 kB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-sdrplay3/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-sdrplay3"
@@ -1116,11 +1063,11 @@ else
   echo "Folder is empty. Execute 'git submodule update --init' from FISSURE directory."
 fi
 ########## Verify ##########
-ls /usr/local/lib/python*/*/*/sdrplay3
+ls /usr/local/lib/python*/*/*/sdrplay3  # Will fail without API
 """,True,'Out-of-Tree Modules'))
 
 # gr-tpms
-programs_parrot_os_6_1.append(('gr-tpms',
+programs_kali.append(('gr-tpms (12.82 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms"
@@ -1147,7 +1094,7 @@ ls /usr/local/lib/python*/*/gnuradio/tpms
 """,True,'Out-of-Tree Modules'))
 
 # gr-tpms_poore
-programs_parrot_os_6_1.append(('gr-tpms_poore',
+programs_kali.append(('gr-tpms_poore (2.71 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-tpms_poore/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-tpms_poore"
@@ -1173,7 +1120,7 @@ ls /usr/local/lib/python*/*/gnuradio/tpms_poore
 """,True,'Out-of-Tree Modules'))
 
 # gr-X10
-programs_parrot_os_6_1.append(('gr-X10',
+programs_kali.append(('gr-X10 (2.71 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-X10/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-X10"
@@ -1199,7 +1146,7 @@ ls /usr/local/lib/python*/*/gnuradio/X10
 """,True,'Out-of-Tree Modules'))
 
 # gr-zwave_poore
-programs_parrot_os_6_1.append(('gr-zwave_poore',
+programs_kali.append(('gr-zwave_poore (2.71 MB)',
 """cd """ + fissure_directory + """
 if [ ! -f "Custom_Blocks/maint-3.10/gr-zwave_poore/.git" ]; then
     git submodule update --init -- "Custom_Blocks/maint-3.10/gr-zwave_poore"
@@ -1225,7 +1172,7 @@ ls /usr/local/lib/python*/*/gnuradio/zwave_poore
 """,True,'Out-of-Tree Modules'))
 
 # QSpectrumAnalyzer
-programs_parrot_os_6_1.append(('QSpectrumAnalyzer',
+programs_kali.append(('QSpectrumAnalyzer (25.2 MB)',
 """#sudo add-apt-repository -y ppa:myriadrf/drivers
 #sudo apt-get -y update
 sudo apt-get install -y python3-pip python3-pyqt5 python3-numpy python3-scipy python3-soapysdr  # No package: soapysdr
@@ -1236,7 +1183,7 @@ ls ~/.local/bin/qspectrumanalyzer
 """,True,'SDR'))
 
 # GQRX
-programs_parrot_os_6_1.append(('GQRX',
+programs_kali.append(('GQRX (35.46 MB)',
 """sudo apt-get install -y libqt5svg5-dev  #sudo apt-get install -y gqrx-sdr
 sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
@@ -1253,7 +1200,7 @@ ls /usr/local/bin/gqrx
 """,True,'SDR'))
 
 # Dump1090
-programs_parrot_os_6_1.append(('Dump1090',
+programs_kali.append(('Dump1090 (2.67 MB)',
 """sudo apt-get install -y libusb-1.0-0-dev
 sudo apt-get install -y librtlsdr-dev
 mkdir -p ~/Installed_by_FISSURE
@@ -1266,32 +1213,30 @@ make
 """,True,'Aircraft'))
 
 # QtDesigner
-programs_parrot_os_6_1.append(('QtDesigner',
+programs_kali.append(('QtDesigner (12.3 kB)',
 """sudo apt-get install -y build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
 ########## Verify ##########
 ls /usr/bin/designer
 """,True,'Development'))
 
 # Grip
-programs_parrot_os_6_1.append(('Grip',
+programs_kali.append(('Grip (840.00 kB)',
 """sudo python3 -m pip install grip --break-system-packages
 ########## Verify ##########
 ls /usr/local/bin/grip
 """,True,'Development'))
 
-# Kismet
-programs_parrot_os_6_1.append(('Kismet',
-"""wget -O - https://www.kismetwireless.net/repos/kismet-release.gpg.key | sudo apt-key add -
-echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
-sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
-sudo apt update
-echo "kismet kismet/install-setuid boolean false" | sudo debconf-set-selections
-echo "kismet kismet/install-user string kismet" | sudo debconf-set-selections
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
-""",True,'802.11'))
+# ~ # Kismet
+# ~ programs_kali.append(('Kismet',
+# ~ """wget -O - https://www.kismetwireless.net/repos/kismet-release.gpg.key | sudo apt-key add -
+# ~ echo 'deb https://www.kismetwireless.net/repos/apt/release/jammy jammy main' | sudo tee /etc/apt/sources.list.d/kismet.list
+# ~ sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # Removes "sudo apt update" warnings
+# ~ sudo apt update
+# ~ sudo apt-get install -y kismet
+# ~ """,True,'802.11'))
 
 # UDP Replay
-programs_parrot_os_6_1.append(('UDP Replay',
+programs_kali.append(('UDP Replay (2.18 MB)',
 """sudo apt-get install -y libpcap-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1307,7 +1252,7 @@ ls /usr/local/bin/udpreplay
 """,True,'802.11'))
 
 # V2Verifier
-programs_parrot_os_6_1.append(('V2Verifier',
+programs_kali.append(('V2Verifier (2.17 MB)',
 """sudo apt-get install -y libgmp3-dev python3-tk python3-pil.imagetk
 sudo python3 -m pip install fastecdsa --break-system-packages
 sudo python3 -m pip install -U pyyaml --break-system-packages
@@ -1317,7 +1262,7 @@ sudo python3 -m pip install -U pyyaml --break-system-packages
 """,True,'V2V'))
 
 # srsRAN_4G/srsRAN/srsLTE
-programs_parrot_os_6_1.append(('srsRAN_4G',
+programs_kali.append(('srsRAN_4G',
 """sudo apt-get install -y build-essential cmake net-tools libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev gcc-11 g++-11
 sudo apt-get install -y libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev  # srsGUI
 mkdir -p ~/Installed_by_FISSURE
@@ -1356,8 +1301,8 @@ sudo apt-get install -y fortune cowsay lolcat  # IMSI-Catcher 4G
 srsenb --help
 """,True,'LTE'))
 
-# FALCON - FIX (libudev-dev, needs older soapysdr version?)
-programs_parrot_os_6_1.append(('FALCON',
+# FALCON - FIX (needs older soapysdr version?)
+programs_kali.append(('FALCON',
 """sudo apt-get install -y build-essential git cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev  # For srsLTE
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1376,7 +1321,7 @@ ls /usr/bin/FalconGUI
 """,False,'LTE'))
 
 # LTE-ciphercheck - Fix
-programs_parrot_os_6_1.append(('LTE-ciphercheck',
+programs_kali.append(('LTE-ciphercheck',
 """sudo apt install -y git cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev libuhd-dev libpcsclite-dev pcsc-tools pcscd
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1390,49 +1335,49 @@ sudo ldconfig
 cp """ + fissure_directory + """/Tools/LTE-ciphercheck/ciphercheck.conf ../srsue/ciphercheck.conf 
 """,False,'LTE'))
 
-# Aircrack-ng
-programs_parrot_os_6_1.append(('Aircrack-ng',
-"""sudo apt-get install -y aircrack-ng
-########## Verify ##########
-aircrack-ng --help
-""",False,'802.11'))
+# ~ # Aircrack-ng
+# ~ programs_kali.append(('Aircrack-ng',
+# ~ """sudo apt-get install -y aircrack-ng
+# ~ ########## Verify ##########
+# ~ aircrack-ng --help
+# ~ """,True,'802.11'))
 
 # Geany
-programs_parrot_os_6_1.append(('Geany',
+programs_kali.append(('Geany (19.97 MB)',
 """sudo apt-get install -y geany
 ########## Verify ##########
 geany --help
 """,True,'Development'))
 
-# # Arduino IDE
-# programs_parrot_os_6_1.append(('Arduino IDE',
-# """wget -P ~/Installed_by_FISSURE/ https://downloads.arduino.cc/arduino-1.8.15-linux64.tar.xz
-# cd ~/Installed_by_FISSURE
-# tar -xf arduino-1.8.15-linux64.tar.xz
-# rm arduino-1.8.15-linux64.tar.xz
-# cd arduino-1.8.15/
-# sudo ./install.sh
-# cp -R """ + fissure_directory + """/Tools/Esp8266_listen_trigger/ ~/Installed_by_FISSURE/
-# ########## Verify ##########
-# arduino --version
-# """,True,'Development'))
-
-# Minicom
-programs_parrot_os_6_1.append(('Minicom',
-"""sudo apt-get install -y minicom
+# Arduino IDE
+programs_kali.append(('Arduino IDE (601.08 MB)',
+"""wget -P ~/Installed_by_FISSURE/ https://downloads.arduino.cc/arduino-1.8.15-linux64.tar.xz
+cd ~/Installed_by_FISSURE
+tar -xf arduino-1.8.15-linux64.tar.xz
+rm arduino-1.8.15-linux64.tar.xz
+cd arduino-1.8.15/
+sudo ./install.sh
+cp -R """ + fissure_directory + """/Tools/Esp8266_listen_trigger/ ~/Installed_by_FISSURE/
 ########## Verify ##########
-ls /usr/bin/minicom
-""",True,'Hardware'))
+arduino --version
+""",True,'Development'))
+
+# ~ # Minicom
+# ~ programs_kali.append(('Minicom',
+# ~ """sudo apt-get install -y minicom
+# ~ ########## Verify ##########
+# ~ ls /usr/bin/minicom
+# ~ """,True,'Hardware'))
 
 # PuTTY
-programs_parrot_os_6_1.append(('PuTTY',
+programs_kali.append(('PuTTY (6.59 MB)',
 """sudo apt-get install -y putty
 ########## Verify ##########
 putty --help
 """,True,'Hardware'))
 
-# openHAB
-programs_parrot_os_6_1.append(('openHAB',
+# openHAB - FIX
+programs_kali.append(('openHAB (603.79 MB)',
 """sudo apt-get -yq install gnupg curl
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
 cd ~/Downloads
@@ -1448,10 +1393,10 @@ sudo apt-get update
 sudo apt-get install -y openhab
 ########## Verify ##########
 ls /usr/bin/openhab-cli
-""",False,'Z-Wave'))
+""",True,'Z-Wave'))
 
 # rtl-zwave
-programs_parrot_os_6_1.append(('rtl-zwave',
+programs_kali.append(('rtl-zwave (108.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 sudo apt-get install -y libpcap-dev
 cp -R """ + fissure_directory + """/Tools/rtl-zwave-master ~/Installed_by_FISSURE/
@@ -1462,7 +1407,7 @@ ls ~/Installed_by_FISSURE/rtl-zwave-master/rtl_zwave
 """,True,'Z-Wave'))
 
 # waving-z
-programs_parrot_os_6_1.append(('waving-z',
+programs_kali.append(('waving-z (2.12 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE/
 git clone https://github.com/baol/waving-z.git
@@ -1477,7 +1422,7 @@ ls ~/Installed_by_FISSURE/waving-z/build/wave-in
 """,True,'Z-Wave'))
 
 # baudline
-programs_parrot_os_6_1.append(('baudline',
+programs_kali.append(('baudline (5.0 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget -P ~/Installed_by_FISSURE/ https://www.baudline.com/baudline_1.08_linux_x86_64.tar.gz  # They removed this file. We are not allowed to distribute source.
@@ -1488,7 +1433,7 @@ rm baudline_1.08_linux_x86_64.tar.gz
 """,False,'SDR'))
 
 # Universal Radio Hacker
-programs_parrot_os_6_1.append(('Universal Radio Hacker',
+programs_kali.append(('Universal Radio Hacker (105.40 MB)',
 """sudo python3 -m pip install cython --break-system-packages
 sudo python3 -m pip install urh --break-system-packages
 ########## Verify ##########
@@ -1496,24 +1441,24 @@ urh --version
 """,True,'SDR'))
 
 # Inspectrum
-programs_parrot_os_6_1.append(('Inspectrum',
+programs_kali.append(('Inspectrum (432.00 kB)',
 """sudo apt-get install -y inspectrum
 ########## Verify ##########
 inspectrum --help
 """,True,'SDR'))
 
-# OpenCPN
-programs_parrot_os_6_1.append(('OpenCPN',
+# OpenCPN - FIX
+programs_kali.append(('OpenCPN',
 """sudo add-apt-repository -y ppa:opencpn/opencpn
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C865EB40  # FIX
 sudo apt-get update
 sudo apt-get install -y opencpn
 ########## Verify ##########
 ls /usr/bin/opencpn
-""",False,'AIS'))
+""",True,'AIS'))
 
 # Kalibrate
-programs_parrot_os_6_1.append(('Kalibrate',
+programs_kali.append(('Kalibrate (1.96 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/steve-m/kalibrate-rtl.git
@@ -1524,7 +1469,7 @@ ls ~/Installed_by_FISSURE/kalibrate-rtl/src/kal
 """,True,'GSM'))
 
 # retrogram-rtlsdr
-programs_parrot_os_6_1.append(('retrogram-rtlsdr',
+programs_kali.append(('retrogram-rtlsdr (1.61 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 sudo apt-get install -y librtlsdr-dev libncurses5-dev libboost-program-options-dev
 cp -R """ + fissure_directory + """/Tools/retrogram-rtlsdr-master ~/Installed_by_FISSURE/
@@ -1535,8 +1480,15 @@ ls ~/Installed_by_FISSURE/retrogram-rtlsdr-master/retrogram-rtlsdr
 """,True,'SDR'))
 
 # RTLSDR-Airband
-programs_parrot_os_6_1.append(('RTLSDR-Airband',
-"""sudo apt-get install -y build-essential cmake pkg-config libmp3lame-dev libshout3-dev libconfig++-dev libfftw3-dev libpulse-dev
+programs_kali.append(('RTLSDR-Airband (7.2 MB)',
+"""sudo apt-get install -y build-essential
+sudo apt-get install -y cmake 
+sudo apt-get install -y pkg-config 
+sudo apt-get install -y libmp3lame-dev 
+sudo apt-get install -y libshout3-dev 
+sudo apt-get install -y libconfig++-dev 
+sudo apt-get install -y libfftw3-dev 
+sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/szpajder/RTLSDR-Airband.git
@@ -1552,7 +1504,7 @@ rtl_airband -h
 """,True,'SDR'))
 
 # Spektrum
-programs_parrot_os_6_1.append(('Spektrum',
+programs_kali.append(('Spektrum (230.65 MB)',
 """echo 'blacklist dvb_usb_rtl28xxu' | sudo tee /etc/modprobe.d/rtl-sdr.conf  # Restart computer to use RTL device
 echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="adm", MODE="0666"' | sudo tee /etc/udev/rules.d/20.rtlsdr.rules
 mkdir -p ~/Installed_by_FISSURE
@@ -1565,7 +1517,7 @@ ls ~/Installed_by_FISSURE/spektrum/spektrum
 """,True,'SDR'))
 
 # SDRTrunk
-programs_parrot_os_6_1.append(('SDRTrunk',
+programs_kali.append(('SDRTrunk (101.92 MB)',
 """#sudo apt-get -yq install gnupg curl  # Java (if needed)
 #sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9
 #cd ~/Downloads
@@ -1584,63 +1536,63 @@ ls ~/Installed_by_FISSURE/sdr-trunk-linux-x86_64-v0.5.0-alpha6/bin/sdr-trunk
 """,True,'Trunked Radio'))
 
 # Audacity
-programs_parrot_os_6_1.append(('Audacity',
+programs_kali.append(('Audacity (53.53 MB)',
 """sudo apt-get install -y audacity
 ########## Verify ##########
 audacity --version
 """,True,'Audio'))
 
 # Sound eXchange
-programs_parrot_os_6_1.append(('Sound eXchange',
+programs_kali.append(('Sound eXchange (1.88 MB)',
 """sudo apt-get install -y sox
 ########## Verify ##########
 sox --version
 """,True,'Audio'))
 
 # LAME
-programs_parrot_os_6_1.append(('LAME',
+programs_kali.append(('LAME (644.00 kB)',
 """sudo apt-get install -y lame
 ########## Verify ##########
 lame --version
 """,True,'Audio'))
 
 # mpv
-programs_parrot_os_6_1.append(('mpv',
+programs_kali.append(('mpv (66.43 MB)',
 """sudo apt-get install -y mpv
 ########## Verify ##########
 mpv --version
 """,True,'Audio'))
 
 # FFmpeg
-programs_parrot_os_6_1.append(('FFmpeg',
+programs_kali.append(('FFmpeg (118.8 kB)',
 """sudo apt-get install -y ffmpeg 
 ########## Verify ##########
 ffmpeg --help
 """,True,'Audio'))
 
 # MPlayer
-programs_parrot_os_6_1.append(('MPlayer',
+programs_kali.append(('MPlayer (8.31 MB)',
 """sudo apt-get install -y mplayer
 ########## Verify ##########
 ls /usr/bin/mplayer
 """,True,'Audio'))
 
 # VLC
-programs_parrot_os_6_1.append(('VLC',
+programs_kali.append(('VLC (82.98 MB)',
 """sudo apt-get install -y vlc
 ########## Verify ##########
 vlc --help
 """,True,'Video'))
 
 # Simple Screen Recorder
-programs_parrot_os_6_1.append(('Simple Screen Recorder',
-"""sudo apt-get install -y simplescreenrecorder 
+programs_kali.append(('Simple Screen Recorder (5.8 MB)',
+"""sudo apt-get install -y simplescreenrecorder
 ########## Verify ##########
 simplescreenrecorder --help
-""",True,'Video'))
+""",False,'Video'))
 
 # radiosonde_auto_rx
-programs_parrot_os_6_1.append(('radiosonde_auto_rx',
+programs_kali.append(('radiosonde_auto_rx (23.15 MB)',
 """sudo apt-get install -y python3 python3-numpy python3-setuptools python3-crcmod python3-requests python3-dateutil python3-pip python3-flask sox git build-essential libtool cmake usbutils libusb-1.0-0-dev rng-tools libsamplerate-dev libatlas3-base libgfortran5
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1654,7 +1606,7 @@ ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
 
 # SdrGlut
-programs_parrot_os_6_1.append(('SdrGlut',
+programs_kali.append(('SdrGlut',
 """sudo apt-get install -y build-essential libwxgtk3.2-dev libglew-dev libusb-dev libsoapysdr-dev libopenal-dev libliquid-dev freeglut3-dev libalut-dev libsndfile1-dev librtaudio-dev libhdf4-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1668,8 +1620,8 @@ ls ~/Installed_by_FISSURE/SdrGlut/sdrglut.x
 """,True,'SDR'))
 
 # rehex
-programs_parrot_os_6_1.append(('rehex',
-"""sudo apt-get install -y build-essential git libwxgtk3.0-gtk3-dev libjansson-dev libcapstone-dev liblua5.3-dev lua5.3 lua5.2 libunistring-dev libgtk-3-dev lua-busted libbotan-2-dev
+programs_kali.append(('rehex (581.02 MB)',
+"""sudo apt-get install -y build-essential git libwxgtk3.2-dev libjansson-dev libcapstone-dev lua5.4 liblua5.4-dev libwxgtk3.2-dev libunistring-dev libgtk-3-dev lua-busted libbotan-2-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/solemnwarning/rehex.git
@@ -1679,10 +1631,10 @@ yes | sudo cpan Template
 sudo make install
 ########## Verify ##########
 ls /usr/local/bin/rehex 
-""",False,'Data'))
+""",True,'Data'))
 
 # ZEPASSD
-programs_parrot_os_6_1.append(('ZEPASSD',
+programs_kali.append(('ZEPASSD (8.70 MB)',
 """#sudo apt-get install -y # boost.program-options, boost.crc, boost.circular-buffer, libfftw3, libuhd 3.9.5 or later
 sudo apt-get install -y libuhd-dev
 mkdir -p ~/Installed_by_FISSURE
@@ -1695,7 +1647,7 @@ ls ~/Installed_by_FISSURE/zepassd/zepassd
 """,True,'RFID'))
 
 # iridium-toolkit
-programs_parrot_os_6_1.append(('iridium-toolkit',
+programs_kali.append(('iridium-toolkit (3.45 MB)',
 """#Python (2.7), NumPy (scipy), crcmod
 sudo apt-get install -y mplayer
 mkdir -p ~/Installed_by_FISSURE
@@ -1710,7 +1662,7 @@ ls ~/Installed_by_FISSURE/osmo-ir77/codec/ir77_ambe_decode
 """,True,'Satellite'))
 
 # IridiumLive
-programs_parrot_os_6_1.append(('IridiumLive',
+programs_kali.append(('IridiumLive (92.71 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/microp11/iridiumlive.git
@@ -1724,14 +1676,14 @@ ls ~/Installed_by_FISSURE/linux-x64/IridiumLive
 """,True,'Satellite'))
 
 # NETATTACK2 - Fix
-programs_parrot_os_6_1.append(('NETATTACK2',
+programs_kali.append(('NETATTACK2',
 """#sudo pip install netifaces  # fix for python2
 #sudo apt-get install -y python-scapy python-nmap python-nfqueue nmap  # this needs to be fixed, can it still run with python2?
-#sudo python2 -m pip install netifaces
+sudo python2 -m pip install netifaces
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/chrizator/netattack2.git
-#sudo python2 -m pip install nmap
+sudo python2 -m pip install nmap
 cd netattack2
 wget http://archive.ubuntu.com/ubuntu/pool/universe/libn/libnetfilter-queue/libnetfilter-queue1_1.0.2-2_amd64.deb
 sudo dpkg -i libnetfilter-queue1_1.0.2-2_amd64.deb
@@ -1739,58 +1691,58 @@ wget http://archive.ubuntu.com/ubuntu/pool/universe/n/nfqueue-bindings/python-nf
 sudo dpkg -i python-nfqueue_0.6-1build2_amd64.deb 
 """,False,'802.11'))
 
-# Wifite
-programs_parrot_os_6_1.append(('Wifite',
-"""echo "macchanger macchanger/automatically_run boolean false" | sudo debconf-set-selections
-# python, iwconfig, ifconfig, Aircrack-ng, tshark, reaver, bully, coWPAtty, pyrit, hashcat, hcxdumptool, hcxpcaptool
-sudo apt-get install -y build-essential libpcap-dev aircrack-ng pixiewps libssl-dev hashcat libcurl4-openssl-dev pkg-config macchanger python-is-python3
-sudo python3 -m pip install psycopg2-binary --break-system-packages  #scapy (python3 scapy with pip causes errors)
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-git clone https://github.com/derv82/wifite2.git
-git clone https://github.com/t6x/reaver-wps-fork-t6x
-cd reaver-wps-fork-t6x/src
-./configure
-make
-sudo make install
-cd ~/Installed_by_FISSURE
-git clone https://github.com/aanarchyy/bully
-cd bully/src
-make
-sudo make install
-cd ~/Installed_by_FISSURE
-wget http://www.willhackforsushi.com/code/cowpatty/4.6/cowpatty-4.6.tgz
-tar zxfv cowpatty-4.6.tgz
-rm cowpatty-4.6.tgz
-cd cowpatty-4.6
-make
-sudo cp cowpatty /usr/bin
-cd ~/Installed_by_FISSURE
-mkdir Pyrit-v0.5.0
-cd Pyrit-v0.5.0
-wget https://github.com/JPaulMora/Pyrit/releases/download/v0.5.0/Pyrit-v0.5.0.zip
-unzip -q Pyrit-v0.5.0.zip
-rm Pyrit-v0.5.0.zip
-sudo apt-get install -y python2-dev
-python2 setup.py clean
-python2 setup.py build
-sudo python2 setup.py install
-cd ~/Installed_by_FISSURE
-git clone https://github.com/ZerBea/hcxdumptool.git
-cd hcxdumptool
-make
-sudo make install
-cd ~/Installed_by_FISSURE
-git clone https://github.com/ZerBea/hcxtools.git
-cd hcxtools
-make
-sudo make install
-sudo ln -s /usr/bin/hcxpcapngtool /usr/bin/hcxpcaptool
-#sudo apt-get install -y tshark
-""",True,'802.11'))
+# ~ # Wifite  # Missing hcxdumptool, hcxpcapngtool
+# ~ programs_kali.append(('Wifite',
+# ~ """echo "macchanger macchanger/automatically_run boolean false" | sudo debconf-set-selections
+# # python, iwconfig, ifconfig, Aircrack-ng, tshark, reaver, bully, coWPAtty, pyrit, hashcat, hcxdumptool, hcxpcaptool
+# ~ sudo apt-get install -y build-essential libpcap-dev aircrack-ng pixiewps libssl-dev hashcat libcurl4-openssl-dev pkg-config macchanger python-is-python3
+# ~ sudo python3 -m pip install psycopg2-binary --break-system-packages  #scapy (python3 scapy with pip causes errors)
+# ~ mkdir -p ~/Installed_by_FISSURE
+# ~ cd ~/Installed_by_FISSURE
+# ~ git clone https://github.com/derv82/wifite2.git
+# ~ git clone https://github.com/t6x/reaver-wps-fork-t6x
+# ~ cd reaver-wps-fork-t6x/src
+# ~ ./configure
+# ~ make
+# ~ sudo make install
+# ~ cd ~/Installed_by_FISSURE
+# ~ git clone https://github.com/aanarchyy/bully
+# ~ cd bully/src
+# ~ make
+# ~ sudo make install
+# ~ cd ~/Installed_by_FISSURE
+# ~ wget http://www.willhackforsushi.com/code/cowpatty/4.6/cowpatty-4.6.tgz
+# ~ tar zxfv cowpatty-4.6.tgz
+# ~ rm cowpatty-4.6.tgz
+# ~ cd cowpatty-4.6
+# ~ make
+# ~ sudo cp cowpatty /usr/bin
+# ~ cd ~/Installed_by_FISSURE
+# ~ mkdir Pyrit-v0.5.0
+# ~ cd Pyrit-v0.5.0
+# ~ wget https://github.com/JPaulMora/Pyrit/releases/download/v0.5.0/Pyrit-v0.5.0.zip
+# ~ unzip -q Pyrit-v0.5.0.zip
+# ~ rm Pyrit-v0.5.0.zip
+# ~ sudo apt-get install -y python2-dev
+# ~ python2 setup.py clean
+# ~ python2 setup.py build
+# ~ sudo python2 setup.py install
+# ~ cd ~/Installed_by_FISSURE
+# ~ git clone https://github.com/ZerBea/hcxdumptool.git
+# ~ cd hcxdumptool
+# ~ make
+# ~ sudo make install
+# ~ cd ~/Installed_by_FISSURE
+# ~ git clone https://github.com/ZerBea/hcxtools.git
+# ~ cd hcxtools
+# ~ make
+# ~ sudo make install
+# ~ sudo ln -s /usr/bin/hcxpcapngtool /usr/bin/hcxpcaptool
+# ~ #sudo apt-get install -y tshark
+# ~ """,True,'802.11'))
 
 # rtl_433
-programs_parrot_os_6_1.append(('rtl_433',
+programs_kali.append(('rtl_433 (27.31 MB)',
 """#sudo apt-get install -y rtl-433
 sudo apt-get install -y libtool libusb-1.0-0-dev librtlsdr-dev rtl-sdr build-essential cmake pkg-config
 mkdir -p ~/Installed_by_FISSURE
@@ -1807,22 +1759,22 @@ rtl_433 -help
 """,True,'433 MHz'))
 
 # RouterSploit
-programs_parrot_os_6_1.append(('RouterSploit',
+programs_kali.append(('RouterSploit (623.97 MB)',
 """sudo apt-get install -y python3-pip libglib2.0-dev rustc
-sudo apt-get install -y python3-setuptools-rust  #sudo python3 -m pip install setuptools-rust --break-system-packages
+sudo python3 -m pip install setuptools-rust --break-system-packages
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://www.github.com/threat9/routersploit
 cd routersploit
-sudo apt-get install -y python3-setuptools  #python3 -m pip install setuptools --break-system-packages
-python3 -m pip install -r requirements.txt --break-system-packages
+python3 -m pip install setuptools --break-system-packages
+python3 -m pip install -r requirements.txt --break-system-packages ##### needs telnetlib3 but the module specifically calls for telnetlib, needs updating
 python3 -m pip install bluepy --break-system-packages
 ########## Verify ##########
 ~/Installed_by_FISSURE/routersploit/rsf.py --help
 """,True,'802.11'))
 
 # Metasploit
-programs_parrot_os_6_1.append(('Metasploit',
+programs_kali.append(('Metasploit (699.84 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 mkdir metasploit
@@ -1833,7 +1785,7 @@ ls /usr/bin/msfconsole
 """,True,'802.11'))
 
 # monitor_rtl433
-programs_parrot_os_6_1.append(('monitor_rtl433',
+programs_kali.append(('monitor_rtl433 (1.10 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mcbridejc/monitor_rtl433.git
@@ -1846,7 +1798,7 @@ ls /usr/local/bin/monitor_rtl433
 """,True,'433 MHz'))
 
 # scan-ssid
-programs_parrot_os_6_1.append(('scan-ssid',
+programs_kali.append(('scan-ssid (232.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 sudo apt-get install -y iw
@@ -1859,21 +1811,21 @@ scan-ssid --help
 """,True,'802.11'))
 
 # minimodem
-programs_parrot_os_6_1.append(('minimodem',
+programs_kali.append(('minimodem (132.00 kB)',
 """sudo apt-get install -y minimodem
 ########## Verify ##########
 minimodem --version
 """,True,'Audio'))
 
 # WSJT-X
-programs_parrot_os_6_1.append(('WSJT-X',
+programs_kali.append(('WSJT-X (39.93 MB)',
 """sudo apt-get install -y wsjtx
 ########## Verify ##########
 ls /usr/bin/wsjtx
 """,True,'Ham Radio'))
 
 # Google Earth Pro
-programs_parrot_os_6_1.append(('Google Earth Pro',
+programs_kali.append(('Google Earth Pro (300.04 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget https://dl.google.com/dl/earth/client/current/google-earth-pro-stable_current_amd64.deb
@@ -1883,15 +1835,15 @@ ls /usr/bin/google-earth-pro
 """,True,'Mapping'))
 
 # gr-air-modes
-programs_parrot_os_6_1.append(('gr-air-modes',
+programs_kali.append(('gr-air-modes (312.00 kB)',
 """sudo apt-get install -y gr-air-modes
 sudo sed -i 's/numpy.float)/numpy.float32)/g' /usr/lib/python3/dist-packages/air_modes/mlat.py  # Deprecated numpy type: np.float->np.float32 or np.float64
 ########## Verify ##########
 modes_rx --help
-""",False,'Aircraft'))
+""",True,'Aircraft'))
 
 # ESP8266 Deauther v2
-programs_parrot_os_6_1.append(('ESP8266 Deauther v2',
+programs_kali.append(('ESP8266 Deauther v2 (5.90 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget https://github.com/SpacehuhnTech/esp8266_deauther/archive/v2.zip
@@ -1900,19 +1852,15 @@ rm v2.zip
 """,True,'802.11'))
 
 # Viking
-programs_parrot_os_6_1.append(('Viking',
+programs_kali.append(('Viking (376.91 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone git://git.code.sf.net/p/viking/code viking
-sudo apt-get install -y libgdk-pixbuf2.0-dev
-sudo apt-get install -y libjson-glib-dev
-sudo apt-get install -y libatk-bridge2.0-0=2.46.0-5 libatk1.0-0=2.46.0-5 --allow-downgrades
-sudo apt-get install -y libatspi2.0-0=2.46.0-5 --allow-downgrades
-sudo apt-get install -y libgtk-3-dev
-sudo apt install -y gtk-doc-tools docbook-xsl yelp-tools libpng-dev libicu-dev intltool
+sudo apt install -y gtk-doc-tools docbook-xsl yelp-tools libpng-dev libgtk-3-dev libicu-dev libjson-glib-dev intltool
 sudo apt-get install -y libcurl4-gnutls-dev libglib2.0-dev-bin
 sudo apt-get install -y libsqlite3-dev nettle-dev libmapnik-dev libgeoclue-2-dev libgexiv2-dev libgps-dev libmagic-dev libbz2-dev libzip-dev liboauth-dev
 sudo apt-get install -y autopoint libnova-dev
+sudo apt-get install -y xxd
 cd viking
 ./autogen.sh
 ./configure
@@ -1923,30 +1871,30 @@ viking --help
 """,True,'Mapping'))
 
 # PyGPSClient
-programs_parrot_os_6_1.append(('PyGPSClient',
+programs_kali.append(('PyGPSClient (5.29 MB)',
 """sudo apt install -y python3-pip python3-tk python3-pil python3-pil.imagetk
 sudo apt remove -y python3-cryptography
-sudo python3 -m pip install --upgrade PyGPSClient --break-system-packages
+sudo python3 -m pip install --upgrade PyGPSClient --break-system-packages --ignore-installed
 ########## Verify ##########
 ls /usr/local/bin/pygpsclient
 """,True,'GPS'))
 
 # Gpredict
-programs_parrot_os_6_1.append(('Gpredict',
+programs_kali.append(('Gpredict (16.67 MB)',
 """sudo apt-get install -y gpredict
 ########## Verify ##########
 gpredict --help
 """,True,'GPS'))
 
 # FoxtrotGPS
-programs_parrot_os_6_1.append(('FoxtrotGPS',
+programs_kali.append(('FoxtrotGPS (3.2 MB)',
 """sudo apt-get install -y foxtrotgps
 ########## Verify ##########
 foxtrotgps --help
-""",True,'GPS'))
+""",False,'GPS'))
 
 # multimon-ng
-programs_parrot_os_6_1.append(('multimon-ng',
+programs_kali.append(('multimon-ng (8.56 MB)',
 """sudo apt-get install -y libpulse-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1962,7 +1910,7 @@ ls /usr/local/bin/multimon-ng
 """,True,'POCSAG'))
 
 # Xastir
-programs_parrot_os_6_1.append(('Xastir',
+programs_kali.append(('Xastir (43.07 MB)',
 """echo 'xastir xastir/setuid boolean true' | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xastir
 ########## Verify ##########
@@ -1970,7 +1918,7 @@ sudo xastir -V
 """,True,'Ham Radio'))
 
 # LTE-Cell-Scanner
-programs_parrot_os_6_1.append(('LTE-Cell-Scanner',
+programs_kali.append(('LTE-Cell-Scanner (150.15 MB)',
 """sudo apt-get install -y cmake libncurses5-dev liblapack-dev libblas-dev libboost-thread-dev libboost-system-dev libitpp-dev librtlsdr-dev libfftw3-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -1987,29 +1935,29 @@ ls /usr/local/bin/CellSearch
 """,True,'LTE'))
 
 # btscanner
-programs_parrot_os_6_1.append(('btscanner',
+programs_kali.append(('btscanner (1.3 MB)',
 """sudo apt-get install -y btscanner
 ########## Verify ##########
 btscanner --help
 """,True,'Bluetooth'))
 
-# hcidump
-programs_parrot_os_6_1.append(('hcidump',
-"""sudo apt-get install -y bluez-hcidump
-########## Verify ##########
-hcidump --help
-""",True,'Bluetooth'))
+# ~ # hcidump
+# ~ programs_kali.append(('hcidump',
+# ~ """sudo apt-get install -y bluez-hcidump
+# ~ ########## Verify ##########
+# ~ hcidump --help
+# ~ """,True,'Bluetooth'))
 
 # GraphicsMagick
-programs_parrot_os_6_1.append(('GraphicsMagick',
+programs_kali.append(('GraphicsMagick (6.9 MB)',
 """sudo apt-get install -y graphicsmagick-imagemagick-compat
 ########## Verify ##########
 gm -help
 """,True,'SDR'))
 
 # Spectrum Painter
-programs_parrot_os_6_1.append(('Spectrum Painter',
-"""sudo apt-get install -y python3-imageio  #sudo python3 -m pip install numpy imageio --break-system-packages
+programs_kali.append(('Spectrum Painter (14.4 MB)',
+"""sudo python3 -m pip install numpy imageio --break-system-packages
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/polygon/spectrum_painter.git
@@ -2018,7 +1966,7 @@ git clone https://github.com/polygon/spectrum_painter.git
 """,True,'SDR'))
 
 # nrsc5 and nrsc5-gui
-programs_parrot_os_6_1.append(('nrsc5',
+programs_kali.append(('nrsc5 (121.2 MB)',
 """sudo apt install -y git build-essential cmake autoconf libtool libao-dev libfftw3-dev librtlsdr-dev libgsl-dev python3-pyaudio
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -2032,7 +1980,7 @@ sudo make install
 sudo ldconfig
 # nrsc5-gui
 python3 -m pip install --upgrade Pillow --break-system-packages
-sudo apt-get install -y python3-pyaudio  #python3 -m pip install pyaudio --break-system-packages
+python3 -m pip install pyaudio --break-system-packages
 sudo apt-get install -y python-gobject
 cd ~/Installed_by_FISSURE
 git clone https://github.com/cmnybo/nrsc5-gui.git
@@ -2041,7 +1989,7 @@ nrsc5 -v
 """,True,'HD Radio'))
 
 # HAM2MON
-programs_parrot_os_6_1.append(('HAM2MON',
+programs_kali.append(('HAM2MON (901.2 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/bkerler/ham2mon.git
@@ -2049,31 +1997,37 @@ cp -f """ + fissure_directory + """/Tools/ham2mon/cursesgui.py ~/Installed_by_FI
 """,True,'Ham Radio'))
 
 # Anki
-programs_parrot_os_6_1.append(('Anki',
-"""sudo apt-get install -y anki
+programs_kali.append(('Anki (1.1 GB)',
+"""#sudo apt-get install -y anki  # No package found
+mkdir -p ~/Installed_by_FISSURE
+cd ~/Installed_by_FISSURE
+wget https://github.com/ankitects/anki/releases/download/2.1.61/anki-2.1.61-linux-qt6.tar.zst
+tar -xf anki-2.1.61-linux-qt6.tar.zst
+rm anki-2.1.61-linux-qt6.tar.zst
+cd anki-2.1.61-linux-qt6
+sudo ./install.sh
 ########## Verify ##########
 anki -h
-""",False,'Ham Radio'))
+""",True,'Ham Radio'))
 
 # Bless
-programs_parrot_os_6_1.append(('Bless (4.00 kB)',
+programs_kali.append(('Bless (4.00 kB)',
 """sudo apt-get install -y snapd
 sudo snap install bless-unofficial
 ########## Verify ##########
 snap list bless-unofficial
 """,True,'Data'))
 
-# trackerjacker
-programs_parrot_os_6_1.append(('trackerjacker',
+# trackerjacker (no longer complains about needing newer scapy version?, something else (netattack2?) resets it, some pieces don't work while running it)
+programs_kali.append(('trackerjacker',
 """sudo ln -s -f /usr/lib/x86_64-linux-gnu/libc.a /usr/lib/x86_64-linux-gnu/liblibc.a  # Python3.9 missing file
-sudo sed -i 's/tostring/tobytes/g' /usr/local/lib/python3.10/dist-packages/scapy/arch/linux.py
 sudo python3 -m pip install trackerjacker --break-system-packages
 ########## Verify ##########
 sudo trackerjacker --help
 """,True,'802.11'))
 
 # airgeddon
-programs_parrot_os_6_1.append(('airgeddon',
+programs_kali.append(('airgeddon (97.1 MB)',
 """sudo apt-get install -y crunch mdk3 hostapd lighttpd ruby-dev xterm isc-dhcp-server ettercap-text-only john
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -2099,48 +2053,48 @@ git clone https://github.com/aircrack-ng/mdk4
 cd mdk4
 make
 sudo make install
-""",False,'802.11'))
+""",True,'802.11'))
 
-# Hydra
-programs_parrot_os_6_1.append(('Hydra',
-"""sudo apt-get install -y hydra
-########## Verify ##########
-ls /usr/bin/hydra
-""",True,'SSH'))
+# ~ # Hydra
+# ~ programs_kali.append(('Hydra',
+# ~ """sudo apt-get install -y hydra
+# ~ ########## Verify ##########
+# ~ ls /usr/bin/hydra
+# ~ """,True,'SSH'))
 
 # Enscribe
-programs_parrot_os_6_1.append(('Enscribe',
+programs_kali.append(('Enscribe (102.4 kB)',
 """sudo apt-get install -y enscribe
 ########## Verify ##########
 ls /usr/bin/enscribe
 """,True,'Audio'))
 
 # ESP32 Bluetooth Classic Sniffer
-programs_parrot_os_6_1.append(('ESP32 BT Classic Sniffer',
+programs_kali.append(('ESP32 BT Classic Sniffer (411.8 MB)',
 """# Now contains errors caused by newer wireshark versions. Not supporting this until it is fixed.
-mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.0.11
+mkdir -p ~/Installed_by_FISSURE  # Requires Wireshark 3.4 by default, modifying it for 3.6.5, 4.0.3, 4.2.5, 4.4.0
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Matheus-Garbelini/esp32_bluetooth_classic_sniffer
 cd esp32_bluetooth_classic_sniffer
 #rm ./dissectors/config.h  # Produces errors if missing
-sed -i 's/VERSION "3.4.0"/VERSION "4.0.11"/g' ./dissectors/config.h
+sed -i 's/VERSION "3.4.0"/VERSION "4.4.0"/g' ./dissectors/config.h
 sed -i 's/VERSION_MAJOR 3/VERSION_MAJOR 4/g' ./dissectors/config.h
-sed -i 's/VERSION_MINOR 4/VERSION_MINOR 0/g' ./dissectors/config.h
-sed -i 's/VERSION_MICRO 0/VERSION_MICRO 11/g' ./dissectors/config.h
-sed -i 's/PLUGIN_PATH_ID "3.4"/PLUGIN_PATH_ID "4.0"/g' ./dissectors/config.h
+sed -i 's/VERSION_MINOR 4/VERSION_MINOR 4/g' ./dissectors/config.h
+sed -i 's/VERSION_MICRO 0/VERSION_MICRO 0/g' ./dissectors/config.h
+sed -i 's/PLUGIN_PATH_ID "3.4"/PLUGIN_PATH_ID "4.4"/g' ./dissectors/config.h
 sed -i 's/Bluetooth Link Manager Protocol/ESP32 Bluetooth Link Manager Protocol/g' ./dissectors/packet-btbrlmp.c
 sed -i 's/btlmp/esp32_btlmp/g' ./dissectors/packet-btbrlmp.c
-sed -i 's/3.4/4.0/g' ./dissectors/build.sh
+sed -i 's/3.4/4.4/g' ./dissectors/build.sh
 sudo ./requirements.sh
 ./build.sh
-sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan/  # Placing it where "sudo Wireshark" dissectors are located
-rm ~/.local/lib/wireshark/plugins/4.0/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
+sudo cp dissectors/h4bcm.so /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/  # Placing it where "sudo Wireshark" dissectors are located
+rm ~/.local/lib/wireshark/plugins/4.4/epan/h4bcm.so  # To avoid "plugin 'h4bcm.so' was found in multiple directories" warning
 ########## Verify ##########
-ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.0/epan/h4bcm.so
+ls /usr/lib/x86_64-linux-gnu/wireshark/plugins/4.4/epan/h4bcm.so
 """,False,'Bluetooth'))
 
 # SigDigger
-programs_parrot_os_6_1.append(('SigDigger (48.00 kB)',
+programs_kali.append(('SigDigger (48.00 kB)',
 """sudo apt-get install -y libsndfile1-dev libfftw3-dev qmake6 soapysdr-tools libsoapysdr-dev fuse
 mkdir -p ~/Installed_by_FISSURE/SigDigger
 cd ~/Installed_by_FISSURE/SigDigger
@@ -2151,14 +2105,14 @@ ls ~/Installed_by_FISSURE/SigDigger/SigDigger-0.3.0-x86_64-full.AppImage
 """,True,'SDR'))
 
 # QSSTV
-programs_parrot_os_6_1.append(('QSSTV',
+programs_kali.append(('QSSTV (3.2 MB)',
 """sudo apt-get install -y qsstv
 ########## Verify ##########
 ls /usr/bin/qsstv
 """,True,'Ham Radio'))
 
 # m17-cxx-demod
-programs_parrot_os_6_1.append(('m17-cxx-demod',
+programs_kali.append(('m17-cxx-demod (326.49 MB)',
 """sudo apt-get install -y libcodec2-dev libboost-dev libgtest-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -2178,21 +2132,21 @@ ls /usr/local/bin/m17-demod
 """,True,'M17'))
 
 # Fldigi
-programs_parrot_os_6_1.append(('Fldigi',
+programs_kali.append(('Fldigi (13.39 MB)',
 """sudo apt-get install -y fldigi
 ########## Verify ##########
 ls /usr/bin/fldigi
 """,True,'Ham Radio'))
 
 # pyFDA
-programs_parrot_os_6_1.append(('pyFDA',
+programs_kali.append(('pyFDA (5.77 MB)',
 """sudo python3 -m pip install pyfda --use-pep517 --break-system-packages  # Has PEP issues with Python 3.10
 ########## Verify ##########
 pyfdax -h
 """,True,'Filters'))
 
-# Bootable USB
-programs_parrot_os_6_1.append(('Bootable USB',
+# Bootable USB - FIX
+programs_kali.append(('Bootable USB',
 """sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 382003C2C8B7B4AB813E915B14E4942973C62A1B
 sudo add-apt-repository -y "deb http://ppa.launchpad.net/nemh/systemback/ubuntu xenial main"
 sudo apt update
@@ -2205,8 +2159,8 @@ ls /usr/bin/systemback && ls /usr/bin/guidus
 """,False,'Development'))
 
 # Dire Wolf
-programs_parrot_os_6_1.append(('Dire Wolf',
-"""sudo apt-get -y install git gcc g++ make cmake libasound2-dev libudev-dev  # Needs specific version of libudev-dev that is problematic
+programs_kali.append(('Dire Wolf (215.38 MB)',
+"""sudo apt-get -y install git gcc g++ make cmake libasound2-dev libudev-dev
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://www.github.com/wb2osz/direwolf
@@ -2219,24 +2173,24 @@ sudo make install
 make install-conf
 ########## Verify ##########
 ls /usr/local/bin/direwolf
-""",False,'Ham Radio'))
+""",True,'Ham Radio'))
 
 # Meld
-programs_parrot_os_6_1.append(('Meld',
+programs_kali.append(('Meld (5.68 MB)',
 """sudo apt-get -y install meld
 ########## Verify ##########
 ls /usr/bin/meld
 """,True,'Data'))
 
 # nwdiag
-programs_parrot_os_6_1.append(('nwdiag',
-"""sudo apt-get install -y python3-nwdiag  #sudo python3 -m pip install nwdiag --break-system-packages
+programs_kali.append(('nwdiag (29.14 MB)',
+"""sudo python3 -m pip install nwdiag --break-system-packages
 ########## Verify ##########
-packetdiag3 -h
+packetdiag -h
 """,True,'Data'))
 
 # HamClock
-programs_parrot_os_6_1.append(('HamClock',
+programs_kali.append(('HamClock (43.15 MB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget https://www.clearskyinstitute.com/ham/HamClock/ESPHamClock.zip
@@ -2250,8 +2204,8 @@ ls /usr/local/bin/hamclock
 """,True,'Ham Radio'))
 
 # ICE9 Bluetooth Sniffer
-programs_parrot_os_6_1.append(('ICE9 Bluetooth Sniffer',
-"""sudo apt install -y libliquid-dev libbtbb-dev libuhd-dev
+programs_kali.append(('ICE9 Bluetooth Sniffer (25.90 MB)',
+"""sudo apt-get install -y libliquid-dev libbtbb-dev libuhd-dev xxd
 sudo apt-get install -y libhackrf-dev libbladerf-dev  # Separating in case there are conflicts with Hardware install
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
@@ -2264,10 +2218,10 @@ make
 sudo make install
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/ice9-bluetooth-sniffer/build/ice9-bluetooth
-""",False,'Bluetooth'))
+""",True,'Bluetooth'))
 
 # dump978
-programs_parrot_os_6_1.append(('dump978',
+programs_kali.append(('dump978',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mutability/dump978.git
@@ -2278,26 +2232,27 @@ ls ~/Installed_by_FISSURE/dump978/dump978
 """,True,'Aircraft'))
 
 # htop
-programs_parrot_os_6_1.append(('htop',
+programs_kali.append(('htop (652.00 kB)',
 """sudo apt-get install -y htop
 ########## Verify ##########
 ls /usr/bin/htop
-""",False,'Development'))
+""",True,'Development'))
 
 # OpenWebRX
-programs_parrot_os_6_1.append(('OpenWebRX',
+programs_kali.append(('OpenWebRX',
 """wget -O - https://repo.openwebrx.de/debian/key.gpg.txt | sudo apt-key add
 echo 'deb https://repo.openwebrx.de/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/openwebrx.list
 sudo apt-get update
 sudo apt-get install -y openwebrx
 sudo systemctl stop openwebrx
 sudo systemctl disable openwebrx  # Prevents starting on boot
+# python3-csdr Depends: python3 (< 3.11)
 ########## Verify ##########
 ls /usr/bin/openwebrx
 """,False,'SDR'))
 
 # CRC RevEng
-programs_parrot_os_6_1.append(('CRC RevEng',
+programs_kali.append(('CRC RevEng (884.00 kB)',
 """mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget -T 10 https://sourceforge.net/projects/reveng/files/3.0.5/reveng-3.0.5.zip/download
@@ -2310,7 +2265,7 @@ ls ~/Installed_by_FISSURE/reveng-3.0.5/bin/i386-linux/reveng
 """,True,'Data'))
 
 # wl-color-picker
-programs_parrot_os_6_1.append(('wl-color-picker',
+programs_kali.append(('wl-color-picker (676.00 kB)',
 """sudo apt-get install -y slurp grim wl-clipboard
 cd ~/Installed_by_FISSURE
 git clone https://github.com/jgmdev/wl-color-picker.git
@@ -2319,81 +2274,81 @@ ls ~/Installed_by_FISSURE/wl-color-picker/wl-color-picker.sh
 """,True,'Development'))
 
 # GHex
-programs_parrot_os_6_1.append(('GHex',
+programs_kali.append(('GHex (3.36 MB)',
 """sudo apt-get install -y ghex
 ########## Verify ##########
 ls /usr/bin/ghex
 """,True,'Data'))
 
 # Archive Flow Graphs
-programs_parrot_os_6_1.append(('Archive Flow Graphs',
+programs_kali.append(('Archive Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Archive\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # Fuzzing Flow Graphs
-programs_parrot_os_6_1.append(('Fuzzing Flow Graphs',
+programs_kali.append(('Fuzzing Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Fuzzing\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # Inspection Flow Graphs
-programs_parrot_os_6_1.append(('Inspection Flow Graphs',
+programs_kali.append(('Inspection Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Inspection\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # IQ Flow Graphs
-programs_parrot_os_6_1.append(('IQ Flow Graphs',
+programs_kali.append(('IQ Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/IQ\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # PD Flow Graphs
-programs_parrot_os_6_1.append(('PD Flow Graphs',
+programs_kali.append(('PD Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/PD\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # Single-Stage Flow Graphs
-programs_parrot_os_6_1.append(('Single-Stage Flow Graphs',
+programs_kali.append(('Single-Stage Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Single-Stage\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # Sniffer Flow Graphs
-programs_parrot_os_6_1.append(('Sniffer Flow Graphs',
+programs_kali.append(('Sniffer Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Sniffer\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # Standalone Flow Graphs
-programs_parrot_os_6_1.append(('Standalone Flow Graphs',
+programs_kali.append(('Standalone Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Standalone\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # TSI Flow Graphs
-programs_parrot_os_6_1.append(('TSI Flow Graphs',
+programs_kali.append(('TSI Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/TSI\ Flow\ Graphs/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # Trigger Flow Graphs
-programs_parrot_os_6_1.append(('Trigger Flow Graphs',
+programs_kali.append(('Trigger Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/Triggers/
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
 # pyais
-programs_parrot_os_6_1.append(('pyais',
+programs_kali.append(('pyais (628.00 kB)',
 """sudo python3 -m pip install pyais --break-system-packages
 ########## Verify ##########
 ls /usr/local/lib/python3*/dist-packages/pyais
 """,True,'AIS'))
 
 # HAMRS
-programs_parrot_os_6_1.append(('HAMRS',
+programs_kali.append(('HAMRS (100.91 MB)',
 """mkdir -p ~/Installed_by_FISSURE/HAMRS
 cd ~/Installed_by_FISSURE/HAMRS
 wget https://hamrs-releases.s3.us-east-2.amazonaws.com/1.0.6/hamrs-1.0.6-linux-x86_64.AppImage
@@ -2403,24 +2358,24 @@ ls ~/Installed_by_FISSURE/HAMRS/hamrs*
 """,True,'Ham Radio'))
 
 # Binwalk
-programs_parrot_os_6_1.append(('Binwalk',
+programs_kali.append(('Binwalk (1.43 MB)',
 """sudo apt-get install -y python3-binwalk binwalk
 ########## Verify ##########
 ls /usr/bin/binwalk
 """,True,'Data'))
 
 # Read the Docs
-programs_parrot_os_6_1.append(('Read the Docs',
-"""sudo python3 -m pip install sphinx
-sudo python3 -m pip install sphinx_rtd_theme
+programs_kali.append(('Read the Docs (54.77 MB)',
+"""sudo python3 -m pip install sphinx --break-system-packages
+sudo python3 -m pip install sphinx_rtd_theme --break-system-packages
 ########## Verify ##########
 sudo python3 -m pip show sphinx_rtd_theme
 """,True,'Development'))
 
 # IQEngine
-programs_parrot_os_6_1.append(('IQEngine',
+programs_kali.append(('IQEngine (355.45 MB)',
 """if command -v docker > /dev/null 2>&1; then
-  echo "Docker is installed." 
+  echo "Docker is installed."
 else
   echo "Docker is not installed."
   sudo apt-get install -y docker.io
@@ -2441,7 +2396,7 @@ sudo docker run hello-world
 """,True,'Data'))
 
 # TAK Server
-programs_parrot_os_6_1.append(('TAK Server',
+programs_kali.append(('TAK Server',
 """# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
 # Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
 
@@ -2593,676 +2548,4 @@ fi
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
-
-
-class InstallDialog2(QtWidgets.QDialog, form_class2):
-    def __init__(self,programs):
-        """ Software Selection Dialog
-        """
-        QtWidgets.QDialog.__init__(self)
-        self.setupUi(self)
-        
-        # Prevent Resizing/Maximizing
-        self.setFixedSize(920, 650)     
-
-        # Hide Progress Bar
-        self.progressBar1.hide()   
-        self.label2_current_item.hide()
-        
-        # Set Style Sheet
-        color1 = "#F4F4F4"
-        color2 = "#FBFBFB"
-        color3 = "#17365D"
-        color4 = "#000000"
-        color5 = "#FFFFFF"
-        color6 = "#FEFEFE"
-        color7 = "#EFEFEF"
-        color8 = "#FEFEFE"
-        color9 = "#EFEFEF"
-        color10 = "#FEFEFE"
-        color11 = "#F8F8F8"
-        color12 = "#000000"
-        color13 = "#C0C0C0"        
-        get_css_text = str(open('/' + os.path.dirname(os.path.realpath(__file__)).strip('/Installer/OS') + "/UI/Style_Sheets/light.css","r").read())
-        get_css_text = re.sub(r'@color1\b',color1,get_css_text)
-        get_css_text = re.sub(r'@color2\b',color2,get_css_text)
-        get_css_text = re.sub(r'@color3\b',color3,get_css_text)
-        get_css_text = re.sub(r'@color4\b',color4,get_css_text)
-        get_css_text = re.sub(r'@color5\b',color5,get_css_text)
-        get_css_text = re.sub(r'@color6\b',color6,get_css_text)
-        get_css_text = re.sub(r'@color7\b',color7,get_css_text)
-        get_css_text = re.sub(r'@color8\b',color8,get_css_text)
-        get_css_text = re.sub(r'@color9\b',color9,get_css_text)
-        get_css_text = re.sub(r'@color10\b',color10,get_css_text)
-        get_css_text = re.sub(r'@color11\b',color11,get_css_text)
-        get_css_text = re.sub(r'@color12\b',color12,get_css_text)
-        get_css_text = re.sub(r'@color13\b',color13,get_css_text)
-        get_css_text = re.sub(r'@unchecked_enabled\b','light-unchecked.png',get_css_text)
-        get_css_text = re.sub(r'@checked_enabled\b','light-checked.png',get_css_text)
-        get_css_text = re.sub(r'@checked_disabled\b','light-checked-disabled.png',get_css_text)
-        get_css_text = re.sub(r'@unchecked_disabled\b','light-unchecked-disabled.png',get_css_text)
-        get_css_text = re.sub(r'@down_arrow_enabled\b','light-down-arrow.png',get_css_text)
-        get_css_text = re.sub(r'@down_arrow_disabled\b','light-down-arrow-disabled.png',get_css_text)
-        get_css_text = re.sub(r'@radio_unchecked_enabled\b','light-radio.png',get_css_text)
-        get_css_text = re.sub(r'@radio_checked_enabled\b','light-radio-checked.png',get_css_text)
-        get_css_text = get_css_text.replace("@icon_path",'/' + os.path.dirname(os.path.realpath(__file__)).strip('/Installer/OS') + "/docs/Icons")
-        get_css_text = get_css_text.replace('@menu_hover_padding','0px')
-        self.setStyleSheet(get_css_text)
-        
-        # Do SIGNAL/Slots Connections
-        self._connectSlots()  
-        
-        # Create Categories
-        for c in larger_categories:
-            parent = QtWidgets.QTreeWidgetItem(self.treeWidget_software)
-            parent.setText(0,c)
-            parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-            parent.setCheckState(0, QtCore.Qt.Checked)
-        
-        # Load Checkboxes in Table
-        self.programs = programs
-        for row in range(0,len(programs)):
-            # Subcategories
-            if programs[row][3] != None:
-                parent_name = programs[row][3]
-                
-                # Iterate the Tree
-                iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-                while iterator.value():
-                    item = iterator.value()
-                    if item.text(0) == parent_name:
-                        child = QtWidgets.QTreeWidgetItem(item)
-                        child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                        child.setText(0, programs[row][0])
-                        if programs[row][2] == True:
-                            child.setCheckState(0, QtCore.Qt.Checked)
-                        else:
-                            child.setCheckState(0, QtCore.Qt.Unchecked)
-                        break
-                    iterator+=1      
-            
-            # No Category
-            else:            
-                parent = QtWidgets.QTreeWidgetItem(self.treeWidget_software)
-                parent.setText(0,programs[row][0])
-                parent.setFlags(parent.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                if programs[row][2] == True:
-                    parent.setCheckState(0, QtCore.Qt.Checked)
-                else:
-                    parent.setCheckState(0, QtCore.Qt.Unchecked)
-
-        # Remove Empty Categories
-        root = self.treeWidget_software.invisibleRootItem()
-        for i in range(root.childCount() - 1, -1, -1):  # Iterate in reverse order
-            parent = root.child(i)
-            if parent.childCount() == 0:
-                root.removeChild(parent)
-
-            
-    def _connectSlots(self):
-        """ Contains the connect functions for all the signals and slots
-        """   
-        # Push Buttons
-        self.pushButton_ok.clicked.connect(self._slotOK_Clicked)
-        self.pushButton_cancel.clicked.connect(self._slotCancelClicked)
-        self.pushButton_deselect.clicked.connect(self._slotDeselectClicked)
-        self.pushButton_default.clicked.connect(self._slotDefaultClicked)
-        self.pushButton_rankings.clicked.connect(self._slotRankingsClicked)
-        self.pushButton_needs_help.clicked.connect(self._slotNeedsHelpClicked)
-        self.pushButton_expand_all.clicked.connect(self._slotExpandAllClicked)
-        self.pushButton_collapse_all.clicked.connect(self._slotCollapseAllClicked)
-        self.pushButton_import.clicked.connect(self._slotImportClicked)
-        self.pushButton_export.clicked.connect(self._slotExportClicked)
-        self.pushButton_sensor_node.clicked.connect(self._slotSensorNodeClicked)       
-        
-        # Tables
-        self.treeWidget_software.clicked.connect(self._slotTableItemClicked)
-
-
-    def _slotOK_Clicked(self):
-        """ Install the software.
-        """      
-        # Find Number of Checked Items and Store Names (prevents checking after starting the install)
-        get_checked_items = 0
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        self.checked_items = []
-        while iterator.value():
-            item = iterator.value()
-            if item.checkState(0) == 2:    
-                # Ignore Categories
-                if item.text(0) not in larger_categories:       
-                    get_checked_items = get_checked_items + 1
-                    self.checked_items.append(item.text(0))     
-            iterator+=1   
-            
-        # Reset the Colors
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()
-            item.setForeground(0,QtGui.QColor('Black'))
-            iterator+=1   
-            
-        # Show Progress Bar
-        self.progressBar1.show() 
-        self.label2_current_item.show()      
-        self.progressBar1.setMaximum(get_checked_items+1)
-        QtWidgets.QApplication.processEvents()
-        self.pushButton_ok.setEnabled(False)
-
-        # Clear the Output File
-        # str(open('/' + os.path.dirname(os.path.realpath(__file__)).strip('/Installer/OS')
-        with open(this_file_directory.strip('OS') + "/disk_usage.txt", "w") as file:
-            file.write("")
-
-        # Iterate the Checked Items
-        self.checked_index = 0
-        for n in range(0,len(self.checked_items)):            
-            # Find the Install Code
-            for p in range(0,len(self.programs)):
-                if self.checked_items[n] == self.programs[p][0]:
-                    self.loop = True
-
-                    # Calculate Disk Usage - Before
-                    statvfs_before = os.statvfs('/')
-                    total_before = statvfs_before.f_frsize * statvfs_before.f_blocks
-                    free_before = statvfs_before.f_frsize * statvfs_before.f_bfree
-                    used_before = total_before - free_before
-                    
-                    # Update the Label
-                    self.label2_current_item.setText(str(self.checked_items[n]))
-            
-                    # Split Install Commands and Verifier Commands
-                    install_command = self.programs[p][1].split("########## Verify ##########")
-                    
-                    # Verify Code Found
-                    if len(install_command) == 2:
-                        self.verify_code = install_command[1]
-                    else:
-                        self.verify_code = ""
-                        
-                    self.loadthread = MyThread(install_command[0], self)                        
-                    self.loadthread.finished.connect(self.on_finished)
-                    self.loadthread.start()
-                                      
-                    self.progressBar1.setValue(self.checked_index+1)
-                    self.checked_index = self.checked_index + 1
-                    
-                    while self.loop == True:
-                        QtWidgets.QApplication.processEvents()
-                        time.sleep(0.1)
-
-                    # Calculate Disk Usage - After
-                    statvfs_after = os.statvfs('/')
-                    total_after = statvfs_after.f_frsize * statvfs_after.f_blocks
-                    free_after = statvfs_after.f_frsize * statvfs_after.f_bfree
-                    used_after = total_after - free_after
-
-                    # Write to File
-                    used = used_after - used_before
-                    used_gb = used / (1024 ** 3)
-                    used_mb = used / (1024 ** 2)
-                    used_kb = used / 1024
-                    if int(used_gb) > 0:
-                        text_output = str(self.checked_items[n]).split('(')[0].strip() + f" ({used_gb:.2f} GB)"
-                    elif int(used_mb) > 0:
-                        text_output = str(self.checked_items[n]).split('(')[0].strip() + f" ({used_mb:.2f} MB)"
-                    else:
-                        text_output = str(self.checked_items[n]).split('(')[0].strip() + f" ({used_kb:.2f} kB)"
-                    with open(this_file_directory + "/disk_usage.txt", "a") as file:
-                        file.write(text_output + "\n")
-
-        # Finished
-        self.progressBar1.setValue(self.checked_index+1)
-        print("\nInstall Complete")
-        time.sleep(2)
-        self.progressBar1.hide()
-        self.label2_current_item.hide() 
-        self.pushButton_ok.setEnabled(True)
-        #self.accept()
-
-        
-    @QtCore.pyqtSlot()
-    def on_finished(self):
-        """ Proceed to the next program.
-        """
-        # Verify
-        if len(self.verify_code) > 0:
-            iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-            while iterator.value():
-                item = iterator.value()
-                if item.text(0) == self.checked_items[self.checked_index-1]:
-                    # Verify Success
-                    try:
-                        p1 = subprocess.check_call(self.verify_code, shell=True)
-                        print("VERIFY SUCCESS")
-                        item.setForeground(0,QtGui.QColor('Green'))
-                        
-                    # Verify Failure
-                    except:
-                        print("VERIFY FAILURE")
-                        item.setForeground(0,QtGui.QColor('Red'))
-                    break
-                iterator+=1  
-            
-        
-        self.loop = False
-        
-
-    def _slotCancelClicked(self):
-        """ Close everything.
-        """
-        self.close()
-        
-
-    def _slotTableItemClicked(self, item):
-        """ Update text edit box with command text when table row is clicked.
-        """
-        # Clicked Item
-        try:
-            current_item = self.treeWidget_software.currentItem().text(0)  # Deselect All and checking a box causes an error
-        except:
-            return  
-
-        # Search Programs
-        for p in range(0,len(self.programs)):
-            if current_item == self.programs[p][0]:
-                self.plainTextEdit_commands.setPlainText(self.programs[p][1])
-                break
-        
-
-    def _slotDeselectClicked(self):
-        """ Unchecks all the checkboxes.
-        """
-        # Iterate the Tree
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()
-            item.setCheckState(0, QtCore.Qt.Unchecked)
-            iterator+=1  
-            
-
-    def _slotDefaultClicked(self):
-        """ Checks the default checkboxes.
-        """
-        # Iterate the Tree
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()            
-            for p in range(0,len(self.programs)):
-                if item.text(0) == self.programs[p][0]:
-                    if self.programs[p][2] == True:
-                        item.setCheckState(0, QtCore.Qt.Checked)
-                    else:
-                        item.setCheckState(0, QtCore.Qt.Unchecked)
-                    break           
-            iterator+=1  
-            
-
-    def _slotRankingsClicked(self):
-        """ Opens a window with the programs sorted by size.
-        """
-        # Extract the Sizes
-        sizes = []        
-        for p in range(0,len(self.programs)):
-            if '(' in self.programs[p][0] and ')' in self.programs[p][0]:
-                get_size = self.programs[p][0].split(' (')[-1].replace(')','')
-                if get_size.endswith(" GB"):
-                    get_size = int(float(get_size[:-3]) * 1024 * 1024 * 1024)
-                elif get_size.endswith(" MB"):
-                    get_size = int(float(get_size[:-3]) * 1024 * 1024)
-                elif get_size.endswith(" kB") or get_size.endswith(" KB"):
-                    get_size = int(float(get_size[:-3]) * 1024)
-                else:
-                    get_size = 0
-                sizes.append(get_size)
-            else:
-                sizes.append(0)
-                
-        indices = [i[0] for i in sorted(enumerate(sizes), key=lambda x:x[1], reverse=True)]
-            
-        msg_text = "Top 30:\n"
-        count = 0
-        for n in indices:
-            msg_text = msg_text + "\t" + self.programs[n][0] + "\n"
-            count = count + 1
-            if count == 30:
-                break
-            
-        msg_text = msg_text + "\n\nTotal (Estimate):\n\t " + str(round(sum(sizes)/(1024*1024*1024),1)) + " GB"
-            
-        # Create the Message Box
-        msgBox = QtWidgets.QMessageBox()
-        msgBox.setText(msg_text)
-        msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
-        ret = msgBox.exec_()
-
-    
-    def _slotNeedsHelpClicked(self):
-        """ Opens a window with a list of installer items that are not checked by default.
-        """
-        # Get Unchecked Items
-        unchecked_items = []        
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()            
-            for p in range(0,len(self.programs)):
-                if item.text(0) == self.programs[p][0]:
-                    if self.programs[p][2] == False:
-                        unchecked_items.append(item.text(0))
-                    break
-            iterator+=1  
-        
-        # Build the Message
-        msg_text = "These programs need help with installation. \nPlease suggest fixes on GitHub or Discord.\n\n"
-        for n in unchecked_items:
-            msg_text = msg_text + "\t" + n + "\n"
-            
-        # Create the Message Box
-        msgBox = QtWidgets.QMessageBox()
-        msgBox.setText(msg_text)
-        msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
-        ret = msgBox.exec_()
-        
-
-    def _slotExpandAllClicked(self):
-        """ Expands the tree widget.
-        """
-        # Expand
-        self.treeWidget_software.expandAll()
-        
-
-    def _slotCollapseAllClicked(self):
-        """ Collapses the tree widget.
-        """
-        # Collapse
-        self.treeWidget_software.collapseAll()
-        
-
-    def _slotImportClicked(self):
-        """ Imports a yaml file for checking installer items.
-        """
-        # Open the File
-        path = QtWidgets.QFileDialog.getOpenFileName(self, 'Open YAML File', this_file_directory, filter='YAML (*.yaml)')
-        lines = []
-        if len(path[0]) > 0:
-            with open(path[0], 'r') as file:
-                lines = file.readlines()
-        else:
-            return
-
-        # Convert to List
-        checked_items = []
-        for line in lines:
-            if line.strip().startswith('-'):
-                checked_items.append(line.strip().lstrip('- ').strip())
-
-        # Uncheck all Items
-        self._slotDeselectClicked()
-
-        # Iterate the Tree
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()            
-            for p in range(0,len(checked_items)):
-                if item.text(0).split('(')[0].strip() == checked_items[p]:
-                    item.setCheckState(0, QtCore.Qt.Checked)
-                    break
-            iterator+=1  
-
-
-    def _slotExportClicked(self):
-        """ Saves checked items to a yaml file to be imported.
-        """
-        # Get Checked Items
-        checked_items = []        
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()
-            if item.checkState(0) == 2:    
-                # Ignore Categories
-                if item.text(0) not in larger_categories:       
-                    checked_items.append(item.text(0).split('(')[0].strip())
-            iterator+=1   
-
-        # Save List to YAML
-        path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save YAML File', this_file_directory, filter='YAML (*.yaml)')
-        if len(path[0]) > 0:
-            if path[0].endswith(".yaml") == False:
-                path[0] = path[0] + ".yaml"
-            with open(path[0], 'w') as file:
-                file.write("checked_items:\n")
-                for item in checked_items:
-                    file.write(f"  - {item}\n")
-
-    def _slotSensorNodeClicked(self):
-        """ Checks minimum required items to install on a remote FISSURE tactical node.
-        """
-        required_items = [
-            "Misc. Dependencies",
-            "fissure Commands",
-            "Password Prompt Exceptions",
-            "GNU Radio",
-            "Scapy",
-            "Wireshark",
-            "Meshtastic",
-            "Network Certificates",
-            "gr-ainfosec",
-            "Auto-Launch Sensor Node"
-            # Add more names as needed
-        ]
-
-        # Step 1: Uncheck all items
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()
-            item.setCheckState(0, QtCore.Qt.Unchecked)
-            iterator += 1
-
-        # Step 2: Check only items in the required list
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()
-            item_name = item.text(0).split('(')[0].strip()  # ignore sizes like " (3.4 MB)"
-            if item_name in required_items:
-                item.setCheckState(0, QtCore.Qt.Checked)
-            iterator += 1
-
-
-        
-class MyThread(QtCore.QThread):
-    def __init__(self, n, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.n = n
-
-
-    def run(self):
-        try:
-            #print(self.n)
-            p1 = subprocess.Popen(self.n, shell=True)
-            p1.wait()
-        except:
-            print("FAILURE") 
-
-
-class InstallDialog1(QtWidgets.QDialog, form_class):
-    def __init__(self):
-        """ Operating System Dialog
-        """
-        QtWidgets.QDialog.__init__(self)
-        self.setupUi(self)
-        
-        # Prevent Resizing/Maximizing
-        self.setFixedSize(320, 435)
-        
-        # Set Style Sheet
-        color1 = "#F4F4F4"
-        color2 = "#FBFBFB"
-        color3 = "#17365D"
-        color4 = "#000000"
-        color5 = "#FFFFFF"
-        color6 = "#FEFEFE"
-        color7 = "#EFEFEF"
-        color8 = "#FEFEFE"
-        color9 = "#EFEFEF"
-        color10 = "#FEFEFE"
-        color11 = "#F8F8F8"
-        color12 = "#000000"
-        color13 = "#C0C0C0"        
-        get_css_text = str(open('/' + os.path.dirname(os.path.realpath(__file__)).strip('/Installer/OS') + "/UI/Style_Sheets/light.css","r").read())
-        get_css_text = re.sub(r'@color1\b',color1,get_css_text)
-        get_css_text = re.sub(r'@color2\b',color2,get_css_text)
-        get_css_text = re.sub(r'@color3\b',color3,get_css_text)
-        get_css_text = re.sub(r'@color4\b',color4,get_css_text)
-        get_css_text = re.sub(r'@color5\b',color5,get_css_text)
-        get_css_text = re.sub(r'@color6\b',color6,get_css_text)
-        get_css_text = re.sub(r'@color7\b',color7,get_css_text)
-        get_css_text = re.sub(r'@color8\b',color8,get_css_text)
-        get_css_text = re.sub(r'@color9\b',color9,get_css_text)
-        get_css_text = re.sub(r'@color10\b',color10,get_css_text)
-        get_css_text = re.sub(r'@color11\b',color11,get_css_text)
-        get_css_text = re.sub(r'@color12\b',color12,get_css_text)
-        get_css_text = re.sub(r'@color13\b',color13,get_css_text)
-        get_css_text = re.sub(r'@unchecked_enabled\b','light-unchecked.png',get_css_text)
-        get_css_text = re.sub(r'@checked_enabled\b','light-checked.png',get_css_text)
-        get_css_text = re.sub(r'@checked_disabled\b','light-checked-disabled.png',get_css_text)
-        get_css_text = re.sub(r'@unchecked_disabled\b','light-unchecked-disabled.png',get_css_text)
-        get_css_text = re.sub(r'@down_arrow_enabled\b','light-down-arrow.png',get_css_text)
-        get_css_text = re.sub(r'@down_arrow_disabled\b','light-down-arrow-disabled.png',get_css_text)
-        get_css_text = re.sub(r'@radio_unchecked_enabled\b','light-radio.png',get_css_text)
-        get_css_text = re.sub(r'@radio_checked_enabled\b','light-radio-checked.png',get_css_text)
-        get_css_text = get_css_text.replace("@icon_path",'/' + os.path.dirname(os.path.realpath(__file__)).strip('/Installer/OS') + "/docs/Icons")
-        get_css_text = get_css_text.replace('@menu_hover_padding','0px')
-        self.setStyleSheet(get_css_text)  
-        
-        # Do SIGNAL/Slots Connections
-        self._connectSlots()  
-        
-        # Detect Operating System
-        process = subprocess.Popen('lsb_release -d', shell=True, stdout=subprocess.PIPE, encoding='utf8')
-        stdout = process.communicate()[0]
-       
-        # Detect x86_64 or ARM
-        process2 = subprocess.Popen('lscpu', shell=True, stdout=subprocess.PIPE, encoding='utf8')
-        stdout2 = process2.communicate()[0]        
-
-        # Select Radio Button
-        if "Ubuntu 20.04" in stdout:
-            self.radioButton_ubuntu20_04.setChecked(True)
-        elif "Parrot" in stdout:
-            self.radioButton_parrot_os_6_1.setChecked(True)
-        elif "DragonOS" in stdout:
-            self.radioButton_dragonos_noble.setChecked(True)
-        elif "KDE neon" in stdout:
-            if "5.25" in stdout:
-                self.radioButton_kde_neon_5_25.setChecked(True)
-        elif "Ubuntu 22.04" in stdout:
-            if "ARM" in stdout2:
-                self.radioButton_ubuntu22_04_arm.setChecked(True)
-            else:
-                self.radioButton_ubuntu22_04.setChecked(True)            
-        elif "Kali" in stdout:
-            self.radioButton_kali.setChecked(True)
-        elif "BackBox" in stdout:  # Check this again
-            self.radioButton_backbox_linux_8.setChecked(True)            
-        elif "bookworm" in stdout:
-            self.radioButton_raspberry_pi_os.setChecked(True)
-        elif "Ubuntu 24.04" in stdout:
-            self.radioButton_ubuntu24_04.setChecked(True) 
-        elif "Arch Linux" in stdout:
-            self.radioButton_arch_linux.setChecked(True) 
-
-        self.get_os = ""
-        
-
-    def _connectSlots(self):
-        """ Contains the connect functions for all the signals and slots
-        """   
-        # Push Buttons
-        self.pushButton_ok.clicked.connect(self._slotOK_Clicked)
-        self.pushButton_cancel.clicked.connect(self._slotCancelClicked)
-        
-
-    def _slotOK_Clicked(self):
-        """ Return to open the second install dialog.
-        """        
-        # Select Software for Operating System
-        if self.radioButton_ubuntu20_04.isChecked():
-            self.get_os = "Ubuntu 20.04"         
-        elif self.radioButton_parrot_os_6_1.isChecked():
-            self.get_os = "Parrot OS 6.1"            
-        elif self.radioButton_kde_neon_5_25.isChecked():
-            self.get_os = "KDE neon 5.25"
-        elif self.radioButton_ubuntu22_04.isChecked():
-            self.get_os = "Ubuntu 22.04"
-        elif self.radioButton_dragonos_noble.isChecked():
-            self.get_os = "DragonOS Noble"
-        elif self.radioButton_kali.isChecked():
-            self.get_os = "Kali 2024.3"
-        elif self.radioButton_backbox_linux_8.isChecked():
-            self.get_os = "BackBox Linux 8"
-        elif self.radioButton_raspberry_pi_os.isChecked():
-            self.get_os = "Raspberry Pi OS"
-        elif self.radioButton_ubuntu22_04_arm.isChecked():
-            self.get_os = "Ubuntu 22.04 ARM"
-        elif self.radioButton_ubuntu24_04.isChecked():
-            self.get_os = "Ubuntu 24.04"
-        elif self.radioButton_arch_linux.isChecked():
-            self.get_os = "Arch Linux"
-            
-        self.accept()
-        
-
-    def _slotCancelClicked(self):
-        """ Close everything.
-        """
-        self.close()
-
-
-def main(argv):
-    """ The start of everything.
-    """   
-    app = QtWidgets.QApplication(argv) 
-    
-    # Operating System Dialog
-    install_dlg1 = InstallDialog1()
-    install_dlg1.show() 
-    
-    # OK Clicked
-    if install_dlg1.exec_() == QtWidgets.QDialog.Accepted:
-        if install_dlg1.get_os == "Ubuntu 20.04":
-            install_dlg2 = InstallDialog2(programs_ubuntu20_04)
-        elif install_dlg1.get_os == "Parrot OS 6.1":
-            install_dlg2 = InstallDialog2(programs_parrot_os_6_1)
-        elif install_dlg1.get_os == "KDE neon 5.25":
-            install_dlg2 = InstallDialog2(programs_ubuntu20_04)
-        elif install_dlg1.get_os == "Ubuntu 22.04":
-            install_dlg2 = InstallDialog2(programs_ubuntu22_04)
-        elif install_dlg1.get_os == "DragonOS Noble":
-            install_dlg2 = InstallDialog2(programs_dragonOS_noble)
-        elif "Kali" in install_dlg1.get_os:
-            install_dlg2 = InstallDialog2(programs_kali)
-        elif install_dlg1.get_os == "BackBox Linux 8":
-            install_dlg2 = InstallDialog2(programs_backbox_linux_8)
-        elif install_dlg1.get_os == "Raspberry Pi OS":
-            install_dlg2 = InstallDialog2(programs_raspberry_pi_os)
-        elif install_dlg1.get_os == "Ubuntu 22.04 ARM":
-            install_dlg2 = InstallDialog2(programs_ubuntu22_04_arm)
-        elif install_dlg1.get_os == "Ubuntu 24.04":
-            install_dlg2 = InstallDialog2(programs_ubuntu24_04)
-        elif "Arch Linux" in install_dlg1.get_os:
-            install_dlg2 = InstallDialog2(programs_arch_linux)
-        install_dlg2.show() 
-        
-        # Install Clicked
-        if install_dlg2.exec_() == QtWidgets.QDialog.Accepted:
-            pass
-        #    print("Install Complete")
-            
-    sys.exit()
-    
- 
-if __name__ == "__main__":
-    main(sys.argv)
 

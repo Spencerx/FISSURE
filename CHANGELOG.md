@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-15
+
+Cleaning installer code.
+
+### Changed
+
+- Removed code from OS installer files
+- Updated labels for first installer GUI
+- Removed programs from second installer script
+- Pointed first installer script to call second installer script instead of OS installer files
+- Updated installer info in the README
+
 ## 2025-10-14
 
 Fixing pytak import errors on install and sample offset slider in demod tool.

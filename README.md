@@ -264,7 +264,7 @@ The following is a list of "supported" hardware with varying levels of integrati
 
 **Supported**
 
-There are now two branches within FISSURE: the Python3 branch and the Python2_maint-3.7 branch. The Python3 branch contains the latest code and has support for PyQt5 and GNU Radio versions 3.8 and 3.10. The Python2_maint-3.7 branch has been deprecated and will only be updated if specific third-party tools require GNU Radio version 3.7 or an older operating system. Only the latest minor versions of operating systems will be supported for installs and we will do our best to keep up.
+There are now two branches within FISSURE: the Python3 branch and the Python2_maint-3.7 branch. The Python3 branch contains the latest code and has support for PyQt5 and GNU Radio versions 3.8 and 3.10. The Python2_maint-3.7 branch has been deprecated and will only be updated if specific third-party tools require GNU Radio version 3.7 or an older operating system. Only the latest minor versions of operating systems will be supported for installs and we will do our best to keep up. Operating systems that have been updated and yet to be fully tested will be listed under "In-Progress."
 
 The GitHub releases provided in this repository are periodic snapshots of the project's state, intended primarily for archival purposes. These releases may not include the latest updates, bug fixes, or features currently under development. To access the most up-to-date version of the software, we strongly recommend using the main Python3 branch, which reflects ongoing development and the current state of the project.
 
@@ -272,16 +272,14 @@ FISSURE is most extensively tested on Ubuntu, making it the most validated platf
 
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
-| BackBox Linux 8 (amd64) | Python3 | maint-3.10 |
-| Kali 23.1 (x64) | Python3 | maint-3.10 |
-| KDE neon 5.25 (x64) (6.0 not tested) | Python3 | maint-3.8 |
-| Parrot Security 6.1 (amd64) | Python3 | maint-3.10 |
-| Raspberry Pi OS (bookworm) | Python3 | maint-3.10 |
-| Ubuntu 18.04 (x64) | Python2_maint-3.7 | maint-3.7 |
-| Ubuntu 20.04 (x64) | Python3 | maint-3.8 |
-| Ubuntu 22.04 (x64) | Python3 | maint-3.10 |
-| Ubuntu 22.04 (ARM/Orange Pi) | Python3 | maint-3.10 |
-| Ubuntu 24.04 (x86) | Python3 | maint-3.10 |
+| DragonOS Noble (24.04) | Python3 | maint-3.10 |
+| Kali | Python3 | maint-3.10 |
+| Raspberry Pi OS | Python3 | maint-3.10 |
+| Ubuntu 18.04 | Python2_maint-3.7 | maint-3.7 |
+| Ubuntu 20.04 | Python3 | maint-3.10 |
+| Ubuntu 22.04 | Python3 | maint-3.10 |
+| Ubuntu 22.04 | Python3 | maint-3.10 |
+| Ubuntu 24.04 / Ubuntu ARM (Orange Pi) / Ubuntu for Raspberry Pi | Python3 | maint-3.10 |
 | Windows 11 WSL2 | See Supported Linux Version | See Supported Linux Version |
 
 **In-Progress (beta)**
@@ -290,8 +288,9 @@ These operating systems are still in beta status. They are under development and
 
 Operating System | FISSURE Branch | Default GNU Radio Version
 :-------------------------:|:-------------------------:|:-------------------------:
-| DragonOS Noble (24.04) | Python3 | maint-3.10 |
-| Ubuntu for Raspberry Pi | Python3 | maint-3.10 |
+| BackBox Linux | Python3 | maint-3.10 |
+| KDE neon | Python3 | maint-3.10 |
+| Parrot Security 6.1 | Python3 | maint-3.10 |
 
 Note: Certain software tools do not work for every OS. Refer to [Known Conflicts and Third-Party Software](https://fissure.readthedocs.io/en/latest/pages/installation.html#known-conflicts)
 

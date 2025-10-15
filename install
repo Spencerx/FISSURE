@@ -31,14 +31,12 @@ fi
 if [[ -n "$ubuntu20_04" ]]
 then
     echo "Ubuntu 20.04 detected"
-    installer_file="ubuntu20_04"
 fi
 
 # DragonOS Focal
 if [[ -n "$dragonOS_focal" ]]
 then
     echo "DragonOS Focal detected. Focal is no longer supported. Update to FocalX."
-    installer_file="dragonos_focal"
     exit
 fi
 
@@ -46,7 +44,6 @@ fi
 if [[ -n "$dragonOS_noble" ]]
 then
     echo "DragonOS Focal detected"
-    installer_file="dragonOS_noble"
 fi
 
 
@@ -57,7 +54,6 @@ then
     if [[ -n "$kde_version" ]]
     then
         echo "KDE neon 5.25 detected"
-        installer_file="kde_neon_5.25"
     fi
 fi
 
@@ -69,7 +65,6 @@ then
     if [[ -n "$ubuntu_arm" ]]
     then
         echo "ARM detected"
-        installer_file="ubuntu22_04_arm"
     fi
 fi
 
@@ -77,50 +72,42 @@ fi
 if [[ -n "$kali23_1" ]]
 then
     echo "Kali detected"
-    installer_file="kali23_1"
 fi
 
 # DragonOS FocalX
 if [[ -n "$dragonOS_focalx" ]]
 then
     echo "DragonOS FocalX detected"
-    installer_file="dragonos_focalx"
 fi
 
 # BackBox
 if [[ -n "$backbox" ]]
 then
     echo "BackBox detected"
-    installer_file="backbox"
 fi
 
 # Raspberry Pi OS
 if [[ -n "$raspberry_pi_os" ]]
 then
     echo "Raspberry Pi OS (bookworm) detected"
-    installer_file="raspberry_pi_os"
 fi
 
 # Parrot OS
 if [[ -n "$parrot_os" ]]
 then
     echo "Parrot OS detected"
-    installer_file="parrot_os"
 fi
 
 # Ubuntu 24.04
 if [[ -n "$ubuntu24_04" ]]
 then
     echo "Ubuntu 24.04 detected"
-    installer_file="ubuntu24_04"
-
 fi
 
 # Python2-maint_3.7, Ubuntu 18.04
 if [[ -n "$ubuntu18_04" ]]
 then    
     echo "This branch is not for Ubuntu 18.04 variants. Switch to the Python2_maint-3.7 branch and try again!"
-    installer_file="ubuntu18_04"
     exit
 fi
 
@@ -186,11 +173,11 @@ fi
 #        Run the Full Installer        #
 ########################################
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-mkdir $DIR/Install_Log
+mkdir -p "$DIR/Install_Log"
 LOGFILE="$DIR/Install_Log/installer.log"
 # log both bash and python output
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "[*] Starting installer at $(date)"
-$DIR/Installer/OS/$installer_file
+$DIR/Installer/installer
 echo "[*] Finished at $(date)"
