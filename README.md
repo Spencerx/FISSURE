@@ -276,7 +276,7 @@ Operating System | FISSURE Branch | Default GNU Radio Version
 | Kali | Python3 | maint-3.10 |
 | Raspberry Pi OS | Python3 | maint-3.10 |
 | Ubuntu 18.04 | Python2_maint-3.7 | maint-3.7 |
-| Ubuntu 20.04 | Python3 | maint-3.10 |
+| Ubuntu 20.04 | Python3 | maint-3.8 |
 | Ubuntu 22.04 | Python3 | maint-3.10 |
 | Ubuntu 22.04 | Python3 | maint-3.10 |
 | Ubuntu 24.04 / Ubuntu ARM (Orange Pi) / Ubuntu for Raspberry Pi | Python3 | maint-3.10 |
