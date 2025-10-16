@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-16
+
+Preparing installer for containerization.
+
+### Changed
+
+- Merging pull requests #94, #95, #96
+
+### Fixed
+
+- Removing first installer script prompts from headless install
+- Running second installer script as an executable instead of with Python
+
 ## 2025-10-15
 
 Adding headless installer and deployment modes.

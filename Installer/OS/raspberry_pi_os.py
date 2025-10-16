@@ -66,7 +66,10 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow --break-system-packages
+
+#sudo python3 -m pip install tensorflow --break-system-packages
+python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
+output=$(uname -a); if echo $output | grep -qi "raspi"; then python3 -m pip install tensorflow --break-system-packages; else python3 -m pip install tensorflow_cpu --break-system-packages; fi  # TODO: Fix to work with sudo
 
 sudo apt install -y nodejs npm build-essential libgtk-3-dev libwebkit2gtk-4.0-dev  # netron
 mkdir -p ~/Installed_by_FISSURE  # netron
@@ -250,8 +253,7 @@ bash -c '
 programs_raspberry_pi_os.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
-sudo apt-get install -y python3-pyserial
-sudo python3 -m pip install meshtastic --break-system-packages
+python3 -m pip install meshtastic --break-system-packages  # TODO: test with sudo and --ignore-installed
 sudo usermod -aG dialout $USER  # log out & in/reboot
 sudo usermod -aG tty $USER
 echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
@@ -2554,4 +2556,3 @@ fi
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
-

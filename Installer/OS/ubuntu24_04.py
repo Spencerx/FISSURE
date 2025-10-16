@@ -77,7 +77,11 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install tensorflow_cpu --break-system-packages
+
+#sudo python3 -m pip install tensorflow_cpu --break-system-packages
+python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
+output=$(uname -a); if echo $output | grep -qi "raspi"; then python3 -m pip install tensorflow --break-system-packages; else python3 -m pip install tensorflow_cpu --break-system-packages; fi  # TODO: Fix to work with sudo
+
 sudo apt-get install -y snapd
 sudo snap install netron
 sudo python3 -m pip install ipython --break-system-packages
@@ -263,7 +267,6 @@ python3 -c "import meshtastic"
 programs_ubuntu24_04.append(('Network Certificates (3.51 kB)',
 """cd '""" + fissure_directory + """'
 export PYTHONPATH='""" + fissure_directory + """':$PYTHONPATH
-python3 -m pip install tensorflow_cpu --break-system-packages
 python3 ./fissure/generate_certificates.py
 ########## Verify ##########
 ls '""" + fissure_directory + """/certificates'
@@ -2580,4 +2583,3 @@ fi
 ########## Verify ##########
 ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
 """,False,'Mapping'))
-

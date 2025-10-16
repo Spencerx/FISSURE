@@ -69,7 +69,8 @@ else
     ubuntu22_04=$(lsb_release -d 2>&1 | grep "Ubuntu 22.04")
     kali23_1=$(lsb_release -d 2>&1 | grep "Kali")
     backbox=$(cat /etc/issue -d 2>&1 | grep "BackBox")
-    raspberry_pi_os=$(lsb_release -d 2>&1 | grep "bookworm")
+    raspberry_pi_os_bookworm=$(lsb_release -d 2>&1 | grep "bookworm")
+    raspberry_pi_os_trixie=$(lsb_release -d 2>&1 | grep "trixie")
     ubuntu24_04=$(lsb_release -d 2>&1 | grep "Ubuntu 24.04")
 fi
 
@@ -113,8 +114,13 @@ if [[ -n "$backbox" ]]; then
     echo "BackBox detected"
 fi
 
-if [[ -n "$raspberry_pi_os" ]]; then
+if [[ -n "$raspberry_pi_os_bookworm" ]]; then
     echo "Raspberry Pi OS (bookworm) detected"
+fi
+
+if [[ -n "$raspberry_pi_os_trixie" ]]
+then
+    echo "Raspberry Pi OS (trixie) detected"
 fi
 
 if [[ -n "$parrot_os" ]]; then
@@ -137,30 +143,38 @@ fi
 qt5_version=$(qmake --version 2>/dev/null | grep "version 5")
 if [[ -z "$qt5_version" ]]; then
     echo "No Qt5 found."
-    read -p "Qt5 is required to open the installer. Install now? [Y/n]: " yn
-    case $yn in
-        [Nn]*) exit ;;
-        *)
-            if [[ -n "$ubuntu20_04" ]]; then
-                sudo apt-get update
+
+    if [[ "$SKIP_GUI" -eq 1 ]]; then
+        echo "[*] Headless mode detected — installing Qt5 dependencies automatically..."
+        AUTO_INSTALL_QT=1
+    else
+        read -p "Qt5 is required to open the installer. Install now? [Y/n]: " yn
+        case $yn in
+            [Nn]*) exit ;;
+            *) AUTO_INSTALL_QT=1 ;;
+        esac
+    fi
+
+    if [[ "$AUTO_INSTALL_QT" -eq 1 ]]; then
+        if [[ -n "$ubuntu20_04" ]]; then
+            sudo apt-get update -y
+            sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5 fonts-ubuntu
+        fi
+
+        if [[ -n "$kde_neon" ]]; then
+            kde_version=$(lsb_release -d 2>&1 | grep "5.25")
+            if [[ -n "$kde_version" ]]; then
+                sudo apt-get update -y
                 sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5 fonts-ubuntu
             fi
+        fi
 
-            if [[ -n "$kde_neon" ]]; then
-                kde_version=$(lsb_release -d 2>&1 | grep "5.25")
-                if [[ -n "$kde_version" ]]; then
-                    sudo apt-get update
-                    sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5 fonts-ubuntu
-                fi
-            fi
-
-            if [[ -n "$ubuntu22_04" ]] || [[ -n "$kali23_1" ]] || [[ -n "$backbox" ]] \
-               || [[ -n "$raspberry_pi_os" ]] || [[ -n "$parrot_os" ]] || [[ -n "$ubuntu24_04" ]]; then
-                sudo apt-get update
-                sudo apt-get install -y build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5 fonts-ubuntu
-            fi
-        ;;
-    esac
+        if [[ -n "$ubuntu22_04" ]] || [[ -n "$kali23_1" ]] || [[ -n "$backbox" ]] || [[ -n "$raspberry_pi_os_bookworm" ]] \
+           || [[ -n "$raspberry_pi_os_trixie" ]] || [[ -n "$parrot_os" ]] || [[ -n "$ubuntu24_04" ]]; then
+            sudo apt-get update -y
+            sudo apt-get install -y build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5 fonts-ubuntu
+        fi
+    fi
 fi
 
 
@@ -178,7 +192,7 @@ echo "[*] Starting installer at $(date)"
 
 if [[ "$SKIP_GUI" -eq 1 ]]; then
     echo "[*] Launching headless Python installer..."
-    python3 "$DIR/Installer/installer" --headless
+    "$DIR/Installer/installer" --headless
 else
     echo "[*] Launching interactive GUI installer..."
     "$DIR/Installer/installer"
