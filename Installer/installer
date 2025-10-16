@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from PyQt5 import QtCore, QtGui, uic, QtWidgets
 
+from PyQt5 import QtCore, QtGui, uic, QtWidgets
 from PyQt5.QtGui import QPainter, QPen, QBrush
 
 import subprocess
@@ -50,16 +50,6 @@ larger_categories = [
     'Z-Wave'
 ]
 
-
-# programs_ubuntu20_04 = []
-# programs_parrot_os_6_1 = []
-# programs_ubuntu22_04 = []
-# programs_dragonOS_noble = []
-# programs_kali = []
-# programs_raspberry_pi_os = []
-# programs_ubuntu22_04_arm = []
-# programs_ubuntu24_04 = []
-# programs_arch_linux = []
 
 ########################################################################
 
@@ -175,14 +165,16 @@ class InstallDialog2(QtWidgets.QDialog, form_class2):
         self.pushButton_ok.clicked.connect(self._slotOK_Clicked)
         self.pushButton_cancel.clicked.connect(self._slotCancelClicked)
         self.pushButton_deselect.clicked.connect(self._slotDeselectClicked)
-        self.pushButton_default.clicked.connect(self._slotDefaultClicked)
         self.pushButton_rankings.clicked.connect(self._slotRankingsClicked)
         self.pushButton_needs_help.clicked.connect(self._slotNeedsHelpClicked)
         self.pushButton_expand_all.clicked.connect(self._slotExpandAllClicked)
         self.pushButton_collapse_all.clicked.connect(self._slotCollapseAllClicked)
         self.pushButton_import.clicked.connect(self._slotImportClicked)
         self.pushButton_export.clicked.connect(self._slotExportClicked)
+        self.pushButton_full.clicked.connect(self._slotFullClicked)
         self.pushButton_sensor_node.clicked.connect(self._slotSensorNodeClicked)       
+        self.pushButton_hiprfisr.clicked.connect(self._slotHiprfisrClicked)
+        self.pushButton_dashboard.clicked.connect(self._slotDashboardClicked)
         
         # Tables
         self.treeWidget_software.clicked.connect(self._slotTableItemClicked)
@@ -347,24 +339,7 @@ class InstallDialog2(QtWidgets.QDialog, form_class2):
             item = iterator.value()
             item.setCheckState(0, QtCore.Qt.Unchecked)
             iterator+=1  
-            
-
-    def _slotDefaultClicked(self):
-        """ Checks the default checkboxes.
-        """
-        # Iterate the Tree
-        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
-        while iterator.value():
-            item = iterator.value()            
-            for p in range(0,len(self.programs)):
-                if item.text(0) == self.programs[p][0]:
-                    if self.programs[p][2] == True:
-                        item.setCheckState(0, QtCore.Qt.Checked)
-                    else:
-                        item.setCheckState(0, QtCore.Qt.Unchecked)
-                    break           
-            iterator+=1  
-            
+                       
 
     def _slotRankingsClicked(self):
         """ Opens a window with the programs sorted by size.
@@ -504,22 +479,28 @@ class InstallDialog2(QtWidgets.QDialog, form_class2):
                 for item in checked_items:
                     file.write(f"  - {item}\n")
 
+
+    def _slotFullClicked(self):
+        """ Checks the default checkboxes.
+        """
+        # Iterate the Tree
+        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
+        while iterator.value():
+            item = iterator.value()            
+            for p in range(0,len(self.programs)):
+                if item.text(0) == self.programs[p][0]:
+                    if self.programs[p][2] == True:
+                        item.setCheckState(0, QtCore.Qt.Checked)
+                    else:
+                        item.setCheckState(0, QtCore.Qt.Unchecked)
+                    break           
+            iterator+=1  
+
+  
     def _slotSensorNodeClicked(self):
         """ Checks minimum required items to install on a remote FISSURE tactical node.
         """
-        required_items = [
-            "Misc. Dependencies",
-            "fissure Commands",
-            "Password Prompt Exceptions",
-            "GNU Radio",
-            "Scapy",
-            "Wireshark",
-            "Meshtastic",
-            "Network Certificates",
-            "gr-ainfosec",
-            "Auto-Launch Sensor Node"
-            # Add more names as needed
-        ]
+        from Modes.sensornode import required_items
 
         # Step 1: Uncheck all items
         iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
@@ -537,6 +518,49 @@ class InstallDialog2(QtWidgets.QDialog, form_class2):
                 item.setCheckState(0, QtCore.Qt.Checked)
             iterator += 1
 
+
+    def _slotHiprfisrClicked(self):
+        """ Checks minimum required items to install the FISSURE HIPRFISR/central hub.
+        """
+        from Modes.hiprfisr import required_items
+
+        # Step 1: Uncheck all items
+        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
+        while iterator.value():
+            item = iterator.value()
+            item.setCheckState(0, QtCore.Qt.Unchecked)
+            iterator += 1
+
+        # Step 2: Check only items in the required list
+        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
+        while iterator.value():
+            item = iterator.value()
+            item_name = item.text(0).split('(')[0].strip()  # ignore sizes like " (3.4 MB)"
+            if item_name in required_items:
+                item.setCheckState(0, QtCore.Qt.Checked)
+            iterator += 1
+
+
+    def _slotDashboardClicked(self):
+        """ Checks minimum required items to install the FISSURE Dashboard.
+        """
+        from Modes.dashboard import required_items
+
+        # Step 1: Uncheck all items
+        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
+        while iterator.value():
+            item = iterator.value()
+            item.setCheckState(0, QtCore.Qt.Unchecked)
+            iterator += 1
+
+        # Step 2: Check only items in the required list
+        iterator = QtWidgets.QTreeWidgetItemIterator(self.treeWidget_software)
+        while iterator.value():
+            item = iterator.value()
+            item_name = item.text(0).split('(')[0].strip()  # ignore sizes like " (3.4 MB)"
+            if item_name in required_items:
+                item.setCheckState(0, QtCore.Qt.Checked)
+            iterator += 1
 
         
 class MyThread(QtCore.QThread):
@@ -683,11 +707,99 @@ class InstallDialog1(QtWidgets.QDialog, form_class):
         self.close()
 
 
+
 def main(argv):
     """ The start of everything.
     """   
+    import os
+    import sys
+    import subprocess
+    from PyQt5 import QtWidgets
+
+    # --- HEADLESS MODE (Non-interactive install) ---
+    if "--headless" in argv:
+        os_arg = os.getenv("FISSURE_OS")
+        mode_arg = os.getenv("FISSURE_MODE")
+
+        if not os_arg or not mode_arg:
+            print("Error: FISSURE_OS and FISSURE_MODE environment variables not set.")
+            sys.exit(1)
+
+        print(f"[*] Running headless install: OS={os_arg}, Mode={mode_arg}")
+
+        # --- Select OS Program List ---
+        if "Ubuntu 24.04" in os_arg:
+            from OS.ubuntu24_04 import programs_ubuntu24_04 as programs
+        elif "Ubuntu 22.04" in os_arg:
+            from OS.ubuntu22_04 import programs_ubuntu22_04 as programs
+        elif "DragonOS" in os_arg:
+            from OS.dragonOS_noble import programs_dragonOS_noble as programs
+        elif "Parrot" in os_arg:
+            from OS.parrot_os import programs_parrot_os_6_1 as programs
+        elif "Kali" in os_arg:
+            from OS.kali23_1 import programs_kali as programs
+        elif "BackBox" in os_arg:
+            from OS.backbox import programs_backbox_linux_8 as programs
+        elif "Raspberry Pi OS" in os_arg:
+            from OS.raspberry_pi_os import programs_raspberry_pi_os as programs
+        else:
+            print(f"Unsupported OS: {os_arg}")
+            sys.exit(1)
+
+        # --- Select Install Mode ---
+        mode_arg = mode_arg.lower()
+        selected_programs = []
+
+        if mode_arg == "full":
+            selected_programs = [p for p in programs if p[2] is True]
+
+        elif mode_arg == "base":
+            print("Base install not supported yet. Exiting.")
+            sys.exit(1)
+            from Modes.base import required_items
+            selected_programs = [p for p in programs if p[0].split('(')[0].strip() in required_items]
+
+        elif mode_arg == "hiprfisr":
+            print("HIPRFISR install not supported yet. Exiting.")
+            sys.exit(1)
+            from Modes.hiprfisr import required_items
+            selected_programs = [p for p in programs if p[0].split('(')[0].strip() in required_items]
+
+        elif mode_arg == "dashboard":
+            print("Dashboard install not supported yet. Exiting.")
+            sys.exit(1)
+            from Modes.dashboard import required_items
+            selected_programs = [p for p in programs if p[0].split('(')[0].strip() in required_items]
+
+        elif mode_arg in ("sensor", "sensornode"):
+            from Modes.sensornode import required_items         
+            selected_programs = [p for p in programs if p[0].split('(')[0].strip() in required_items]
+
+        elif mode_arg == "custom":
+            from Modes.custom import required_items
+            selected_programs = [p for p in programs if p[0].split('(')[0].strip() in required_items]
+
+        else:
+            print(f"Unknown mode: {mode_arg}")
+            sys.exit(1)
+
+        # --- Run Installs Sequentially ---
+        print(f"[*] Installing {len(selected_programs)} program(s)...")
+        for name, command, _, _ in selected_programs:
+            print(f"[INSTALL] {name}")
+            result = subprocess.run(command, shell=True)
+            if result.returncode != 0:
+                print(f"[ERROR] {name} installation failed (code {result.returncode})")
+            else:
+                print(f"[OK] {name} installed successfully")
+
+        print("[*] Headless installation complete.")
+        sys.exit(0)
+
+
+    # --- GUI MODE (Interactive install) ---
     app = QtWidgets.QApplication(argv) 
-    
+
     # Operating System Dialog
     install_dlg1 = InstallDialog1()
     install_dlg1.show() 
@@ -726,18 +838,16 @@ def main(argv):
             install_dlg2 = InstallDialog2(programs_ubuntu24_04)
         elif "Arch Linux" in install_dlg1.get_os:
             return
-            # from OS.ubuntu24_04 import programs_ubuntu24_04
-            # install_dlg2 = InstallDialog2(programs_ubuntu24_04)
+
         install_dlg2.show() 
-        
+
         # Install Clicked
         if install_dlg2.exec_() == QtWidgets.QDialog.Accepted:
             pass
-        #    print("Install Complete")
-            
+            # print("Install Complete")
+
     sys.exit()
-    
- 
+
+
 if __name__ == "__main__":
     main(sys.argv)
-

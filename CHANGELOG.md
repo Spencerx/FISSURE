@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 ## 2025-10-15
 
+Adding headless installer and deployment modes.
+
+### Added
+
+- Headless installer for operating systems and modes for FISSURE deployments
+- Buttons in installer GUI for recalling modes for Full (previously Default), HIPRFISR, Dashboard, and Sensor Node
+
+### Changed
+
+- Renamed "Default" button in installer to "Full"
+
+## 2025-10-15
+
 Cleaning installer code.
 
 ### Changed
