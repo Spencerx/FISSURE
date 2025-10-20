@@ -17,8 +17,7 @@ import subprocess
 import time
 from typing import List, Dict, Any
 
-from fissure.utils.plugins.operations import Operation, setup_decorator, run_decorator
-from fissure.utils.plugins.operations import get_arguments as get_arguments_base
+from fissure.utils.plugins.operations import Operation
 
 # add wifi_lib to path and import modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -26,7 +25,7 @@ from wifi_lib.query_iface import verify_interface, get_channels
 from wifi_lib.configure_iface import set_monitor_mode, set_channel
 from wifi_lib.oui import OUILookup, get_vendor_common_name
 
-class WifiScanAP(Operation):
+class OperationMain(Operation):
     """WiFi AP Scanner
     """
     def __init__(self, dev: str, duration: float = -1, dwell: float = 1, power: float = -100, channels: List[int] | None = None, sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
@@ -71,9 +70,10 @@ class WifiScanAP(Operation):
         # verify interface is valid
         verify_interface(self.dev, raise_error=True, logger=self.logger)
 
-        # defined and prepare resources
-        resources = get_resources(self.dev)
-        super().prepare_resources(resources)
+        # defined resources
+        self.resource_args = {
+            'dev': self.dev
+        }
 
         self.aps = {} # AP table
 
@@ -98,7 +98,56 @@ class WifiScanAP(Operation):
         # initialize oui lookup
         self.oui_lookup = OUILookup()
 
-    @setup_decorator
+    @staticmethod
+    def get_resources(dev: str = '') -> Dict[str, Any]:
+        """
+        Get the resources required by the plugin script.
+
+        Parameters
+        ----------
+        dev : str
+            The network device name (e.g., 'wlan0').
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary containing the resources for the plugin script.
+        """
+        return {
+            'wifi_interface': {
+                'type': 'wifi_adapter',
+                'model': '',
+                'serial': dev,
+                'description': 'A wifi adapter capable of operating in monitor mode.',
+                'required': True
+            }
+        }
+
+    @staticmethod
+    def get_interfaces() -> Dict[str, Any]:
+        """
+        Get the interfaces available for the plugin script.
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary containing the interfaces for the plugin script.
+        """
+        return {
+            'alert': {
+                'type': 'alert',
+                'channel': 'fissure', # FISSURE zmq
+                'direction': 'out',
+                'description': 'Wifi AP detections.'
+            },
+            'tak': {
+                'type': 'tak',
+                'channel': 'fissure', # FISSURE zmq
+                'direction': 'out',
+                'description': 'Wifi AP detections in TAK CoT format.'
+            }
+        }
+
     async def setup(self) -> bool:
         """
         Setup the environment to run the operation.
@@ -121,7 +170,6 @@ class WifiScanAP(Operation):
         self.logger.info("Operation environment setup complete.")
         return True
 
-    @run_decorator
     async def run(self) -> None:
         """
         Run the operation.
@@ -141,6 +189,13 @@ class WifiScanAP(Operation):
                     await self.stop()
                     return
 
+                # set monitor mode
+                configured = set_monitor_mode(self.dev, raise_error=True, logger=self.logger)
+                if not configured:
+                    self.logger.debug(f"Failed to set monitor mode on interface {self.dev}.")
+                    self.logger.error("Operation environment setup failed.")
+                    return
+
                 # set channel
                 channel_set = set_channel(self.dev, channel)
                 if not channel_set:
@@ -148,10 +203,12 @@ class WifiScanAP(Operation):
                     return
 
                 # capture
+                self.logger.debug(f"Scanning channel {channel} for {self.dwell} seconds...")
                 output = subprocess.run(self.cmd, capture_output=True)
                 output = output.stdout.decode('utf-8')
                 reader = csv.reader(output.split('\n'),escapechar="\\")
                 self._curr_ap = []
+                nrows = 0
                 for row in reader:
                     # yield event loop and check for stop conditions
                     await asyncio.sleep(0)
@@ -160,17 +217,20 @@ class WifiScanAP(Operation):
                         break
 
                     if len(row) == self.nfields: # populated line
+                        nrows += 1
+                        self.logger.debug(f"Processing row: {row}")
                         # check power
                         power = row[self.fields.get('dbm_antsignal')]
                         power = self.power - 1 if len(power)==0 else int(power.split(',')[0])
                         if power < self.power:
+                            self.logger.debug(f"Signal power {power} dBm below threshold {self.power} dBm; skipping.")
                             continue
 
                         # get ssid
                         ssid_raw = row[self.fields.get('ssid')]
                         if ssid_raw == '<MISSING>' or ssid_raw == '' or ssid_raw is None:
                             # no ssid
-                            ssid = '<MISSING>'
+                            ssid = None
                         else:
                             ssid = ''
                             for i in range(0,len(ssid_raw),2):
@@ -180,11 +240,13 @@ class WifiScanAP(Operation):
                         type_subtype = int(row[self.fields.get('type_subtype')], 16)
                         freq = float(row[self.fields.get('freq')])
                         if type_subtype == 8: # beacon
-                            mac_sa = row[self.fields.get('sa')]
-                            await self.add_ap(ssid, mac_sa, freq, power)
+                            await self.add_ap(ssid, row[self.fields.get('sa')], freq, power)
                         elif type_subtype == 0: # association request
-                            mac_da = row[self.fields.get('da')]
-                            await self.add_ap(ssid, mac_da, freq, power)
+                            await self.add_ap(ssid, row[self.fields.get('da')], freq, power)
+                        else:
+                            self.logger.debug(f"Frame type_subtype {type_subtype} not beacon or association request; skipping.")
+                if nrows == 0:
+                    self.logger.warning(f"No data captured on channel {channel}.")
 
     async def add_ap(self, ssid: str, mac: str, freq: float, power: float) -> None:
         """
@@ -201,7 +263,10 @@ class WifiScanAP(Operation):
         power : float
             Signal power of the access point.
         """
-        if mac not in self._curr_ap:
+        if mac == '':
+            self.logger.debug("Empty MAC address received; skipping.")
+
+        elif mac not in self._curr_ap:
             self._curr_ap.append(mac)
             vendor = self.oui_lookup.match(mac)
 
@@ -216,125 +281,32 @@ class WifiScanAP(Operation):
                 'stations': {}
             }
 
+            if ssid is None or ssid == '':
+                ssid = mac
+
             # send alert
             await self.alert_callback(self.sensor_node_id, self.opid, f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', logger=self.logger)
 
             # send tak cot
             await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=ssid, remarks=f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S', logger=self.logger)
 
-def get_resources(dev: str = '') -> Dict[str, Any]:
-    """
-    Get the resources required by the plugin script.
-
-    Parameters
-    ----------
-    dev : str
-        The network device name (e.g., 'wlan0').
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary containing the resources for the plugin script.
-    """
-    return {
-        'wifi_interface': {
-            'type': 'wifi_adapter',
-            'model': '',
-            'serial': dev,
-            'description': 'A wifi adapter capable of operating in monitor mode.',
-            'required': True
-        }
-    }
-
-def get_interfaces() -> Dict[str, Any]:
-    """
-    Get the interfaces available for the plugin script.
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary containing the interfaces for the plugin script.
-    """
-    return {
-        'alert': {
-            'type': 'alert',
-            'channel': 'fissure', # FISSURE zmq
-            'direction': 'out',
-            'description': 'Wifi AP detections.'
-        },
-        'tak': {
-            'type': 'tak',
-            'channel': 'fissure', # FISSURE zmq
-            'direction': 'out',
-            'description': 'Wifi AP detections in TAK CoT format.'
-        }
-    }
-
-def get_arguments(logger: logging.Logger = logging.getLogger(__name__)) -> Dict[str, Any]:
-    """Get the arguments required to initialize the operation.
-
-    Parameters
-    ----------
-    Operation : Operation
-        The operation class to inspect.
-    logger : logging.Logger, optional
-        Logger instance for logging, by default logging.getLogger(__name__)
-
-    Returns
-    -------
-    Dict[str, Any]
-        A dictionary specifying the arguments required to initialize the operation. The keys are argument names, and the values are dictionaries with key, value pairs with keys `default`, `type`, `description`, and `required`. All values are cast to strings to facilitate JSON serialization.
-    """
-    return get_arguments_base(WifiScanAP, logger)
-
-def main(*args, **kwargs) -> object:
-    """
-    Main function to run the plugin script.
-
-    Parameters
-    ----------
-    **kwargs : dict
-        Keyword arguments for variables in WifiScanAP.
-
-    Returns
-    -------
-    object
-        An instance of the WifiScanAP class with the provided arguments.
-    """
-    return WifiScanAP(*args, **kwargs)
+        else:
+            self.logger.debug(f"AP with MAC {mac} already reported in this scan cycle.")
 
 if __name__ == "__main__":
     """Run the plugin script as a standalone program for testing purposes.
     """
-    import traceback
-
-    # set up logging
-    logger = logging.getLogger(__file__.split('/')[-1])
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
-
-    # create operation instance
-    # adjust parameters as needed for testing
-    logger.debug("Initializing...")
-    op = main(
-        dev='wlx00c0cab5f8c9',
-        duration=-1,
-        dwell=1,
-        power=-100,
-        channels=None,
-        logger=logger
+    from fissure.utils.plugins.test_operation import run_test
+    run_test(
+        OperationMain,
+        {
+            'dev': 'wlx00c0cab5f8c9',
+            'duration': -1,
+            'dwell': 0.5,
+            'power': -100,
+            'channels': list(range(1,10)) + [124,128,140]
+        },
+        {
+            'dev': 'wlx00c0cab5f8c9'
+        }
     )
-    logger.debug("Running...")
-
-    # run operation
-    loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(op.setup())
-        logger.debug("Setup complete.")
-        loop.run_until_complete(op.run())
-    except Exception as e:
-        loop.run_until_complete(op.stop())
-        logger.error(f"Error occurred: {e}")
-        logger.debug(traceback.format_exc())
-    finally:
-        loop.run_until_complete(op.teardown())
