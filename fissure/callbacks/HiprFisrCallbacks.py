@@ -3527,6 +3527,25 @@ async def stop_plugin_operation(component: object, sensor_node_id: int, operatio
     }
     await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+async def stop_all_plugin_operations(component: object, sensor_node_id: int=0):
+    """Stop all running plugin operations on the sensor node.
+
+    Parameters
+    ----------
+    component : object
+        Component
+    sensor_node_id : int
+        Sensor node ID
+    """
+    component.logger.info(f"Stopping all plugin operations on sensor node {sensor_node_id}")
+    PARAMETERS = {}
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "stop_all_plugin_operations",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 async def pluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict):
     """Handle Plugin Operation Started Event
 
