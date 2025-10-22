@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-22
+
+Apptainer containerization updates.
+
+### Added
+
+- install_apptainer.sh script for configuring containerization with Apptainer
+- fissure-apptainer.sh template for executing a new apptainer terminal shortcut
+- fissure_apptainer.def for managing the apptainer build
+- helpful_apptainer_commands.txt for reference
+
+### Changed
+
+- Modified Ubuntu 24.04 installer for Apptainer containerization
+
+### Fixed
+
+- Adjusting bit extraction technique in the demodulation tool to match the plot window samples using midpoint sampling
+- Restoring line-buffered mode in the installer by calling the second script with `python3 -u`
+
 ## 2025-10-16
 
 Preparing installer for containerization.
