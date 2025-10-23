@@ -639,17 +639,25 @@ fi
 if [[ "$INSTALL_FISSURE_CMD" == true ]]; then
     echo "[*] Preparing fissure-apptainer launcher..."
 
-    SRC_FILE="$INSTALLER_DIR/fissure-apptainer.sh"
     DEST_PATH="$HOME/.local/bin"
+    SRC_FILE="$INSTALLER_DIR/fissure-apptainer.sh"
     DEST_FILE="$DEST_PATH/fissure-apptainer"
+
+    # Ensure bin directory exists
+    mkdir -p "$DEST_PATH"
+
+    # Add ~/.local/bin to PATH if missing
+    if grep -Fq "~/.local/bin" ~/.bashrc; then
+        echo "~/.local/bin already present in ~/.bashrc"
+    else
+        printf "\n%s\n" 'if [ -d "$HOME/.local/bin" ]; then PATH="$PATH:$HOME/.local/bin"; fi' >> ~/.bashrc
+        echo "[+] Added ~/.local/bin to PATH in ~/.bashrc"
+    fi
 
     # Ensure source file exists
     if [[ ! -f "$SRC_FILE" ]]; then
         echo "[!] fissure-apptainer.sh not found in $INSTALLER_DIR"
     else
-        mkdir -p "$DEST_PATH"
-
-        # Copy the original launcher to destination first
         cp "$SRC_FILE" "$DEST_FILE"
 
         # Replace placeholders only in the installed copy
@@ -658,12 +666,6 @@ if [[ "$INSTALL_FISSURE_CMD" == true ]]; then
 
         chmod +x "$DEST_FILE"
         echo "[✓] fissure-apptainer command installed at $DEST_FILE"
-    fi
-
-    # PATH check
-    if ! echo "$PATH" | grep -q "$DEST_PATH"; then
-        echo "[!] $DEST_PATH is not in your PATH. Add this line to ~/.bashrc:"
-        echo "    export PATH=\$PATH:$DEST_PATH"
     fi
 fi
 

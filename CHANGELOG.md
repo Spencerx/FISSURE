@@ -1,6 +1,22 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-23
+
+Merging pull request #97, fixing Apptainer install.
+
+### Added
+
+- Merging pull request #97: 
+  - Fixed issue in wifi plugin wifi_scan_ap where monitor mode disabled during scan
+  - Added functionality to stop all plugin operations on a sensor node
+
+### Fixed
+
+- Creating .local/bin folder for fissure-apptainer command and adding the path to .bashrc
+- Fixed Wayland GUI launch issue by binding `$XDG_RUNTIME_DIR` to a writable `/tmp` path inside the Apptainer, allowing Qt5/XWayland to initialize properly when running in headless writable containers
+- Adding `--no-sandbox` to chrome command in Apptainer %post
+
 ## 2025-10-22
 
 Apptainer containerization updates.
