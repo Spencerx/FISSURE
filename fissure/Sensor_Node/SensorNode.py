@@ -253,6 +253,7 @@ class SensorNode(object):
         # Register plugin operation callbacks
         self.callbacks['run_plugin_operation'] = self.run_plugin_operation
         self.callbacks['stop_plugin_operation'] = self.stop_plugin_operation
+        self.callbacks['stop_all_plugin_operations'] = self.stop_all_plugin_operations
 
         # Initialize GPS Coordinates
         self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
@@ -621,6 +622,19 @@ class SensorNode(object):
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+    async def stop_all_plugin_operations(self, component: object, sensor_node_id: int | str = 0) -> None:
+        """
+        Stops all running plugin operations on the Sensor Node.
+
+        Parameters
+        ----------
+        sensor_node_id : int | str, optional
+            Sensor node ID, by default 0.
+        """
+        self.logger.info("Stopping all plugin operations.")
+        for operation_id in list(self.operations.keys()):
+            await self.stop_plugin_operation(component, operation_id, sensor_node_id)
 
     async def shutdown_comms(self):
         """
