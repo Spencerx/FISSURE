@@ -51,14 +51,42 @@ fi
 # Launch FISSURE Apptainer
 #######################################
 echo "[*] Launching FISSURE Apptainer..."
-sudo apptainer shell \
-  --writable \
-  --bind /dev/bus/usb:/dev/bus/usb \
-  $(for dev in /dev/ttyACM* /dev/ttyUSB*; do [ -e "$dev" ] && echo --bind "$dev:$dev"; done) \
-  --bind /run/udev:/run/udev \
-  --bind /tmp/.X11-unix:/tmp/.X11-unix \
-  --bind /run/user/$(id -u $SUDO_USER)/pulse:/tmp/pulse \
-  --env DISPLAY=$DISPLAY,PULSE_SERVER=unix:/tmp/pulse/native,PULSE_COOKIE=/tmp/pulse-cookie \
-  --env XDG_RUNTIME_DIR=/tmp/runtime-root \
-  "$CONTAINER_DIR"
 
+# Detect display server type
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+  echo "[*] Wayland session detected."
+  # Needed for GUI apps under Wayland
+  xhost +local:root 2>/dev/null || true
+  RUNTIME_DEST="/tmp/runtime-user"
+  sudo mkdir -p "$RUNTIME_DEST"
+
+  sudo apptainer shell \
+    --writable \
+    --bind /dev/bus/usb:/dev/bus/usb \
+    $(for dev in /dev/ttyACM* /dev/ttyUSB*; do [ -e "$dev" ] && echo --bind "$dev:$dev"; done) \
+    --bind /run/udev:/run/udev \
+    --bind /run/user/$(id -u $SUDO_USER)/pulse:/tmp/pulse \
+    --bind "$XDG_RUNTIME_DIR:$RUNTIME_DEST" \
+    --env DISPLAY=$DISPLAY \
+    --env XDG_RUNTIME_DIR=$RUNTIME_DEST \
+    --env QT_QPA_PLATFORM=xcb \
+    --env PULSE_SERVER=unix:/tmp/pulse/native \
+    --env PULSE_COOKIE=/tmp/pulse-cookie \
+    "$CONTAINER_DIR"
+
+else
+  echo "[*] X11 session detected."
+  xhost +local:root 2>/dev/null || true
+
+  sudo apptainer shell \
+    --writable \
+    --bind /dev/bus/usb:/dev/bus/usb \
+    $(for dev in /dev/ttyACM* /dev/ttyUSB*; do [ -e "$dev" ] && echo --bind "$dev:$dev"; done) \
+    --bind /run/udev:/run/udev \
+    --bind /tmp/.X11-unix:/tmp/.X11-unix \
+    --bind /run/user/$(id -u $SUDO_USER)/pulse:/tmp/pulse \
+    --env DISPLAY=$DISPLAY \
+    --env PULSE_SERVER=unix:/tmp/pulse/native \
+    --env PULSE_COOKIE=/tmp/pulse-cookie \
+    "$CONTAINER_DIR"
+fi

@@ -125,6 +125,17 @@ EOF
     update-desktop-database /usr/share/applications
     xdg-settings set default-web-browser google-chrome-safe.desktop || true
     echo "[✓] Chrome installation and sandbox fix complete."
+    
+    echo "[*] Overriding xdg-open to use Chrome-safe..."
+    if [ -f /usr/bin/xdg-open ]; then
+        mv /usr/bin/xdg-open /usr/bin/xdg-open.real
+    fi
+    cat <<'EOF' > /usr/bin/xdg-open
+#!/bin/bash
+exec /usr/local/bin/chrome-safe "$@"
+EOF
+    chmod +x /usr/bin/xdg-open
+    echo "[✓] xdg-open now uses Chrome-safe."
 
     # FISSURE installer
     cd /opt/FISSURE
