@@ -164,7 +164,11 @@ class Dashboard(QtWidgets.QMainWindow):
         self.active_sensor_node = -1  # Needed for Plugin Loading
         if self.backend.settings["auto_connect_hiprfisr"] == True:
             self.window.actionAuto_Connect_HIPRFISR.setChecked(True)
+
+            print("Before startLocalSession, thread:", QtCore.QThread.currentThread())
             StatusBarSlots.startLocalSession(self)
+            print("After startLocalSession")
+            #StatusBarSlots.startLocalSession(self)
             self.splash.progressBar.setValue(50)
         else:
             self.splash.progressBar.setValue(50)
@@ -189,9 +193,14 @@ class Dashboard(QtWidgets.QMainWindow):
             self.__init_Library__()
 
         # Hide the Splash Screen
-        self.splash.progressBar.setValue(100)
-        time.sleep(0.1)
-        self.splash.close()        
+        if self.backend.settings["auto_connect_hiprfisr"] == False:
+            self.splash.progressBar.setValue(100)
+            QtWidgets.QApplication.processEvents()  # new
+            QtCore.QTimer.singleShot(100, self.splash.close)  # new
+            QtWidgets.QApplication.processEvents()  # new
+        else:
+            time.sleep(0.1)
+            self.splash.close()
 
         # Show the Dialog
         self.show()

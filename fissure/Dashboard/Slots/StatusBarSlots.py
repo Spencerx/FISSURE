@@ -116,6 +116,7 @@ async def connect(
     # connect_button.setChecked(True)
     connect_button.setText("Connecting...")
     dashboard.backend.initial_database_retrieval = True  # Retrieve the database again on reconnect
+    dashboard.backend.initialize_comms()
     await dashboard.backend.connect_to_hiprfisr(addr)
     # connect_button.setChecked(False)
 

@@ -153,6 +153,15 @@ exec python3 fissure/Sensor_Node/SensorNode.py
 EOF
 chmod +x "$bin_path/fissure-sensor-node"
 
+# Create fissure-hiprfisr command
+cat << EOF > "$bin_path/fissure-hiprfisr"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Server/__main__.py
+EOF
+chmod +x "$bin_path/fissure-hiprfisr"
+
 # Create desktop entry for FISSURE (skip in Apptainer)
 if [ -z "$APPTAINER_CONTAINER" ] && [ -z "$APPTAINER_NAME" ]; then
   echo "[Desktop Entry]\\nStartupWMClass=__main__.py\\nName=FISSURE\\nTerminal=false\\nType=Application\\nCategories=Qt;Science;DataVisualization;Electricity;HamRadio;" > {fissure_directory}/Installer/fissure.desktop

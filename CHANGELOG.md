@@ -1,6 +1,25 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-26
+
+Fixes for standalone HIPRFISR testing.
+
+### Added
+
+- fissure-hiprfisr command to the installer for launching the HIPRFISR and processing engines without the Dashboard
+
+### Changed
+
+- Updated all fissure Command installer items to match Ubuntu 24.04 installer
+- Updated interactive roadmap with search and list of immediate children
+
+### Fixed
+
+- Fixed wget filepath error for 5 MS/s online archive IQ files
+- Increased range values for decimation and center sliders in demodulation tool
+- Increased the number of digits for center and threshold sliders in demodulation tool
+
 ## 2025-10-23
 
 Merging pull request #97, fixing Apptainer install.
