@@ -6,7 +6,7 @@ from configparser import ConfigParser
 import logging
 
 from fissure.utils.common import get_fissure_config
-
+from fissure.callbacks import HiprFisrCallbacks
 
 def load_config() -> ConfigParser:
     """
@@ -134,11 +134,12 @@ class TakReceiver(pytak.QueueWorker):
         self._logger.debug("TAK Msg Received:\n%s\n", data_decode)
         try:
             root = ET.fromstring(data_decode)
+            uid = root.get("uid", "unknown")
             remarks = root.find(".//detail/remarks")
             if remarks is not None and remarks.text:
-                if 'ACTION' in remarks.text:
-                    self._logger.info(f"FISSURE Action Detected: {remarks.text}")
-                    # Placeholder: Perform actions with self.hipfisr if needed
+                if remarks.text == "FTN Requested: Plugin Names":
+                    self._logger.info(f"FTN Plugin Names Requested for UID: {uid}")
+                    await HiprFisrCallbacks.sendPluginNamesTak(self.hipfisr, uid, sensor_node_id=0)
         except ET.ParseError as e:
             self._logger.error("XML Parse Error: %s", e)
 
@@ -148,7 +149,6 @@ class TakReceiver(pytak.QueueWorker):
 
         Read from the TAK server receive queue and run `TakReceiver.handle_data`.
         """
-        self._logger.debug("Waiting for data...")
         if not self.queue.empty():
             data = (
                 await self.queue.get()
