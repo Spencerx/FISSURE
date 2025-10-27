@@ -17,6 +17,9 @@ import atexit
 import ssl
 from datetime import datetime, timezone, timedelta
 
+import pytak
+from fissure.utils.tak_server import load_config as load_tak_config
+from fissure.utils.tak_server import TakReceiver
 
 HEARTBEAT_LOOP_DELAY = 0.1  # Seconds
 EVENT_LOOP_DELAY = 0.1
@@ -196,7 +199,17 @@ class HiprFisr:
 
         # Initialize TAK Variables
         self.tak_connected = False
-        self.tak_mode = "disabled"
+
+        # Initialize TAK Server Interface
+        self.clitool = None
+        try:
+            self.tak_config = load_tak_config()
+            self.clitool = pytak.CLITool(self.tak_config)
+            self.tak_connected = True
+            self.logger.info("TAK auto-connect: setup complete.")
+        except Exception as e:
+            self.logger.warning(f"TAK auto-connect failed: {e}")
+            self.clitool = None
 
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
@@ -317,37 +330,22 @@ class HiprFisr:
         # Check For TAK Auto-Connect
         self.tak_mode = self.settings["tak"]["connect_mode"].lower()
 
-        clitool = None
-        if self.tak_mode == "auto":
-            try:
-                from fissure.utils.tak_server import load_config as load_tak_config
-                from fissure.utils.tak_server import TakReceiver
-                tak_config = load_tak_config()
-                import pytak
-                clitool = pytak.CLITool(tak_config)
-                await clitool.setup()
-                self.tak_connected = True
-                self.logger.info("TAK auto-connect: setup complete.")
-            except Exception as e:
-                self.logger.warning(f"TAK auto-connect failed: {e}")
-                clitool = None
-        elif self.tak_mode == "manual":
-            self.logger.info("TAK manual-connect mode: waiting for user trigger.")
-        else:
-            self.logger.info("TAK integration disabled in config.")
+        if self.clitool is not None:
+            await self.clitool.setup()
+            self.logger.info("TAK client setup complete.")
 
         # Start Event Loop
         while not self.shutdown:
             if not self.connect_loop:
-                if clitool:
+                if self.clitool is not None:
                     try:
-                        clitool.add_tasks(
-                            {TakReceiver(clitool.rx_queue, tak_config, self, self.logger)}
+                        self.clitool.add_tasks(
+                            {TakReceiver(self.clitool.rx_queue, self.tak_config, self, self.logger)}
                         )
-                        await clitool.run()
+                        await self.clitool.run()
                     except Exception as e:
                         self.logger.warning(f"TAK client error: {e}")
-                        clitool = None
+                        self.clitool = None
 
                 # Process Incoming Messages
                 if self.dashboard_connected:
