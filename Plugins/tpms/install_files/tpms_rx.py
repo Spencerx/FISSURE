@@ -8,7 +8,7 @@ import logging
 from multiprocessing import Process
 import socket
 import subprocess
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from fissure.utils.hardware import findRTL2832U
 from fissure.utils.plugins.operations import Operation
@@ -16,7 +16,7 @@ from fissure.utils.plugins.operations import Operation
 class OperationMain(Operation):
     """TPMS Receiver
     """
-    def __init__(self, dev: str, frequency: float = 315e6, gain: float = 49, whitelist: list[str] = None, sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback=None, tak_cot_callback=None) -> None:
+    def __init__(self, dev: str, frequency: float = 315e6, gain: float = 49, whitelist: list[str] = None, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback=None, tak_cot_callback=None) -> None:
         """
         Parameters
         ----------
@@ -28,7 +28,7 @@ class OperationMain(Operation):
             RTL-SDR gain, by default 49
         whitelist : list[str], optional
             List of TPMS IDs to report, by default None (report all)
-        sensor_node_id : int | str, optional
+        sensor_node_id : Union[int, str], optional
             The ID of the sensor node, by default 0
         logger : logging.Logger, optional
             Logger instance, by default logging.getLogger(__name__)
