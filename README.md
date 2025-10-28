@@ -49,7 +49,8 @@ FISSURE streamlines complex SDR workflows by centralizing software, libraries, a
 - Integrate alerts and data into TAK for team awareness
 
 <p align="center">
-<img src="/docs/Icons/README/rf_re.png" width="300" height="300">
+  <img src="/docs/Icons/README/rf_re.png" height="275">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="/docs/Icons/README/key_capabilities1.png" height="275">
 </p>
 
 ## Deployment Options

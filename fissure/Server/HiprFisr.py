@@ -224,8 +224,8 @@ class HiprFisr:
         )
         self.backend_router.start()
 
-        if frontend_address.protocol == "tcp":
-            frontend_address.update(address=self.ip_address)
+        #if frontend_address.protocol == "tcp":
+        #    frontend_address.update(address=self.ip_address)
         return frontend_address
 
 

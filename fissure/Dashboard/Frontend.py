@@ -173,7 +173,8 @@ class Dashboard(QtWidgets.QMainWindow):
         else:
             self.splash.progressBar.setValue(50)
             self.window.actionAuto_Connect_HIPRFISR.setChecked(False)
-            self.__init2__()
+            StatusBarSlots.remote_connect_prompt(self.statusBar())
+            self.__init2__()            
 
         self.logger.info("=== READY ===")
         

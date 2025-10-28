@@ -42,13 +42,22 @@ fft_size: 8192
 file_logging_level: DEBUG
 heartbeat_interval: 5
 hiprfisr:
+  # NOTE:
+  # These communication settings define how external components
+  # (like the Dashboard or Sensor Nodes) locate and connect to HIPRFISR.
+  #
+  # HIPRFISR itself may override these values when launched (e.g. via --remote),
+  # but other components use this file to discover its address and ports.
+  #
+  # - 'frontend': External connection used by Dashboard and Sensor Nodes
+  # - 'backend' : Internal connection for local PD/TSI processes (always IPC)
   backend:
     address: fissure-backend
     protocol: ipc
   frontend:
-    address: 0.0.0.0
-    heartbeat_channel: 5051
-    message_channel: 5052
+    address: 0.0.0.0  # User enters an IP address in the status bar for remote connections
+    heartbeat_channel: 5051  # User enters the hb port in the status bar for remote connections
+    message_channel: 5052  # User enters the msg port in the status bar for remote connections
     protocol: tcp
 hiprfisr_pub_port: 5055
 icon_style: Light
@@ -161,9 +170,6 @@ sensor_node5:
   tsi: ''
 sensor_node_hiprfisr_dealer_port: 5053
 sensor_node_pub_port: 5061
-server:
-  address: fissure
-  protocol: ipc
 startup_automation_mode: Manual
 tak:
   cert: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.pem

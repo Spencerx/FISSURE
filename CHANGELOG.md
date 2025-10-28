@@ -1,6 +1,25 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-28
+
+Fixes for connecting to remote HIPRFISR.
+
+### Added
+
+- Added new image in README under Key Capabilities
+
+### Changed
+
+- Removed "server" variables from YAML config files
+- Added "--remote" argument to fissure-hiprfisr command
+- Changed default remote IP address hint from "127.0.0.1" to "192.168.1.xxx"
+
+### Fixed
+
+- Commented out IP address update in HiprFisr.py initialize_comms()
+- Fixed connect() in StatusBarSlots.py to perform connect_to_hiprfisr() without errors
+
 ## 2025-10-26
 
 Fixes for standalone HIPRFISR testing.

@@ -158,7 +158,7 @@ cat << EOF > "$bin_path/fissure-hiprfisr"
 #!/bin/bash
 export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
 cd {fissure_directory} || exit 1
-exec python3 fissure/Server/__main__.py
+exec python3 fissure/Server/__main__.py --remote
 EOF
 chmod +x "$bin_path/fissure-hiprfisr"
 
