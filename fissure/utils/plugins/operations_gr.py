@@ -4,6 +4,7 @@
 import asyncio
 from gnuradio import gr
 import logging
+from typing import Union
 
 from fissure.utils.plugins.operations import Operation
 
@@ -62,7 +63,7 @@ def teardown_decorator(func):
 class OperationGR(Operation):
     """GNU Radio Flowgraph Plugin Operations Base Class
     """
-    def __init__(self, tb: gr.top_block, sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
+    def __init__(self, tb: gr.top_block, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
         super().__init__(sensor_node_id, logger, alert_callback, tak_cot_callback)
         if not callable(tb):
             logger.error(f"tb {tb} is not callable")

@@ -4,7 +4,7 @@
 """
 import os
 import sys
-from typing import Any, Dict
+from typing import Any, Dict, Union
 import logging
 
 from fissure.utils.plugins.operations_gr import OperationGR
@@ -16,13 +16,13 @@ from gr_flowgraphs.TPMS_FSK_USRPB210_Transmit import TPMS_FSK_USRPB210_Transmit
 class OperationMain(OperationGR):
     """TPMS Transmitter
     """
-    def __init__(self, dev: str = '', sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
+    def __init__(self, dev: str = '', sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
         """
         Parameters
         ----------
         dev : str, optional
             The Ettus USRP serial number, by default '' will use the first available device found
-        sensor_node_id : int | str, optional
+        sensor_node_id : Union[int, str], optional
             The ID of the sensor node, by default 0
         logger : logging.Logger, optional
             Logger instance, by default None

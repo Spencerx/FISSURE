@@ -5,7 +5,7 @@ This script serves as an example of how to create a plugin script for FISSURE. T
 import asyncio
 import logging
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 import uuid
 
 from fissure.Sensor_Node.utils.resources import Resource
@@ -22,7 +22,7 @@ class PluginExample(object):
 
     This class can be modified to implement specific functionality for the plugin.
     """
-    def __init__(self, example_arg: str = EXAMPLE_ARG, example_arg2: int = EXAMPLE_ARG2, example_arg3: List[int] = EXAMPLE_ARG3, sensor_node_id: int | str = 0, logger: logging.Logger = None, alert_callback: callable = None) -> None:
+    def __init__(self, example_arg: str = EXAMPLE_ARG, example_arg2: int = EXAMPLE_ARG2, example_arg3: List[int] = EXAMPLE_ARG3, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = None, alert_callback: callable = None) -> None:
         """
         Initialize the plugin with given keyword arguments.
 
