@@ -11,6 +11,8 @@ Dashboard connection and logging fixes for a remote HIPRFISR.
 - Updating FissureZMQNode.py to perform safe logging during shutdown to suppress warnings
 - Adding a sleep line to prevent warnings during shutdown in backend event loop
 - Resetting Dashboard states when disconnecting from HIPRFISR to enable UI widgets on reconnect
+- Commented out async function calls in LibraryTabPluginManagerTabSlots.py in connect_slots() that were called too early in the Dashboard startup
+- Dashboard disconnects from HIPRFISR instead of shutting down the HIPRFISR for a remote HIPRFISR
 
 ## 2025-10-28
 

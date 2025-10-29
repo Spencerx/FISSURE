@@ -164,11 +164,7 @@ class Dashboard(QtWidgets.QMainWindow):
         self.active_sensor_node = -1  # Needed for Plugin Loading
         if self.backend.settings["auto_connect_hiprfisr"] == True:
             self.window.actionAuto_Connect_HIPRFISR.setChecked(True)
-
-            print("Before startLocalSession, thread:", QtCore.QThread.currentThread())
             StatusBarSlots.startLocalSession(self)
-            print("After startLocalSession")
-            #StatusBarSlots.startLocalSession(self)
             self.splash.progressBar.setValue(50)
         else:
             self.splash.progressBar.setValue(50)
@@ -847,6 +843,11 @@ class Dashboard(QtWidgets.QMainWindow):
         # Refresh Browse Table
         LibraryTabSlots._slotLibraryBrowseChanged(self)
 
+        # Plugin Manager Tab
+        # TODO: Implement this async functionality without errors in Frontend.py
+        # LibraryTabPluginManagerTabSlots._slot_local_plugin_pkg_path_auto(self, False)
+        # LibraryTabPluginManagerTabSlots._slot_plugin_download_dir_auto(self, False)
+
 
     def __init_signals__(self):
         """
@@ -1121,8 +1122,12 @@ class Dashboard(QtWidgets.QMainWindow):
                 await self.backend.disconnect_local_sensor_node(n-1)
                 break
         
-        # Shut Down Local HIPRFISR
-        await StatusBarSlots.shutdown_hiprfisr(self)
+        # Shut Down Local HIPRFISR, Disconnect from Remote HIPRFISR
+        if self.backend.settings["auto_connect_hiprfisr"] == True:
+            await StatusBarSlots.shutdown_hiprfisr(self)
+        else:
+            await StatusBarSlots.disconnect_hiprfisr(self)
+            self.backend.shutdown_complete = True
 
         while self.backend.stop() == False:
             await qasync.asyncio.sleep(0.1)

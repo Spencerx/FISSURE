@@ -198,11 +198,14 @@ class DashboardBackend:
 
         while self.shutdown is False:
             await self.send_heartbeat()
+            await asyncio.sleep(0)
             await self.recv_heartbeat()
+            await asyncio.sleep(0)
             self.check_heartbeats()
 
             if self.hiprfisr_connected:
                 await self.read_hiprfisr_messages()
+                await asyncio.sleep(0)
 
                 # Retrieve Initial Database Cache from HIPRFISR
                 if self.initial_database_retrieval == True:

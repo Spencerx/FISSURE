@@ -37,7 +37,6 @@ TABLES_FUNCTIONS = [
     ('soi_data.csv', addSOI, removeSOI)
 ]
 
-
 async def get_fissure_plugin_editor_plugins_path() -> str:
     """Get the path to the FISSURE Plugin Editor plugins directory.
 
@@ -46,19 +45,18 @@ async def get_fissure_plugin_editor_plugins_path() -> str:
     str
         Path to the FISSURE Plugin Editor plugins directory.
     """
-    try:
+    if shutil.which("fissure-plugin-editor") is not None:
         proc = await asyncio.create_subprocess_exec(
             "fissure-plugin-editor", "plugins", "-d",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, _ = await proc.communicate()
-    except FileNotFoundError:
-        return None
-
-    output = stdout.decode().strip()
-    if output.startswith("Plugins directory:"):
-        return output.split("Plugins directory:")[1].strip()
+        output = stdout.decode().strip()
+        if output.startswith("Plugins directory:"):
+            return output.split("Plugins directory:")[1].strip()
+        else:
+            return None
     else:
         return None
 
