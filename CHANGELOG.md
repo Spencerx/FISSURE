@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-10-29
+
+Dashboard connection and logging fixes for a remote HIPRFISR.
+
+### Fixed
+
+- Merging pull request #98: `For compatibility with <Python3.10 changed instances of parameter definitions in format type1\|type2 to format Union\[type1,type2\].`
+- Updating FissureZMQNode.py to perform safe logging during shutdown to suppress warnings
+- Adding a sleep line to prevent warnings during shutdown in backend event loop
+- Resetting Dashboard states when disconnecting from HIPRFISR to enable UI widgets on reconnect
+
 ## 2025-10-28
 
 Fixes for connecting to remote HIPRFISR.
