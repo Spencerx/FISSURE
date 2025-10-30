@@ -16,6 +16,9 @@ import os
 import atexit
 import ssl
 from datetime import datetime, timezone, timedelta
+from fissure.utils.tak_server import load_config as load_tak_config
+import pytak
+
 
 
 HEARTBEAT_LOOP_DELAY = 0.1  # Seconds
@@ -313,26 +316,54 @@ class HiprFisr:
 
         # Start Heartbeat Loop
         heartbeat_task = asyncio.create_task(self.heartbeat_loop())
+        from fissure.utils.common import get_fissure_config
+        fissure_config = get_fissure_config()
+        tak_config = load_tak_config()
+        tak_ip = fissure_config["tak"]["ip_addr"]
+        tak_port = fissure_config["tak"]["port"]
 
         # Check For TAK Auto-Connect
         self.tak_mode = self.settings["tak"]["connect_mode"].lower()
 
         clitool = None
         if self.tak_mode == "auto":
-            try:
-                from fissure.utils.tak_server import load_config as load_tak_config
-                from fissure.utils.tak_server import TakReceiver
-                tak_config = load_tak_config()
-                import pytak
-                clitool = pytak.CLITool(tak_config)
-                await clitool.setup()
-                self.tak_connected = True
-                self.logger.info("TAK auto-connect: setup complete.")
-            except Exception as e:
-                self.logger.warning(f"TAK auto-connect failed: {e}")
-                clitool = None
+            while True:
+                try:
+                    reader, writer = await asyncio.open_connection(tak_ip, tak_port)
+                    writer.close()
+                    await writer.wait_closed()
+                    self.logger.info(f"TAK server {tak_ip}:{tak_port} is reachable.")
+                    break
+                except Exception:
+                    await asyncio.sleep(1)
+
+            # --- Launch TAK client in independent task ---
+            async def run_tak_client():
+                while not self.shutdown:
+                    try:
+                        clitool = pytak.CLITool(tak_config)
+                        await clitool.setup()
+
+                        # Extend TX queue size safely
+                        if clitool.tx_queue.maxsize < 500:
+                            self.logger.info(
+                                f"Increasing pytak TX queue size from {clitool.tx_queue.maxsize} → 500."
+                            )
+                            new_queue = asyncio.Queue(maxsize=500)
+                            while not clitool.tx_queue.empty():
+                                new_queue.put_nowait(await clitool.tx_queue.get())
+                            clitool.tx_queue = new_queue
+
+                        self.logger.info("Started pytak client task...")
+                        await clitool.run()
+                    except Exception as e:
+                        self.logger.error(f"TAK client crashed: {e}")
+                        await asyncio.sleep(5)  # retry delay
+
+            asyncio.create_task(run_tak_client())
+            self.logger.info("TAK client launched in background. Entering main loop...")
         elif self.tak_mode == "manual":
-            self.logger.info("TAK manual-connect mode: waiting for user trigger.")
+           self.logger.info("TAK manual-connect mode: waiting for user trigger.")
         else:
             self.logger.info("TAK integration disabled in config.")
 
