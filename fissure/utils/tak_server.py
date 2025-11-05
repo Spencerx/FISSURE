@@ -144,17 +144,28 @@ class TakReceiver(pytak.QueueWorker):
 
     async def run(self) -> None:
         """
-        Read Server Queue
-
-        Read from the TAK server receive queue and run `TakReceiver.handle_data`.
+        Wait forever for CoT events from TAK server.
+        Only exits on shutdown or None sentinel.
         """
-        self._logger.debug("Waiting for data...")
-        if not self.queue.empty():
-            data = (
-                await self.queue.get()
-            )  # this is how we get the received CoT from rx_queue
-            await self.handle_data(data)
-            await asyncio.sleep(1)
+        self._logger.debug("TAK Receiver started, waiting for data...")
+
+        while True:
+            try:
+                data = await self.queue.get()  # blocks until a message arrives
+
+                # pytak uses None as shutdown sentinel in some cases
+                if data is None:
+                    self._logger.debug("TAK receiver got shutdown signal.")
+                    return
+
+                await self.handle_data(data)
+
+            except asyncio.CancelledError:
+                # Task cancelled cleanly on shutdown
+                return
+            except Exception as e:
+                self._logger.error(f"TAK receiver error: {e}")
+                await asyncio.sleep(1)
 
 async def main(rx: bool = True, tx: bool = False):
     """

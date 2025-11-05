@@ -274,13 +274,14 @@ class SensorNode(object):
         """
         # IP
         if self.network_type == "IP":
-            sensor_node_pair_port = str(self.settings_dict['Sensor Node']['msg_port'])
-            #sensor_node_hb_port = int(self.settings_dict['Sensor Node']['hb_port'])
+            sensor_node_msg_port = str(self.settings_dict['Sensor Node']['msg_port'])
+            sensor_node_hb_port = int(self.settings_dict['Sensor Node']['hb_port'])
             
             if self.local_remote == "local":
                 sensor_node_pair_address = fissure.comms.Address(protocol="ipc", address=self.ip_address, hb_channel="ipc:///tmp/zmq_ipc_heartbeat", msg_channel="ipc:///tmp/zmq_ipc_message")
             else:
-                sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=5051, msg_channel=sensor_node_pair_port) 
+                #sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=5051, msg_channel=sensor_node_pair_port) 
+                sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=sensor_node_hb_port, msg_channel=sensor_node_msg_port) 
 
             self.hiprfisr_socket = fissure.comms.Server(
                 address=sensor_node_pair_address,

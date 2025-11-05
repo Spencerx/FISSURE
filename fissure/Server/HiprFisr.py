@@ -17,6 +17,7 @@ import atexit
 import ssl
 from datetime import datetime, timezone, timedelta
 from fissure.utils.tak_server import load_config as load_tak_config
+from fissure.utils.tak_server import TakReceiver
 import pytak
 
 
@@ -199,7 +200,7 @@ class HiprFisr:
 
         # Initialize TAK Variables
         self.tak_connected = False
-        self.tak_mode = "disabled"
+        self.tak_task = None
 
         # Register Callbacks
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
@@ -309,103 +310,210 @@ class HiprFisr:
 
     async def begin(self):
         """
-        Main Event Loop
+        HIPRFISR main event loop with simplified & reliable TAK handling.
+        TAK logic:
+        auto  -> connect at start + reconnect on loss
+        manual -> connect only when triggered by user (no reconnect)
+        off   -> disabled
         """
-        # Begin
+
         self.logger.info("=== STARTING HIPRFISR ===")
 
-        # Start Heartbeat Loop
+        # Ensure clean state
+        self.tak_task = None
+        self.clitool = None
+        self.tak_mode = self.settings["tak"]["connect_mode"].lower()
+
         heartbeat_task = asyncio.create_task(self.heartbeat_loop())
+
+        # Load TAK config
         from fissure.utils.common import get_fissure_config
         fissure_config = get_fissure_config()
         tak_config = load_tak_config()
+
         tak_ip = fissure_config["tak"]["ip_addr"]
         tak_port = fissure_config["tak"]["port"]
 
-        # Check For TAK Auto-Connect
-        self.tak_mode = self.settings["tak"]["connect_mode"].lower()
-
-        clitool = None
+        # ---------------------------------------------------------
+        # AUTO MODE: wait until the server comes up, then connect
+        # ---------------------------------------------------------
         if self.tak_mode == "auto":
-            while True:
+            self.logger.info(f"TAK auto-connect: checking {tak_ip}:{tak_port}")
+
+            while not self.shutdown:
                 try:
-                    reader, writer = await asyncio.open_connection(tak_ip, tak_port)
-                    writer.close()
-                    await writer.wait_closed()
-                    self.logger.info(f"TAK server {tak_ip}:{tak_port} is reachable.")
+                    r, w = await asyncio.open_connection(tak_ip, tak_port)
+                    w.close()
+                    await w.wait_closed()
+                    self.logger.info("TAK server reachable, launching pytak...")
                     break
-                except Exception:
+                except:
                     await asyncio.sleep(1)
 
-            # --- Launch TAK client in independent task ---
-            async def run_tak_client():
-                while not self.shutdown:
-                    try:
-                        clitool = pytak.CLITool(tak_config)
-                        await clitool.setup()
+            if not self.shutdown:
+                self.tak_task = asyncio.create_task(self.run_tak_loop(tak_config, auto_reconnect=True))
 
-                        # Extend TX queue size safely
-                        if clitool.tx_queue.maxsize < 500:
-                            self.logger.info(
-                                f"Increasing pytak TX queue size from {clitool.tx_queue.maxsize} → 500."
-                            )
-                            new_queue = asyncio.Queue(maxsize=500)
-                            while not clitool.tx_queue.empty():
-                                new_queue.put_nowait(await clitool.tx_queue.get())
-                            clitool.tx_queue = new_queue
-
-                        self.logger.info("Started pytak client task...")
-                        await clitool.run()
-                    except Exception as e:
-                        self.logger.error(f"TAK client crashed: {e}")
-                        await asyncio.sleep(5)  # retry delay
-
-            asyncio.create_task(run_tak_client())
-            self.logger.info("TAK client launched in background. Entering main loop...")
         elif self.tak_mode == "manual":
-           self.logger.info("TAK manual-connect mode: waiting for user trigger.")
-        else:
-            self.logger.info("TAK integration disabled in config.")
+            self.logger.info("TAK manual mode: waiting for user to connect")
+            # You can trigger manual start later with:
+            # self.tak_task = asyncio.create_task(self.run_tak_loop(tak_config, auto_reconnect=False))
 
-        # Start Event Loop
+        else:
+            self.logger.info("TAK is disabled in config")
+
+        # ---------------------------------------------------------
+        # Main HIPRFISR event loop (unchanged)
+        # ---------------------------------------------------------
+        loop = asyncio.get_event_loop()
+        self.silence_asyncio_ssl_errors(loop)
         while not self.shutdown:
             if not self.connect_loop:
-                if clitool:
-                    try:
-                        clitool.add_tasks(
-                            {TakReceiver(clitool.rx_queue, tak_config, self, self.logger)}
-                        )
-                        await clitool.run()
-                    except Exception as e:
-                        self.logger.warning(f"TAK client error: {e}")
-                        clitool = None
-
-                # Process Incoming Messages
                 if self.dashboard_connected:
                     await self.read_dashboard_messages()
                 if self.pd_connected or self.tsi_connected:
                     await self.read_backend_messages()
-
-                for sensor_node in self.sensor_nodes:
-                    if sensor_node and sensor_node.connected:
+                for node in self.sensor_nodes:
+                    if node and node.connected:
                         await self.read_sensor_node_messages()
                         break
-
                 await asyncio.sleep(EVENT_LOOP_DELAY)
             else:
                 await self.connect_components()
 
         self.logger.debug("Shutdown reached in HIPRFISR event loop")
 
-        # Ensure the Heartbeat Loop is Stopped
+        # ---------------------------------------------------------
+        # Cleanup
+        # ---------------------------------------------------------
         heartbeat_task.cancel()
         try:
             await heartbeat_task
         except asyncio.CancelledError:
             pass
 
+        await self.stop_tak_client()
         await self.shutdown_comms()
-        self.logger.info("=== SHUTDOWN ===")
+
+        await asyncio.sleep(0)
+        self.logger.info("=== SHUTDOWN COMPLETE ===")
+        return
+
+
+    async def run_tak_loop(self, tak_config, auto_reconnect=True):
+        """
+        Run pytak. Restart only if auto_reconnect=True.
+        Never double-spawns.
+        """
+
+        while not self.shutdown:
+            try:
+                self.clitool = pytak.CLITool(tak_config)
+                await self.clitool.setup()
+
+                # TX queue boost
+                if self.clitool.tx_queue.maxsize < 500:
+                    q = asyncio.Queue(maxsize=500)
+                    while not self.clitool.tx_queue.empty():
+                        q.put_nowait(await self.clitool.tx_queue.get())
+                    self.clitool.tx_queue = q
+
+                # Attach receiver once per loop
+                self.clitool.add_tasks({
+                    TakReceiver(self.clitool.rx_queue, tak_config, self, self.logger)
+                })
+
+                self.logger.info("Starting pytak client...")
+                self.tak_connected = True
+                await self.clitool.run()
+                self.logger.warning("TAK connection ended")
+                self.tak_connected = False
+
+                if self.shutdown:
+                    break
+
+                if not auto_reconnect:
+                    self.logger.info("TAK manual mode: not reconnecting")
+                    break
+
+                self.logger.warning("TAK connection lost. Reconnecting in 5 seconds...")
+                await asyncio.sleep(5)
+
+            except Exception as e:
+                if self.shutdown:
+                    break
+                self.logger.error(f"pytak crashed: {e}")
+
+            # auto reconnect delay
+            if auto_reconnect and not self.shutdown:
+                await asyncio.sleep(5)
+
+        self.logger.info("Exiting Tak loop")
+
+
+    async def stop_tak_client(self):
+        """Stop pytak without Python 3.8 TLS spam."""
+        self.tak_connected = False
+        if self.clitool:
+            try:
+                # Stop queue processing
+                try:
+                    self.clitool.tx_queue.put_nowait(None)
+                except:
+                    pass
+
+                # Shutdown if pytak supports it
+                if hasattr(self.clitool, "shutdown"):
+                    await self.clitool.shutdown()
+            except:
+                pass
+
+        if self.tak_task:
+            self.tak_task.cancel()
+            try:
+                await self.tak_task
+            except:
+                pass
+
+        # Close TLS writer safely
+        writer = getattr(self.clitool, "writer", None)
+        if writer:
+            try:
+                writer.close()
+                await writer.wait_closed()
+            except:
+                # Python 3.8 TLS throws noise here — ignore it
+                pass
+
+        self.clitool = None
+        self.tak_task = None
+
+
+    async def start_tak_manual(self):
+        if not self.tak_task:
+            tak_config = load_tak_config()
+            self.tak_task = asyncio.create_task(self.run_tak_loop(tak_config, auto_reconnect=False))
+            self.logger.info("Manual TAK connection started")
+
+
+    def silence_asyncio_ssl_errors(self, loop):
+        """Ignore spurious SSL errors on shutdown (Python 3.8 TLS bug)."""
+        orig_handler = loop.get_exception_handler()
+
+        def handler(loop, context):
+            msg = context.get("message", "")
+            exc = context.get("exception")
+            if (
+                "Fatal error on SSL transport" in msg or
+                (exc and isinstance(exc, OSError) and exc.errno == 9)
+            ):
+                # ignore bad fd & ssl closure errors
+                return
+            if orig_handler is not None:
+                orig_handler(loop, context)
+            else:
+                loop.default_exception_handler(context)
+
+        loop.set_exception_handler(handler)
 
 
     async def connect_components(self):

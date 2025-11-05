@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-11-05
+
+Fixing auto-connect to TAK server and suppressing warnings.
+
+### Changed
+
+- Updated TakReceiver run() to loop continuously to work with new connect behavior
+
+### Fixed
+
+- Pull request #99: Adding fixes to TAK logic for fresh OS boot and reconnects
+- Updated HiprFisr.py begin()/event loop with new connections to pytak and reconnect behavior with TAK connect_mode set to auto
+
 ## 2025-10-29
 
 Dashboard connection and logging fixes for a remote HIPRFISR.
