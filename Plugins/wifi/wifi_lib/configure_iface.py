@@ -123,4 +123,15 @@ def set_channel(dev: str, channel: int, raise_error: bool = False, logger: loggi
     RuntimeError
         If the operation fails and raise_error is True.
     """
-    return apply_change(dev, [['sudo', 'iwconfig', dev, 'channel', str(channel)]], raise_error, logger)
+    command = ['sudo', 'iwconfig', dev, 'channel', str(channel)]
+    try:
+        logger.info(f"Running command: {' '.join(command)}")
+        subprocess.run(command, check=True)
+        logger.info(f"Successfully applied changes to {dev}")
+        return True
+    except subprocess.CalledProcessError as e:
+        report = f"Failed to apply changes to {dev}:\n\tCommand:{command}\n\tError: {e}"
+        logger.error(report)
+        if raise_error:
+            raise RuntimeError(report)
+        return False

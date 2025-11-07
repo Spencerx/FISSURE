@@ -17,7 +17,12 @@ import subprocess
 import time
 from typing import List, Dict, Any
 
-from fissure.utils.plugins.operations import Operation
+try:
+    from fissure.utils.plugins.operations import Operation
+except ImportError:
+    # add fissure to path and import modules
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+    from fissure.utils.plugins.operations import Operation
 
 # add wifi_lib to path and import modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
