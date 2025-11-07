@@ -275,13 +275,14 @@ class SensorNode(object):
         """
         # IP
         if self.network_type == "IP":
-            sensor_node_pair_port = str(self.settings_dict['Sensor Node']['msg_port'])
-            #sensor_node_hb_port = int(self.settings_dict['Sensor Node']['hb_port'])
+            sensor_node_msg_port = str(self.settings_dict['Sensor Node']['msg_port'])
+            sensor_node_hb_port = int(self.settings_dict['Sensor Node']['hb_port'])
             
             if self.local_remote == "local":
                 sensor_node_pair_address = fissure.comms.Address(protocol="ipc", address=self.ip_address, hb_channel="ipc:///tmp/zmq_ipc_heartbeat", msg_channel="ipc:///tmp/zmq_ipc_message")
             else:
-                sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=5051, msg_channel=sensor_node_pair_port) 
+                #sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=5051, msg_channel=sensor_node_pair_port) 
+                sensor_node_pair_address = fissure.comms.Address(protocol="tcp", address=self.ip_address, hb_channel=sensor_node_hb_port, msg_channel=sensor_node_msg_port) 
 
             self.hiprfisr_socket = fissure.comms.Server(
                 address=sensor_node_pair_address,
@@ -311,7 +312,7 @@ class SensorNode(object):
             self.callbacks[cb_name] = cb_func
 
 
-    async def send_alert(self, sensor_node_id: int | str, opid: str, message: str, logger: None = None) -> None:
+    async def send_alert(self, sensor_node_id: Union[int, str], opid: str, message: str, logger: None = None) -> None:
         """
         Send an alert message.
 
@@ -319,7 +320,7 @@ class SensorNode(object):
 
         Parameters
         ----------
-        sensor_node_id : int | str
+        sensor_node_id : Union[int, str]
             Sensor node ID
         opid : str
             The operation ID. Unused placeholder for future use.
@@ -340,12 +341,12 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def send_tak_cot(self, sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H", logger: None = None) -> None:
+    async def send_tak_cot(self, sensor_node_id: Union[int, str], opid: str, uid: str, remarks: str, lat: Union[float, bool] = True, lon: Union[float, bool] = True, alt: Union[float, bool] = True, time: Union[float, bool] = True, type: str="a-f-G-U-H", logger: None = None) -> None:
         """Send a TAK message.
 
         Parameters
         ----------
-        sensor_node_id : int | str
+        sensor_node_id : Union[int, str]
             Sensor node ID
         opid : str
             Operation ID
@@ -353,13 +354,13 @@ class SensorNode(object):
             Unique ID for the TAK message.
         remarks : str
             Remarks to include in the TAK message.
-        lat : float | bool, optional
+        lat : Union[float, bool], optional
             Latitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
-        lon : float | bool, optional
+        lon : Union[float, bool], optional
             Longitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
-        alt : float | bool, optional
+        alt : Union[float, bool], optional
             Altitude in meters, by default True to use current Sensor Node GPS position. False to omit.
-        time : float | bool, optional
+        time : Union[float, bool], optional
             Timestamp as a Unix epoch float, by default True to use current time. False to omit.
         type : str, optional
             Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
@@ -418,7 +419,7 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: int | str = 0) -> None:
+    async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: Union[int, str] = 0) -> None:
         """
         Runs a plugin operation on the Sensor Node
 
@@ -570,7 +571,7 @@ class SensorNode(object):
             self.logger.error(f"No callable run() method found in {plugin_script_path} OperationMain class")
             return
 
-    async def stop_plugin_operation(self, component: object, operation_id: str, sensor_node_id: int | str = 0) -> None:
+    async def stop_plugin_operation(self, component: object, operation_id: str, sensor_node_id: Union[int, str] = 0) -> None:
         """
         Stops a plugin operation on the Sensor Node.
 
@@ -624,13 +625,13 @@ class SensorNode(object):
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
-    async def stop_all_plugin_operations(self, component: object, sensor_node_id: int | str = 0) -> None:
+    async def stop_all_plugin_operations(self, component: object, sensor_node_id: Union[int, str] = 0) -> None:
         """
         Stops all running plugin operations on the Sensor Node.
 
         Parameters
         ----------
-        sensor_node_id : int | str, optional
+        sensor_node_id : Union[int, str], optional
             Sensor node ID, by default 0.
         """
         self.logger.info("Stopping all plugin operations.")

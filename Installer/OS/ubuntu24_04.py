@@ -82,8 +82,10 @@ sudo python3 -m pip install pydotplus --break-system-packages
 python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
 output=$(uname -a); if echo $output | grep -qi "raspi"; then python3 -m pip install tensorflow --break-system-packages; else python3 -m pip install tensorflow_cpu --break-system-packages; fi  # TODO: Fix to work with sudo
 
-sudo apt-get install -y snapd
-sudo snap install netron
+#sudo apt-get install -y snapd  # TODO: container fix
+#sudo snap install netron  # TODO: container fix
+sudo python3 -m pip install netron --break-system-packages  # TODO: container fix
+
 sudo python3 -m pip install ipython --break-system-packages
 sudo python3 -m pip install scikit-learn==1.3.2 --break-system-packages
 sudo python3 -m pip uninstall opencv-python --break-system-packages
@@ -103,84 +105,140 @@ sudo python3 -m pip install msgpack --break-system-packages
 sudo python3 -m pip install eventlet --break-system-packages
 sudo python3 -m pip install psycopg2-binary --break-system-packages
 sudo python3 -m pip install python-dotenv --break-system-packages
-. ~/.bashrc
+
+sudo apt-get install -y gnome-terminal dbus-x11 gsettings-desktop-schemas  # Apptainer
+
+#. ~/.bashrc  # TODO: container fix
+
 """,True,"Minimum Install"))
 
 # fissure Commands
 programs_ubuntu24_04.append(('fissure Commands',
-f"""mkdir -p ~/.local/bin
-if grep -Fq "~/.local/bin" ~/.bashrc
-then
-  echo "~/.local/bin is already in ~/.bashrc"
+f"""# Detect environment and choose bin path
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+  echo "[Apptainer detected] Using /usr/local/bin for command installs."
+  bin_path="/usr/local/bin"
 else
-  printf "\\n%s\\n" "export PATH=~/.local/bin:$PATH" >> ~/.bashrc
+  bin_path="$HOME/.local/bin"
+fi
+
+echo "Using bin path: $bin_path"
+mkdir -p "$bin_path"
+
+# Add ~/.local/bin to PATH if missing (for normal installs)
+if [ "$bin_path" = "$HOME/.local/bin" ]; then
+  if grep -Fq "~/.local/bin" ~/.bashrc
+  then
+    echo "~/.local/bin is already in ~/.bashrc"
+  else
+    printf "\\n%s\\n" "export PATH=~/.local/bin:$PATH" >> ~/.bashrc
+  fi
 fi
 
 # Create fissure command
-/bin/echo -e "export PYTHONPATH=$PYTHONPATH:{fissure_directory} \ncd {fissure_directory} \npython3 {fissure_directory}/fissure/Dashboard/__main__.py" > ~/.local/bin/fissure
-sudo chmod +x ~/.local/bin/fissure
+cat << EOF > "$bin_path/fissure"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Dashboard/__main__.py
+EOF
+chmod +x "$bin_path/fissure"
 
 # Create fissure-sensor-node command
-/bin/echo -e "#!/bin/bash\nexport PYTHONPATH=$PYTHONPATH:{fissure_directory} \ncd {fissure_directory} \npython3 {fissure_directory}/fissure/Sensor_Node/SensorNode.py" > ~/.local/bin/fissure-sensor-node
-sudo chmod +x ~/.local/bin/fissure-sensor-node
+cat << EOF > "$bin_path/fissure-sensor-node"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Sensor_Node/SensorNode.py
+EOF
+chmod +x "$bin_path/fissure-sensor-node"
 
-# Create desktop entry for FISSURE
-echo "[Desktop Entry]\\nStartupWMClass=__main__.py\\nName=FISSURE\\nTerminal=false\\nType=Application\nCategories=Qt;Science;DataVisualization;Electricity;HamRadio;" > {fissure_directory}/Installer/fissure.desktop
-echo "Exec=/home/$USER/.local/bin/fissure" >> {fissure_directory}/Installer/fissure.desktop
-echo "Icon={fissure_directory}/docs/Icons/logo_f.png" >> {fissure_directory}/Installer/fissure.desktop
-sudo cp {fissure_directory}/Installer/fissure.desktop /usr/share/applications/
+# Create fissure-hiprfisr command
+cat << EOF > "$bin_path/fissure-hiprfisr"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Server/__main__.py --remote
+EOF
+chmod +x "$bin_path/fissure-hiprfisr"
 
-# Reload bashrc to update PATH
-. ~/.bashrc
+# Create desktop entry for FISSURE (skip in Apptainer)
+if [ -z "$APPTAINER_CONTAINER" ] && [ -z "$APPTAINER_NAME" ]; then
+  echo "[Desktop Entry]\\nStartupWMClass=__main__.py\\nName=FISSURE\\nTerminal=false\\nType=Application\\nCategories=Qt;Science;DataVisualization;Electricity;HamRadio;" > {fissure_directory}/Installer/fissure.desktop
+  echo "Exec=/home/$USER/.local/bin/fissure" >> {fissure_directory}/Installer/fissure.desktop
+  echo "Icon={fissure_directory}/docs/Icons/logo_f.png" >> {fissure_directory}/Installer/fissure.desktop
+  sudo cp {fissure_directory}/Installer/fissure.desktop /usr/share/applications/ 2>/dev/null || true
+else
+  echo "[Apptainer detected] Skipping desktop entry creation."
+fi
 
 ########## Verify ##########
-ls ~/.local/bin/fissure ~/.local/bin/fissure-sensor-node
+ls -l /usr/local/bin/fissure /usr/local/bin/fissure-sensor-node 2>/dev/null \
+  || ls -l ~/.local/bin/fissure ~/.local/bin/fissure-sensor-node
 """, True, 'Minimum Install'))
 
 # Password Prompt Exceptions
 programs_ubuntu24_04.append(('Password Prompt Exceptions',
-f"""# Replace placeholder in the template file directly into a temporary file
-sed "s/__USERNAME__/$(whoami)/g" "{fissure_directory}/Installer/password_prompt_exceptions.txt" > /tmp/password_prompt_exceptions
-
-# Validate the temporary sudoers file
-echo "Validating sudoers file..."
-if visudo -c -f /tmp/password_prompt_exceptions; then
-    echo "Validation successful. Installing sudoers file..."
-    sudo mv /tmp/password_prompt_exceptions /etc/sudoers.d/fissure
-    sudo chown root:root /etc/sudoers.d/fissure
-    sudo chmod 440 /etc/sudoers.d/fissure
-    echo "No Password Prompts Setup completed successfully!"
+f"""# Detect Apptainer by environment variables (new method)
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[Apptainer detected] Skipping Password Prompt Exceptions — running as root."
 else
-    echo "Validation failed! Not installing the sudoers file to avoid system issues."
-    rm /tmp/password_prompt_exceptions
+  # Replace placeholder in the template file directly into a temporary file
+  sed "s/__USERNAME__/$(whoami)/g" "{fissure_directory}/Installer/password_prompt_exceptions.txt" > /tmp/password_prompt_exceptions
+
+  # Validate the temporary sudoers file
+  echo "Validating sudoers file..."
+  if command -v visudo >/dev/null 2>&1 && visudo -c -f /tmp/password_prompt_exceptions; then
+      echo "Validation successful. Installing sudoers file..."
+      sudo mv /tmp/password_prompt_exceptions /etc/sudoers.d/fissure
+      sudo chown root:root /etc/sudoers.d/fissure
+      sudo chmod 440 /etc/sudoers.d/fissure
+      echo "No Password Prompts Setup completed successfully!"
+  else
+      echo "Validation failed or visudo not found! Skipping installation to avoid system issues."
+      rm -f /tmp/password_prompt_exceptions
+  fi
 fi
+
 ########## Verify ##########
-ls -l /etc/sudoers.d/fissure
+ls -l /etc/sudoers.d/fissure 2>/dev/null || echo "No sudoers file installed (expected in Apptainer)."
 """, True, 'Minimum Install'))
 
 # GNU Radio
 programs_ubuntu24_04.append(('GNU Radio (1.40 GB)',
-"""sudo add-apt-repository -y ppa:gnuradio/gnuradio-releases
-sudo apt-get update
-sudo apt-get install -y gnuradio  # =3.10.5.1-0~gnuradio~jammy-2  # Check for changes here: https://launchpad.net/~gnuradio/+archive/ubuntu/gnuradio-releases
+"""#sudo add-apt-repository -y ppa:gnuradio/gnuradio-releases
+#sudo apt-get update
+sudo apt-get install -y gnuradio  # =3.10.5.1-0~gnuradio~jammy-2
 sudo apt-get install -y uhd-host
 
 # Configure GNU Radio
-(gnuradio-companion &) && sleep 5 && killall gnuradio-companion
-/bin/echo -e "[grc]\nlocal_blocks_path=""" + fissure_directory + """/Custom_Blocks\nxterm_executable=/usr/bin/gnome-terminal" > ~/.gnuradio/config.conf
-sudo cp /usr/lib/uhd/utils/uhd-usrp.rules /etc/udev/rules.d/  # For B205 mini
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-sudo mkdir /usr/share/uhd
-sudo chmod -R 777 /usr/share/uhd
-uhd_images_downloader
+mkdir -p ~/.gnuradio
+printf "[grc]\\nlocal_blocks_path=%s/Custom_Blocks\\nxterm_executable=/usr/bin/gnome-terminal\\n" "{fissure_directory}" > ~/.gnuradio/config.conf
 
-# Find OOT Modules
-printf "\\n%s\\n" "export PYTHONPATH=/usr/local/lib/python3.8/site-packages:/usr/local/lib/python3/dist-packages:/usr/lib/python3/site-packages:$PYTHONPATH" >> ~/.bashrc
-printf "\\n%s\\n" "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
-printf "\\n%s\\n" "export PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/lib/python3/site-packages:$PYTHONPATH" >> ~/.profile  # For GRC without terminal
-printf "\\n%s\\n" "export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.profile  # For GRC without terminal
-. ~/.bashrc
+# ---------- Host-specific section ----------
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[Apptainer detected] Skipping host-level configuration (udev rules, bashrc, group edits)"
+    sudo mkdir -p /usr/share/uhd
+    sudo chmod -R 777 /usr/share/uhd
+    uhd_images_downloader
+else
+    # udev and user environment only make sense on host
+    sudo cp /usr/lib/uhd/utils/uhd-usrp.rules /etc/udev/rules.d/  # For B205 mini
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    sudo mkdir -p /usr/share/uhd
+    sudo chmod -R 777 /usr/share/uhd
+    uhd_images_downloader
+
+    # Host-side environment exports
+    printf "\\nexport PYTHONPATH=/usr/local/lib/python3.8/site-packages:/usr/local/lib/python3/dist-packages:/usr/lib/python3/site-packages:$PYTHONPATH" >> ~/.bashrc
+    printf "\\nexport LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
+    printf "\\nexport PYTHONPATH=/usr/local/lib/python3/dist-packages:/usr/lib/python3/site-packages:$PYTHONPATH" >> ~/.profile
+    printf "\\nexport LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> ~/.profile
+    . ~/.bashrc
+fi
+# ---------- End host-specific section ----------
+
 sudo apt-get install -y libzmq3-dev swig cmake
 sudo sh -c "/bin/echo -e '/usr/local/lib' >> /etc/ld.so.conf"
 sudo ldconfig
@@ -193,22 +251,31 @@ programs_ubuntu24_04.append(('Scapy (82.47 MB)',
 """sudo apt-get install -y python3-scapy
 #sudo python3 -m pip install scapy --break-system-packages  # Causes errors
 sudo python2 -m pip install scapy==2.4.5
-sudo sed -i 's/tostring/tobytes/g' /usr/local/lib/python3.10/dist-packages/scapy/arch/linux.py
 ########## Verify ##########
 python2 -c "import scapy" && python3 -c "import scapy"
 """,True,"Minimum Install"))
 
 # Wireshark
 programs_ubuntu24_04.append(('Wireshark (160.89 MB)',
-"""sudo add-apt-repository --y ppa:wireshark-dev/stable  # Gets installed with Misc. Dependencies (tshark), ESP32 Bluetooth Classic Sniffer
+"""
+# ---------- Install Wireshark ----------
 sudo apt-get update
-sudo apt install -y wireshark wireshark-dev  # Yes
-sudo groupadd wireshark
-sudo usermod -a -G wireshark $USER
-sudo chgrp wireshark /usr/bin/dumpcap
-sudo chmod o-rx /usr/bin/dumpcap
-sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
-sudo getcap /usr/bin/dumpcap
+sudo apt-get install -y wireshark wireshark-dev
+
+# ---------- Environment detection ----------
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[Apptainer detected] Skipping group/capability configuration (running as root)"
+else
+    echo "[Host detected] Setting up Wireshark permissions for non-root capture..."
+    sudo groupadd -f wireshark
+    sudo usermod -a -G wireshark $USER
+    sudo chgrp wireshark /usr/bin/dumpcap
+    sudo chmod o-rx /usr/bin/dumpcap
+    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+    sudo getcap /usr/bin/dumpcap
+fi
+
+# ---------- Install custom FISSURE dissectors ----------
 mkdir -p ~/.config/wireshark/plugins
 cp -a """ + fissure_directory + """/Dissectors/. ~/.config/wireshark/plugins
 ########## Verify ##########
@@ -220,45 +287,82 @@ programs_ubuntu24_04.append(('PostgreSQL Database',
 """sudo python3 -m pip install python-dotenv --break-system-packages
 sudo apt-get install -y libpq-dev
 sudo python3 -m pip install psycopg2 --break-system-packages
-sudo apt-get install -y docker.io docker-compose-v2
-sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
 sudo apt install -y postgresql-client
-cd '""" + fissure_directory + """'
-cp example.env .env
-bash -c '
-    set -o allexport
-    source .env
-    set +o allexport
-    export PGPASSWORD=$POSTGRES_PASSWORD
-    sudo docker compose up -d
-    until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
-        echo "Waiting for PostgreSQL to be ready..."
-        sleep 2
-    done
-    pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
-'
+
+# ---------- Host vs Apptainer ----------
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[Apptainer detected] Skipping Docker setup; using host PostgreSQL instance."
+else
+    echo "[Host detected] Setting up PostgreSQL via Docker..."
+    sudo apt-get install -y docker.io docker-compose-v2 postgresql-client
+    sudo usermod -aG docker ${USER}
+    cd '""" + fissure_directory + """'
+    cp example.env .env
+    bash -c '
+        set -e
+        set -o allexport
+        source .env
+        set +o allexport
+        export PGPASSWORD=$POSTGRES_PASSWORD
+        echo "[*] Starting PostgreSQL container..."
+        sudo docker compose up -d
+        until pg_isready -U $POSTGRES_USER -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+        done
+        echo "[*] Restoring FISSURE database..."
+        pg_restore -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -v db/fissure_db_dump.sql
+    '
+fi
 ########## Verify ##########
-bash -c '
-    set -o allexport
-    source .env
-    set +o allexport
-    export PGPASSWORD=$POSTGRES_PASSWORD
-    sudo docker compose up -d
-    psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT -c "SELECT COUNT(*) FROM pg_tables;"
-'
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[Apptainer detected] Verifying connection to host PostgreSQL..."
+    bash -c '
+        set -e
+        set -o allexport
+        source .env
+        set +o allexport
+        export PGPASSWORD=$POSTGRES_PASSWORD
+        psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT \
+             -c "SELECT COUNT(*) FROM pg_tables;"
+    '
+else
+    echo "[Host detected] Verifying PostgreSQL container..."
+    bash -c '
+        set -e
+        set -o allexport
+        source .env
+        set +o allexport
+        export PGPASSWORD=$POSTGRES_PASSWORD
+        sudo docker compose up -d
+        psql -U $POSTGRES_USER -d $POSTGRES_DB -h $POSTGRES_HOST -p $POSTGRES_EXTERNAL_PORT \
+             -c "SELECT COUNT(*) FROM pg_tables;"
+    '
+fi
 """,True,'Minimum Install'))
 
 # Meshtastic
 programs_ubuntu24_04.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
-sudo apt-get install -y python3-pyserial
 sudo python3 -m pip install "meshtastic==2.6.4" --break-system-packages
-sudo usermod -aG dialout $USER  # log out & in/reboot
-sudo usermod -aG tty $USER
-echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
-sudo udevadm control --reload-rules
-sudo udevadm trigger
+
+# ---------- Host-specific section ----------
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[Apptainer detected] Skipping udev and usermod changes (handled on host)."
+else
+    echo "[*] Configuring Meshtastic host access rules..."
+    sudo usermod -aG dialout $USER  # log out & in/reboot
+    sudo usermod -aG tty $USER
+
+    # Create udev rule for Meshtastic USB devices
+    echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | \
+        sudo tee /etc/udev/rules.d/99-meshtastic.rules
+
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+fi
+# ---------- End host-specific section ----------
 ########## Verify ##########
 python3 -c "import meshtastic"
 """,True,'Minimum Install'))
@@ -274,9 +378,13 @@ ls '""" + fissure_directory + """/certificates'
 
 # Auto-Launch Sensor Node
 programs_ubuntu24_04.append(('Auto-Launch Sensor Node',
-f"""mkdir -p "$HOME/.config/autostart"
+"""if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+  echo "[!] Skipping autostart setup (inside Apptainer container)."
+else
+  echo "[*] Configuring auto-launch for Sensor Node..."
+  mkdir -p "$HOME/.config/autostart"
 
-cat <<EOF > "$HOME/.config/autostart/fissure-sensor-node.desktop"
+  cat <<EOF > "$HOME/.config/autostart/fissure-sensor-node.desktop"
 [Desktop Entry]
 Type=Application
 Terminal=true
@@ -284,11 +392,36 @@ Name=FISSURE Sensor Node
 Exec=gnome-terminal -- bash -c 'sleep 1; $HOME/.local/bin/fissure-sensor-node; exec bash'
 EOF
 
-chmod +x "$HOME/.config/autostart/fissure-sensor-node.desktop"
+  chmod +x "$HOME/.config/autostart/fissure-sensor-node.desktop"
+  echo "[✓] Sensor Node autostart configured."
+fi
 
 ########## Verify ##########
 ls "$HOME/.config/autostart/fissure-sensor-node.desktop"
 """,False,'Remote Sensor Node'))
+
+# RTL-SDR
+programs_ubuntu24_04.append(('RTL-SDR',
+"""echo "[*] Installing RTL-SDR host libraries and tools..."
+
+sudo apt-get update
+sudo apt-get -y install rtl-sdr
+
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[!] Detected Apptainer — skipping kernel module blacklist and udev rule (host only)."
+else
+    echo "[*] Configuring host for RTL-SDR access..."
+    echo 'blacklist dvb_usb_rtl28xxu' | sudo tee /etc/modprobe.d/rtl-sdr.conf
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="adm", MODE="0666"' \
+        | sudo tee /etc/udev/rules.d/20.rtlsdr.rules
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    echo "[*] Reboot required for RTL-SDR devices to appear."
+fi
+
+########## Verify ##########
+ls /usr/bin/rtl_test"
+""", True, 'Hardware'))
 
 # LimeSDR
 programs_ubuntu24_04.append(('LimeSDR (417.08 MB)',
@@ -315,73 +448,147 @@ bladeRF-cli --help
 
 # USRP X300 Series
 programs_ubuntu24_04.append(('USRP X300 Series (0.00 kB)',
-"""mkdir -p ~/Installed_by_FISSURE  # Set MTU to 9000 and run uhd_image_loader command
+"""echo "[*] Preparing USRP X300/X310 environment..."  # Set MTU to 9000 and run uhd_image_loader command
+
+mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-#wget https://codeload.github.com/EttusResearch/uhd/zip/release_003_010_003_000 -O uhd.zip
-#unzip uhd.zip
-#cd uhd-release_003_010_003_000/host/include
-#sudo cp -Rv uhd/rfnoc /usr/share/uhd/
-#rm -Rf ~/Installed_by_FISSURE/uhd-release_003_010_003_000
-/usr/lib/uhd/utils/uhd_images_downloader.py
-#"/usr/bin/uhd_image_loader" --args="type=x300,addr=192.168.40.2"  # Use your X310 IP
-sudo sysctl -w net.core.wmem_max=24862979
+
+# UHD FPGA image downloader
+if [ -x /usr/lib/uhd/utils/uhd_images_downloader.py ]; then
+    /usr/lib/uhd/utils/uhd_images_downloader.py
+elif [ -x /usr/bin/uhd_images_downloader ]; then
+    /usr/bin/uhd_images_downloader
+else
+    echo "[!] UHD image downloader not found. Ensure 'uhd-host' is installed."
+fi
+
+# Handle host vs. Apptainer sysctl configuration
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[!] Detected Apptainer environment. Skipping sysctl network tuning."
+else
+    echo "[*] Adjusting system network buffers for high-throughput USRP operation..."
+    sudo sysctl -w net.core.wmem_max=24862979 || echo "[!] sysctl update failed (non-critical)."
+fi
+
+echo "[✓] USRP X300/X310 preparation complete."
+
+########## Verify ##########
+if command -v uhd_usrp_probe >/dev/null 2>&1; then
+    echo "[✓] UHD tools installed: $(uhd_usrp_probe --version 2>/dev/null | head -n 1)"
+else
+    echo "[!] uhd_usrp_probe not found. Ensure 'uhd-host' is installed."
+fi
+
+if [ -d /usr/share/uhd/images ]; then
+    echo "[✓] UHD FPGA image directory found: /usr/share/uhd/images"
+else
+    echo "[!] UHD image directory missing. Try rerunning uhd_images_downloader."
+fi
 """,True,'Hardware'))
 
 # HackRF, gr-osmosdr
 programs_ubuntu24_04.append(('HackRF, gr-osmosdr (73.12 MB)',
-"""sudo apt-get install -y libusb-1.0-0-dev
+r"""echo "[*] Installing HackRF v2024.02.1 and gr-osmosdr dependencies..."
 
-# HackRF
+# Core build deps
+sudo apt-get update
+sudo apt-get install -y build-essential cmake git wget unzip pkg-config libusb-1.0-0-dev \
+    libfftw3-dev libprotobuf-dev protobuf-compiler libnl-3-dev libnl-genl-3-dev \
+    libboost-all-dev python3-dev python3-pip
+
+# Prepare build area
 mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE/
-wget https://github.com/greatscottgadgets/hackrf/releases/download/v2024.02.1/hackrf-2024.02.1.zip
-unzip hackrf-2024.02.1.zip
-rm hackrf-2024.02.1.zip
-mkdir ~/Installed_by_FISSURE/hackrf-2024.02.1/host/build
-cd ~/Installed_by_FISSURE/hackrf-2024.02.1/host/build
-sed -i 's/cmake_minimum_required(VERSION 2.8.12)/cmake_minimum_required(VERSION 3.5)/' \
-    ~/Installed_by_FISSURE/hackrf-2024.02.1/host/CMakeLists.txt \
-    ~/Installed_by_FISSURE/hackrf-2024.02.1/host/libhackrf/CMakeLists.txt \
-    ~/Installed_by_FISSURE/hackrf-2024.02.1/host/hackrf-tools/CMakeLists.txt
-cmake ..
-make
-sudo make install
-sudo ldconfig
-sudo cp """ + fissure_directory + """/Tools/53-hackrf.rules /etc/udev/rules.d/53-hackrf.rules
-sudo udevadm trigger --action=change
-#sudo apt-get install -y hackrf
-
-# gr-osmosdr
-#sudo apt-get install gr-osmosdr
 cd ~/Installed_by_FISSURE
-git clone https://gitea.osmocom.org/sdr/gr-osmosdr.git
-cd gr-osmosdr
-mkdir build
-cd build
-cmake -DCMAKE_PREFIX_PATH=/usr/local ..
-make
+
+# Download and build fixed HackRF release
+HACKRF_VER="2024.02.1"
+HACKRF_ZIP="hackrf-${HACKRF_VER}.zip"
+HACKRF_DIR="hackrf-${HACKRF_VER}"
+HACKRF_URL="https://github.com/greatscottgadgets/hackrf/releases/download/v${HACKRF_VER}/${HACKRF_ZIP}"
+
+echo "[*] Fetching HackRF ${HACKRF_VER}..."
+wget -q --show-progress -O "${HACKRF_ZIP}" "${HACKRF_URL}"
+unzip -q "${HACKRF_ZIP}"
+rm -f "${HACKRF_ZIP}"
+
+echo "[*] Building HackRF from source..."
+mkdir -p "${HACKRF_DIR}/host/build"
+cd "${HACKRF_DIR}/host/build"
+
+# Apply the cmake_minimum_required patch you used previously (keeps your approach intact)
+sed -i 's/cmake_minimum_required(VERSION 2.8.12)/cmake_minimum_required(VERSION 3.5)/' \
+    ../CMakeLists.txt ../libhackrf/CMakeLists.txt ../hackrf-tools/CMakeLists.txt || true
+
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j"$(nproc)"
 sudo make install
 sudo ldconfig
-sudo apt remove --purge -y xtrx-dkms
-sudo dpkg --configure -a
+
+# Install udev rule from FISSURE tools (host only — skip in Apptainer)
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[!] Running inside Apptainer — skipping udev rule install."
+else
+    if [ -f "{fissure_directory}/Tools/53-hackrf.rules" ]; then
+        echo "[*] Installing udev rule for HackRF on host..."
+        sudo cp "{fissure_directory}/Tools/53-hackrf.rules" /etc/udev/rules.d/53-hackrf.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --action=change || true
+    else
+        echo "[!] udev rule not found at {fissure_directory}/Tools/53-hackrf.rules — skipping udev install."
+    fi
+fi
+
+# Build and install gr-osmosdr
+echo "[*] Building gr-osmosdr..."
+cd ~/Installed_by_FISSURE
+if [ ! -d gr-osmosdr ]; then
+    git clone --depth 1 https://gitea.osmocom.org/sdr/gr-osmosdr.git
+fi
+cd gr-osmosdr
+mkdir -p build && cd build
+cmake -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_BUILD_TYPE=Release ..
+make -j"$(nproc)"
+sudo make install
+sudo ldconfig
 ########## Verify ##########
 hackrf_sweep -h #&& ls /usr/local/bin/osmocom_fft
 """,True,'Hardware'))
 
 # 8812au Driver
 programs_ubuntu24_04.append(('8812au Driver (202.14 MB)',
-"""# Still Broken, Needs Replacement Driver
-sudo apt-get -y install dkms
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-git clone https://github.com/aircrack-ng/rtl8812au/
-cd ~/Installed_by_FISSURE/rtl8812au
-sudo make dkms_install
+"""echo "[*] Preparing rtl8812au driver build (container-safe)..."
+
+# If we're inside Apptainer, skip host kernel/udev changes
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[!] Detected Apptainer environment — skipping host kernel driver installation."
+    echo "[*] To install on host, run the host installer with --rtl8812au or run this script on the host."
+else
+    sudo apt-get -y install dkms git build-essential
+    mkdir -p ~/Installed_by_FISSURE
+    cd ~/Installed_by_FISSURE
+
+    if [ -d rtl8812au ]; then
+        echo "[*] rtl8812au repository already exists — using existing clone."
+    else
+        git clone https://github.com/aircrack-ng/rtl8812au
+    fi
+
+    cd rtl8812au
+    sudo make dkms_install
+fi
+
+########## Verify ##########
+# Only attempt to load/verify the module on the host
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[*] Verification skipped inside Apptainer."
+else
+    sudo modprobe 8812au && echo "[✓] rtl8812au module loaded successfully" || echo "[!] rtl8812au module load failed"
+fi
 """,True,'Hardware'))
 
 # Zigbee Sniffer
 programs_ubuntu24_04.append(('Zigbee Sniffer (680.00 kB)',
-"""mkdir -p ~/Installed_by_FISSURE
+"""mkdir -p ~/Installed_by_FISSURE  # Recheck this item with hardware
 cp -R """ + fissure_directory + """/Tools/OpenSniffer-0.1/ ~/Installed_by_FISSURE/
 cd ~/Installed_by_FISSURE/OpenSniffer-0.1/
 sudo python3 setup.py install
@@ -401,19 +608,32 @@ sudo apt-get install -y mlocate
 
 # fl2k
 programs_ubuntu24_04.append(('fl2k',
-"""mkdir -p ~/Installed_by_FISSURE
+"""echo "[*] Installing osmo-fl2k (VGA dongle transmitter)..."
+
+mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
-git clone https://gitea.osmocom.org/sdr/osmo-fl2k.git  # gets redirected: https://git.osmocom.org/osmo-fl2k.git
+
+if [ ! -d osmo-fl2k ]; then
+    git clone https://gitea.osmocom.org/sdr/osmo-fl2k.git
+fi
+
 cd osmo-fl2k
-mkdir build
+mkdir -p build
 cd build
-sed -i 's/cmake_minimum_required(VERSION 2.6)/cmake_minimum_required(VERSION 3.5)/' ~/Installed_by_FISSURE/osmo-fl2k/CMakeLists.txt
-cmake ../ -DINSTALL_UDEV_RULES=ON
-make -j 3
+sed -i 's/cmake_minimum_required(VERSION 2.6)/cmake_minimum_required(VERSION 3.5)/' ../CMakeLists.txt
+cmake ../
+make -j"$(nproc)"
 sudo make install
 sudo ldconfig
-sudo udevadm control -R
-sudo udevadm trigger
+
+# Handle udev only on the host
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+    echo "[!] Detected Apptainer — skipping udev rule installation (host only)."
+else
+    echo "[*] Installing udev rules for osmo-fl2k on host..."
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+fi
 ########## Verify ##########
 ls /usr/local/bin/fl2k_test
 """,True,'Hardware'))
@@ -421,7 +641,7 @@ ls /usr/local/bin/fl2k_test
 # Proxmark3
 programs_ubuntu24_04.append(('Proxmark3 (3.52 GB)',
 """sudo apt-get install -y p7zip git build-essential libreadline8 libreadline-dev libusb-0.1-4 libusb-dev perl pkg-config wget libncurses5-dev gcc-arm-none-eabi libreadline-dev libpcsclite-dev gcc-arm-none-eabi
-mkdir -p ~/Installed_by_FISSURE
+mkdir -p ~/Installed_by_FISSURE  # test with hardware
 cd ~/Installed_by_FISSURE
 git clone https://github.com/Proxmark/proxmark3.git
 cd proxmark3
@@ -1537,8 +1757,8 @@ rtl_airband -h
 
 # Spektrum
 programs_ubuntu24_04.append(('Spektrum (230.65 MB)',
-"""echo 'blacklist dvb_usb_rtl28xxu' | sudo tee /etc/modprobe.d/rtl-sdr.conf  # Restart computer to use RTL device
-echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="adm", MODE="0666"' | sudo tee /etc/udev/rules.d/20.rtlsdr.rules
+"""#echo 'blacklist dvb_usb_rtl28xxu' | sudo tee /etc/modprobe.d/rtl-sdr.conf  # Done in RTL-SDR install item
+#echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="adm", MODE="0666"' | sudo tee /etc/udev/rules.d/20.rtlsdr.rules
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 wget -P ~/Installed_by_FISSURE/ https://github.com/pavels/spektrum/releases/download/2.1.0/spektrum-linux64.tar.gz
@@ -2406,49 +2626,30 @@ sudo python3 -m pip show sphinx_rtd_theme
 
 # IQEngine
 programs_ubuntu24_04.append(('IQEngine (393.84 MB)',
-"""if command -v docker > /dev/null 2>&1; then
-  echo "Docker is installed."
-else
-  echo "Docker is not installed."
-  sudo apt-get install -y docker.io
-  #sudo systemctl start docker
-  #sudo systemctl enable docker
-  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
-  #newgrp docker
-fi
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
-git clone https://github.com/IQEngine/IQEngine.git
-cd ~/Installed_by_FISSURE/IQEngine
-cp example.env .env
-docker run --env-file .env -v '""" + fissure_directory + """/IQ Recordings':/tmp/myrecordings -p 3001:3000 --pull=always -d ghcr.io/iqengine/iqengine:pre
-docker stop $(docker ps -q --filter ancestor=ghcr.io/iqengine/iqengine:pre)
-########## Verify ##########
-sudo docker run hello-world
-""",True,'Data'))
-
-# TAK Server
-programs_ubuntu24_04.append(('TAK Server',
 """# Create TAK.gov account and download TAKSERVER-DOCKER-#.#-RELEASE-##.ZIP from https://tak.gov/products/tak-server
 # Place ZIP file in ~/Installed_by_FISSURE folder and then run this installer item!
 
-if command -v docker > /dev/null 2>&1; then
-  echo "Docker is installed."
+# ---------- Host vs Apptainer ----------
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+  echo "[Apptainer detected] Skipping TAK Server setup; must be installed on the host."
 else
-  echo "Docker is not installed."
-  sudo apt-get install -y docker.io
-  #sudo systemctl start docker
-  #sudo systemctl enable docker
-  sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
-  #newgrp docker
-fi
+  if command -v docker > /dev/null 2>&1; then
+    echo "Docker is installed."
+  else
+    echo "Docker is not installed."
+    sudo apt-get install -y docker.io
+    #sudo systemctl start docker
+    #sudo systemctl enable docker
+    sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
+    #newgrp docker
+  fi
 
-mkdir -p ~/Installed_by_FISSURE
-cd ~/Installed_by_FISSURE
+  mkdir -p ~/Installed_by_FISSURE
+  cd ~/Installed_by_FISSURE
 
-# Unzip and move into the extracted directory
-unzip takserver-docker-*.zip
-if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
+  # Unzip and move into the extracted directory
+  unzip takserver-docker-*.zip
+  if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" ]; then
     cd takserver-docker-*/
 
     # Ensure CoreConfig.xml exists
@@ -2576,10 +2777,14 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     echo ""
     echo "TAK Server setup complete! Import webadmin.p12 certificate via browser. Access WebTAK at https://localhost:8443"
     echo ""
-else
+  else
     echo "TAK Server zip extraction failed or extracted folder not found. Exiting."
-fi
-
+  fi
+fi  # end host-only block
 ########## Verify ##########
-ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+  echo "[Apptainer detected] Skipping TAK Server verification — host-only install."
+else
+  ls "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)"
+fi
 """,False,'Mapping'))

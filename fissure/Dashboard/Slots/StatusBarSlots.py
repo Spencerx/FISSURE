@@ -15,6 +15,7 @@ def remote_connect_prompt(statusBar: QtCore.QObject):
     """
 
     statusBar.session_label.setText("Server:")
+    statusBar.protocol_select.setEnabled(False)  # lock it so users can't change
 
     # Hide Buttons
     statusBar.local_button.hide()
@@ -54,7 +55,7 @@ def toggle_port_boxes(statusBar: QtCore.QObject):
     :type statusBar: QtCore.QObject (FissureStatusBar)
     """
     if statusBar.protocol_select.currentText() == "tcp":
-        statusBar.addr_box.setText("127.0.0.1")
+        statusBar.addr_box.setText("192.168.1.xxx")  # hint for user
         statusBar.ports_prompt.show()
     else:
         statusBar.addr_box.setText("fissure")
@@ -112,30 +113,46 @@ async def connect(
 
     dashboard.logger.info(f"[GUI] Connecting to HIPRFISR @ {addr} ...")
 
-    # Connect to HiprFisr
-    # connect_button.setChecked(True)
+    # # ---- show busy popup ----  # Needs more adjustments to stay up longer
+    # dlg = QtWidgets.QProgressDialog("Connecting to HIPRFISR...", None, 0, 0, dashboard)
+    # dlg.setWindowTitle("FISSURE")
+    # dlg.setWindowModality(QtCore.Qt.ApplicationModal)
+    # dlg.setCancelButton(None)
+    # dlg.setMinimumDuration(3000)  # 0 means "auto", use >0 to force paint
+    # dlg.setAutoClose(False)
+    # dlg.setAutoReset(False)
+    # dlg.show()
+
+    # # force Qt to process one paint cycle right now
+    # QtWidgets.QApplication.processEvents(QtCore.QEventLoop.AllEvents, 100)
+
+    # ---- backend start and async connect ----
     connect_button.setText("Connecting...")
-    dashboard.backend.initial_database_retrieval = True  # Retrieve the database again on reconnect
-    await dashboard.backend.connect_to_hiprfisr(addr)
-    # connect_button.setChecked(False)
+    dashboard.backend.initial_database_retrieval = True
+    dashboard.backend.initialize_comms()
+    dashboard.backend.start()
 
-    if dashboard.backend.hiprfisr_connected is True:
-        dashboard.logger.info("[GUI] Connected")
-        connect_button.setText("Connected!")
-        await qasync.asyncio.sleep(1)
+    asyncio.create_task(dashboard.backend.connect_to_hiprfisr(addr))
 
-        # Update Status Bar
-        status_bar.update_session_status(connected=True, addr=addr)
-
-        # Enable Widgets in retrieveDatabaseCacheReturn()
-
-    else:
-        # Connection Failed
-        connect_button.setText("FAILED")
+    # ---- async waiter to watch for connection ----
+    async def _wait_for_connected():
+        for _ in range(100):  # ~5s total
+            if dashboard.backend.hiprfisr_connected:
+                dashboard.logger.info("[GUI] Connected")
+                status_bar.update_session_status(connected=True, addr=addr)
+                connect_button.setText("Connected!")
+                connect_button.setChecked(False)
+                # dlg.close()
+                return
+            await asyncio.sleep(0.05)
+            QtWidgets.QApplication.processEvents()
+        # timed out
         dashboard.logger.critical("[GUI] HIPRFISR not connected")
-        await qasync.asyncio.sleep(1)
-        connect_button.setChecked(False)
         connect_button.setText("Retry")
+        connect_button.setChecked(False)
+        # dlg.close()
+
+    asyncio.create_task(_wait_for_connected())
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -158,6 +175,8 @@ async def disconnect_hiprfisr(dashboard: QtCore.QObject):
     disconnect_button.setChecked(True)
     await dashboard.backend.disconnect_from_hiprfisr()
     disconnect_button.setChecked(False)
+
+    back(dashboard)
 
     dashboard.logger.info("[GUI] Disconnected")
 
@@ -200,6 +219,8 @@ async def shutdown_hiprfisr(dashboard: QtCore.QObject):
     shutdown_button.setChecked(True)
     await dashboard.backend.shutdown_hiprfisr()  # Needs event loop running to know if shutdown happened   
     shutdown_button.setChecked(False)
+
+    back(dashboard)
 
     # Disable Sensor Node Buttons
     dashboard.ui.pushButton_top_node1.setEnabled(False)

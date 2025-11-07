@@ -223,7 +223,8 @@ class DemodDialog(QtWidgets.QDialog, UI_Types.Demod):
             self.textEdit_ascii.clear()
             return
 
-        indices = np.arange(start, len(bits), sps)
+        #indices = np.arange(start, len(bits), sps)
+        indices = np.arange(start + sps // 2, len(bits), sps)  # uses midpoint
         symbol_bits = bits[indices]
         if symbol_bits.size == 0:
             self.textEdit_bits.clear()

@@ -49,14 +49,15 @@ FISSURE streamlines complex SDR workflows by centralizing software, libraries, a
 - Integrate alerts and data into TAK for team awareness
 
 <p align="center">
-<img src="/docs/Icons/README/rf_re.png" width="300" height="300">
+  <img src="/docs/Icons/README/rf_re.png" height="275">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="/docs/Icons/README/key_capabilities1.png" height="275">
 </p>
 
 ## Deployment Options
 
 - Desktop GUI for visualization and prototyping
 - Headless nodes for remote sensing and autonomous operations
-- Dockerized services for scalable and repeatable installs
+- Containerized services for scalable and repeatable installs
 - TAK integration for mission relevance and shared situational awareness
 
 ---
@@ -124,6 +125,14 @@ AIS has published several articles highlighting FISSURE’s applications, update
 [See all AIS blog posts](https://www.ainfosec.com/blog/)
 
 ## News
+
+![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
+
+**Apptainer Containerization** Run FISSURE inside a lightweight Apptainer container for consistent, portable deployments with full GUI and hardware access.
+
+![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
+
+**Command Line Installer** Quickly install FISSURE and its dependencies using a streamlined command line interface with mode selection and automation options.
 
 ![NEW](https://img.shields.io/badge/NEW-Documentation-brightgreen) 
 
@@ -294,6 +303,15 @@ Operating System | FISSURE Branch | Default GNU Radio Version
 
 Note: Certain software tools do not work for every OS. Refer to [Known Conflicts and Third-Party Software](https://fissure.readthedocs.io/en/latest/pages/installation.html#known-conflicts)
 
+
+**Apptainer Installs**
+
+Testing is underway with apptainer to containerize FISSURE installs. Combinations of host OS, container OS, and FISSURE install mode (full, base, Dashboard, HIPRFISR, SensorNode) are still in progress. The following are supported combinations.
+
+Host Operating System | Container Operating System | FISSURE Mode
+:-------------------------:|:-------------------------:|:-------------------------:
+| Ubuntu 24.04 | Ubuntu 24.04 | full |
+
 **Installation** 
 
 For adding SSH keys to GitHub and cloning with SSH (needed for contributing):
@@ -436,6 +454,48 @@ To connect to a remote TAK server:
 2. Set "connect_mode" (auto/manual/disabled) field in `/FISSURE/YAML/User Configs/default.yaml`. Connect to TAK server in FISSURE Dashboard TAK menu if set to manual.
 3. Run a FISSURE effect that creates a TAK alert (examples coming soon)
 
+**Apptainer Setup**
+
+Apptainer is used to containerize most of the FISSURE installation, making deployment and testing simpler across different systems. While the majority of FISSURE runs inside the Apptainer environment, several components still require setup on the **host**:
+
+- **Docker containers** (such as the PostgreSQL database and TAK Server) run on the **host**, not inside Apptainer.  
+- **udev rules, USB drivers, and hardware interfaces** must also be installed on the host for SDRs, Wi-Fi adapters, and other peripherals to function properly.
+
+Pre-built Apptainer containers and ISO images are planned for future releases to simplify setup. These instructions are intended for users who want to **build the Apptainer container from source** or customize their installation.
+
+1. **Clone the FISSURE Repository**
+
+2. **Configure the Installer**
+   - Open `FISSURE/install_apptainer.sh` in a text editor.  
+   - Review and adjust the variables near the top of the script.  
+     Set each option (`true` / `false`) according to what you want to include (e.g., `UHD`, `HackRF`, `Wi-Fi`, etc.).  
+   - Choose the desired FISSURE install mode:
+     - `full` - Includes all SDR software, network tools, and utilities 
+     - `base` - Core FISSURE + GUI dependencies only (for expediting future container building)
+     - `Dashboard` - GUI-only container (no SDR tools)  
+     - `HIPRFISR` - Headless HIPRFISR server build
+     - `SensorNode` - Sensor node build only  
+
+3. **Run the Installer**
+   ```bash
+   cd FISSURE/Installer
+   ./install_apptainer.sh
+   ```
+   This builds a writable **Apptainer sandbox** in your home directory and installs all selected software inside the container and on the host (where applicable).
+
+4. **Launch the Container**
+   ```bash
+   fissure-apptainer
+   ```
+   This command opens a terminal inside the FISSURE container with **USB ports, audio devices, and graphics** automatically bound for hardware and GUI access.
+
+5. **Run FISSURE**
+   Once inside the container, run FISSURE just as you would on a normal system:
+   ```bash
+   fissure
+   fissure-sensor-node
+   ```
+   The environment behaves like a standard install, but more isolated from the host. If you encounter issues while using FISSURE inside Apptainer, please let us know which programs, hardware, or features are not working correctly.
 
 ## Lessons
 

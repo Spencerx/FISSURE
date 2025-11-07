@@ -157,21 +157,21 @@ if [[ -z "$qt5_version" ]]; then
 
     if [[ "$AUTO_INSTALL_QT" -eq 1 ]]; then
         if [[ -n "$ubuntu20_04" ]]; then
-            sudo apt-get update -y
+            sudo apt-get update
             sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5 fonts-ubuntu
         fi
 
         if [[ -n "$kde_neon" ]]; then
             kde_version=$(lsb_release -d 2>&1 | grep "5.25")
             if [[ -n "$kde_version" ]]; then
-                sudo apt-get update -y
+                sudo apt-get update
                 sudo apt-get install -y build-essential qtcreator qt5-default python3-pyqt5 fonts-ubuntu
             fi
         fi
 
         if [[ -n "$ubuntu22_04" ]] || [[ -n "$kali23_1" ]] || [[ -n "$backbox" ]] || [[ -n "$raspberry_pi_os_bookworm" ]] \
-           || [[ -n "$raspberry_pi_os_trixie" ]] || [[ -n "$parrot_os" ]] || [[ -n "$ubuntu24_04" ]]; then
-            sudo apt-get update -y
+          || [[ -n "$raspberry_pi_os_trixie" ]] || [[ -n "$parrot_os" ]] || [[ -n "$ubuntu24_04" ]]; then
+            sudo apt-get update
             sudo apt-get install -y build-essential qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools python3-pyqt5 fonts-ubuntu
         fi
     fi
@@ -192,10 +192,10 @@ echo "[*] Starting installer at $(date)"
 
 if [[ "$SKIP_GUI" -eq 1 ]]; then
     echo "[*] Launching headless Python installer..."
-    "$DIR/Installer/installer" --headless
+    python3 -u "$DIR/Installer/installer" --headless
 else
     echo "[*] Launching interactive GUI installer..."
-    "$DIR/Installer/installer"
+    python3 -u "$DIR/Installer/installer"
 fi
 
 echo "[*] Finished at $(date)"

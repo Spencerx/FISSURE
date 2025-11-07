@@ -104,9 +104,9 @@ def connect_slots(dashboard: QtCore.QObject):
         lambda: _slot_plugin_editor(dashboard)
     )
 
-    # trigger hiprfisr automatic plugin list refresh on tab change
-    _slot_local_plugin_pkg_path_auto(dashboard, False)
-    _slot_plugin_download_dir_auto(dashboard, False)
+    # # trigger hiprfisr automatic plugin list refresh on tab change
+    # _slot_local_plugin_pkg_path_auto(dashboard, False)
+    # _slot_plugin_download_dir_auto(dashboard, False)
 
 @qasync.asyncSlot(QtCore.QObject)
 async def _slot_local_plugin_pkg_path_auto(dashboard: QtCore.QObject, verbose: bool = True):

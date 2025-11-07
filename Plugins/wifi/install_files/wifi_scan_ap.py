@@ -15,7 +15,7 @@ import os
 import sys
 import subprocess
 import time
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 try:
     from fissure.utils.plugins.operations import Operation
@@ -33,7 +33,7 @@ from wifi_lib.oui import OUILookup, get_vendor_common_name
 class OperationMain(Operation):
     """WiFi AP Scanner
     """
-    def __init__(self, dev: str, duration: float = -1, dwell: float = 1, power: float = -100, channels: List[int] | None = None, sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
+    def __init__(self, dev: str, duration: float = -1, dwell: float = 1, power: float = -100, channels: Union[List[int], None] = None, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
         """
         Initialize the Wifi AP Scanner.
 
@@ -47,9 +47,9 @@ class OperationMain(Operation):
             Time to spend on each channel in seconds. Default is 1.
         power : float, optional
             Minimum signal strength (in dBm) to consider a device. Default is -100.
-        channels : List[int] | None, optional
+        channels : Union[List[int], None], optional
             List of channels to scan. If None, all available channels will be scanned.
-        sensor_node_id : int | str, optional
+        sensor_node_id : Union[int, str], optional
             The ID of the sensor node, by default 0
         logger : logging.Logger, optional
             Logger instance for logging, by default None

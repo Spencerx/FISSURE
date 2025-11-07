@@ -198,11 +198,14 @@ class DashboardBackend:
 
         while self.shutdown is False:
             await self.send_heartbeat()
+            await asyncio.sleep(0)
             await self.recv_heartbeat()
+            await asyncio.sleep(0)
             self.check_heartbeats()
 
             if self.hiprfisr_connected:
                 await self.read_hiprfisr_messages()
+                await asyncio.sleep(0)
 
                 # Retrieve Initial Database Cache from HIPRFISR
                 if self.initial_database_retrieval == True:
@@ -231,6 +234,10 @@ class DashboardBackend:
 
         # Shut Down Comms
         await self.shutdown_comms()
+
+        # Give pyzmq a moment to resolve cancelled futures
+        await asyncio.sleep(0)  # prevents errors/warnings
+
         fissure.utils.save_fissure_config(data=self.settings)  # Check for Remember Configuration is in save_fissure_config
         self.logger.info("=== SHUTDOWN ===")
         self.shutdown_complete = True
@@ -454,6 +461,11 @@ class DashboardBackend:
         self.tsi_connected = False
         self.sensor_node_connected = [False, False, False, False, False]
         self.session_active = False
+
+        # Reset frontend / database state for clean reconnect
+        self.initial_database_retrieval = True
+        self.frontend_initialized = False
+        self.library = None
 
 
     async def launch_local_sensor_node(self, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):

@@ -113,33 +113,67 @@ sudo python3 -m pip install python-dotenv --break-system-packages
 
 # fissure Commands
 programs_parrot_os_6_1.append(('fissure Commands',
-f"""mkdir -p ~/.local/bin
-if grep -Fq "~/.local/bin" ~/.bashrc
-then
-  echo "~/.local/bin is already in ~/.bashrc"
+f"""# Detect environment and choose bin path
+if [ -n "$APPTAINER_CONTAINER" ] || [ -n "$APPTAINER_NAME" ]; then
+  echo "[Apptainer detected] Using /usr/local/bin for command installs."
+  bin_path="/usr/local/bin"
 else
-  printf "\\n%s\\n" "export PATH=~/.local/bin:$PATH" >> ~/.bashrc
+  bin_path="$HOME/.local/bin"
+fi
+
+echo "Using bin path: $bin_path"
+mkdir -p "$bin_path"
+
+# Add ~/.local/bin to PATH if missing (for normal installs)
+if [ "$bin_path" = "$HOME/.local/bin" ]; then
+  if grep -Fq "~/.local/bin" ~/.bashrc
+  then
+    echo "~/.local/bin is already in ~/.bashrc"
+  else
+    printf "\\n%s\\n" "export PATH=~/.local/bin:$PATH" >> ~/.bashrc
+  fi
 fi
 
 # Create fissure command
-/bin/echo -e "export PYTHONPATH=$PYTHONPATH:{fissure_directory} \ncd {fissure_directory} \npython3 {fissure_directory}/fissure/Dashboard/__main__.py" > ~/.local/bin/fissure
-sudo chmod +x ~/.local/bin/fissure
+cat << EOF > "$bin_path/fissure"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Dashboard/__main__.py
+EOF
+chmod +x "$bin_path/fissure"
 
 # Create fissure-sensor-node command
-/bin/echo -e "#!/bin/bash\nexport PYTHONPATH=$PYTHONPATH:{fissure_directory} \ncd {fissure_directory} \npython3 {fissure_directory}/fissure/Sensor_Node/SensorNode.py" > ~/.local/bin/fissure-sensor-node
-sudo chmod +x ~/.local/bin/fissure-sensor-node
+cat << EOF > "$bin_path/fissure-sensor-node"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Sensor_Node/SensorNode.py
+EOF
+chmod +x "$bin_path/fissure-sensor-node"
 
-# Create desktop entry for FISSURE
-echo "[Desktop Entry]\\nStartupWMClass=__main__.py\\nName=FISSURE\\nTerminal=false\\nType=Application\nCategories=Qt;Science;DataVisualization;Electricity;HamRadio;" > {fissure_directory}/Installer/fissure.desktop
-echo "Exec=/home/$USER/.local/bin/fissure" >> {fissure_directory}/Installer/fissure.desktop
-echo "Icon={fissure_directory}/docs/Icons/logo_f.png" >> {fissure_directory}/Installer/fissure.desktop
-sudo cp {fissure_directory}/Installer/fissure.desktop /usr/share/applications/
+# Create fissure-hiprfisr command
+cat << EOF > "$bin_path/fissure-hiprfisr"
+#!/bin/bash
+export PYTHONPATH="$PYTHONPATH:{fissure_directory}"
+cd {fissure_directory} || exit 1
+exec python3 fissure/Server/__main__.py --remote
+EOF
+chmod +x "$bin_path/fissure-hiprfisr"
 
-# Reload bashrc to update PATH
-. ~/.bashrc
+# Create desktop entry for FISSURE (skip in Apptainer)
+if [ -z "$APPTAINER_CONTAINER" ] && [ -z "$APPTAINER_NAME" ]; then
+  echo "[Desktop Entry]\\nStartupWMClass=__main__.py\\nName=FISSURE\\nTerminal=false\\nType=Application\\nCategories=Qt;Science;DataVisualization;Electricity;HamRadio;" > {fissure_directory}/Installer/fissure.desktop
+  echo "Exec=/home/$USER/.local/bin/fissure" >> {fissure_directory}/Installer/fissure.desktop
+  echo "Icon={fissure_directory}/docs/Icons/logo_f.png" >> {fissure_directory}/Installer/fissure.desktop
+  sudo cp {fissure_directory}/Installer/fissure.desktop /usr/share/applications/ 2>/dev/null || true
+else
+  echo "[Apptainer detected] Skipping desktop entry creation."
+fi
 
 ########## Verify ##########
-ls ~/.local/bin/fissure ~/.local/bin/fissure-sensor-node
+ls -l /usr/local/bin/fissure /usr/local/bin/fissure-sensor-node 2>/dev/null \
+  || ls -l ~/.local/bin/fissure ~/.local/bin/fissure-sensor-node
 """, True, 'Minimum Install'))
 
 # Password Prompt Exceptions

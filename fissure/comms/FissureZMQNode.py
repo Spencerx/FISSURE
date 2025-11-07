@@ -14,6 +14,7 @@ import zmq.auth
 import zmq.auth.asyncio
 import asyncio
 import gc
+import sys
 
 SERVER = "server"
 CLIENTS = "clients"
@@ -367,14 +368,24 @@ class Server(FissureZMQNode):
         """
         Close ZMQ sockets
         """
+        # Safe logging during shutdown
+        def safe_debug(msg):
+            if not getattr(sys, "is_finalizing", lambda: False)():
+                try:
+                    self.logger.debug(msg)
+                except Exception:
+                    pass
+
+        # Close sockets
         self.heartbeat_channel.setsockopt(zmq.LINGER, 0)
         self.message_channel.setsockopt(zmq.LINGER, 0)
+
         if not (self.heartbeat_channel.closed or self.message_channel.closed):
             if self.heartbeat_channel.closed is False:
                 self.heartbeat_channel.close()
             if self.message_channel.closed is False:
                 self.message_channel.close()
-            self.logger.debug(f"[{self.name}] shutdown ({self.address})")
+            safe_debug(f"[{self.name}] shutdown ({self.address})")
 
         # Cleanup IPC sockets
         if self.address.protocol == "ipc":
@@ -383,7 +394,7 @@ class Server(FissureZMQNode):
                 hb_socket_path = self.address.heartbeat_channel[len("ipc://"):]
 
                 if os.path.exists(hb_socket_path):
-                    self.logger.debug(f"[{self.name}] removing ipc socket: {hb_socket_path}")
+                    safe_debug(f"[{self.name}] removing ipc socket: {hb_socket_path}")
                     os.remove(hb_socket_path)
 
             # Message Channel
@@ -391,7 +402,7 @@ class Server(FissureZMQNode):
                 msg_socket_path = self.address.message_channel[len("ipc://"):]
 
                 if os.path.exists(msg_socket_path):
-                    self.logger.debug(f"[{self.name}] removing ipc socket: {msg_socket_path}")
+                    safe_debug(f"[{self.name}] removing ipc socket: {msg_socket_path}")
                     os.remove(msg_socket_path)
 
 
@@ -525,11 +536,28 @@ class Listener(FissureZMQNode):
         """
         Disconnect all open connections and close ZMQ Socket
         """
+        # Safe logging during shutdown
+        def safe_debug(msg):
+            if not getattr(sys, "is_finalizing", lambda: False)():
+                try:
+                    self.logger.debug(msg)
+                except Exception:
+                    pass
+        
+        # Disconnect from all connected servers
         for server in list(self.connections):  # Iterate over a copy of the set
             self.disconnect(server)  # pragma: no cover
+
+        # Close sockets cleanly
+        try:
+            self.heartbeat_channel.setsockopt(zmq.LINGER, 0)
+            self.message_channel.setsockopt(zmq.LINGER, 0)
+        except Exception:
+            pass
+
         if not (self.heartbeat_channel.closed or self.message_channel.closed):
             if not self.heartbeat_channel.closed:
                 self.heartbeat_channel.close()
             if not self.message_channel.closed:
                 self.message_channel.close()
-            self.logger.debug(f"[{self.name}] shutdown")
+            safe_debug(f"[{self.name}] shutdown")

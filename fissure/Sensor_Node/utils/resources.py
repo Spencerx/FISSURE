@@ -4,12 +4,13 @@
 from datetime import datetime, timezone
 import logging
 import os
+from typing import Union
 
 class Resource(object):
     """
     Represents a resource allocated to a sensor node operation.
     """
-    def __init__(self, pid: str, op_uuid: str, type: str, model: str | None = None, serial: str = None, logger: logging.Logger = None) -> None:
+    def __init__(self, pid: str, op_uuid: str, type: str, model: Union[str, None] = None, serial: Union[str, None] = None, logger: logging.Logger = None) -> None:
         """
         Initialize the resource parameters.
 
@@ -55,7 +56,7 @@ class Resource(object):
         return f"Resource(pid={self.pid}, op_uuid={self.op_uuid}, type={self.type}, model={self.model}, serial={self.serial})"
 
     @staticmethod
-    def request_resource(pid: str, op_uuid: str, type: str, model: str | None = None, serial: str | None = None) -> 'Resource':
+    def request_resource(pid: str, op_uuid: str, type: str, model: Union[str, None] = None, serial: Union[str, None] = None) -> 'Resource':
         """
         Request a resource for a sensor node operation.
 
@@ -113,7 +114,7 @@ class Resource(object):
         else:
             self.logger.warning(f"Resource lock file does not exist: {self.lock_filename}")
 
-def resource_available(type: str, model: str | None = None, serial: str | None = None) -> bool:
+def resource_available(type: str, model: Union[str, None] = None, serial: Union[str, None] = None) -> bool:
     """
     Check if a resource is available.
 

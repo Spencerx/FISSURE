@@ -5,6 +5,7 @@ This module provides functions to look up Organizationally Unique Identifiers (O
 """
 import csv
 import os
+from typing import Union
 
 # vendor plain text (reduced from variants)
 # (search term, plain output)
@@ -26,7 +27,7 @@ class OUILookup(object):
             for lines in ouireader:
                 self._table[lines[1]] = lines[2]
 
-    def match(self, mac: str) -> str | None:
+    def match(self, mac: str) -> Union[str, None]:
         """
         Match a MAC address to its OUI entry.
 
@@ -37,14 +38,14 @@ class OUILookup(object):
 
         Returns
         -------
-        str | None
+        Union[str, None]
             The OUI entry if found, otherwise None.
         """
         tmp_mac = mac.replace(":", "").upper()
         found_mac = tmp_mac[:6]
         return self._table.get(found_mac)
 
-def get_vendor_common_name(name: str) -> str | None:
+def get_vendor_common_name(name: str) -> Union[str, None]:
     """
     Get the common name for a vendor.
 
@@ -55,7 +56,7 @@ def get_vendor_common_name(name: str) -> str | None:
 
     Returns
     -------
-    str | None
+    Union[str, None]
         Common name of the vendor if found, otherwise None.
     """
     common_name = None

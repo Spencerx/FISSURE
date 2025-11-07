@@ -9,18 +9,18 @@ import os
 import uuid
 import re
 import sys
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from fissure.Sensor_Node.utils.resources import Resource
 
 _base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback']
 
-async def send_alert(sensor_node_id: int | str, opid: str, message: str, logger=logging.getLogger(__name__)) -> None:
+async def send_alert(sensor_node_id: Union[int, str], opid: str, message: str, logger=logging.getLogger(__name__)) -> None:
     """Placeholder for alert callback if none is provided.
 
     Parameters
     ----------
-    sensor_node_id : int | str
+    sensor_node_id : Union[int, str]
         The sensor node ID
     opid : str
         The operation ID
@@ -29,12 +29,12 @@ async def send_alert(sensor_node_id: int | str, opid: str, message: str, logger=
     """
     logger.info(f"Alert {sensor_node_id}, {opid}: {message}")
 
-async def send_tak_cot(sensor_node_id: int | str, opid: str, uid: str, remarks: str, lat: float | bool = True, lon: float | bool = True, alt: float | bool = True, time: float | bool = True, type: str="a-f-G-U-H", logger=logging.getLogger(__name__)) -> None:
+async def send_tak_cot(sensor_node_id: Union[int, str], opid: str, uid: str, remarks: str, lat: Union[float, bool] = True, lon: Union[float, bool] = True, alt: Union[float, bool] = True, time: Union[float, bool] = True, type: str="a-f-G-U-H", logger=logging.getLogger(__name__)) -> None:
     """Placeholder for TAK CoT callback if none is provided.
 
     Parameters
     ----------
-    sensor_node_id : int | str
+    sensor_node_id : Union[int, str]
         The sensor node ID
     opid : str
         The operation ID
@@ -42,13 +42,13 @@ async def send_tak_cot(sensor_node_id: int | str, opid: str, uid: str, remarks: 
         The unique ID
     remarks : str
         The remarks
-    lat : float | bool, optional
+    lat : Union[float, bool], optional
         The latitude, by default True
-    lon : float | bool, optional
+    lon : Union[float, bool], optional
         The longitude, by default True
-    alt : float | bool, optional
+    alt : Union[float, bool], optional
         The altitude, by default True
-    time : float | bool, optional
+    time : Union[float, bool], optional
         The time, by default True
     type : str, optional
         The type, by default "a-f-G-U-H"
@@ -177,12 +177,12 @@ def operation_class_decorator(cls):
 class Operation(object):
     """Base class for plugin operations.
     """
-    def __init__(self, sensor_node_id: int | str = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
+    def __init__(self, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
         """Initialize the Operation class.
 
         Parameters
         ----------
-        sensor_node_id : int | str, optional
+        sensor_node_id : Union[int, str], optional
             The ID of the sensor node, by default 0
         logger : logging.Logger, optional
             Logger instance for logging, by default logging.getLogger(__name__)

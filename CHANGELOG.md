@@ -1,6 +1,106 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-11-05
+
+Fixing auto-connect to TAK server and suppressing warnings.
+
+### Changed
+
+- Updated TakReceiver run() to loop continuously to work with new connect behavior
+
+### Fixed
+
+- Pull request #99: Adding fixes to TAK logic for fresh OS boot and reconnects
+- Updated HiprFisr.py begin()/event loop with new connections to pytak and reconnect behavior with TAK connect_mode set to auto
+
+## 2025-10-29
+
+Dashboard connection and logging fixes for a remote HIPRFISR.
+
+### Fixed
+
+- Merging pull request #98: `For compatibility with <Python3.10 changed instances of parameter definitions in format type1\|type2 to format Union\[type1,type2\].`
+- Updating FissureZMQNode.py to perform safe logging during shutdown to suppress warnings
+- Adding a sleep line to prevent warnings during shutdown in backend event loop
+- Resetting Dashboard states when disconnecting from HIPRFISR to enable UI widgets on reconnect
+- Commented out async function calls in LibraryTabPluginManagerTabSlots.py in connect_slots() that were called too early in the Dashboard startup
+- Dashboard disconnects from HIPRFISR instead of shutting down the HIPRFISR for a remote HIPRFISR
+
+## 2025-10-28
+
+Fixes for connecting to remote HIPRFISR.
+
+### Added
+
+- Added new image in README under Key Capabilities
+
+### Changed
+
+- Removed "server" variables from YAML config files
+- Added "--remote" argument to fissure-hiprfisr command
+- Changed default remote IP address hint from "127.0.0.1" to "192.168.1.xxx"
+
+### Fixed
+
+- Commented out IP address update in HiprFisr.py initialize_comms()
+- Fixed connect() in StatusBarSlots.py to perform connect_to_hiprfisr() without errors
+
+## 2025-10-26
+
+Fixes for standalone HIPRFISR testing.
+
+### Added
+
+- fissure-hiprfisr command to the installer for launching the HIPRFISR and processing engines without the Dashboard
+
+### Changed
+
+- Updated all fissure Command installer items to match Ubuntu 24.04 installer
+- Updated interactive roadmap with search and list of immediate children
+
+### Fixed
+
+- Fixed wget filepath error for 5 MS/s online archive IQ files
+- Increased range values for decimation and center sliders in demodulation tool
+- Increased the number of digits for center and threshold sliders in demodulation tool
+
+## 2025-10-23
+
+Merging pull request #97, fixing Apptainer install.
+
+### Added
+
+- Merging pull request #97: 
+  - Fixed issue in wifi plugin wifi_scan_ap where monitor mode disabled during scan
+  - Added functionality to stop all plugin operations on a sensor node
+
+### Fixed
+
+- Creating .local/bin folder for fissure-apptainer command and adding the path to .bashrc
+- Fixed Wayland GUI launch issue by binding `$XDG_RUNTIME_DIR` to a writable `/tmp` path inside the Apptainer, allowing Qt5/XWayland to initialize properly when running in headless writable containers
+- Adding `--no-sandbox` to chrome command in Apptainer %post
+
+## 2025-10-22
+
+Apptainer containerization updates.
+
+### Added
+
+- install_apptainer.sh script for configuring containerization with Apptainer
+- fissure-apptainer.sh template for executing a new apptainer terminal shortcut
+- fissure_apptainer.def for managing the apptainer build
+- helpful_apptainer_commands.txt for reference
+
+### Changed
+
+- Modified Ubuntu 24.04 installer for Apptainer containerization
+
+### Fixed
+
+- Adjusting bit extraction technique in the demodulation tool to match the plot window samples using midpoint sampling
+- Restoring line-buffered mode in the installer by calling the second script with `python3 -u`
+
 ## 2025-10-16
 
 Preparing installer for containerization.

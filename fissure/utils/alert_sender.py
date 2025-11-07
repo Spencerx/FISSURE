@@ -152,7 +152,8 @@ def _alert_sender(
                             PARAMETERS["type"]
                         ]
                     }
-                print(str(len(PARAMETERS.get("msg"))) + ":" + str(PARAMETERS.get("msg")))
+                    # print(str(len(PARAMETERS.get("msg"))) + ":" + str(PARAMETERS.get("msg")))
+                # print(PARAMETERS)
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER if network_type == "IP" else fissure.comms.MessageFields.SOURCE: identifier,
                     fissure.comms.MessageFields.MESSAGE_NAME: name,
