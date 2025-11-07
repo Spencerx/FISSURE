@@ -254,6 +254,7 @@ class SensorNode(object):
         self.callbacks['run_plugin_operation'] = self.run_plugin_operation
         self.callbacks['stop_plugin_operation'] = self.stop_plugin_operation
         self.callbacks['stop_all_plugin_operations'] = self.stop_all_plugin_operations
+        self.callbacks['plugin_action'] = self.plugin_action
 
         # Initialize GPS Coordinates
         self.gps_autostart = self.settings_dict['Sensor Node']['gps']['gps_autostart']
@@ -635,6 +636,65 @@ class SensorNode(object):
         self.logger.info("Stopping all plugin operations.")
         for operation_id in list(self.operations.keys()):
             await self.stop_plugin_operation(component, operation_id, sensor_node_id)
+
+    async def plugin_action(self, component: object, plugin_name: str, action_name: str, parameters: Dict[str, Any] = {}, sensor_node_id: Union[int, str] = 0) -> None:
+        """
+        Calls a specific action function within a plugin.
+
+        Parameters
+        ----------
+        plugin_name : str
+            The name of the plugin.
+        action_name : str
+            The name of the action function to invoke.
+        parameters : Dict[str, Any], optional
+            The parameters to pass to the action function.
+        """
+        try:
+            self.logger.info(f"Invoking plugin action: {plugin_name} - {action_name} with parameters: {parameters}")
+
+            # Get the plugin path using the plugin name
+            plugin_path = os.path.join(PLUGIN_DIR, plugin_name)
+            if not os.path.exists(plugin_path):
+                self.logger.error(f"Plugin path does not exist: {plugin_path}")
+                return        
+            self.logger.debug(f"Plugin path resolved: {plugin_path}")
+
+            # Get the plugin script path using the plugin name and action
+            plugin_actions_module = os.path.join(plugin_path, 'actions.py')
+            if not os.path.exists(plugin_actions_module):
+                self.logger.error(f"Plugin actions module does not exist: {plugin_actions_module}")
+                return
+            self.logger.debug(f"Plugin actions module resolved: {plugin_actions_module}")
+
+            # Import and run the action function from the plugin script
+            spec = importlib.util.spec_from_file_location("plugin_module", plugin_actions_module)
+            if spec is None:
+                self.logger.error(f"Could not load spec for plugin actions module: {plugin_actions_module}")
+                return
+            plugin_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(plugin_module)
+
+            # Get the action function
+            action_func = getattr(plugin_module, action_name, None)
+            if action_func is None or not callable(action_func):
+                self.logger.error(f"No callable {action_name} found in {plugin_actions_module}")
+                return
+
+            # Invoke the action function
+            try:
+                if inspect.iscoroutinefunction(action_func):
+                    await action_func(self, parameters, sensor_node_id)
+                else:
+                    action_func(self, parameters, sensor_node_id)
+            except Exception as e:
+                tb_str = traceback.format_exc()
+                self.logger.error(f"Error invoking plugin action {action_name} from {plugin_actions_module}: {e}\n{tb_str}")
+                return
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            self.logger.error(f"Error in plugin_action for {plugin_name} - {action_name}: {e}\n{tb_str}")
+            return
 
     async def shutdown_comms(self):
         """

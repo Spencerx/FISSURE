@@ -3619,6 +3619,115 @@ async def sendPluginNamesTakResults(component: object, tak_uid: str, sensor_node
         tb = traceback.format_exc()
         component.logger.debug(tb)
 
+async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name: str, sensor_node_id: int=0):
+    """Request Sensor Node plugin action names for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    tak_uid : str
+        TAK unique identifier
+    plugin_name : str
+        Plugin name
+    sensor_node_id : int, optional
+        Sensor node ID, by default 0
+    """
+    PARAMETERS = {
+        "tak_uid": tak_uid,
+        "plugin_name": plugin_name,
+        "sensor_node_id": sensor_node_id,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionNamesTak",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def sendPluginActionNamesTakResults(component: object, tak_uid: str, sensor_node_id: int, plugin_name: str, action_names: List[str]):
+    """Handle Sensor Node plugin action names for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    tak_uid : str
+        TAK unique identifier
+    sensor_node_id : int
+        Sensor node ID
+    plugin_name : str
+        Plugin name
+    action_names : List[str]
+        Plugin action names
+    """
+    component.logger.debug(f"Preparing to send TAK plugin action names for TAK UID: {tak_uid}")
+    try:
+        msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
+
+        # Ensure msg is an Element; if pytak returned a string, try to parse it
+        if not isinstance(msg, ET.Element):
+            try:
+                msg = ET.fromstring(msg)
+            except Exception:
+                component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
+                return
+
+        # Find existing <detail> or create one if missing
+        detail = msg.find("detail")
+        if detail is None:
+            detail = ET.SubElement(msg, "detail")
+
+        # add <remarks> as a child element (not an attribute)
+        remarks = ET.SubElement(detail, "remarks")
+        # prepare remarks with plugin action names
+        remarks.text = f"FTN plugin actions: {plugin_name}: " + ", ".join(action_names)
+
+        # Convert to bytes
+        msg_bytes = ET.tostring(msg, encoding='utf-8')
+
+        # send the message
+        component.logger.debug("Sending TAK plugin action names message: " + msg_bytes.decode('utf-8'))
+        component.clitool.tx_queue.put_nowait(msg_bytes)
+    except Exception as e:
+        component.logger.error(f"Failed to send TAK plugin action names: {e}")
+        tb = traceback.format_exc()
+        component.logger.debug(tb)
+
+
+async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: int, plugin_name: str, action_name: str, parameters: dict):
+    """Request Sensor Node plugin action for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    tak_uid : str
+        TAK unique identifier
+    sensor_node_id : int
+        Sensor node ID
+    plugin_name : str
+        Plugin name
+    action_name : str
+        Plugin action name
+    parameters : dict
+        Plugin action parameters
+    """
+    PARAMETERS = {
+        "plugin_name": plugin_name,
+        "action_name": action_name,
+        "parameters": parameters,
+        "sensor_node_id": sensor_node_id,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "plugin_action",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.sensor_nodes[sensor_node_id].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
 async def pluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict):
     """Handle Plugin Operation Started Event
 

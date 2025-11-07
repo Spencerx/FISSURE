@@ -2,14 +2,18 @@
 """Plugin Related Functionality
 """
 import asyncio
-import os
-import shutil
-import filecmp
 import csv
+import filecmp
+import importlib.util
+import inspect
 import logging
-from typing import List
-from subprocess import Popen, run
+import os
 from psycopg2.extensions import connection
+import shutil
+from subprocess import Popen, run
+import traceback
+from typing import List
+
 from fissure.utils import FISSURE_ROOT, PLUGIN_DIR
 from fissure.utils.library import (
     openDatabaseConnection,
@@ -98,6 +102,35 @@ def get_local_plugin_names():
                 plugins += [root]
     return plugins
 
+def get_plugin_actions(plugin: str, logger: logging.getLogger = logging.getLogger(__name__)) -> List[str]:
+    """Get Plugin Actions
+
+    Parameters
+    ----------
+    plugin : str
+        Plugin name
+
+    Returns
+    -------
+    List[str]
+        List of action names
+    """
+    actions_path = os.path.join(PLUGIN_DIR, plugin, 'actions.py')
+    actions = []
+    if os.path.exists(actions_path):
+        try:
+            spec = importlib.util.spec_from_file_location("actions", actions_path)
+            if spec is None or spec.loader is None:
+                # Could not create a valid spec/loader for the actions module
+                raise ImportError(f"Cannot load module spec for {actions_path}")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            
+            actions = [name for name, obj in inspect.getmembers(module, inspect.isfunction) if not name.startswith('_')]  # Exclude private functions
+        except Exception as e:
+            logger.error(f"Failed to load actions from {actions_path}: {e}")
+            logger.debug("Traceback while loading actions:\n%s", traceback.format_exc())
+    return actions
 
 def apply_csv_to_table(conn:connection, file: str, function: object):
     """Apply CSV Rows to PostgreSQL Table
