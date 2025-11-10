@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import threading
+import traceback
 import time
 import yaml
 from concurrent.futures import ThreadPoolExecutor
@@ -1304,6 +1305,77 @@ async def removePlugin(component: object, sensor_node_id: int, plugin_name: str)
     if sensor_node_id > -1:
         # remove plugin
         plugin.remove(plugin_name)
+
+
+async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: int):
+    """Send Plugin Names for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    tak_uid : str
+        TAK UID
+    sensor_node_id : int
+        Sensor node ID
+    """
+    try:
+        plugin_names = plugin.get_local_plugin_names()
+
+        # send plugin names
+        PARAMETERS = {
+            "tak_uid": tak_uid,
+            "sensor_node_id": sensor_node_id,
+            "plugin_names": plugin_names
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginNamesTakResults",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        component.logger.debug(f"Sending plugin names for TAK UID {tak_uid}: {plugin_names}")
+        await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    except Exception as e:
+        component.logger.error(f"Error sending plugin names for TAK UID {tak_uid}: {e}")
+        tb = traceback.format_exc()
+        component.logger.debug(tb)
+
+
+async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name: str, sensor_node_id: int):
+    """Send Plugin Action Names for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    tak_uid : str
+        TAK UID
+    plugin_name : str
+        Plugin name
+    sensor_node_id : int
+        Sensor node ID
+    """
+    try:
+        action_names = plugin.get_plugin_actions(plugin_name, component.logger)
+
+        # send action names
+        PARAMETERS = {
+            "tak_uid": tak_uid,
+            "sensor_node_id": sensor_node_id,
+            "plugin_name": plugin_name,
+            "action_names": action_names
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionNamesTakResults",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        component.logger.debug(f"Sending action names for plugin {plugin_name} and TAK UID {tak_uid}: {action_names}")
+        await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    except Exception as e:
+        component.logger.error(f"Error sending action names for plugin {plugin_name} and TAK UID {tak_uid}: {e}")
+        tb = traceback.format_exc()
+        component.logger.debug(tb)
 
 
 async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", format=""):

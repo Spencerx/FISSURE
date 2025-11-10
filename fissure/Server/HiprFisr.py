@@ -21,6 +21,9 @@ from fissure.utils.tak_server import TakReceiver
 import pytak
 
 
+import pytak
+from fissure.utils.tak_server import load_config as load_tak_config
+from fissure.utils.tak_server import TakReceiver
 
 HEARTBEAT_LOOP_DELAY = 0.1  # Seconds
 EVENT_LOOP_DELAY = 0.1
@@ -409,13 +412,6 @@ class HiprFisr:
             try:
                 self.clitool = pytak.CLITool(tak_config)
                 await self.clitool.setup()
-
-                # TX queue boost
-                if self.clitool.tx_queue.maxsize < 500:
-                    q = asyncio.Queue(maxsize=500)
-                    while not self.clitool.tx_queue.empty():
-                        q.put_nowait(await self.clitool.tx_queue.get())
-                    self.clitool.tx_queue = q
 
                 # Attach receiver once per loop
                 self.clitool.add_tasks({
