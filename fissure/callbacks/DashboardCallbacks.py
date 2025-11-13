@@ -2064,6 +2064,22 @@ async def uptimeIP_Return(component: object, sensor_node_id:str, uptime: str):
     ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], uptime)
 
 
+async def memoryIP_Return(component: object, sensor_node_id:str, memory: str):
+    """
+    Returns the memory results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], memory)
+
+
+async def diskIP_Return(component: object, sensor_node_id:str, disk: str):
+    """
+    Returns the disk results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], disk)
+
+
 async def cpuIP_Return(component: object, sensor_node_id:str, cpu: str):
     """
     Returns the CPU percentage results to the HardwareSelectDialog.
@@ -2094,3 +2110,11 @@ async def iwconfigIP_Return(component: object, sensor_node_id:str, iwconfig: str
     """
     # Open a Text Dialog
     ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], iwconfig)
+
+
+async def pingIP_Return(component: object, sensor_node_id:str, ping: str):
+    """
+    Returns the iwconfig results to the HardwareSelectDialog.
+    """
+    # Open a Text Dialog
+    ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], ping)

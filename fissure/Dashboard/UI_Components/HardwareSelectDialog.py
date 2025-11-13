@@ -404,6 +404,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             remote_actions_ip_ifconfig_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_ip_ifconfig_{node_idx}")           
             remote_actions_meshtastic_iwconfig_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_meshtastic_iwconfig_{node_idx}")           
             remote_actions_ip_iwconfig_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_ip_iwconfig_{node_idx}")
+            remote_actions_ip_ping_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_ip_ping_{node_idx}")
 
             local_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.local(self, tab_index=idx - 1))
             remote_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.remote(self, tab_index=idx - 1))
@@ -463,6 +464,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             remote_actions_ip_ifconfig_button.clicked.connect(lambda: HardwareSelectSlots.ip_ifconfig(self))   
             remote_actions_meshtastic_iwconfig_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_iwconfig(self))
             remote_actions_ip_iwconfig_button.clicked.connect(lambda: HardwareSelectSlots.ip_iwconfig(self))                              
+            remote_actions_ip_ping_button.clicked.connect(lambda: HardwareSelectSlots.ip_ping(self))                              
 
         # Connect general slots
         self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict="", recall_settings_on_connect=False))

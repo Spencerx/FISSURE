@@ -2212,6 +2212,22 @@ class DashboardBackend:
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)            
 
 
+    async def pingIP(self, sensor_node_id):
+        """
+        Sends a message to the HIPRFISR to ping the sensor node computer.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "sensor_node_id": sensor_node_id
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "pingIP",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)   
+
 #######################################################################################
 ############################## Low Throughput Messages ################################
 #######################################################################################

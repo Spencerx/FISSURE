@@ -1631,7 +1631,8 @@ async def launch(HWSelect: QtCore.QObject):
 @qasync.asyncSlot(QtCore.QObject)
 async def ping(HWSelect: QtCore.QObject):
     """
-    Send command to HiprFisr to ping the host running the Sensor Node and await response
+    Send command to HiprFisr to ping the host running the Sensor Node and await response.
+    # TODO: ping needs to happen at HIPRFISR
     """
     # Ping IP Address
     if HWSelect.tabWidget_nodes.currentIndex() == 0:
@@ -2351,7 +2352,9 @@ async def find(HWSelect: QtCore.QObject):
         elif get_gps_source == "Meshtastic":
             await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
         elif get_gps_source == "Saved":
-            await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)            
+            await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
+        elif get_gps_source == "Internet":
+            await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
         else:
             return
 
@@ -2367,7 +2370,9 @@ async def find(HWSelect: QtCore.QObject):
         elif get_gps_source == "Meshtastic":
             await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)
         elif get_gps_source == "Saved":
-            await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)            
+            await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)
+        elif get_gps_source == "Internet":
+            await HWSelect.dashboard.backend.findGPS_CoordinatesLT(str(tab_index), get_gps_source, get_format)
         else:
             return
 
@@ -2829,3 +2834,11 @@ async def ip_iwconfig(HWSelect: QtCore.QObject):
     await HWSelect.dashboard.backend.iwconfigIP(str(tab_index))  
 
 
+@qasync.asyncSlot(QtCore.QObject)
+async def ip_ping(HWSelect: QtCore.QObject):
+    """
+    Send command to HiprFisr to ping the host running the Sensor Node and await response.
+    """
+    # Send Message to Backend
+    tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    await HWSelect.dashboard.backend.pingIP(str(tab_index))  

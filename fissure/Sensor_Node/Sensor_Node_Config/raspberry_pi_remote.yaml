@@ -14,7 +14,7 @@ Sensor Node:
                latitude: 40.712776
                longitude: -74.005974
                altitude: 10.5
-          gps_source: gpsd           # gpsd or Meshtastic
+          gps_source: gpsd           # Options: gpsd, Meshtastic, saved, internet
           gps_update_interval_seconds: 5
           gpsd_serial_port: '/dev/gps_usb'
      hb_port: '5051'     

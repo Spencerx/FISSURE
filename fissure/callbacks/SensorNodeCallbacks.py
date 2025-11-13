@@ -812,7 +812,6 @@ async def recallSettings(component: object):
         fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    # print(msg)
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
@@ -1387,21 +1386,30 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
         get_coordinates = fissure.utils.hardware.probe_gpsd(component.logger, format, component.gpsd_serial_port, False)
     elif gps_source == "Meshtastic":
         # Use Existing Serial Connection
-        if component.local_remote == "remote":
+        if component.network_type == "Meshtastic":
             gps_data = await component.hiprfisr_socket.get_gps_position()
-            get_coordinates = fissure.utils.format_coordinates(
-                gps_data['latitude'], 
-                gps_data['longitude'],
-                format
-            )
+            if gps_data is None:
+                get_coordinates = "No GPS data returned"
+            else:
+                get_coordinates = fissure.utils.format_coordinates(
+                    gps_data['latitude'], 
+                    gps_data['longitude'],
+                    format
+                )
+
         # Establish Serial Connection
         else:
-            gps_data = await fissure.utils.hardware.probeMeshtasticGPS(component.meshtastic_serial_port, 10)
-            get_coordinates = fissure.utils.format_coordinates(
-                gps_data['latitude'], 
-                gps_data['longitude'],
-                format
-            )
+            async with component.meshtastic_lock:  # Prevent multiple calls to serial port with beacon
+                gps_data = await fissure.utils.hardware.probeMeshtasticGPS(component.meshtastic_serial_port, 10)
+
+            if gps_data is None:
+                get_coordinates = "No GPS data returned"
+            else:
+                get_coordinates = fissure.utils.format_coordinates(
+                    gps_data['latitude'], 
+                    gps_data['longitude'],
+                    format
+                )
 
     elif gps_source == "Saved":
         get_coordinates = fissure.utils.format_coordinates(
@@ -1409,6 +1417,16 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
             component.gps_position['longitude'], 
             format
         )
+    elif gps_source == "Internet":
+        get_coordinates = await fissure.utils.hardware.probeInternetGPS(component.logger)
+        if get_coordinates is None:
+            get_coordinates = "No GPS data returned"
+        else:
+            get_coordinates = fissure.utils.format_coordinates(
+                component.gps_position['latitude'], 
+                component.gps_position['longitude'], 
+                format
+            )
     else:
         get_coordinates = "Invalid GPS Source"
 
@@ -1554,7 +1572,8 @@ async def cpuIP(component: object, sensor_node_id: str):
     """
     # Get CPU Percentage
     cpu_result = subprocess.check_output("top -bn1 | grep 'Cpu(s)' | awk '{print $2 + $4}'", shell=True, text=True).strip()
-
+    cpu_result = f"{cpu_result}%"
+    
     # Send Status
     PARAMETERS = {
         "sensor_node_id": sensor_node_id,

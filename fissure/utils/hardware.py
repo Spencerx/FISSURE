@@ -12,6 +12,7 @@ import os
 import select
 import json
 import re
+import aiohttp
 
 
 SUPPORTED_HARDWARE = [
@@ -1352,6 +1353,33 @@ async def probeMeshtasticGPS(serial_port: str, timeout: int = 10) -> Optional[Di
 
     except Exception as e:
         print(f"Error creating temporary connection to {serial_port}: {e}")
+        return None
+
+
+async def probeInternetGPS(logger):
+    """
+    Fetch approximate GPS data from the internet using IP-based geolocation.
+
+    Returns:
+        dict: {'latitude': float, 'longitude': float, 'altitude': float}
+        or None if the lookup failed.
+    """
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://ipinfo.io/loc", timeout=5) as response:
+                if response.status == 200:
+                    text = (await response.text()).strip()
+                    lat_str, lon_str = text.split(",")
+                    lat = float(lat_str)
+                    lon = float(lon_str)
+                    alt = 0.0  # IP geolocation has no altitude info
+                    logger.info(f"Fetched internet GPS location: {lat}, {lon}")
+                    return {'latitude': lat, 'longitude': lon, 'altitude': alt}
+                else:
+                    logger.warning(f"ipinfo.io returned status {response.status}")
+                    return None
+    except Exception as e:
+        logger.error(f"Error fetching GPS from internet: {e}")
         return None
 
 

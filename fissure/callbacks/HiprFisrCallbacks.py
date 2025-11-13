@@ -358,6 +358,37 @@ async def deleteListener(component: object, listener_name=""):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
+async def pingIP(component: object, sensor_node_id: str):
+    """
+    Pings the sensor node IP from the HIPRFISR and returns the results to the Dashboard.
+    """
+    # Obtain IP address from sensor node ID
+    for addr in component.sensor_nodes[int(sensor_node_id)].listener.connections:  # Will there ever be multiple connections?
+        ip = addr.address
+
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            f"ping -c 1 -W 2 {ip}",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await proc.communicate()
+        result = stdout.decode().strip() or stderr.decode().strip()
+    except Exception as e:
+        result = f"Error running ping: {e}"
+
+    PARAMETERS = {
+        "sensor_node_id": sensor_node_id,
+        "ping": result,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "pingIP_Return",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
 ##########################################################################
 ###################### To Multiple Components ############################
 ##########################################################################
@@ -1821,10 +1852,6 @@ async def gpsBeaconRefreshIP(component: object, sensor_node_id: str):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.sensor_nodes[int(sensor_node_id)].listener.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-
-
 
 
 async def rebootIP(component: object, sensor_node_id=0):

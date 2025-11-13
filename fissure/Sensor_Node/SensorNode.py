@@ -101,18 +101,28 @@ async def main(local_flag):
             sensor_node.logger,
             gps_update_interval_seconds=sensor_node.gps_update_interval_seconds,
             gps_callback=sensor_node.gpsUpdate,
-            gps_data=sensor_node.gps_position,
             gpsd_serial_port=sensor_node.gpsd_serial_port,
+            settings=sensor_node.settings_dict['Sensor Node']['gps'],
+            meshtastic_lock=sensor_node.meshtastic_lock
         )
-        if sensor_node.gps_source == "gpsd":
-            gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, None))
-        elif sensor_node.gps_source == "Meshtastic":
-            # Existing Serial Connection
-            if sensor_node.local_remote == "remote":
-                gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, sensor_node.hiprfisr_socket))
-            # Temporary Serial Connection
+
+        # Create Task
+        if sensor_node.gps_source == "Meshtastic":
+            # Always use the serial connection for Meshtastic GPS,
+            # unless we're explicitly using the Meshtastic network type.
+            if sensor_node.network_type == "Meshtastic":
+                gps_task = asyncio.create_task(
+                    gps_manager.periodic_gps_update("Meshtastic", sensor_node.hiprfisr_socket)
+                )
             else:
-                gps_task = asyncio.create_task(gps_manager.periodic_gps_update("Meshtastic New Connection", sensor_node.meshtastic_serial_port))
+                # IP networking but Meshtastic GPS source → use direct serial connection
+                gps_task = asyncio.create_task(
+                    gps_manager.periodic_gps_update("Meshtastic New Connection", sensor_node.meshtastic_serial_port)
+                )
+        
+        # gpsd, saved, internet
+        else:
+            gps_task = asyncio.create_task(gps_manager.periodic_gps_update(sensor_node.gps_source, None))
     
     # Start Event Loop
     try:
@@ -262,12 +272,16 @@ class SensorNode(object):
         self.gps_source = self.settings_dict['Sensor Node']['gps']['gps_source']
         self.gps_update_interval_seconds = self.settings_dict['Sensor Node']['gps']['gps_update_interval_seconds']
 
+        # Prevent Multiple Calls to Serial Port with Meshtastic
+        self.meshtastic_lock = asyncio.Lock()
+
         # initial position from config file
         self.gps_position = self.settings_dict['Sensor Node']['gps']['gps_position']
         self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(self.gps_position['latitude'], self.gps_position['longitude'])
 
         # Initialize operations tracking
         self.operations = {}
+
 
     def initialize_comms(self):
         """
@@ -2920,9 +2934,21 @@ class SensorNode(object):
         """
         Callback function to save GPS updates from Meshtastic node.
         """
-        self.logger.info(f"Updated GPS Position: {gps_data}")
-        self.gps_position = gps_data
-        self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(gps_data['latitude'], gps_data['longitude'])
+        # Update Values, Keep old values if partially None
+        if gps_data:
+            for key in ['latitude', 'longitude', 'altitude']:
+                value = gps_data.get(key)
+                if value is not None:
+                    self.gps_position[key] = value
+            
+            # Store DDM Values
+            self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(self.gps_position['latitude'], self.gps_position['longitude'])
+            self.logger.warning(f"Updating GPS position: {self.gps_position}")
+
+        # Failed GPS probe, stale value
+        else:
+            # TODO: Add a flag for stale
+            self.logger.warning(f"Failed to update GPS position. Keeping last position: {self.gps_position}")
 
         # Beacon GPS Position to HIPFISR then TAK
         if self.gps_tak_beacon == True:
@@ -2973,8 +2999,9 @@ class GPSManager:
             logger: logging.Logger, 
             gps_update_interval_seconds: int, 
             gps_callback: Callable[[Dict[str, float]], None], 
-            gps_data: dict={"latitude": None, "longitude": None, "altitude": None},
             gpsd_serial_port = str,
+            settings=None,
+            meshtastic_lock=None
         ):
         """
         Args:
@@ -2984,9 +3011,10 @@ class GPSManager:
         self.logger = logger
         self.gps_update_interval_seconds = gps_update_interval_seconds
         self.gps_callback = gps_callback  # Function to store GPS data
-        self.running = False  # Controls the GPS update loop
-        self.gps_data = gps_data
         self.gpsd_serial_port = gpsd_serial_port
+        self.settings = settings or {}
+        self.meshtastic_lock = meshtastic_lock
+        self.running = False  # Controls the GPS update loop
 
 
     async def fetch_gps_from_meshtastic(self, meshtastic_node) -> Optional[Dict[str, float]]:
@@ -3026,32 +3054,62 @@ class GPSManager:
             return None
         
 
+    async def fetch_gps_from_saved(self):
+        """
+        Fetch GPS data from a saved value in the config file.
+        """
+        try:
+            saved = self.settings.get('gps_position', {})
+            lat = saved.get('latitude', 0.0)
+            lon = saved.get('longitude', 0.0)
+            alt = saved.get('altitude', 0.0)
+            return {'latitude': lat, 'longitude': lon, 'altitude': alt}
+    
+        except Exception as e:
+            self.logger.error(f"Error getting GPS from saved value in config file: {e}")
+            return None
+
+
+    async def fetch_gps_from_internet(self):
+        """
+        Fetch approximate GPS data from the internet using IP-based geolocation.
+        Returns None if unavailable (no fallback here).
+        """
+        return await fissure.utils.hardware.probeInternetGPS(self.logger)
+            
+
     async def periodic_gps_update(self, gps_source, meshtastic_node):
         """Periodically updates GPS position from available sources."""
         self.running = True
         while self.running:
             gps_data = None
 
-            # Try Meshtastic first
-            if gps_source == "Meshtastic":
+            # Meshtastic, existing connection
+            if gps_source == "Meshtastic":  # TODO: add lower() logic across all gps_source to account for caps in config files
                 if meshtastic_node:
                     gps_data = await self.fetch_gps_from_meshtastic(meshtastic_node)
 
+            # Meshtastic, new connection/on IP networking with a Meshtastic device plugged in
             elif gps_source == "Meshtastic New Connection":
                 if meshtastic_node:
-                    gps_data = await self.fetch_gps_from_meshtastic_new_connection(meshtastic_node)
+                    async with self.meshtastic_lock:  # Prevents multiple calls from Find button
+                        gps_data = await self.fetch_gps_from_meshtastic_new_connection(meshtastic_node)
 
-            # If Meshtastic failed, try an external GPS
+            # gpsd, USB GPS receiver
             elif gps_source == "gpsd":
                 gps_data = await self.fetch_gps_from_gpsd()
 
+            # Saved
+            elif gps_source == "saved":
+                gps_data = await self.fetch_gps_from_saved()
+
+            # Internet
+            elif gps_source == "internet":
+                gps_data = await self.fetch_gps_from_internet()
+
             # Send new GPS data to the callback function
-            if gps_data:
-                for key in ['latitude', 'longitude', 'altitude']:
-                    value = gps_data.get(key)
-                    if not value is None:
-                        self.gps_data[key] = value
-                await self.gps_callback(self.gps_data)
+            # Handle None values in the callback function and treat as stale
+            await self.gps_callback(gps_data)
 
             await asyncio.sleep(self.gps_update_interval_seconds)
 

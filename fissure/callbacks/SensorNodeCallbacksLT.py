@@ -575,6 +575,7 @@ async def cpuMeshtasticLT(component: object, sensor_node_id: str):
     """
     # Get CPU Percentage
     cpu_result = subprocess.check_output("top -bn1 | grep 'Cpu(s)' | awk '{print $2 + $4}'", shell=True, text=True).strip()
+    cpu_result = f"{cpu_result}%"
 
     # Return the Text
     PARAMETERS = {"sensor_node_id": sensor_node_id, "cpu": cpu_result}

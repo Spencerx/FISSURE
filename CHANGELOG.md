@@ -1,6 +1,37 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-11-12
+
+Adjusting GPS behavior, adding saved and internet GPS source options.
+
+### Added
+
+- Saved and Internet options for gps_source in sensor node config file
+- Internet option for Find button in sensor node configuration dialog
+- Pull request #101: TAK plugin interaction functionality
+  - Moved TAK server connection to Hiprfisr init.
+  - Added TAK to Sensor Node plugin names query functionality.
+  - Removed legacy test plugins.
+  - Wifi plugin updated: TAK integration ready, channel switching bug fixed, automatic device selection
+  - TAK FISSURE plugin operation fully functional.
+  - Resolved merge conflicts.
+  - Removed pytak increased tx queue size that held messages to TAK server.
+
+### Changed
+
+- Put a lock around accessing the Meshtastic serial port for Find button and beacons
+- No longer passing in current position into GPSManager, handling all position updates in gpsUpdate callback
+- Moved Ping button from remote actions to local actions in sensor node configuration dialog
+- Added a % to the end of CPU button return value
+
+### Fixed
+
+- Meshtastic GPS source (for new temporary Meshtastic serial connections) option now works for remote IP networking, updated beacon and findGPS_Coordinates
+- Sensor node no longer crashes if Meshtastic GPS probe does not return a position during Find
+- Remote IP Address Ping returns values after connected to a remote node
+- Created missing memoryIP_Return, diskIP_Return functions in Dashboard callbacks
+
 ## 2025-11-05
 
 Fixing auto-connect to TAK server and suppressing warnings.
