@@ -28,13 +28,16 @@ class MessageFields:
     # Generic
     IDENTIFIER = "Identifier"
     MESSAGE_NAME = "MessageName"
-    SOURCE = "Source"
-    DESTINATION = "Destination"
+    SOURCE = "Source"  # TODO
+    DESTINATION = "Destination"  #TODO
+    UUID = "UUID"
 
     # Heartbeats
     HEARTBEAT = "Heartbeat"
     TIME = "Time"
     IP = "IP"
+    INTERVAL = "Interval"
+    UUID = "UUID"
 
     # Status/Commands
     CALLBACK = "callback"

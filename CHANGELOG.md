@@ -1,6 +1,35 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-01
+
+Switching IP node connection to ROUTER-DEALER and fixing shutdown procedures.
+
+### Added
+
+- Replaced ZMQ PAIR with ROUTER-DEALER
+- HIPRFISR/hub no longer sends heartbeats to nodes
+- Nodes send more information in heartbeats
+- HIPRFISR/hub maps dashboard slots to node UUIDs and stores node info by UUID
+- Message from nodes contain UUID
+- New Dashboard widgets for connecting to sensor nodes
+- Code in README for killing all FISSURE related programs in one line
+- Added more password prompt exceptions to the list
+
+### Changed
+
+- Changed default remote sensor node heartbeat and message ports to 6100 and 6101 to not overlap with HIPRFISR ports when sharing an IP
+- Heartbeats transmit their interval in each message
+- Sensor Node reads its config file for heartbeat_interval
+- UUID is written to a file in ~/.fissure directory for local and remote nodes
+
+### Fixed
+
+- Revamped shutdown and task cleanup
+- Error in operations.py when not passing in all the expected arguments
+- Added aircrack-ng from source to installer for raspberry pi setups
+- Simplified hardware select dialog functions that listed all widgets for every tab
+
 ## 2025-11-12
 
 Adjusting GPS behavior, adding saved and internet GPS source options.

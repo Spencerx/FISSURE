@@ -27,9 +27,12 @@ async def updateLoggingLevels(component: object, new_console_level="", new_file_
 
 async def hiprfisrDisconnecting(component: object):
     """
-    Stop trying to send data and heartbeats to the HIPRFISSR on an intentional disconnect.
+    HIPRFISR is intentionally disconnecting from this Sensor Node.
+    Stop sending messages, mark connection down, and shut down socket cleanly.
     """
-    # Stop Outgoing Messages
+    component.logger.info("Received hiprfisrDisconnecting")
+
+    # Mark HIPRFISR as disconnected
     component.hiprfisr_connected = False
 
 
@@ -113,6 +116,7 @@ async def downloadSensorNodeFile(component: object, sensor_node_id=0, sensor_nod
             }
             msg = {
                 fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                fissure.comms.MessageFields.UUID: component.UUID,
                 fissure.comms.MessageFields.MESSAGE_NAME: "saveFile",
                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -154,6 +158,7 @@ async def downloadSensorNodeFile(component: object, sensor_node_id=0, sensor_nod
             }
             msg = {
                 fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                fissure.comms.MessageFields.UUID: component.UUID,
                 fissure.comms.MessageFields.MESSAGE_NAME: "saveFile",
                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -213,6 +218,7 @@ async def refreshSensorNodeFiles(component: object, sensor_node_id=0, sensor_nod
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.UUID: component.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "refreshSensorNodeFilesResults",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -787,11 +793,14 @@ async def stopPD(component: object, sensor_node_id=0):
 
 async def terminateSensorNode(component: object):
     """
-    Stops sensor_node.py for local operations.
+    Stops sensor_node.py entirely (local or remote) by triggering shutdown.
     """
-    # Exit
-    component.logger.info("sensor node shutdown")
+    component.logger.info("terminateSensorNode callback triggered — shutting down sensor node")
+
+    # Tell begin loop to exit
     component.shutdown = True
+
+    # Let task termination and socket shutdown fall naturally through the checks at the end of begin()
 
 
 async def recallSettings(component: object):
@@ -809,6 +818,32 @@ async def recallSettings(component: object):
     PARAMETERS = {"settings_dict": settings_dict}
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
+        fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def nodeSelectIP(component: object, dashboard_node_index, node_uuid):
+    """
+    Recall default settings from a local yaml file and send to HIPRFISR.
+    """
+    # Recall Default Settings Saved Locally
+    component.logger.info("nodeSelectIP/Recall Settings")
+    filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Sensor_Node_Config", "default.yaml")
+    with open(filename) as yaml_library_file:
+        settings_dict = yaml.load(yaml_library_file, yaml.FullLoader)
+
+    # Send the Message
+    PARAMETERS = {
+        "dashboard_node_index": dashboard_node_index,
+        "uuid": component.UUID,
+        "settings_dict": settings_dict
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -902,13 +937,14 @@ async def probeHardware(component: object, tab_index=0, table_row_text=[]):
     PARAMETERS = {"tab_index": tab_index, "output": output, "height_width": height_width}
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "hardwareProbeResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def scanHardware(component: object, tab_index=0, hardware_list=[]):
+async def scanHardware(component: object, hardware_list=[]):
     """
     Scans all types of hardware included in the hardware_list and returns the information.
     """
@@ -956,9 +992,13 @@ async def scanHardware(component: object, tab_index=0, hardware_list=[]):
             all_scan_results.append(fissure.utils.hardware.findCaribouLite())            
 
     # Return Scan Results
-    PARAMETERS = {"tab_index": tab_index, "hardware_scan_results": all_scan_results}
+    PARAMETERS = {
+        "uuid": component.UUID,
+        "hardware_scan_results": all_scan_results
+    }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "hardwareScanResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1051,6 +1091,7 @@ async def guessHardware(component: object, tab_index=0, table_row=[], table_row_
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "hardwareGuessResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1083,6 +1124,7 @@ async def checkPlugin(component: object, plugin_names: List[str], sensor_node_id
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "checkSensorNodePluginResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1152,6 +1194,7 @@ async def __installPlugin(component: object, sensor_node_id: int, plugin_name: s
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "registerPlugin",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1189,6 +1232,7 @@ async def installPlugins(component: object, sensor_node_id: int, plugin_names: s
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.UUID: component.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "transferPlugins",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -1209,6 +1253,7 @@ async def installPlugins(component: object, sensor_node_id: int, plugin_names: s
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "installPluginsDatabase",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1240,6 +1285,7 @@ async def transferPluginsInstall(component: object, sensor_node_id: int, plugins
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "installPluginsDatabase",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1269,6 +1315,7 @@ async def uninstallPlugins(component: object, sensor_node_id: int, plugin_names:
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.UUID: component.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "deregisterPlugin",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -1281,6 +1328,7 @@ async def uninstallPlugins(component: object, sensor_node_id: int, plugin_names:
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "uninstallPluginsDatabase",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1329,6 +1377,7 @@ async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: in
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.UUID: component.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginNamesTakResults",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -1366,6 +1415,7 @@ async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name:
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.UUID: component.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionNamesTakResults",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -1436,6 +1486,7 @@ async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", for
     PARAMETERS = {"tab_index": tab_index, "coordinates": get_coordinates}
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1461,6 +1512,7 @@ async def gpsBeaconEnableDisableIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1478,6 +1530,7 @@ async def gpsBeaconRefreshIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1520,6 +1573,7 @@ async def uptimeIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "uptimeIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1540,6 +1594,7 @@ async def memoryIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "memoryIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1560,6 +1615,7 @@ async def diskIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "diskIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1573,7 +1629,7 @@ async def cpuIP(component: object, sensor_node_id: str):
     # Get CPU Percentage
     cpu_result = subprocess.check_output("top -bn1 | grep 'Cpu(s)' | awk '{print $2 + $4}'", shell=True, text=True).strip()
     cpu_result = f"{cpu_result}%"
-    
+
     # Send Status
     PARAMETERS = {
         "sensor_node_id": sensor_node_id,
@@ -1581,6 +1637,7 @@ async def cpuIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "cpuIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1601,6 +1658,7 @@ async def processesIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "processesIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1621,6 +1679,7 @@ async def ifconfigIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
@@ -1641,6 +1700,7 @@ async def iwconfigIP(component: object, sensor_node_id: str):
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.UUID: component.UUID,
         fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
