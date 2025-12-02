@@ -52,7 +52,7 @@ async def main():
 class SensorNode:
     listener: fissure.comms.Listener
     connected: bool
-    UUID: str
+    uuid: str
     last_heartbeat: float  # FIX: Use this or self.heartbeats?
     terminated: bool
     plugins: list = []
@@ -64,7 +64,7 @@ class SensorNode:
         """
         # self.listener = fissure.comms.Listener(zmq.PAIR, name=f"{fissure.comms.Identifiers.HIPRFISR}::sensor_node")
         self.connected = False
-        self.UUID = ""
+        self.uuid = ""
         self.last_heartbeat = 0
         self.terminated = False
         self.connection_type = connection_type
@@ -745,25 +745,32 @@ class HiprFisr:
             # Backend (PD/TSI)
             await self.read_backend_messages()
 
-            # If Dashboard is gone, break
-            if not self.dashboard_connected:
-                self.logger.warning("Dashboard lost during connect loop")
-                break
+            # Dashboard expected
+            if self.settings.get("auto_connect_hiprfisr", True):
+                if not self.dashboard_connected:
+                    self.logger.warning("Dashboard lost during connect loop")
+                    break
 
-            # All components connected?
-            if self.dashboard_connected and self.pd_connected and self.tsi_connected:
-                msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "Connected",
-                    fissure.comms.MessageFields.PARAMETERS: [
-                        fissure.comms.Identifiers.PD,
-                        fissure.comms.Identifiers.TSI,
-                    ],
-                }
-                await self.dashboard_socket.send_msg(
-                    fissure.comms.MessageTypes.STATUS, msg
-                )
-                self.connect_loop = False
+                # All components connected?
+                if self.dashboard_connected and self.pd_connected and self.tsi_connected:
+                    msg = {
+                        fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                        fissure.comms.MessageFields.MESSAGE_NAME: "Connected",
+                        fissure.comms.MessageFields.PARAMETERS: [
+                            fissure.comms.Identifiers.PD,
+                            fissure.comms.Identifiers.TSI,
+                        ],
+                    }
+                    await self.dashboard_socket.send_msg(
+                        fissure.comms.MessageTypes.STATUS, msg
+                    )
+                    self.connect_loop = False
+
+            # Headless/remote Dashboard
+            else:
+                # All components connected?
+                if self.pd_connected and self.tsi_connected:
+                    self.connect_loop = False
 
         self.logger.debug("Exiting connect loop")
 
@@ -893,9 +900,9 @@ class HiprFisr:
             if received is None:
                 return  # socket was shut down
 
-            print (received)
+            # print(received)
             sender_id = received.get(fissure.comms.MessageFields.SENDER_ID)
-            uuid = received.get(fissure.comms.MessageFields.UUID)
+            uuid = received.get(fissure.comms.MessageFields.IDENTIFIER)
             msg_type  = received.get(fissure.comms.MessageFields.TYPE)
             msg_name  = received.get(fissure.comms.MessageFields.MESSAGE_NAME)
             params    = received.get(fissure.comms.MessageFields.PARAMETERS, {})
@@ -928,7 +935,13 @@ class HiprFisr:
             # COMMANDS ------------------------------------------------------
             if msg_type == fissure.comms.MessageTypes.COMMANDS:
                 try:
-                    await self.sensor_node_router.run_callback(self, received)
+                    params = received.get("Parameters", {})
+
+                    # AUTO-INJECT UUID so all callbacks can access it
+                    if isinstance(params, dict):
+                        params.setdefault("uuid", uuid)
+
+                        await self.sensor_node_router.run_callback(self, received)
                 except Exception as e:
                     self.logger.error(
                         f"Callback failed for node uuid={uuid}, msg={msg_name}: {e}"
@@ -989,7 +1002,10 @@ class HiprFisr:
             if self.dashboard_connected:
                 await self.dashboard_socket.send_heartbeat(heartbeat)
             else:
-                self.logger.error("[HIPRFISR][HB] Dashboard not connected.")
+                if self.settings.get("auto_connect_hiprfisr", True):
+                    self.logger.error("[HIPRFISR][HB] Dashboard not connected.")
+                else:
+                    pass
 
             # -------------------------------------------------------------
             # PD / TSI HEARTBEAT
@@ -1103,14 +1119,14 @@ class HiprFisr:
 
         print("\n=== NODE HEARTBEATS RECEIVED ===")
         # print("Raw heartbeats list:", hbs)
+        # print(self.nodes)
 
         node_list = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
 
         for hb in hbs:
-            sn_id = hb.get(fissure.comms.MessageFields.IDENTIFIER)
             sn_time = float(hb.get(fissure.comms.MessageFields.TIME))
             sn_int  = hb.get(fissure.comms.MessageFields.INTERVAL, 5)
-            sn_uuid  = hb.get(fissure.comms.MessageFields.UUID)  # ← UUID is the real node key
+            sn_uuid  = hb.get(fissure.comms.MessageFields.IDENTIFIER)  # ← UUID is the real node key
 
             params = hb.get(fissure.comms.MessageFields.PARAMETERS, {})
             sn_ip        = hb.get(fissure.comms.MessageFields.IP)        # ← IP now at top level
@@ -1127,12 +1143,15 @@ class HiprFisr:
             # ---------------------------------------------------------
             # LOOKUP BY UUID (correct)
             node = self.nodes.get(sn_uuid)
+            callsign_prefix = self.settings.get("callsign_prefix", "FTN")
 
             if node is None:
                 # CREATE NEW NODE ENTRY (keyed by UUID — correct)
+                callsign_prefix = self.settings.get("callsign_prefix", "FTN")
                 node = {
                     "uuid": sn_uuid,
                     "identity": sn_id_zmq,          # router identity
+                    "callsign": callsign_prefix + "-" + sn_nickname,
                     "ip": sn_ip,
                     "network_type": sn_nettype,
                     "nickname": sn_nickname,
@@ -1143,8 +1162,9 @@ class HiprFisr:
                 }
                 self.nodes[sn_uuid] = node
             else:
-                # UPDATE EXISTING NODE
+                # UPDATE EXISTING NODE           
                 node["identity"]     = sn_id_zmq
+                node["callsign"]     = callsign_prefix + "-" + sn_nickname
                 node["ip"]           = sn_ip
                 node["network_type"] = sn_nettype
                 node["nickname"]     = sn_nickname
@@ -1586,7 +1606,7 @@ class HiprFisr:
         asyncio.run(sensor.close())
 
 
-    async def send_cot(self, uid, lat, lon, alt, time, remarks, type:str="a-f-G-U-H"):
+    async def send_cot(self, uid, callsign, lat, lon, alt, time, remarks, type:str="a-f-G-U-H"):
         """
         Sends CoT message to TAK server. Used for alerts but not for the sensor node GPS beacon.
         """
@@ -1602,7 +1622,7 @@ class HiprFisr:
         cot_msg = f"""<?xml version="1.0" encoding="UTF-8"?>
         <event version="2.0" type="{type}" uid="{uid}" how="m-g" time="{time}" start="{time}" stale="2029-08-09T18:18:06.521956Z">
             <detail>
-                <contact callsign="{uid}"/>
+                <contact callsign="{callsign}"/>
                 <remarks>"{remarks}"</remarks>
             </detail>
             <point lat="{lat}" lon="{lon}" ce="0" le="0" hae="0"/>
@@ -1655,7 +1675,7 @@ class SensorNodeTracker:
         self.past_positions = {}
 
 
-    async def send_cot_gps_update(self, uid, lat, lon, alt, time, remarks, max_history=10):
+    async def send_cot_gps_update(self, uid, callsign, lat, lon, alt, time, remarks, max_history=10):
         """
         Sends GPS update CoT messages to TAK server for current position and past positions.
         """
@@ -1683,7 +1703,7 @@ class SensorNodeTracker:
         <event version="2.0" uid="{uid}" type="b-m-r" how="h-e" time="{time}" start="{time}" stale="{stale_time}">
             <point lat="0" lon="0" hae="0" ce="9999999" le="9999999" />
             <detail>
-                <contact callsign=""/>""" # message for single message
+                <contact callsign="{callsign}"/>""" # message for single message
 
         # **Loop through past positions and add them to CoT messages**
         for i, past_entry in enumerate(self.past_positions[uid]):

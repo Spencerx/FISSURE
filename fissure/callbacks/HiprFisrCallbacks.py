@@ -2930,17 +2930,23 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
 async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
     """
     Forwards the GPS coordinate results message to TAK.
-    """   
-    await component.send_cot(uid, lat, lon, alt, time, remarks, type)
+    """
+    prefix = component.settings['callsign_prefix']
+    callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
+    await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
 
 
-async def takPlotGpsUpdate(component: object, uuid: str, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
     """
     Forwards the sensor node GPS coordinates message to TAK.
     """
     time = time.replace(" ", "T")
     max_history = 5
-    await component.sensor_node_tracker.send_cot_gps_update(uid, lat, lon, alt, time, remarks, max_history)
+
+    prefix = component.settings['callsign_prefix']
+    callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
+
+    await component.sensor_node_tracker.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -4177,7 +4183,7 @@ async def stop_plugin_operation(component: object, sensor_node_id: int, operatio
     )
 
 
-async def stop_all_plugin_operations(component: object, sensor_node_id: int=0):
+async def stop_all_plugin_operations(component: object, tak_uid: str, sensor_node_id: int=0):
     """Stop all running plugin operations on the sensor node.
 
     Parameters
@@ -4196,7 +4202,8 @@ async def stop_all_plugin_operations(component: object, sensor_node_id: int=0):
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    # uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[tak_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4231,7 +4238,7 @@ async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: in
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[tak_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4316,7 +4323,7 @@ async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name:
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[tak_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4409,7 +4416,7 @@ async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: i
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[tak_uid].get("identity", None)
     if identity is None:
         return
     

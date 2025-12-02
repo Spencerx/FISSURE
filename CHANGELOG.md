@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-02
+
+Adding callsigns to TAK CoT messages and using long UUID for IP nodes.
+
+### Added
+
+- Callsign prefix in YAML config file for CoT messages
+
+### Changed
+
+- Removed UUID from message envelopes coming from sensor nodes
+- Set IDENTIFIER constant to UUID value in sensor nodes
+- Using 8 character identifier for Meshtastic connections
+- Inserted uuid variable into all HIPRFISR callbacks as part of read_sensor_node_messages()
+- Removed uuid from message PARAMETERS coming from the sensor node since it is in the identifier
+
+### Fixed
+
+- Added checks to exit the connect loop and not print warnings continuously when running a headless HIPRFISR
+- Removed resolving identities from Dashboard mappings for TAK operations
+
 ## 2025-12-01
 
 Switching IP node connection to ROUTER-DEALER and fixing shutdown procedures.

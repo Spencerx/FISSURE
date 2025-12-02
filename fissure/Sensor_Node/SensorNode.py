@@ -259,10 +259,14 @@ class SensorNode(object):
         self.listener = None
         self.connected = False
         self.terminated = False
-        self.UUID = self.load_or_create_uuid()  # Read from file
-        # self.UUID = str(uuid.uuid4())
-
         self.shutdown = False
+
+        # Use small UUID for Meshtastic to save characters
+        self.uuid = self.load_or_create_uuid()  # Read from file
+        if self.network_type == "Meshtastic":
+            self.identifier = self.uuid[:8]
+        else:
+            self.identifier = self.uuid
 
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)
@@ -388,7 +392,6 @@ class SensorNode(object):
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER if self.network_type == "IP" else fissure.comms.MessageFields.SOURCE: self.identifier,
-            fissure.comms.MessageFields.UUID: self.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn" if self.network_type == "IP" else "alertReturnLT",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS if self.network_type == "IP" else { "sensor_node_id": sensor_node_id, "alert_text": PARAMETERS["alert_text"][:100] },
         }
@@ -438,7 +441,6 @@ class SensorNode(object):
         # Prepare values
         if self.network_type == "IP":
             PARAMETERS = {
-                "uuid": self.UUID,
                 "uid": uid,
                 "lat": lat,
                 "lon": lon,
@@ -468,7 +470,6 @@ class SensorNode(object):
         # Send message
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.UUID: self.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -614,7 +615,6 @@ class SensorNode(object):
                 }
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStarted",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
@@ -678,7 +678,6 @@ class SensorNode(object):
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.UUID: self.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStopped",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -957,14 +956,13 @@ class SensorNode(object):
         nickname = self.settings_dict.get("Sensor Node", {}).get("nickname", "-")
         hb = {
             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.UUID: self.UUID,
             fissure.comms.MessageFields.MESSAGE_NAME: fissure.comms.MessageFields.HEARTBEAT,
             fissure.comms.MessageFields.TIME: now,
             fissure.comms.MessageFields.IP: self.ip_address,
             fissure.comms.MessageFields.INTERVAL: self.heartbeat_interval,  # TODO: Get other components to send their interval? Update MessageTypes
 
             fissure.comms.MessageFields.PARAMETERS: {
-                # "uuid": self.UUID,           # stable node uuid (the KEY in HIPRFISR)
+                # "uuid": self.uuid,           # stable node uuid (the KEY in HIPRFISR)
                 "network_type": self.network_type,
                 "nickname": nickname,
                 # "socket_id": self.socket_id  # Gets detected by the ZMQ ROUTER/Receiver
@@ -1055,7 +1053,6 @@ class SensorNode(object):
         PARAMETERS = {"sensor_node_id": sensor_node_id, "error": error}
         msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphError",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -1070,7 +1067,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "PD"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinished",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1079,7 +1075,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Attack"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinished",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1102,7 +1097,6 @@ class SensorNode(object):
                 PARAMETERS = {"sensor_node_id": sensor_node_id, "operation": "IQ", "filepath": return_filepath, "data": get_data}
                 msg = {
                             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                            fissure.comms.MessageFields.UUID: self.UUID,
                             fissure.comms.MessageFields.MESSAGE_NAME: "saveFile",
                             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
@@ -1113,7 +1107,6 @@ class SensorNode(object):
                 PARAMETERS = {"sensor_node_id": sensor_node_id}
                 msg = {
                             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                            fissure.comms.MessageFields.UUID: self.UUID,
                             fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ",
                             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
@@ -1122,7 +1115,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ_Playback",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1131,7 +1123,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ_Inspection",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1140,7 +1131,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Stream"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedSniffer",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1149,7 +1139,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Tagged Stream"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedSniffer",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1158,7 +1147,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Message/PDU"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedSniffer",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1173,7 +1161,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "PD"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStarted",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1182,7 +1169,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Attack"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStarted",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1191,7 +1177,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedIQ",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1200,7 +1185,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedIQ_Playback",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1209,7 +1193,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedIQ_Inspection",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1218,7 +1201,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Stream"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedSniffer",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1227,7 +1209,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Tagged Stream"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedSniffer",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1236,7 +1217,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id, "category": "Message/PDU"}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedSniffer",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -1869,7 +1849,6 @@ class SensorNode(object):
                     PARAMETERS = {"bits_message": bits_message}
                     msg = {
                                 fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                                fissure.comms.MessageFields.UUID: self.UUID,
                                 fissure.comms.MessageFields.MESSAGE_NAME: "pdBitsReturn",
                                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                     }
@@ -2136,7 +2115,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStarted",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -2369,7 +2347,6 @@ class SensorNode(object):
         PARAMETERS = {"sensor_node_id": sensor_node_id}
         msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "multiStageAttackFinished",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -2509,7 +2486,6 @@ class SensorNode(object):
         PARAMETERS = {"sensor_node_id": sensor_node_id, "position": position}
         msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "archivePlaylistPosition",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -2554,7 +2530,6 @@ class SensorNode(object):
         PARAMETERS = {"sensor_node_id": sensor_node_id}
         msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "archivePlaylistFinished",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -2644,7 +2619,6 @@ class SensorNode(object):
             # PARAMETERS = {"sensor_node_id": sensor_node_id, error=str(e)}
             # msg = {
                         # fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        # fissure.comms.MessageFields.UUID: self.UUID,
                         # fissure.comms.MessageFields.MESSAGE_NAME: "Detector Flow Graph Error",
                         # fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             # }
@@ -2768,7 +2742,6 @@ class SensorNode(object):
         PARAMETERS = {"sensor_node_id": sensor_node_id, "band_id": band_id, "frequency": frequency}
         msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "bandID_Return",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
@@ -2844,7 +2817,6 @@ class SensorNode(object):
                     PARAMETERS = {"frequency_value": frequency_value, "power_value": power_value, "time_value": time_value}
                     msg = {
                                 fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                                fissure.comms.MessageFields.UUID: self.UUID,
                                 fissure.comms.MessageFields.MESSAGE_NAME: "detectorReturn",
                                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                     }
@@ -3080,7 +3052,6 @@ class SensorNode(object):
             PARAMETERS = {"sensor_node_id": sensor_node_id}
             msg = {
                         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.UUID: self.UUID,
                         fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistFinished",
                         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
@@ -3111,7 +3082,6 @@ class SensorNode(object):
         if self.gps_tak_beacon == True:
             if self.network_type == "IP":
                 PARAMETERS = {
-                    "uuid": self.UUID,
                     "uid": self.identifier,
                     "lat": self.gps_position['latitude'],
                     "lon": self.gps_position['longitude'],
@@ -3121,7 +3091,6 @@ class SensorNode(object):
                 }
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdate",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
@@ -3140,7 +3109,6 @@ class SensorNode(object):
                 }
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.UUID: self.UUID,
                     fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdateLT",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }

@@ -348,7 +348,14 @@ class FissureZMQNode(ABC):
             return await cb(context, *params)
         else:
             if type(params) is dict:  # Dictionary Params
-                return await cb(context, **params)
+                import inspect
+                sig = inspect.signature(cb)
+
+                filtered_params = {
+                    k: v for k, v in params.items()
+                    if k in sig.parameters
+                }
+                return await cb(context, **filtered_params)
             elif type(params) is list:  # List Params
                 return await cb(context, *params)
             elif type(params) is str:  # Space Separated String Params
