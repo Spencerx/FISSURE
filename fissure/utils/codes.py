@@ -36,7 +36,10 @@ MESSAGE_CODE_MAP = {
     "T1": "ifconfigMeshtasticLT",
     "T2": "ifconfigMeshtasticReturnLT",
     "U1": "iwconfigMeshtasticLT",
-    "U2": "iwconfigMeshtasticReturnLT",     
+    "U2": "iwconfigMeshtasticReturnLT",
+    "W1": "recvMeshtasticHeartbeatsLT",
+    "Y1": "completeMeshtasticHandshakeLT",
+    "Z1": "nodeSelectLT"
 }
 
 # Reverse mapping for sending messages

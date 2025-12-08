@@ -32,11 +32,12 @@ class MessageFields:
     DESTINATION = "Destination"  #TODO
 
     # Heartbeats
-    HEARTBEAT = "Heartbeat"
+    #IDENTIFIER
+    HEARTBEAT = "Heartbeat"  # MESSAGE_NAME
     TIME = "Time"
-    IP = "IP"
+    IP = "IP"  # IP Only
+    ASSIGNED_ID = "AssignedID"  # Meshtastic Only
     INTERVAL = "Interval"
-    UUID = "UUID"
 
     # Status/Commands
     CALLBACK = "callback"

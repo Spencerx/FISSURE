@@ -62,6 +62,9 @@ hiprfisr:
     protocol: tcp
 hiprfisr_pub_port: 5055
 icon_style: Light
+meshtastic:
+  auto_connect_meshtastic: false
+  meshtastic_serial_port: /dev/ttyACM0
 morse_code_amplitude_threshold: 0.5
 morse_code_between_letter_spacing: 3
 morse_code_between_word_spacing: 7

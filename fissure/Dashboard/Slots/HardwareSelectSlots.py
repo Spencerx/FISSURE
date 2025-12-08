@@ -822,10 +822,10 @@ async def guess(HWSelect: QtCore.QObject):
         get_row_text.append(str(scan_results_table.item(get_row, n).text()))
 
     # Send Message for HIPRFISR to Sensor Node Connections
-    local_remote_stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index+1}")
-    if local_remote_stacked_widget.currentIndex() == 2:
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    if get_network_type == "IP":
         await HWSelect.dashboard.backend.guessHardware(str(tab_index), get_row, get_row_text, HWSelect.guess_index)
-    elif local_remote_stacked_widget.currentIndex() == 4:
+    elif get_network_type == "Meshtastic":
         await HWSelect.dashboard.backend.guessHardwareLT(str(tab_index), get_row, get_row_text, HWSelect.guess_index)
 
 
@@ -850,12 +850,11 @@ async def probe(HWSelect: QtCore.QObject):
     probe_button = getattr(HWSelect, f"pushButton_scan_results_probe_{tab_index+1}")
 
     # Send Message for HIPRFISR to Sensor Node Connections
-    local_remote_stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index+1}")
-
-    if local_remote_stacked_widget.currentIndex() == 2:
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    if get_network_type == "IP":
         probe_button.setEnabled(False)
         await HWSelect.dashboard.backend.probeHardware(str(tab_index), get_row_text)
-    elif local_remote_stacked_widget.currentIndex() == 4:
+    elif get_network_type == "Meshtastic":
         await HWSelect.dashboard.backend.probeHardwareLT(str(tab_index), get_row_text)
 
 
@@ -873,10 +872,10 @@ async def scan(HWSelect: QtCore.QObject):
             hardware_list.append(str(list_widget.item(n).text()))
 
     # Send Message for HIPRFISR to Sensor Node Connections
-    local_remote_stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index+1}")
-    if local_remote_stacked_widget.currentIndex() == 2:
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    if get_network_type == "IP":
         await HWSelect.dashboard.backend.scanHardware(str(tab_index), hardware_list)
-    elif local_remote_stacked_widget.currentIndex() == 4:
+    elif get_network_type == "Meshtastic":
         await HWSelect.dashboard.backend.scanHardwareLT(str(tab_index), hardware_list)
 
 
@@ -1399,38 +1398,39 @@ async def connect(HWSelect: QtCore.QObject):
     """
     Connects to the remote sensor node using the IP address and ports.
     """
-    # Connect
-    tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    ip_widget = getattr(HWSelect, f"textEdit_ip_addr_{tab_index+1}")
-    msg_port_widget = getattr(HWSelect, f"textEdit_msg_port_{tab_index+1}")
-    hb_port_widget = getattr(HWSelect, f"textEdit_hb_port_{tab_index+1}")
-    recall_settings_widget = getattr(HWSelect, f"checkBox_recall_settings_remote_{tab_index+1}")
-    connect_widget = getattr(HWSelect, f"pushButton_connect_{tab_index+1}")
-    network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index+1}")
+    pass
+    # # Connect
+    # tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    # ip_widget = getattr(HWSelect, f"textEdit_ip_addr_{tab_index+1}")
+    # msg_port_widget = getattr(HWSelect, f"textEdit_msg_port_{tab_index+1}")
+    # hb_port_widget = getattr(HWSelect, f"textEdit_hb_port_{tab_index+1}")
+    # recall_settings_widget = getattr(HWSelect, f"checkBox_recall_settings_remote_{tab_index+1}")
+    # connect_widget = getattr(HWSelect, f"pushButton_connect_{tab_index+1}")
+    # network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index+1}")
 
-    get_ip = str(ip_widget.toPlainText())
-    get_msg_port = str(msg_port_widget.toPlainText())
-    get_hb_port = str(hb_port_widget.toPlainText())
-    get_recall_settings = str(recall_settings_widget.isChecked())
+    # get_ip = str(ip_widget.toPlainText())
+    # get_msg_port = str(msg_port_widget.toPlainText())
+    # get_hb_port = str(hb_port_widget.toPlainText())
+    # get_recall_settings = str(recall_settings_widget.isChecked())
 
-    # Check Existing IPs
-    get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]
-    for n in range(0, len(get_sensor_node)):
-        if (get_ip == HWSelect.dashboard.backend.settings[get_sensor_node[n]]["ip_address"]) and (n != tab_index):
-            ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect, "IP address already in use.")
-            return
+    # # Check Existing IPs
+    # get_sensor_node = ["sensor_node1", "sensor_node2", "sensor_node3", "sensor_node4", "sensor_node5"]
+    # for n in range(0, len(get_sensor_node)):
+    #     if (get_ip == HWSelect.dashboard.backend.settings[get_sensor_node[n]]["ip_address"]) and (n != tab_index):
+    #         ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect, "IP address already in use.")
+    #         return
 
-    # Disable Buttons
-    connect_widget.setEnabled(False)
-    recall_settings_widget.setEnabled(False)
-    ip_widget.setEnabled(False)
-    msg_port_widget.setEnabled(False)
-    hb_port_widget.setEnabled(False)
-    network_type_widget.setEnabled(False)
-    QtWidgets.QApplication.processEvents()
+    # # Disable Buttons
+    # connect_widget.setEnabled(False)
+    # recall_settings_widget.setEnabled(False)
+    # ip_widget.setEnabled(False)
+    # msg_port_widget.setEnabled(False)
+    # hb_port_widget.setEnabled(False)
+    # network_type_widget.setEnabled(False)
+    # QtWidgets.QApplication.processEvents()
 
-    # Send Message for HIPRFISR to Sensor Node Connections
-    await HWSelect.dashboard.backend.connect_remote_sensor_node(str(tab_index), get_ip, get_msg_port, get_hb_port, get_recall_settings)
+    # # Send Message for HIPRFISR to Sensor Node Connections
+    # await HWSelect.dashboard.backend.connect_remote_sensor_node(str(tab_index), get_ip, get_msg_port, get_hb_port, get_recall_settings)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -1448,22 +1448,15 @@ async def disconnect(HWSelect: QtCore.QObject, delete_node=False):
     local_button = getattr(HWSelect, f"radioButton_local_{tab_index+1}")
     remote_button = getattr(HWSelect, f"radioButton_remote_{tab_index+1}")
 
-    if (str(network_type_widgets.currentText()) == "IP") or local_button.isChecked():
+    network_type = str(network_type_widgets.currentText())
 
-        local_button.setEnabled(False)        
-        remote_button.setEnabled(False)        
+    local_button.setEnabled(False)        
+    remote_button.setEnabled(False)        
 
-        stacked_widgets.setCurrentIndex(6)
+    stacked_widgets.setCurrentIndex(6)
 
-        # Send Message for HIPRFISR to Sensor Node Connections
-        await HWSelect.dashboard.backend.disconnect_remote_sensor_node(str(tab_index), delete_node)
-
-    elif str(network_type_widgets.currentText()) == "Meshtastic":
-
-        stacked_widgets.setCurrentIndex(3)
-
-        # Send Message for HIPRFISR to end Meshtastic Serial Connection
-        await HWSelect.dashboard.backend.disconnectFromMeshtastic(str(tab_index))
+    # Send Message for HIPRFISR to Sensor Node Connections
+    await HWSelect.dashboard.backend.disconnect_remote_sensor_node(str(tab_index), delete_node, network_type)
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -1976,7 +1969,8 @@ async def find(HWSelect: QtCore.QObject):
     find_widget = getattr(HWSelect, f"pushButton_find_{tab_index+1}")
 
     # Local, Connected: IP
-    if local_remote_stacked_widget.currentIndex() == 2:
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    if get_network_type == "IP":
         get_gps_source = str(gps_source_widget.currentText())
         if get_gps_source == "gpsd":
             await HWSelect.dashboard.backend.findGPS_Coordinates(str(tab_index), get_gps_source, get_format)
@@ -1993,7 +1987,7 @@ async def find(HWSelect: QtCore.QObject):
         find_widget.setEnabled(False)
 
     # Remote, Connected: Meshtastic
-    elif local_remote_stacked_widget.currentIndex() == 4:
+    elif get_network_type == "Meshtastic":
         # Send the Message
         get_gps_source = str(gps_source_widget.currentText())
         if get_gps_source == "gpsd":
@@ -2079,24 +2073,25 @@ def network_type_changed(HWSelect: QtCore.QObject):
     """ 
     Changes the stacked widget of connection controls for different network types (IP, Meshtastic, etc.).
     """
-    # Handle Stacked Widget Switching
-    tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index + 1}", None)
-    select_connect_stacked_widget = getattr(HWSelect, f"stackedWidget_select_connect_{tab_index + 1}", None)
-    network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index + 1}", None)
-    local_actions_stacked_widget = getattr(HWSelect, f"stackedWidget_local_actions_{tab_index + 1}", None)
-    remote_actions_stacked_widget = getattr(HWSelect, f"stackedWidget_remote_actions_{tab_index + 1}", None)
+    pass
+    # # Handle Stacked Widget Switching
+    # tab_index = HWSelect.tabWidget_nodes.currentIndex()
+    # stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index + 1}", None)
+    # select_connect_stacked_widget = getattr(HWSelect, f"stackedWidget_select_connect_{tab_index + 1}", None)
+    # network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index + 1}", None)
+    # local_actions_stacked_widget = getattr(HWSelect, f"stackedWidget_local_actions_{tab_index + 1}", None)
+    # remote_actions_stacked_widget = getattr(HWSelect, f"stackedWidget_remote_actions_{tab_index + 1}", None)
     
-    if str(network_type_widget.currentText()) == "IP":
-        select_connect_stacked_widget.setCurrentIndex(0)
-        stacked_widget.setCurrentIndex(5)
-        local_actions_stacked_widget.setCurrentIndex(0)        
-        remote_actions_stacked_widget.setCurrentIndex(0)        
-    elif str(network_type_widget.currentText()) == "Meshtastic":
-        select_connect_stacked_widget.setCurrentIndex(0)
-        stacked_widget.setCurrentIndex(3)
-        local_actions_stacked_widget.setCurrentIndex(1)        
-        remote_actions_stacked_widget.setCurrentIndex(1)  
+    # if str(network_type_widget.currentText()) == "IP":
+    #     select_connect_stacked_widget.setCurrentIndex(0)
+    #     stacked_widget.setCurrentIndex(5)
+    #     local_actions_stacked_widget.setCurrentIndex(0)        
+    #     remote_actions_stacked_widget.setCurrentIndex(0)        
+    # elif str(network_type_widget.currentText()) == "Meshtastic":
+    #     select_connect_stacked_widget.setCurrentIndex(0)
+    #     stacked_widget.setCurrentIndex(3)
+    #     local_actions_stacked_widget.setCurrentIndex(1)        
+    #     remote_actions_stacked_widget.setCurrentIndex(1)  
 
 
 @QtCore.pyqtSlot(QtCore.QObject)
@@ -2169,21 +2164,21 @@ async def meshtastic_connect(HWSelect: QtCore.QObject):
     await HWSelect.dashboard.backend.connectToSensorNodeMeshtastic(str(tab_index), get_serial_port, get_serial_baud_rate)
 
 
-@qasync.asyncSlot(QtCore.QObject)
-async def meshtastic_disconnect(HWSelect: QtCore.QObject):
-    """
-    Disconnect local serial connection and remove saved network connection from HIPRFISR.
-    """
-    # Disconnect
-    tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index+1}")
-    network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index+1}")
+# @qasync.asyncSlot(QtCore.QObject)
+# async def meshtastic_disconnect(HWSelect: QtCore.QObject):
+#     """
+#     Disconnect local serial connection and remove saved network connection from HIPRFISR.
+#     """
+#     # Disconnect
+#     tab_index = HWSelect.tabWidget_nodes.currentIndex()
+#     stacked_widget = getattr(HWSelect, f"stackedWidget_local_remote_{tab_index+1}")
+#     network_type_widget = getattr(HWSelect, f"comboBox_network_type_{tab_index+1}")
 
-    stacked_widget.setCurrentIndex(3)
-    network_type_widget.setEnabled(True)
+#     stacked_widget.setCurrentIndex(3)
+#     network_type_widget.setEnabled(True)
 
-    # Send Message for HIPRFISR to end Meshtastic Serial Connection
-    await HWSelect.dashboard.backend.disconnectFromMeshtastic(str(tab_index))
+#     # Send Message for HIPRFISR to end Meshtastic Serial Connection
+#     # await HWSelect.dashboard.backend.disconnectFromMeshtastic(str(tab_index))
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -2427,17 +2422,18 @@ async def ip_ping(HWSelect: QtCore.QObject):
 
 
 @qasync.asyncSlot(QtCore.QObject)
-async def ip_node_refresh(HWSelect: QtCore.QObject):
+async def node_refresh(HWSelect: QtCore.QObject):
     """
     Send command to HiprFisr to.
     """
     # Send Message to Backend
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
-    await HWSelect.dashboard.backend.nodeRefreshIP(str(tab_index))
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    await HWSelect.dashboard.backend.nodeRefresh(str(tab_index), get_network_type)
 
 
 @qasync.asyncSlot(QtCore.QObject)
-async def ip_node_select(HWSelect: QtCore.QObject):
+async def node_select(HWSelect: QtCore.QObject):
     """
     Send command to HiprFisr to.
     """
@@ -2447,9 +2443,19 @@ async def ip_node_select(HWSelect: QtCore.QObject):
 
     row = tableWidget_node_list_widget.currentRow()
     node_uuid = str(tableWidget_node_list_widget.item(row,0).text())
+    node_assigned_id = str(tableWidget_node_list_widget.item(row,3).text())
+
+    # Check if Meshtastic handshake is completed
+    if node_assigned_id == "0":
+        ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(HWSelect, "Assigned ID = 0. Meshtastic node needs to complete handshake. Please wait for the assigned ID to update and then click Refresh before selecting.")
+        return
 
     # Send Message to Backend
-    await HWSelect.dashboard.backend.nodeSelectIP(str(tab_index), node_uuid)
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    if get_network_type == "IP":
+        await HWSelect.dashboard.backend.nodeSelectIP(str(tab_index), node_uuid)
+    elif get_network_type == "Meshtastic":
+        await HWSelect.dashboard.backend.nodeSelectLT(str(tab_index), node_uuid)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -2461,4 +2467,8 @@ async def ip_node_reconnect(HWSelect: QtCore.QObject):
     tab_index = HWSelect.tabWidget_nodes.currentIndex()
 
     # Send Message to Backend
-    await HWSelect.dashboard.backend.nodeReconnectIP(str(tab_index))
+    get_network_type = str(getattr(HWSelect, f"comboBox_network_type_{tab_index+1}").currentText())
+    if get_network_type == "IP":
+        await HWSelect.dashboard.backend.nodeReconnectIP(str(tab_index))
+    elif get_network_type == "Meshtastic":
+        await HWSelect.dashboard.backend.nodeReconnectLT(str(tab_index))

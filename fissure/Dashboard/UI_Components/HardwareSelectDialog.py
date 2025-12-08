@@ -259,7 +259,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_refresh_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_refresh_{node_idx}")
             meshtastic_info_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_info_{node_idx}")
             meshtastic_connect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_connect_{node_idx}")
-            meshtastic_disconnect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_disconnect_{node_idx}")
+            # meshtastic_disconnect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_meshtastic_disconnect_{node_idx}")
             meshtastic_recall_info_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_meshtastic_recall_info_{node_idx}")
             meshtastic_recall_hardware_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_meshtastic_recall_hardware_{node_idx}")
             meshtastic_recall_status_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_meshtastic_recall_status_{node_idx}")
@@ -285,6 +285,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             remote_actions_meshtastic_iwconfig_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_meshtastic_iwconfig_{node_idx}")           
             remote_actions_ip_iwconfig_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_ip_iwconfig_{node_idx}")
             remote_actions_ip_ping_button: QtWidgets.QPushButton = getattr(self, f"pushButton_remote_actions_ip_ping_{node_idx}")
+            pushButton_node_refresh_button: QtWidgets.QPushButton = getattr(self, f"pushButton_node_refresh_{node_idx}")
+            pushButton_node_select_button: QtWidgets.QPushButton = getattr(self, f"pushButton_node_select_{node_idx}")
+            pushButton_ip_node_reconnect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_ip_node_reconnect_{node_idx}")
 
             local_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.local(self, tab_index=idx - 1))
             remote_button.clicked.connect(lambda _, idx=node_idx: HardwareSelectSlots.remote(self, tab_index=idx - 1))
@@ -319,7 +322,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             meshtastic_refresh_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_refresh(self))
             meshtastic_info_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_info(self))
             meshtastic_connect_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_connect(self))
-            meshtastic_disconnect_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_disconnect(self))
+            # meshtastic_disconnect_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_disconnect(self))
             meshtastic_recall_info_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_info(self))
             meshtastic_recall_hardware_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_hardware(self))
             meshtastic_recall_status_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_recall_status(self))
@@ -344,24 +347,17 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             remote_actions_ip_ifconfig_button.clicked.connect(lambda: HardwareSelectSlots.ip_ifconfig(self))   
             remote_actions_meshtastic_iwconfig_button.clicked.connect(lambda: HardwareSelectSlots.meshtastic_iwconfig(self))
             remote_actions_ip_iwconfig_button.clicked.connect(lambda: HardwareSelectSlots.ip_iwconfig(self))                              
-            remote_actions_ip_ping_button.clicked.connect(lambda: HardwareSelectSlots.ip_ping(self))                              
+            remote_actions_ip_ping_button.clicked.connect(lambda: HardwareSelectSlots.ip_ping(self))
+            pushButton_node_refresh_button.clicked.connect(lambda: HardwareSelectSlots.node_refresh(self))
+            pushButton_node_select_button.clicked.connect(lambda: HardwareSelectSlots.node_select(self))        
+            pushButton_ip_node_reconnect_button.clicked.connect(lambda: HardwareSelectSlots.ip_node_reconnect(self))                       
 
         # Connect general slots
         self.pushButton_import.clicked.connect(lambda: HardwareSelectSlots.importClicked(self, settings_dict="", recall_settings_on_connect=False, first_time=True))
         self.pushButton_export.clicked.connect(lambda: HardwareSelectSlots.export(self))
         self.pushButton_apply.clicked.connect(lambda: HardwareSelectSlots.apply(self))
         self.pushButton_cancel.clicked.connect(self.close)
-        self.pushButton_delete.clicked.connect(lambda: HardwareSelectSlots.delete(self))
-
-        # New Test Items, Move these up
-        pushButton_node_refresh_button: QtWidgets.QPushButton = getattr(self, f"pushButton_node_refresh_1")
-        pushButton_node_refresh_button.clicked.connect(lambda: HardwareSelectSlots.ip_node_refresh(self))
-        pushButton_node_select_button: QtWidgets.QPushButton = getattr(self, f"pushButton_node_select_1")
-        pushButton_node_select_button.clicked.connect(lambda: HardwareSelectSlots.ip_node_select(self))        
-        pushButton_ip_node_reconnect_button: QtWidgets.QPushButton = getattr(self, f"pushButton_ip_node_reconnect_1")
-        pushButton_ip_node_reconnect_button.clicked.connect(lambda: HardwareSelectSlots.ip_node_reconnect(self))
-
-        
+        self.pushButton_delete.clicked.connect(lambda: HardwareSelectSlots.delete(self))      
 
 
     def scanReturn(self, tab_index, all_scan_results):
@@ -567,7 +563,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
 
 
     def sensorNodeConnected(self, tab_index=0, serial=False):
-        """Updates widgets for a sensor node once it is connected to the rest of FISSURE."""
+        """
+        Updates widgets for a sensor node once it is connected to the rest of FISSURE.
+        """
         # Reload hardware tables
         self.populate_hardware_tables(tab_index)
 
@@ -591,16 +589,29 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         find_widget = getattr(self, f"pushButton_find_{tab_index}")
         network_type_label = getattr(self, f"label2_network_type_{tab_index}")
         network_type_combobox = getattr(self, f"comboBox_network_type_{tab_index}")
-
+        local_actions_stacked_widget = getattr(self, f"stackedWidget_local_actions_{tab_index}")
+        remote_actions_stacked_widget = getattr(self, f"stackedWidget_remote_actions_{tab_index}")
+        
         # Update widget states
         if serial == True:
-            stacked_widget.setCurrentIndex(4)
+            stacked_widget.setCurrentIndex(2)
+
             if stacked_widget.currentIndex() != 6:
                 select_connect_stacked_widget.setCurrentIndex(1)
         else:
             stacked_widget.setCurrentIndex(2)
+
             if stacked_widget.currentIndex() != 6:
                 select_connect_stacked_widget.setCurrentIndex(1)
+
+        get_network_type = str(network_type_combobox.currentText())
+        if get_network_type == "IP":
+            local_actions_stacked_widget.setCurrentIndex(0)
+            remote_actions_stacked_widget.setCurrentIndex(0)
+        elif get_network_type == "Meshtastic":
+            local_actions_stacked_widget.setCurrentIndex(1)
+            remote_actions_stacked_widget.setCurrentIndex(1)
+
         stacked_widget.setEnabled(True)
         bottom_stacked_widget.setCurrentIndex(0)
         scan_pushbutton.setEnabled(True)
@@ -627,7 +638,9 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
 
 
     def sensorNodeDisconnected(self, tab_index=0):
-        """Updates widgets for a sensor node once it is disconnected from the rest of FISSURE."""
+        """
+        Updates widgets for a sensor node once it is disconnected from the rest of FISSURE.
+        """
         # Adjust the tab index to match widget numbering
         tab_index += 1
 
@@ -642,6 +655,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
         find_widget = getattr(self, f"pushButton_find_{tab_index}")
         network_type_label = getattr(self, f"label2_network_type_{tab_index}")
         network_type_combobox = getattr(self, f"comboBox_network_type_{tab_index}")
+        nickname_widget = getattr(self, f"textEdit_nickname_{tab_index}")
         
         sensor_node = f"sensor_node{tab_index}"
 
@@ -673,14 +687,17 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             network_type_combobox.setVisible(False)
         else:
             # Remote disconnect, show reconnect
+            get_nickname = str(nickname_widget.toPlainText())
             if network_type_combobox.currentText() == "IP":
                 stacked_widget.setCurrentIndex(6)
-                if str(self.dashboard.backend.settings[sensor_node]["nickname"]) == "":
+                # Connect
+                if get_nickname == "":
                     select_connect_stacked_widget.setCurrentIndex(0)
                     local_button.setEnabled(True)
                     remote_button.setEnabled(True)
                     network_type_label.setEnabled(True)
                     network_type_combobox.setEnabled(True)     
+                # Reconnect
                 else:
                     select_connect_stacked_widget.setCurrentIndex(1)
                     local_button.setEnabled(False)
@@ -688,9 +705,21 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
                     network_type_label.setEnabled(False)
                     network_type_combobox.setEnabled(False)     
 
-            elif network_type_combobox.currentText() == "Serial":
-                stacked_widget.setCurrentIndex(3)
-                # select_connect_stacked_widget.setCurrentIndex(1)
+            elif network_type_combobox.currentText() == "Meshtastic":
+                # Connect
+                if get_nickname == "":
+                    select_connect_stacked_widget.setCurrentIndex(0)
+                    local_button.setEnabled(True)
+                    remote_button.setEnabled(True)
+                    network_type_label.setEnabled(True)
+                    network_type_combobox.setEnabled(True)     
+                # Reconnect
+                else:
+                    select_connect_stacked_widget.setCurrentIndex(1)
+                    local_button.setEnabled(False)
+                    remote_button.setEnabled(False)
+                    network_type_label.setEnabled(False)
+                    network_type_combobox.setEnabled(False)   
 
             network_type_label.setVisible(True)
             network_type_combobox.setVisible(True)
@@ -770,6 +799,7 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             ip            = info.get("ip", "—")
             nickname      = info.get("nickname", "—")
             # network_type  = info.get("network_type", "—")
+            assigned_id   = info.get("assigned_id", "—")
             last_seen_ts  = info.get("last_seen", None)
             # connected     = info.get("connected", False)
 
@@ -791,7 +821,8 @@ class HardwareSelectDialog(QtWidgets.QDialog, UI_Types.HW_Select):
             table.setItem(row, 1, QtWidgets.QTableWidgetItem(str(ip)))
             table.setItem(row, 2, QtWidgets.QTableWidgetItem(str(nickname)))
             # table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(network_type)))
-            table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(last_seen)))
+            table.setItem(row, 3, QtWidgets.QTableWidgetItem(str(assigned_id)))
+            table.setItem(row, 4, QtWidgets.QTableWidgetItem(str(last_seen)))
             # table.setItem(row, 5, QtWidgets.QTableWidgetItem(str(conn_text)))
 
             # Resize Table

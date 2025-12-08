@@ -645,23 +645,23 @@ class DashboardBackend:
         self.library = None
 
 
-    async def connect_remote_sensor_node(self, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):
-        """
-        Sends message to HIPRFISR to establish IP based connection to a remote sensor node.
-        """
-        PARAMETERS = {
-            "sensor_node_id": str(sensor_node_id),
-            "ip_address": ip_address,
-            "msg_port": msg_port,
-            "hb_port": hb_port,
-            "recall_settings": recall_settings,
-        }
-        launch_cmd = {
-            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-            fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeIP",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
+    # async def connect_remote_sensor_node(self, sensor_node_id, ip_address, msg_port, hb_port, recall_settings):
+    #     """
+    #     Sends message to HIPRFISR to establish IP based connection to a remote sensor node.
+    #     """
+    #     PARAMETERS = {
+    #         "sensor_node_id": str(sensor_node_id),
+    #         "ip_address": ip_address,
+    #         "msg_port": msg_port,
+    #         "hb_port": hb_port,
+    #         "recall_settings": recall_settings,
+    #     }
+    #     launch_cmd = {
+    #         fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+    #         fissure.comms.MessageFields.MESSAGE_NAME: "connectToSensorNodeIP",
+    #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    #     }
+    #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, launch_cmd)
 
 
     async def disconnect_local_sensor_node(self, sensor_node_id):
@@ -677,10 +677,11 @@ class DashboardBackend:
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, terminate_cmd)
 
 
-    async def disconnect_remote_sensor_node(self, sensor_node_id, delete_node):
+    async def disconnect_remote_sensor_node(self, sensor_node_id, delete_node, network_type):
         PARAMETERS = {
             "dashboard_index": str(sensor_node_id),
             "delete_node": delete_node,
+            "network_type": network_type
         }
         disconnect_cmd = {
             fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
@@ -690,19 +691,19 @@ class DashboardBackend:
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, disconnect_cmd)
 
 
-    async def disconnectFromMeshtastic(self, sensor_node_id):
-        """
-        Ends connections to local serial connection to Meshatastic.
-        """
-        PARAMETERS = {
-            "sensor_node_id": str(sensor_node_id),
-        }
-        disconnect_cmd = {
-            fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-            fissure.comms.MessageFields.MESSAGE_NAME: "disconnectFromMeshtastic",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, disconnect_cmd)
+    # async def disconnectFromMeshtastic(self, sensor_node_id):
+    #     """
+    #     Ends connections to local serial connection to Meshatastic.
+    #     """
+    #     PARAMETERS = {
+    #         "sensor_node_id": str(sensor_node_id),
+    #     }
+    #     disconnect_cmd = {
+    #         fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+    #         fissure.comms.MessageFields.MESSAGE_NAME: "disconnectFromMeshtastic",
+    #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    #     }
+    #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, disconnect_cmd)
 
 
     async def scanHardware(self, tab_index, hardware_list):
@@ -2387,18 +2388,19 @@ class DashboardBackend:
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def nodeRefreshIP(self, dashboard_node_index):
+    async def nodeRefresh(self, dashboard_node_index, network_type):
         """
         Sends a message to the HIPRFISR to.
         """
         # Send the Message
         if self.hiprfisr_connected is True:
             PARAMETERS = {
-                "dashboard_node_index": dashboard_node_index
+                "dashboard_node_index": dashboard_node_index,
+                "network_type": network_type
             }
             msg = {
                     fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "nodeRefreshIP",
+                    fissure.comms.MessageFields.MESSAGE_NAME: "nodeRefresh",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
@@ -2754,3 +2756,37 @@ class DashboardBackend:
             }
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)            
 
+
+    async def nodeSelectLT(self, dashboard_node_index, node_uuid):
+        """
+        Sends a message to the HIPRFISR to.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "dashboard_node_index": dashboard_node_index,
+                "node_uuid": node_uuid
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "nodeSelectLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    async def nodeReconnectLT(self, dashboard_node_index):
+        """
+        Sends a message to the HIPRFISR to.
+        """
+        # Send the Message
+        if self.hiprfisr_connected is True:
+            PARAMETERS = {
+                "dashboard_node_index": dashboard_node_index,
+            }
+            msg = {
+                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
+                    fissure.comms.MessageFields.MESSAGE_NAME: "nodeReconnectLT",
+                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

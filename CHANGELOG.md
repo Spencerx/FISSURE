@@ -1,6 +1,39 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-07
+
+Meshtastic networking overhaul.
+
+### Added
+
+- Pull request #102: Hiprfisr logging
+  - Hiprfisr logging of received sensor node heartbeat
+  - Fixed HIPRFISR TAK plot messaging incorrect use of UID
+- Assigned short-ID system with hub-managed ID counter
+- Complete Meshtastic handshake flow
+- Reverse lookup helper: resolve UUID from assigned_id
+- Persistent UUID-based log identifier for sensor nodes
+- Meshtastic-safe last-seen tracking (no disconnect toggling)
+- Integer validation/cast for sn_assigned_id
+- Updated routing to support assigned_id as message SOURCE
+
+### Changed
+
+- Removed SensorNode class and associated functions in HiprFisr.py
+- Reworked Meshtastic node registration logic (new vs. existing node behavior)
+- Overhauled heartbeat handling: Meshtastic nodes no longer trated like IP nodes
+- Updated send_msg behavior to use assigned_id instead of legacy identifier
+- Dashboard mapping updated to rely strictly on UUID references
+- Refactored node update paths for consistent state management
+- Removed dependence on sn_int for RF timing; Meshtastic interval ignored
+- Standardized node identity model (uuid = permanent, assigned_id = routing, identifier = logging)
+
+### Fixed
+
+- pingIP() now acquires the IP address using the UUID and the nodes dictionary
+- Log identifiers regenerating randomly instead of matching persisitent UUID
+
 ## 2025-12-02
 
 Adding callsigns to TAK CoT messages and using long UUID for IP nodes.

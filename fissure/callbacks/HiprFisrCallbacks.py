@@ -364,14 +364,19 @@ async def deleteListener(component: object, listener_name=""):
 async def pingIP(component: object, sensor_node_id: str):
     """
     Pings the sensor node IP from the HIPRFISR and returns the results to the Dashboard.
-    """
-    # Obtain IP address from sensor node ID
-    for addr in component.sensor_nodes[int(sensor_node_id)].listener.connections:  # Will there ever be multiple connections?
-        ip = addr.address
+    """   
+    # Acquire IP Address
+    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    if uuid is None:
+        return
+    ip_address = component.nodes[uuid].get("ip_address",None)
+
+    if ip_address is None:
+        return
 
     try:
         proc = await asyncio.create_subprocess_shell(
-            f"ping -c 1 -W 2 {ip}",
+            f"ping -c 1 -W 2 {ip_address}",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
@@ -1963,7 +1968,7 @@ async def terminateSensorNode(component: object, sensor_node_id):
     )
 
 
-async def nodeRefreshIP(component: object, dashboard_node_index):
+async def nodeRefresh(component: object, dashboard_node_index, network_type):
     """
     """
     # For testing:
@@ -1989,14 +1994,25 @@ async def nodeRefreshIP(component: object, dashboard_node_index):
     # -----------------------------------------------------
     # Notify dashboard
     # -----------------------------------------------------
-    PARAMETERS = {
-        "dashboard_node_index": dashboard_node_index,
-        "nodes": component.nodes
+    # Validate input network type
+    if network_type not in ("IP", "Meshtastic"):
+        return
+
+    # Filter nodes by network type
+    filtered_nodes = {
+        uuid: node
+        for uuid, node in component.nodes.items()
+        if node.get("network_type") == network_type
     }
 
+    PARAMETERS = {
+        "dashboard_node_index": dashboard_node_index,
+        "nodes": filtered_nodes,
+    }
+    
     msg_to_dashboard = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "nodeRefreshIP_Return",
+        fissure.comms.MessageFields.MESSAGE_NAME: "nodeRefreshReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
 
@@ -2018,7 +2034,6 @@ async def nodeSelectIP(component: object, dashboard_node_index, node_uuid):
     # Send Message to Node
     PARAMETERS = {
         "dashboard_node_index": dashboard_node_index,
-        "node_uuid": node_uuid
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -2039,7 +2054,6 @@ async def nodeReconnectIP(component: object, dashboard_node_index):
     # Send Message to Node
     PARAMETERS = {
         "dashboard_node_index": dashboard_node_index,
-        "node_uuid": node_uuid
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -2049,16 +2063,21 @@ async def nodeReconnectIP(component: object, dashboard_node_index):
     await component.sensor_node_router.send_msg(fissure.comms.MessageTypes.COMMANDS, msg, target_ids=[identity])
 
 
-async def disconnectFromSensorNode(component, dashboard_index=0, delete_node=False):
+async def disconnectFromSensorNode(component, dashboard_index=0, delete_node=False, network_type="IP"):
     """
     Dashboard callback: request disconnection of a Sensor Node.
     """
     dashboard_index = int(dashboard_index)
 
     # 1) Resolve UUID + identity
-    uuid, identity = component.resolve_sensor_node_identity(dashboard_index)
-    if not uuid:
-        return  # Helper already logged the problem
+    if network_type == "IP":
+        uuid, identity = component.resolve_sensor_node_identity(dashboard_index)
+        if not uuid:
+            return  # Helper already logged the problem
+    elif network_type == "Meshtastic":
+        uuid = component.dashboard_node_map[dashboard_index]
+        if not uuid:
+            return
 
     # 2) Mark node as disconnected internally
     node = component.nodes.get(uuid)
@@ -2078,20 +2097,21 @@ async def disconnectFromSensorNode(component, dashboard_index=0, delete_node=Fal
         )
 
     # 4) Notify Sensor Node (if still reachable)
-    try:
-        msg2 = {
-            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: "hiprfisrDisconnecting",
-            fissure.comms.MessageFields.PARAMETERS: {},
-        }
+    if network_type == "IP":
+        try:
+            msg2 = {
+                fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "hiprfisrDisconnecting",
+                fissure.comms.MessageFields.PARAMETERS: {},
+            }
 
-        await component.sensor_node_router.send_msg(
-            fissure.comms.MessageTypes.COMMANDS,
-            msg2,
-            target_ids=[identity]
-        )
-    except Exception:
-        pass
+            await component.sensor_node_router.send_msg(
+                fissure.comms.MessageTypes.COMMANDS,
+                msg2,
+                target_ids=[identity]
+            )
+        except Exception:
+            pass
 
     # 5) Delete node entirely from HIPRFISR (optional)
     if delete_node:
@@ -2148,66 +2168,68 @@ async def disconnectFromSensorNode(component, dashboard_index=0, delete_node=Fal
         component.logger.info(f"[DELETE] Node {uuid} fully removed from HIPRFISR")
 
 
-async def disconnectFromMeshtastic(component: object, sensor_node_id=0):
-    """
-    Ends connections to local serial connection to Meshatastic.
-    """
-    sensor_node_id = int(sensor_node_id)
+# async def disconnectFromMeshtastic(component: object, sensor_node_id=0):
+#     """
+#     Ends connections to local serial connection to Meshatastic.
+#     """
+#     pass
+    # sensor_node_id = int(sensor_node_id)
 
-    # Ensure the sensor node exists
-    if component.sensor_nodes[sensor_node_id] is None:
-        component.logger.warning(f"Sensor node {sensor_node_id} is not connected.")
-        return
+    # # Ensure the sensor node exists
+    # if component.sensor_nodes[sensor_node_id] is None:
+    #     component.logger.warning(f"Sensor node {sensor_node_id} is not connected.")
+    #     return
 
-    # Disconnect
-    try:
-        await component.sensor_nodes[sensor_node_id].listener.disconnect()
-    except Exception as e:
-        component.logger.error(f"Error disconnecting local serial connection for Sensor Node {sensor_node_id}: {e}")        
+    # # Disconnect
+    # try:
+    #     await component.sensor_nodes[sensor_node_id].listener.disconnect()
+    # except Exception as e:
+    #     component.logger.error(f"Error disconnecting local serial connection for Sensor Node {sensor_node_id}: {e}")        
 
-    # Set the node to None to fully remove it
-    component.sensor_nodes[sensor_node_id] = None
-    component.logger.info(f"Local serial connection for Sensor Node {sensor_node_id} successfully disconnected.")
+    # # Set the node to None to fully remove it
+    # component.sensor_nodes[sensor_node_id] = None
+    # component.logger.info(f"Local serial connection for Sensor Node {sensor_node_id} successfully disconnected.")
 
-    # Notify the Dashboard
-    PARAMETERS = {"component_name": sensor_node_id}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "componentDisconnected",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    # # Notify the Dashboard
+    # PARAMETERS = {"component_name": sensor_node_id}
+    # msg = {
+    #     fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+    #     fissure.comms.MessageFields.MESSAGE_NAME: "componentDisconnected",
+    #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    # }
+    # await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def connectToSensorNodeMeshtastic(component: object, sensor_node_id, serial_port, serial_baud_rate):
     """
     Connects the HIPRFISR to a local serial connection for a device using Meshtastic.
     """
-    sensor_node_id = int(sensor_node_id)
-    context = component
-    name=f"{fissure.comms.Identifiers.HIPRFISR}::sensor_node"
+    pass
+    # sensor_node_id = int(sensor_node_id)
+    # context = component
+    # name=f"{fissure.comms.Identifiers.HIPRFISR}::sensor_node"
 
-    # Initialize Meshtastic connection
-    component.logger.info(f"Connecting to sensor node {sensor_node_id} via Meshtastic on {serial_port}...")
+    # # Initialize Meshtastic connection
+    # component.logger.info(f"Connecting to sensor node {sensor_node_id} via Meshtastic on {serial_port}...")
 
-    try:
-        if component.sensor_nodes[sensor_node_id] is None:
-            await component.reset_sensor_node_listener(
-                sensor_node_id, "Meshtastic", serial_port=serial_port, name=name, context=context
-            )
-        component.logger.info(f"Connected to local serial port for communicating with Sensor node {sensor_node_id} via Meshtastic.")
+    # try:
+    #     if component.sensor_nodes[sensor_node_id] is None:
+    #         await component.reset_sensor_node_listener(
+    #             sensor_node_id, "Meshtastic", serial_port=serial_port, name=name, context=context
+    #         )
+    #     component.logger.info(f"Connected to local serial port for communicating with Sensor node {sensor_node_id} via Meshtastic.")
 
-        # Send Connected Messages
-        PARAMETERS = {"component_name": sensor_node_id}
-        msg = {
-            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: "componentConnectedSerial",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    #     # Send Connected Messages
+    #     PARAMETERS = {"component_name": sensor_node_id}
+    #     msg = {
+    #         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+    #         fissure.comms.MessageFields.MESSAGE_NAME: "componentConnectedSerial",
+    #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    #     }
+    #     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
         
-    except Exception as e:
-        component.logger.error(f"Failed to connect to sensor node {sensor_node_id} via Meshtastic: {e}")
+    # except Exception as e:
+    #     component.logger.error(f"Failed to connect to sensor node {sensor_node_id} via Meshtastic: {e}")
 
 
 async def findGPS_Coordinates(component: object, tab_index=0, gps_source="", format=""):
@@ -2932,7 +2954,8 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     Forwards the GPS coordinate results message to TAK.
     """
     prefix = component.settings['callsign_prefix']
-    callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
+    callsign = f"{prefix}-{uid}"
+    uid = callsign
     await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
 
 
@@ -3375,39 +3398,41 @@ async def checkSensorNodePluginResults(component: object, sensor_node_id: int, p
     plugin_status : dict
         Status (values) of plugins (keys)
     """
-    # Align database to sensor node
-    run_db_install = False
-    uninstall_plugins = []
-    for plugin_name in plugin_status.keys():
-        installed = plugin_status.get(plugin_name).get('installed')
-        if installed and (not plugin_name in component.sensor_nodes[sensor_node_id].plugins):
-            # Plugin is installed on sensor node but not registered in hipfisr; register for installation
-            run_db_install = True
-            await registerPlugin(component, sensor_node_id, plugin_name)
+    pass  # TODO: replace component.sensor_nodes
 
-        elif (not installed) and (plugin_name in component.sensor_nodes[sensor_node_id].plugins):
-            # Plugin is not installed on sensor node but is registered in hipfisr; deregister and remove from database
-            uninstall_plugins += [plugin_name]
-            await deregisterPlugin(component, sensor_node_id, plugin_name)
+    # # Align database to sensor node
+    # run_db_install = False
+    # uninstall_plugins = []
+    # for plugin_name in plugin_status.keys():
+    #     installed = plugin_status.get(plugin_name).get('installed')
+    #     if installed and (not plugin_name in component.sensor_nodes[sensor_node_id].plugins):
+    #         # Plugin is installed on sensor node but not registered in hipfisr; register for installation
+    #         run_db_install = True
+    #         await registerPlugin(component, sensor_node_id, plugin_name)
 
-    if len(uninstall_plugins) > 0:
-        # Uninstall plugins from database
-        await uninstallPluginsDatabase(component, sensor_node_id, uninstall_plugins)
-    if run_db_install:
-        # Install plugins to database
-        await installPluginsDatabase(component, sensor_node_id, True)
+    #     elif (not installed) and (plugin_name in component.sensor_nodes[sensor_node_id].plugins):
+    #         # Plugin is not installed on sensor node but is registered in hipfisr; deregister and remove from database
+    #         uninstall_plugins += [plugin_name]
+    #         await deregisterPlugin(component, sensor_node_id, plugin_name)
 
-    # Forward results to Dashboard
-    PARAMETERS = {
-        "sensor_node_id": sensor_node_id,
-        "plugin_status": plugin_status,
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "checkSensorNodePluginResults",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    # if len(uninstall_plugins) > 0:
+    #     # Uninstall plugins from database
+    #     await uninstallPluginsDatabase(component, sensor_node_id, uninstall_plugins)
+    # if run_db_install:
+    #     # Install plugins to database
+    #     await installPluginsDatabase(component, sensor_node_id, True)
+
+    # # Forward results to Dashboard
+    # PARAMETERS = {
+    #     "sensor_node_id": sensor_node_id,
+    #     "plugin_status": plugin_status,
+    # }
+    # msg = {
+    #     fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+    #     fissure.comms.MessageFields.MESSAGE_NAME: "checkSensorNodePluginResults",
+    #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    # }
+    # await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def savePlugin(component: object, plugin_name: str, plugin_data: str):
@@ -3617,14 +3642,16 @@ async def registerPlugin(component: object, sensor_node_id: int, plugin_name: st
     plugin_name : str
         Plugin name
     """
-    if sensor_node_id > -1:
-        if not plugin_name in component.sensor_nodes[sensor_node_id].plugins:
-            # Add plugin to list for sensor node
-            component.sensor_nodes[sensor_node_id].plugins += [plugin_name]
-    else:
-        if not plugin_name in component.local_plugins:
-            # Add plugin to list for hiprfisr
-            component.local_plugins += [plugin_name]
+    pass  # TODO: replace component.sensor_nodes
+    
+    # if sensor_node_id > -1:
+    #     if not plugin_name in component.sensor_nodes[sensor_node_id].plugins:
+    #         # Add plugin to list for sensor node
+    #         component.sensor_nodes[sensor_node_id].plugins += [plugin_name]
+    # else:
+    #     if not plugin_name in component.local_plugins:
+    #         # Add plugin to list for hiprfisr
+    #         component.local_plugins += [plugin_name]
 
 
 async def deregisterPlugin(component: object, sensor_node_id: int, plugin_name: str):
@@ -3639,14 +3666,16 @@ async def deregisterPlugin(component: object, sensor_node_id: int, plugin_name: 
     plugin_name : str
         Plugin name
     """
-    if sensor_node_id > -1:
-        if plugin_name in component.sensor_nodes[sensor_node_id].plugins:
-            # Remove plugin from list for sensor node
-            component.sensor_nodes[sensor_node_id].plugins.remove(plugin_name)
-    else:
-        if plugin_name in component.local_plugins:
-            # Remove plugin from list for hiprfisr
-            component.local_plugins.remove(plugin_name)
+    pass  # TODO: replace component.sensor_nodes
+
+    # if sensor_node_id > -1:
+    #     if plugin_name in component.sensor_nodes[sensor_node_id].plugins:
+    #         # Remove plugin from list for sensor node
+    #         component.sensor_nodes[sensor_node_id].plugins.remove(plugin_name)
+    # else:
+    #     if plugin_name in component.local_plugins:
+    #         # Remove plugin from list for hiprfisr
+    #         component.local_plugins.remove(plugin_name)
 
 
 async def installPluginsDatabase(component: object, sensor_node_id: int, refresh_frontend_widgets: bool=True):
@@ -3661,20 +3690,22 @@ async def installPluginsDatabase(component: object, sensor_node_id: int, refresh
     refresh_frontend_widgets : bool, optional
         Update dashboard UI widgets after installation, by default True
     """
-    # Get registered active plugins list
-    if sensor_node_id > -1:
-        plugins = component.sensor_nodes[sensor_node_id].plugins
-    else:
-        plugins = component.local_plugins
+    pass  # TODO: replace component.sensor_nodes
 
-    # Install plugins to database
-    plugin.modify_database(component.logger, plugins, 'add')
+    # # Get registered active plugins list
+    # if sensor_node_id > -1:
+    #     plugins = component.sensor_nodes[sensor_node_id].plugins
+    # else:
+    #     plugins = component.local_plugins
 
-    # Update database cache and dashboard
-    await retrieveDatabaseCache(component, refresh_frontend_widgets)
+    # # Install plugins to database
+    # plugin.modify_database(component.logger, plugins, 'add')
 
-    # Update plugin table list
-    await checkPlugin(component, sensor_node_id)
+    # # Update database cache and dashboard
+    # await retrieveDatabaseCache(component, refresh_frontend_widgets)
+
+    # # Update plugin table list
+    # await checkPlugin(component, sensor_node_id)
 
 
 async def uninstallPluginsDatabase(component: object, sensor_node_id: int, plugin_names: List[str]):
