@@ -2953,10 +2953,12 @@ async def takPlot(component: object, uid: str, lat: float, lon: float, alt: floa
     """
     Forwards the GPS coordinate results message to TAK.
     """
-    prefix = component.settings['callsign_prefix']
-    callsign = f"{prefix}-{uid}"
-    uid = callsign
-    await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
+    try:
+        await component.send_cot(uid, uid, lat, lon, alt, time, remarks, type)
+    except Exception as e:
+        component.logger.error(f"Error sending COT to TAK: {e}")
+        tb = traceback.format_exc()
+        component.logger.debug(tb)
 
 
 async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):

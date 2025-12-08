@@ -967,9 +967,11 @@ class HiprFisr:
         if not hbs:
             return
 
-        print("\n=== NODE HEARTBEATS RECEIVED ===")
-        # print("Raw heartbeats list:", hbs)
-        # print(self.nodes)
+        for hb in hbs:
+            self.logger.info(
+                f"received {hb.get('SenderID')} heartbeat "
+                f"({fissure.utils.get_timestamp(hb.get('Time'))})"
+            )
 
         for hb in hbs:
             sn_time = float(hb.get(fissure.comms.MessageFields.TIME))
