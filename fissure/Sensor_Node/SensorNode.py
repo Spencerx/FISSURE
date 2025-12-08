@@ -179,11 +179,11 @@ class SensorNode(object):
     """
     
     # settings: Dict
-    identifier: str = "sensor node " + str(uuid.uuid4())[:8]  #fissure.comms.Identifiers.SENSOR_NODE_0
+    # identifier: str = "sensor node " + str(uuid.uuid4())[:8]  #fissure.comms.Identifiers.SENSOR_NODE_0
     #logger: logging.Logger = fissure.utils.get_logger(fissure.comms.Identifiers.SENSOR_NODE_0)
-    logger: logging.Logger = fissure.utils.get_logger(identifier)
+    # logger: logging.Logger = fissure.utils.get_logger(identifier)
     # ip_address: str
-    hiprfisr_socket: fissure.comms.Server  # PAIR
+    # hiprfisr_socket: fissure.comms.Server  # PAIR
     #hiprfisr_connected: bool
     # sensor_nodes: List[Listener]  # DEALER/DEALER
     # heartbeats: Dict[str, Union[float, Dict[int, float]]]  # {name: time, name: time, ... sensor_nodes: {node_id: time}}
@@ -195,6 +195,7 @@ class SensorNode(object):
     def __init__(self, local_flag):
         # self.hiprfisr_connected = False
         self.local_remote = "local" if local_flag else "remote"
+        
 
         self.os_info = fissure.utils.get_os_info()
         filename = os.path.join(fissure.utils.SENSOR_NODE_DIR, "Sensor_Node_Config", "default.yaml")
@@ -210,6 +211,14 @@ class SensorNode(object):
         
         self.child_tasks = []
         self.sockets = []
+
+        # Load UUIDs, big for IP, assigned ID for Meshtastic
+        self.uuid = self.load_or_create_uuid()  # Read from file
+
+        self.identifier = self.uuid  # IP source ID (full UUID)
+        self.assigned_id = 0  # Meshtastic source ID (temporary hub ID)
+
+        self.logger = fissure.utils.get_logger("sensor node " + self.uuid[:8])
 
         fissure.utils.init_logging()
         self.updateLoggingLevels(
@@ -227,6 +236,7 @@ class SensorNode(object):
         }
 
         self.heartbeat_interval = int(self.settings_dict['Sensor Node']['heartbeat_interval'])
+        self.heartbeat_interval_connected = int(self.settings_dict['Sensor Node']['heartbeat_interval_connected'])
         self.sensor_node_heartbeat_time = 0
         self.attack_flow_graph_loaded = False
         self.archive_flow_graph_loaded = False
@@ -258,15 +268,8 @@ class SensorNode(object):
         # ZMQ DEALER/ROUTER fields
         self.listener = None
         self.connected = False
-        self.terminated = False
+        self.terminated = False  # TODO: not used?
         self.shutdown = False
-
-        # Use small UUID for Meshtastic to save characters
-        self.uuid = self.load_or_create_uuid()  # Read from file
-        if self.network_type == "Meshtastic":
-            self.identifier = self.uuid[:8]
-        else:
-            self.identifier = self.uuid
 
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.SensorNodeCallbacks)
@@ -391,7 +394,7 @@ class SensorNode(object):
             "alert_text": message
         }
         msg = {
-            fissure.comms.MessageFields.IDENTIFIER if self.network_type == "IP" else fissure.comms.MessageFields.SOURCE: self.identifier,
+            fissure.comms.MessageFields.IDENTIFIER if self.network_type == "IP" else fissure.comms.MessageFields.SOURCE: self.assigned_id,
             fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn" if self.network_type == "IP" else "alertReturnLT",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS if self.network_type == "IP" else { "sensor_node_id": sensor_node_id, "alert_text": PARAMETERS["alert_text"][:100] },
         }
@@ -776,12 +779,15 @@ class SensorNode(object):
                 pass
 
         if self.hiprfisr_socket:
-            try:
-                self.hiprfisr_socket.terminated = True
-                self.hiprfisr_socket.shutdown()
-                # self.hiprfisr_socket.close_sockets()
-            except:
-                pass
+            if self.network_type == "IP":
+                try:
+                    self.hiprfisr_socket.terminated = True
+                    self.hiprfisr_socket.shutdown()
+                    # self.hiprfisr_socket.close_sockets()
+                except:
+                    pass
+            elif self.network_type == "Meshtastic":
+                await self.hiprfisr_socket.disconnect()
 
 
     async def heartbeat_loop(self):
@@ -798,6 +804,12 @@ class SensorNode(object):
                 except Exception:
                     pass
                     # self.hiprfisr_connected = False
+            
+            elif self.network_type == "Meshtastic":
+                try:
+                    await self.send_heartbeat()
+                except Exception:
+                    pass
 
             # 2. RECEIVE heartbeat from HIPRFISR
             try:
@@ -831,15 +843,35 @@ class SensorNode(object):
         self.logger.info("=== STARTING SENSOR NODE ===")
 
         # Connect to HIPRFISR (HB + MSG channels)
-        ok = await self.hiprfisr_socket.connect(self.hiprfisr_address)
+        if self.network_type == "IP":
+            ok = await self.hiprfisr_socket.connect(self.hiprfisr_address)
 
-        if ok:
-            self.logger.info(
-                f"Connected to HIPRFISR @ {self.hiprfisr_address}"
-            )
-            await asyncio.sleep(0.1)  # For ZMQ handshake to complete
+            if ok:
+                self.logger.info(
+                    f"Connected to HIPRFISR @ {self.hiprfisr_address}"
+                )
+                await asyncio.sleep(0.1)  # For ZMQ handshake to complete
+            else:
+                self.logger.error("FAILED connecting to HIPRFISR")
+                return
+        elif self.network_type == "Meshtastic":
+            try:
+                serial_port = self.pending_meshtastic_params["serial_port"]
+                self.hiprfisr_socket = fissure.comms.FissureMeshtasticNode(
+                    serial_port,
+                    self.pending_meshtastic_params["name"],
+                    self.pending_meshtastic_params["context"],
+                )
+                self.logger.info(
+                    f"Connected to Meshtastic serial port: {serial_port}"
+                )
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to initialize Meshtastic on {serial_port}: {e}"
+                )
+                return
         else:
-            self.logger.error("FAILED connecting to HIPRFISR")
+            self.logger.error("Unknown network type. Enter IP or Meshtastic in node YAML config file.")
             return
         
         # Start Heartbeat Loop
@@ -942,7 +974,7 @@ class SensorNode(object):
         """
         Sends a heartbeat to HIPRFISR (ROUTER) using the router identity.
         """
-        if self.network_type != "IP":
+        if self.network_type != "IP" and self.network_type != "Meshtastic":
             return
 
         now = time.time()
@@ -954,23 +986,41 @@ class SensorNode(object):
 
         # Build the message
         nickname = self.settings_dict.get("Sensor Node", {}).get("nickname", "-")
-        hb = {
-            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: fissure.comms.MessageFields.HEARTBEAT,
-            fissure.comms.MessageFields.TIME: now,
-            fissure.comms.MessageFields.IP: self.ip_address,
-            fissure.comms.MessageFields.INTERVAL: self.heartbeat_interval,  # TODO: Get other components to send their interval? Update MessageTypes
+        if self.network_type == "IP":
+            hb = {
+                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: fissure.comms.MessageFields.HEARTBEAT,
+                fissure.comms.MessageFields.TIME: now,
+                fissure.comms.MessageFields.IP: self.ip_address,
+                fissure.comms.MessageFields.INTERVAL: self.heartbeat_interval,  # TODO: Get other components to send their interval? Update MessageTypes
 
-            fissure.comms.MessageFields.PARAMETERS: {
-                # "uuid": self.uuid,           # stable node uuid (the KEY in HIPRFISR)
-                "network_type": self.network_type,
-                "nickname": nickname,
-                # "socket_id": self.socket_id  # Gets detected by the ZMQ ROUTER/Receiver
-                #"settings": {} #self.settings_dict["Sensor Node"], On recall settings
+                fissure.comms.MessageFields.PARAMETERS: {
+                    "network_type": self.network_type,
+                    "nickname": nickname,
+                    # "uuid": self.uuid,           # stable node uuid (the KEY in HIPRFISR)
+                    # "socket_id": self.socket_id  # Gets detected by the ZMQ ROUTER/Receiver
+                    # "settings": {} #self.settings_dict["Sensor Node"], On recall settings
+                }
             }
-        }      
+            await self.hiprfisr_socket.send_heartbeat(hb)
 
-        await self.hiprfisr_socket.send_heartbeat(hb)
+        elif self.network_type == "Meshtastic":
+            PARAMETERS = {
+                "msg": [
+                    self.assigned_id,
+                    self.heartbeat_interval,
+                    nickname,
+                    now,
+                ]
+            }
+            heartbeat_message = {
+                fissure.comms.MessageFields.SOURCE: self.uuid,  # Nodes always send the UUID and not the assigned ID/identifier
+                fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,  # TODO: obtain HIPRFISR ID some other way
+                fissure.comms.MessageFields.MESSAGE_NAME: "recvMeshtasticHeartbeatsLT",
+                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+            await self.hiprfisr_socket.send_heartbeat(heartbeat_message)
+
         self.heartbeats["self"] = now
         self.logger.debug(f"Sent heartbeat at {now}")
 
@@ -3099,7 +3149,7 @@ class SensorNode(object):
             elif self.network_type == "Meshtastic":
                 PARAMETERS = {
                     "msg": [
-                        self.identifier,
+                        self.uuid,
                         self.gps_position['latitude'],
                         self.gps_position['longitude'],
                         self.gps_position['altitude'],
@@ -3108,7 +3158,8 @@ class SensorNode(object):
                     ]
                 }
                 msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                    fissure.comms.MessageFields.SOURCE: self.assigned_id,
+                    fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,  # TODO: obtain HIPRFISR ID some other way
                     fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdateLT",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }

@@ -49,60 +49,6 @@ async def main():
     fissure.utils.zmq_cleanup()
 
 
-class SensorNode:
-    listener: fissure.comms.Listener
-    connected: bool
-    uuid: str
-    last_heartbeat: float  # FIX: Use this or self.heartbeats?
-    terminated: bool
-    plugins: list = []
-
-
-    def __init__(self, connection_type="IP", serial_port=None, name=None, context=None):
-        """
-        Initialize Listener
-        """
-        # self.listener = fissure.comms.Listener(zmq.PAIR, name=f"{fissure.comms.Identifiers.HIPRFISR}::sensor_node")
-        self.connected = False
-        self.uuid = ""
-        self.last_heartbeat = 0
-        self.terminated = False
-        self.connection_type = connection_type
-
-        if connection_type == "IP":
-            self.listener = fissure.comms.Listener(
-                zmq.PAIR, name=f"{fissure.comms.Identifiers.HIPRFISR}::sensor_node"
-            )
-        elif connection_type == "Meshtastic":
-            if serial_port is None or context is None:
-                raise ValueError("Meshtastic connection requires a serial port and context")
-
-            self.listener = fissure.comms.FissureMeshtasticNode(serial_port, name, context)
-
-
-    async def close(self):
-        """
-        Needed to use async close functions.
-        """
-        if hasattr(self, "listener") and self.listener is not None:
-            if self.connection_type == "IP":
-                self.listener.shutdown()
-            elif self.connection_type == "Meshtastic":
-                await self.listener.disconnect()
-
-
-    def __del__(self):
-        """
-        Cleanup on GC
-        """
-        pass
-        # if hasattr(self, "listener") and self.listener is not None:
-        #     if self.connection_type == "IP":
-        #         self.listener.shutdown()
-        #     elif self.connection_type == "Meshtastic":
-        #         self.listener.disconnect()
-
-
 class HiprFisr:
     """Fissure HIPRFISR Class"""
 
@@ -120,7 +66,7 @@ class HiprFisr:
     tsi_connected: bool
     pd_id: bytes
     pd_connected: bool
-    sensor_nodes: List[SensorNode]
+    # sensor_nodes: List[SensorNode]
     local_plugins: List[str] = []
     heartbeats: Dict[str, Union[float, Dict[int, float]]]  # {name: time, name: time, ... sensor_nodes: {node_id: time}}
     callbacks: Dict = {}
@@ -176,9 +122,11 @@ class HiprFisr:
         self.connect_loop = True
         self.child_tasks = []
         self.sockets = []
+        self.hiprfisr_serial_connected = False
 
         self.nodes = {}
         self.dashboard_node_map = [None] * 5
+        self.assigned_id_counter = 1  # TODO: make this persist, saving itself when updated
 
         # Load settings from Fissure Config YAML
         self.settings = fissure.utils.get_fissure_config()
@@ -202,7 +150,7 @@ class HiprFisr:
 
         # Create the HIPRFISR ZMQ Nodes
         listen_addr = self.initialize_comms(address)
-        self.initialize_sensor_nodes()
+        # self.initialize_sensor_nodes()
         self.message_counter = 0
         self.shutdown = False
 
@@ -266,138 +214,29 @@ class HiprFisr:
             self.logger.info("Sensor Node IPC endpoints bound successfully")
         except Exception as e:
             self.logger.warning(f"Could not bind IPC endpoints: {e}")
+        
+        # 4) Auto-connect to Meshtastic serial port
+        mesh_cfg = self.settings.get("meshtastic", {}) or {}
+        if mesh_cfg.get("auto_connect_meshtastic"):
+            serial_port = mesh_cfg.get("meshtastic_serial_port")
+            if serial_port:
+                try:
+                    self.meshtastic_node = fissure.comms.FissureMeshtasticNode(
+                        serial_port=serial_port,
+                        name=f"{self.identifier}::meshtastic",
+                        context=self,   # <- where .callbacks lives
+                    )
+                    self.hiprfisr_serial_connected = True
+                    self.logger.info(
+                        f"Meshtastic auto-connect enabled, using serial port {serial_port}"
+                    )
+                    self.meshtastic_node.assigned_id = self.identifierLT
+                except Exception as e:
+                    self.logger.warning(
+                        f"Failed to initialize Meshtastic on {serial_port}: {e}"
+                    )
 
         return frontend_address
-
-
-    def initialize_sensor_nodes(self):
-        """
-        Initialize Sensor Node Listeners, Heartbeats, etc
-        """
-        self.sensor_nodes = []
-        for n in range(0,5):
-            # self.sensor_nodes.append(SensorNode())
-            self.sensor_nodes.append(None)
-
-    
-    async def reset_sensor_node_listener(self, sensor_node_index=0, connection_type="IP", **kwargs):
-        """
-        Resets the Sensor Node slot entry for HIPRFISR.
-        This version matches the PD/TSI model:
-        - HIPRFISR does NOT create per-node DEALER sockets.
-        - The ROUTER handles all inbound/outbound messages.
-        - UUID is assigned on first message from the Sensor Node.
-        """
-
-        # -----------------------------------------------------
-        # 1. Clear old entry
-        # -----------------------------------------------------
-        self.sensor_nodes[sensor_node_index] = None
-
-        # -----------------------------------------------------
-        # 2. Build a fresh slot entry
-        # -----------------------------------------------------
-        class SensorNodeEntry:
-            pass
-
-        entry = SensorNodeEntry()
-
-        # General per-node state
-        entry.UUID = None             # assigned after first ROUTER message
-        entry.connected = False       # becomes True once UUID is registered
-        entry.terminated = False
-        entry.heartbeat_time = None   # last heartbeat timestamp
-
-        # Store entry and return
-        self.sensor_nodes[sensor_node_index] = entry
-        return entry
-
-
-    async def disconnectSensorNode(self, sensor_node_id: int, delete_node: bool = False):
-        """
-        Fully tear down a Sensor Node’s ROUTER/DEALER connection.
-        Called internally by disconnectFromSensorNode().
-
-        Handles:
-        - heartbeat clearing
-        - DEALER socket shutdown
-        - ZMQ context cleanup
-        - slot removal (optional)
-        """
-
-        node = self.sensor_nodes[sensor_node_id]
-
-        if node is None:
-            return
-
-        # ---------------------------------------------------------
-        # 1. Stop connection flags
-        # ---------------------------------------------------------
-        node.connected = False
-        node.terminated = True
-
-        # ---------------------------------------------------------
-        # 2. Remove heartbeat record
-        # ---------------------------------------------------------
-        try:
-            self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][sensor_node_id] = None
-        except Exception:
-            pass
-
-        # ---------------------------------------------------------
-        # 3. Shutdown DEALER socket
-        # ---------------------------------------------------------
-        listener = getattr(node, "listener", None)
-
-        if listener:
-            try:
-                listener.terminated = True
-            except:
-                pass
-
-            # Close ZMQ DEALER socket
-            try:
-                listener.shutdown()
-            except:
-                pass
-
-            # Destroy its private ZMQ context if present
-            if hasattr(listener, "ctx") and listener.ctx:
-                try:
-                    listener.ctx.term()
-                except:
-                    pass
-
-            node.listener = None
-
-        # ---------------------------------------------------------
-        # 4. Delete node slot or leave empty
-        # ---------------------------------------------------------
-        if delete_node:
-            self.sensor_nodes[sensor_node_id] = None
-
-            # Shift all later nodes up one slot
-            for i in range(sensor_node_id, len(self.sensor_nodes) - 1):
-                self.sensor_nodes[i] = self.sensor_nodes[i + 1]
-                self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][i] = \
-                    self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][i + 1]
-
-            # Clear last slot
-            self.sensor_nodes[-1] = None
-            self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][-1] = None
-
-        # ---------------------------------------------------------
-        # 5. Final dashboard notification
-        # ---------------------------------------------------------
-        if self.dashboard_connected:
-            msg = {
-                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                fissure.comms.MessageFields.MESSAGE_NAME: "componentDisconnected",
-                fissure.comms.MessageFields.PARAMETERS: str(sensor_node_id),
-            }
-            await self.dashboard_socket.send_msg(
-                fissure.comms.MessageTypes.COMMANDS, msg
-            )
 
 
     def register_callbacks(self, ctx: ModuleType):
@@ -764,6 +603,17 @@ class HiprFisr:
                     await self.dashboard_socket.send_msg(
                         fissure.comms.MessageTypes.STATUS, msg
                     )
+                       
+                    # Send Meshtastic auto-connect serial connected message
+                    if self.hiprfisr_serial_connected:
+                        PARAMETERS = None  #{"component_name": sensor_node_id}
+                        msg = {
+                            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                            fissure.comms.MessageFields.MESSAGE_NAME: "hiprfisrConnectedSerial",
+                            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                        }
+                        await self.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
                     self.connect_loop = False
 
             # Headless/remote Dashboard
@@ -1102,7 +952,7 @@ class HiprFisr:
                 # )
 
         # ---------------------------------------------------
-        # Sensor Node heartbeat handling (NEW CLEAN FUNCTION)
+        # Sensor Node heartbeat handling (IP-only)
         # ---------------------------------------------------
         await self.recv_sensor_node_heartbeats()
 
@@ -1123,8 +973,6 @@ class HiprFisr:
                 f"({fissure.utils.get_timestamp(hb.get('Time'))})"
             )
 
-        node_list = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
-
         for hb in hbs:
             sn_time = float(hb.get(fissure.comms.MessageFields.TIME))
             sn_int  = hb.get(fissure.comms.MessageFields.INTERVAL, 5)
@@ -1135,110 +983,190 @@ class HiprFisr:
             sn_nickname  = params.get("nickname", "-")
             sn_nettype   = params.get("network_type", "IP")
             sn_id_zmq    = hb.get(fissure.comms.MessageFields.SENDER_ID) # sensor-node-sensor node f8be9c34-39dbbc90-32e1-43ea-b0ce-f4729ab2e3a5
+            sn_assigned_id = -1  # For Meshtastic handshake
 
-            if not sn_uuid:
-                self.logger.error("Heartbeat missing UUID — ignoring.")
-                continue
+            await self.node_heartbeat_updates(sn_time, sn_int, sn_uuid, sn_ip, sn_nickname, sn_nettype, sn_id_zmq, sn_assigned_id)
 
-            # ---------------------------------------------------------
-            # Use UUID as the ONLY dictionary key
-            # ---------------------------------------------------------
-            # LOOKUP BY UUID (correct)
-            node = self.nodes.get(sn_uuid)
-            callsign_prefix = self.settings.get("callsign_prefix", "FTN")
 
-            if node is None:
-                # CREATE NEW NODE ENTRY (keyed by UUID — correct)
-                callsign_prefix = self.settings.get("callsign_prefix", "FTN")
-                node = {
-                    "uuid": sn_uuid,
-                    "identity": sn_id_zmq,          # router identity
-                    "callsign": callsign_prefix + "-" + sn_nickname,
-                    "ip": sn_ip,
-                    "network_type": sn_nettype,
-                    "nickname": sn_nickname,
-                    "settings": {},             # settings returned only when requested
-                    "last_seen": sn_time,
-                    "interval": sn_int,
-                    "connected": True,
-                }
-                self.nodes[sn_uuid] = node
-            else:
-                # UPDATE EXISTING NODE           
-                node["identity"]     = sn_id_zmq
-                node["callsign"]     = callsign_prefix + "-" + sn_nickname
-                node["ip"]           = sn_ip
-                node["network_type"] = sn_nettype
-                node["nickname"]     = sn_nickname
-                node["last_seen"]    = sn_time
-                node["interval"]     = sn_int
-                node["connected"]    = True
+    async def node_heartbeat_updates(self, sn_time, sn_int, sn_uuid, sn_ip, sn_nickname, sn_nettype, sn_id_zmq, sn_assigned_id: int):
+        """
+        """
+        # Validate input variables
+        if not sn_uuid:
+            self.logger.error("Heartbeat missing UUID — ignoring.")
+            return
+        
+        try:
+            sn_assigned_id = int(sn_assigned_id)
+        except (ValueError, TypeError):
+            sn_assigned_id = 0
 
-            # ---------------------------------------------------------
-            # AUTO-SELECT LOCAL SENSOR NODE (UUID match)
-            # ---------------------------------------------------------
-            if sn_uuid == self.local_node_uuid and sn_uuid not in self.dashboard_node_map:
+        callsign_prefix = self.settings.get("callsign_prefix", "FTN")
 
-                self.logger.info(f"[LOCAL NODE] Auto-selecting UUID {sn_uuid}")
+        # ---------------------------------------------------------
+        # LOOKUP NODE BY UUID
+        # ---------------------------------------------------------
+        node = self.nodes.get(sn_uuid)
+        is_new_node = node is None
 
-                # Find free dashboard slot (0-4)
-                dashboard_node_index = None
-                for idx, entry in enumerate(self.dashboard_node_map):
-                    if entry is None:
-                        dashboard_node_index = idx
-                        break
+        # ---------------------------------------------------------
+        # HANDLE ASSIGNED ID LOGIC
+        # ---------------------------------------------------------
+        final_assigned_id = None
 
-                if dashboard_node_index is None:
-                    self.logger.warning("[LOCAL NODE] No free dashboard slots — skipping auto-select.")
+        if sn_nettype == "IP":
+            # IP nodes do not participate in the short-ID scheme
+            final_assigned_id = -1
+
+        else:  # Meshtastic ID-handling logic
+            if is_new_node:
+                # ---------------------------
+                # FIRST TIME SEEING THIS UUID
+                # ---------------------------
+                if sn_assigned_id == 0:
+
+                    # Fresh registration request → assign a new one
+                    final_assigned_id = self.assigned_id_counter
+                    self.assigned_id_counter += 1
+
+                    # We must send the handshake message
+                    send_handshake = True
+
                 else:
-                    # Assign UUID into that slot
-                    self.dashboard_node_map[dashboard_node_index] = sn_uuid
+                    # Hub reboot recovery → accept the node's stored ID
+                    final_assigned_id = sn_assigned_id
+                    self.assigned_id_counter = max(self.assigned_id_counter, sn_assigned_id + 1)
+                    send_handshake = False
 
-                    # Perform the callback that configures node settings etc.
-                    cb = self.callbacks.get("nodeSelectIP")
-                    if cb:
-                        await cb(self, dashboard_node_index, sn_uuid)
+            else:
+                # ---------------------------
+                # EXISTING NODE (UUID known)
+                # ---------------------------
+                stored_id = node.get("assigned_id", 0)
+
+                if sn_assigned_id == 0:
+                    # Node reboot OR stale 0 message → keep stored ID
+                    final_assigned_id = stored_id
+                    send_handshake = True
+
+                else:
+                    # Node claims an ID
+                    # If stored_id is >0, we keep that (stale protection)
+                    # If stored_id is 0, accept the node’s value
+                    if stored_id > 0:
+                        final_assigned_id = stored_id
                     else:
-                        self.logger.error("nodeSelectIP callback not registered!")
+                        final_assigned_id = sn_assigned_id
 
-            # ---------------------------------------------------------
-            # Maintain heartbeat slot table (still uses identity)
-            # ---------------------------------------------------------
-            slot_index = None
+                    self.assigned_id_counter = max(self.assigned_id_counter, final_assigned_id + 1)
+                    send_handshake = False
 
-            # Existing slot
+        # ---------------------------------------------------------
+        # CREATE OR UPDATE NODE ENTRY
+        # ---------------------------------------------------------
+        if is_new_node:
+            node = {
+                "uuid": sn_uuid,
+                "identity": sn_id_zmq,
+                "callsign": f"{callsign_prefix}-{sn_nickname}",
+                "ip": sn_ip,
+                "network_type": sn_nettype,
+                "nickname": sn_nickname,
+                "settings": {},
+                "last_seen": sn_time,
+                "interval": sn_int,
+                "connected": True,
+                "assigned_id": final_assigned_id,
+            }
+            self.nodes[sn_uuid] = node
+
+            # print("created new entry")
+
+        else:
+            node["identity"]     = sn_id_zmq
+            node["callsign"]     = f"{callsign_prefix}-{sn_nickname}"
+            node["ip"]           = sn_ip
+            node["network_type"] = sn_nettype
+            node["nickname"]     = sn_nickname
+            node["last_seen"]    = sn_time
+            node["interval"]     = sn_int
+            node["connected"]    = True
+            node["assigned_id"]  = final_assigned_id
+
+            # print("updated existing entry")
+
+        # ---------------------------------------------------------
+        # SEND HANDSHAKE MESSAGE IF NEEDED (Meshtastic only)
+        # ---------------------------------------------------------
+        if sn_nettype != "IP" and send_handshake:
+            PARAMETERS = {"assigned_id": final_assigned_id}
+
+            msg = {
+                fissure.comms.MessageFields.SOURCE: self.identifierLT,
+                fissure.comms.MessageFields.DESTINATION: sn_uuid,
+                fissure.comms.MessageFields.MESSAGE_NAME: "completeMeshtasticHandshakeLT",
+                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+
+            await self.meshtastic_node.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+            # print(f"Handshake sent → assigned_id={final_assigned_id}")
+
+        # ---------------------------------------------------------
+        # AUTO-SELECT LOCAL SENSOR NODE (UUID match)
+        # ---------------------------------------------------------
+        if sn_uuid == self.local_node_uuid and sn_uuid not in self.dashboard_node_map:
+
+            self.logger.info(f"[LOCAL NODE] Auto-selecting UUID {sn_uuid}")
+
+            # Find free dashboard slot (0-4)
+            dashboard_node_index = None
+            for idx, entry in enumerate(self.dashboard_node_map):
+                if entry is None:
+                    dashboard_node_index = idx
+                    break
+
+            if dashboard_node_index is None:
+                self.logger.warning("[LOCAL NODE] No free dashboard slots — skipping auto-select.")
+            else:
+                # Assign UUID into that slot
+                self.dashboard_node_map[dashboard_node_index] = sn_uuid
+
+                # Perform the callback that configures node settings etc.
+                cb = self.callbacks.get("nodeSelectIP")
+                if cb:
+                    await cb(self, dashboard_node_index, sn_uuid)
+                else:
+                    self.logger.error("nodeSelectIP callback not registered!")
+
+        # ---------------------------------------------------------
+        # Maintain heartbeat slot table (still uses identity)
+        # ---------------------------------------------------------
+        slot_index = None
+        node_list = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
+
+        # Existing slot
+        for idx, entry in enumerate(node_list):
+            if entry and entry.get("uuid") == sn_uuid:
+                slot_index = idx
+                break
+
+        # Free slot
+        if slot_index is None:
             for idx, entry in enumerate(node_list):
-                if entry and entry.get("uuid") == sn_uuid:
+                if entry is None:
                     slot_index = idx
                     break
 
-            # Free slot
-            if slot_index is None:
-                for idx, entry in enumerate(node_list):
-                    if entry is None:
-                        slot_index = idx
-                        break
+        if slot_index is None:
+            self.logger.error(f"No free heartbeat slots for sensor node identity={sn_id_zmq}")
+            return
 
-            if slot_index is None:
-                self.logger.error(f"No free heartbeat slots for sensor node identity={sn_id_zmq}")
-                continue
-
-            node_list[slot_index] = {
-                "uuid": sn_uuid,
-                "identity": sn_id_zmq,
-                "time": sn_time,
-                "interval": sn_int,
-            }
-
-            # ---------------------------------------------------------
-            # Update sensor_nodes slot state (unchanged behavior)
-            # ---------------------------------------------------------
-            if slot_index < len(self.sensor_nodes):
-                sn_entry = self.sensor_nodes[slot_index]
-                if sn_entry:
-                    sn_entry.connected = True
-                    sn_entry.terminated = False
-                    sn_entry.heartbeat_time = sn_time
+        node_list[slot_index] = {
+            "uuid": sn_uuid,
+            "identity": sn_id_zmq,
+            "time": sn_time,
+            "interval": sn_int,
+        }
 
 
     async def check_heartbeats(self):
@@ -1330,6 +1258,11 @@ class HiprFisr:
         # Sensor Node checks
         # -----------------------------------------------------------------
         for uuid, node in list(self.nodes.items()):
+            # Do not track Meshtastic nodes (heartbeat intervals can vary among nodes)
+            if node["network_type"] == "Meshtastic":
+                continue
+
+            # Calculate
             last_seen = node["last_seen"]
             interval = node.get("interval", global_interval)
             cutoff = current_time - (interval * failure_multiple)
@@ -1381,6 +1314,32 @@ class HiprFisr:
             return None, None
 
         return uuid, identity
+    
+
+    def resolve_node_assigned_id(self, dashboard_index: int):
+        """
+        Given a dashboard node index (0-4), return (uuid, assigned_id) for the
+        corresponding sensor node, or (None, None) if not available.
+        """
+        # 1) Validate dashboard_index → UUID
+        uuid = self.dashboard_node_map[int(dashboard_index)]
+        if uuid is None:
+            self.logger.error(f"[resolve] No node assigned to dashboard index {dashboard_index}")
+            return None, None
+
+        # 2) Validate UUID exists in self.nodes
+        node_entry = self.nodes.get(uuid)
+        if not node_entry:
+            self.logger.error(f"[resolve] No node entry found for uuid {uuid}")
+            return None, None
+
+        # 3) Extract ROUTER identity
+        assigned_id = node_entry.get("assigned_id")
+        if not assigned_id:
+            self.logger.error(f"[resolve] UUID {uuid} has no assigned ID")
+            return None, None
+
+        return uuid, assigned_id
 
 
     def resolve_dashboard_target(self, uuid: str):
@@ -1404,6 +1363,31 @@ class HiprFisr:
         self.logger.warning(f"[resolve] UUID {uuid} is not assigned to any dashboard index")
         return node, None
 
+
+    def resolve_uuid_from_assigned_id(self, assigned_id: int):
+        """
+        Given an assigned_id, return the corresponding UUID and node entry.
+
+        Returns:
+            (uuid, node_entry)
+            OR (None, None) if no node has this assigned_id.
+        """
+        # Normalize assigned_id (handle strings, None, etc.)
+        try:
+            assigned_id = int(assigned_id)
+        except (ValueError, TypeError):
+            self.logger.error(f"[resolve] Invalid assigned_id={assigned_id}")
+            return None, None
+
+        # Search self.nodes (keyed by UUID)
+        for uuid, node in self.nodes.items():
+            if node.get("assigned_id") == assigned_id:
+                return uuid, node
+
+        # Not found
+        self.logger.warning(f"[resolve] No node found with assigned_id={assigned_id}")
+        return None, None
+    
 
     async def updateLoggingLevels(self, new_console_level="", new_file_level=""):
         """Update the logging levels on the HIPRFISR and forward to all components."""
@@ -1601,11 +1585,11 @@ class HiprFisr:
         return self.plugin_editor.get_protocol_parameters(protocol_name)
     
 
-    def sensorNodeCleanup(self, sensor: SensorNode):
-        """
-        Closes SensorNode object on exit.
-        """
-        asyncio.run(sensor.close())
+    # def sensorNodeCleanup(self, sensor: SensorNode):
+    #     """
+    #     Closes SensorNode object on exit.
+    #     """
+    #     asyncio.run(sensor.close())
 
 
     async def send_cot(self, uid, callsign, lat, lon, alt, time, remarks, type:str="a-f-G-U-H"):

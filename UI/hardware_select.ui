@@ -167,7 +167,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_48">
        <widget class="QPushButton" name="pushButton_node_select_1">
@@ -233,6 +233,11 @@
         <column>
          <property name="text">
           <string>Nickname</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Assigned ID</string>
          </property>
         </column>
         <column>
@@ -1087,7 +1092,7 @@ p, li { white-space: pre-wrap; }
            </rect>
           </property>
           <property name="text">
-           <string>Disconnect</string>
+           <string>BAD Disconnect</string>
           </property>
          </widget>
         </widget>
@@ -2922,7 +2927,7 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_50">
        <widget class="QPushButton" name="pushButton_node_refresh_2">
@@ -5691,7 +5696,7 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_52">
        <widget class="QPushButton" name="pushButton_node_refresh_3">
@@ -8460,7 +8465,7 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_54">
        <widget class="QPushButton" name="pushButton_node_refresh_4">
@@ -11251,7 +11256,7 @@ p, li { white-space: pre-wrap; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_56">
        <widget class="QPushButton" name="pushButton_node_refresh_5">

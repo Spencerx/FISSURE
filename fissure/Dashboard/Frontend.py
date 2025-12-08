@@ -161,6 +161,7 @@ class Dashboard(QtWidgets.QMainWindow):
         self.ui.tabWidget_library.setCurrentIndex(0)
 
         # Auto Connect HIPRFISR
+        self.hiprfisr_serial_connected = False
         self.active_sensor_node = -1  # Needed for Plugin Loading
         if self.backend.settings["auto_connect_hiprfisr"] == True:
             self.window.actionAuto_Connect_HIPRFISR.setChecked(True)

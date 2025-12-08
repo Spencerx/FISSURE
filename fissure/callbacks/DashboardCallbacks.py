@@ -313,38 +313,49 @@ async def componentConnected(component: object, component_name=""):
         component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id, serial=False)
 
 
-async def componentConnectedSerial(component: object, component_name=""):
+
+async def hiprfisrDisconnectedSerial(component: object):
     """
-    Update the Sensor Node Configuration window on connection to serial port but not the status bar until heartbeats arrive.
+    Keeps track if the Meshtastic serial port at the HIPRFISR is disconnected.
     """
-    if component_name == fissure.comms.Identifiers.PD:
-        pass
-    elif component_name == fissure.comms.Identifiers.TSI:
-        pass
-    elif component_name == fissure.comms.Identifiers.DASHBOARD:
-        pass
-    else:
-        # Modify the Button/Stacked Widget
-        try:
-            sensor_node_id = int(component_name)
-        except:
-            return
-        if sensor_node_id == 0:
-            component.frontend.signals.ComponentStatus.emit("Sensor Node 0", True, component.frontend.statusBar())
-            component.sensor_node_connected[0] = True
-        elif sensor_node_id == 1:
-            component.frontend.signals.ComponentStatus.emit("Sensor Node 1", True, component.frontend.statusBar())
-            component.sensor_node_connected[1] = True
-        elif sensor_node_id == 2:
-            component.frontend.signals.ComponentStatus.emit("Sensor Node 2", True, component.frontend.statusBar())
-            component.sensor_node_connected[2] = True
-        elif sensor_node_id == 3:
-            component.frontend.signals.ComponentStatus.emit("Sensor Node 3", True, component.frontend.statusBar())
-            component.sensor_node_connected[3] = True
-        elif sensor_node_id == 4:
-            component.frontend.signals.ComponentStatus.emit("Sensor Node 4", True, component.frontend.statusBar())
-            component.sensor_node_connected[4] = True
-        component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id, serial=True)
+    component.hiprfisr_serial_connected = False
+
+
+async def hiprfisrConnectedSerial(component: object):
+    """
+    Keeps track if the Meshtastic serial port at the HIPRFISR is connected.
+    """
+    component.hiprfisr_serial_connected = True
+
+    # Use the other componentConnected function instead!
+    # if component_name == fissure.comms.Identifiers.PD:
+    #     pass
+    # elif component_name == fissure.comms.Identifiers.TSI:
+    #     pass
+    # elif component_name == fissure.comms.Identifiers.DASHBOARD:
+    #     pass
+    # else:
+    #     # Modify the Button/Stacked Widget
+    #     try:
+    #         sensor_node_id = int(component_name)
+    #     except:
+    #         return
+    #     if sensor_node_id == 0:
+    #         component.frontend.signals.ComponentStatus.emit("Sensor Node 0", True, component.frontend.statusBar())
+    #         component.sensor_node_connected[0] = True
+    #     elif sensor_node_id == 1:
+    #         component.frontend.signals.ComponentStatus.emit("Sensor Node 1", True, component.frontend.statusBar())
+    #         component.sensor_node_connected[1] = True
+    #     elif sensor_node_id == 2:
+    #         component.frontend.signals.ComponentStatus.emit("Sensor Node 2", True, component.frontend.statusBar())
+    #         component.sensor_node_connected[2] = True
+    #     elif sensor_node_id == 3:
+    #         component.frontend.signals.ComponentStatus.emit("Sensor Node 3", True, component.frontend.statusBar())
+    #         component.sensor_node_connected[3] = True
+    #     elif sensor_node_id == 4:
+    #         component.frontend.signals.ComponentStatus.emit("Sensor Node 4", True, component.frontend.statusBar())
+    #         component.sensor_node_connected[4] = True
+    #     component.frontend.popups["HardwareSelectDialog"].sensorNodeConnected(tab_index=sensor_node_id, serial=True)
 
 
 async def bandID_Return(component: object, sensor_node_id=0, band_id=0, frequency=0):
@@ -2120,7 +2131,7 @@ async def pingIP_Return(component: object, sensor_node_id:str, ping: str):
     ret = await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(component.frontend.popups["HardwareSelectDialog"], ping)
 
 
-async def nodeRefreshIP_Return(component: object, dashboard_node_index:str, nodes):
+async def nodeRefreshReturn(component: object, dashboard_node_index:str, nodes):
     """
     .
     """
