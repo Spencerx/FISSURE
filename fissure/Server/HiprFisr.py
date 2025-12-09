@@ -750,12 +750,12 @@ class HiprFisr:
             if received is None:
                 return  # socket was shut down
 
-            # print(received)
             sender_id = received.get(fissure.comms.MessageFields.SENDER_ID)
             uuid = received.get(fissure.comms.MessageFields.IDENTIFIER)
             msg_type  = received.get(fissure.comms.MessageFields.TYPE)
             msg_name  = received.get(fissure.comms.MessageFields.MESSAGE_NAME)
             params    = received.get(fissure.comms.MessageFields.PARAMETERS, {})
+
 
             if not uuid:
                 self.logger.warning(
@@ -792,6 +792,7 @@ class HiprFisr:
                         params.setdefault("uuid", uuid)
 
                         await self.sensor_node_router.run_callback(self, received)
+
                 except Exception as e:
                     self.logger.error(
                         f"Callback failed for node uuid={uuid}, msg={msg_name}: {e}"

@@ -59,7 +59,8 @@ async def retrieveDatabaseCache(component: object, refresh_frontend_widgets=Fals
         fissure.comms.MessageFields.MESSAGE_NAME: "retrieveDatabaseCacheReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def addToLibrary(
@@ -262,7 +263,8 @@ async def disconnect(component: object):
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "Disconnect OK",
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.STATUS, ack)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.STATUS, ack)
     component.logger.debug("Dashboard Disconnecting")
     component.dashboard_connected = False
     component.session_active = False
@@ -334,7 +336,8 @@ async def enableDisableListener(component: object, listener_type="", listener_na
         fissure.comms.MessageFields.MESSAGE_NAME: "enableDisableListenerReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def deleteListener(component: object, listener_name=""):
@@ -358,7 +361,8 @@ async def deleteListener(component: object, listener_name=""):
         fissure.comms.MessageFields.MESSAGE_NAME: "deleteListenerReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def pingIP(component: object, sensor_node_id: str):
@@ -394,7 +398,8 @@ async def pingIP(component: object, sensor_node_id: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "pingIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 ##########################################################################
@@ -610,7 +615,8 @@ async def findEntropyReturn(component: object, ents=[]):
         fissure.comms.MessageFields.MESSAGE_NAME: "findEntropyReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def addPubSocket(component: object, ip_address="", port=0):
@@ -678,7 +684,8 @@ async def findPreamblesReturn(component: object, slice_medians, candidate_preamb
         fissure.comms.MessageFields.MESSAGE_NAME: "findPreamblesReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def searchLibraryReturn(component: object, message=[]):
@@ -692,7 +699,8 @@ async def searchLibraryReturn(component: object, message=[]):
         fissure.comms.MessageFields.MESSAGE_NAME: "searchLibraryReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def demodFG_LibrarySearchReturn(component: object, flow_graphs=[]):
@@ -704,7 +712,8 @@ async def demodFG_LibrarySearchReturn(component: object, flow_graphs=[]):
         fissure.comms.MessageFields.MESSAGE_NAME: "demodFG_LibrarySearchReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def bufferSizeReturn(component: object, buffer_size=0):
@@ -718,7 +727,8 @@ async def bufferSizeReturn(component: object, buffer_size=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "bufferSizeReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def sliceByPreambleReturn(component: object, packet_lengths=[], packet_dict={}):
@@ -732,7 +742,8 @@ async def sliceByPreambleReturn(component: object, packet_lengths=[], packet_dic
         fissure.comms.MessageFields.MESSAGE_NAME: "sliceByPreambleReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def foundPreambles(component: object, parameters={}):
@@ -744,7 +755,8 @@ async def foundPreambles(component: object, parameters={}):
         fissure.comms.MessageFields.MESSAGE_NAME: "foundPreambles",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def foundPreamblesInLibrary(component: object, parameters={}):
@@ -756,7 +768,8 @@ async def foundPreamblesInLibrary(component: object, parameters={}):
         fissure.comms.MessageFields.MESSAGE_NAME: "foundPreamblesInLibrary",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 # ############################ To TSI ####################################
@@ -871,7 +884,8 @@ async def conditionerProgressBarReturn(component: object, progress=0, file_index
         fissure.comms.MessageFields.MESSAGE_NAME: "conditionerProgressBarReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def tsiConditionerFinished(component: object, table_strings=[]):
@@ -883,7 +897,8 @@ async def tsiConditionerFinished(component: object, table_strings=[]):
         fissure.comms.MessageFields.MESSAGE_NAME: "tsiConditionerFinished",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def feProgressBarReturn(component: object, progress=0, file_index=0):
@@ -895,7 +910,8 @@ async def feProgressBarReturn(component: object, progress=0, file_index=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "feProgressBarReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def tsiFE_Finished(component: object, table_strings=[]):
@@ -907,7 +923,8 @@ async def tsiFE_Finished(component: object, table_strings=[]):
         fissure.comms.MessageFields.MESSAGE_NAME: "tsiFE_Finished",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 ##########################################################################
@@ -2091,10 +2108,7 @@ async def disconnectFromSensorNode(component, dashboard_index=0, delete_node=Fal
         fissure.comms.MessageFields.PARAMETERS: {"component_name": dashboard_index},
     }
     if component.dashboard_connected:
-        await component.dashboard_socket.send_msg(
-            fissure.comms.MessageTypes.COMMANDS,
-            msg
-        )
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     # 4) Notify Sensor Node (if still reachable)
     if network_type == "IP":
@@ -2534,7 +2548,8 @@ async def refreshSensorNodeFilesResults(
         fissure.comms.MessageFields.MESSAGE_NAME: "refreshSensorNodeFilesResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def autorunPlaylistStarted(component: object, sensor_node_id=0):
@@ -2548,7 +2563,8 @@ async def autorunPlaylistStarted(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistStarted",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def autorunPlaylistFinished(component: object, sensor_node_id=0):
@@ -2562,7 +2578,8 @@ async def autorunPlaylistFinished(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "autorunPlaylistFinished",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphError(component: object, sensor_node_id=0, error=""):
@@ -2576,7 +2593,8 @@ async def flowGraphError(component: object, sensor_node_id=0, error=""):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphError",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def detectorFlowGraphError(component: object, sensor_node_id=0, error=""):
@@ -2590,7 +2608,8 @@ async def detectorFlowGraphError(component: object, sensor_node_id=0, error=""):
         fissure.comms.MessageFields.MESSAGE_NAME: "detectorFlowGraphError",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def archivePlaylistFinished(component: object, sensor_node_id=0):
@@ -2604,7 +2623,8 @@ async def archivePlaylistFinished(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "archivePlaylistFinished",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def archivePlaylistPosition(component: object, sensor_node_id=0, position=0):
@@ -2618,7 +2638,8 @@ async def archivePlaylistPosition(component: object, sensor_node_id=0, position=
         fissure.comms.MessageFields.MESSAGE_NAME: "archivePlaylistPosition",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def multiStageAttackFinished(component: object, sensor_node_id=0):
@@ -2632,7 +2653,8 @@ async def multiStageAttackFinished(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "multiStageAttackFinished",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphFinishedSniffer(component: object, sensor_node_id=0, category=""):
@@ -2646,7 +2668,8 @@ async def flowGraphFinishedSniffer(component: object, sensor_node_id=0, category
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedSniffer",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphFinishedIQ_Inspection(component: object, sensor_node_id=0):
@@ -2660,7 +2683,8 @@ async def flowGraphFinishedIQ_Inspection(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ_Inspection",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphFinishedIQ_Playback(component: object, sensor_node_id=0):
@@ -2674,7 +2698,8 @@ async def flowGraphFinishedIQ_Playback(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ_Playback",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphFinishedIQ(component: object, sensor_node_id=0):
@@ -2688,7 +2713,8 @@ async def flowGraphFinishedIQ(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphFinished(component: object, sensor_node_id=0, category=""):
@@ -2702,7 +2728,8 @@ async def flowGraphFinished(component: object, sensor_node_id=0, category=""):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinished",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphStartedSniffer(component: object, sensor_node_id=0, category=""):
@@ -2716,7 +2743,8 @@ async def flowGraphStartedSniffer(component: object, sensor_node_id=0, category=
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedSniffer",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphStartedIQ_Inspection(component: object, sensor_node_id=0):
@@ -2730,7 +2758,8 @@ async def flowGraphStartedIQ_Inspection(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedIQ_Inspection",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphStartedIQ_Playback(component: object, sensor_node_id=0):
@@ -2744,7 +2773,8 @@ async def flowGraphStartedIQ_Playback(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedIQ_Playback",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphStartedIQ(component: object, sensor_node_id=0):
@@ -2758,7 +2788,8 @@ async def flowGraphStartedIQ(component: object, sensor_node_id=0):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStartedIQ",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def flowGraphStarted(component: object, sensor_node_id=0, category=""):
@@ -2772,7 +2803,8 @@ async def flowGraphStarted(component: object, sensor_node_id=0, category=""):
         fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphStarted",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def recallSettingsReturn(component: object, dashboard_node_index, uuid, settings_dict):
@@ -2786,7 +2818,8 @@ async def recallSettingsReturn(component: object, dashboard_node_index, uuid, se
         fissure.comms.MessageFields.MESSAGE_NAME: "recallSettingsReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg1)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg1)
 
     # Send First Connected Message
     component.dashboard_node_map[int(dashboard_node_index)] = uuid
@@ -2797,7 +2830,8 @@ async def recallSettingsReturn(component: object, dashboard_node_index, uuid, se
         fissure.comms.MessageFields.MESSAGE_NAME: "componentConnected",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg2)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg2)
 
 
 async def hardwareProbeResults(component: object, tab_index=0, output="", height_width=[]):
@@ -2811,7 +2845,8 @@ async def hardwareProbeResults(component: object, tab_index=0, output="", height
         fissure.comms.MessageFields.MESSAGE_NAME: "hardwareProbeResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def hardwareScanResults(component: object, uuid="", hardware_scan_results=[]):
@@ -2830,7 +2865,8 @@ async def hardwareScanResults(component: object, uuid="", hardware_scan_results=
         fissure.comms.MessageFields.MESSAGE_NAME: "hardwareScanResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def hardwareGuessResults(
@@ -2851,7 +2887,8 @@ async def hardwareGuessResults(
         fissure.comms.MessageFields.MESSAGE_NAME: "hardwareGuessResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def bandID_Return(component: object, sensor_node_id=0, band_id=0, frequency=0):
@@ -2864,7 +2901,8 @@ async def bandID_Return(component: object, sensor_node_id=0, band_id=0, frequenc
         fissure.comms.MessageFields.MESSAGE_NAME: "bandID_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def detectorReturn(component: object, frequency_value=0, power_value=0, time_value=0.0):
@@ -2878,7 +2916,8 @@ async def detectorReturn(component: object, frequency_value=0, power_value=0, ti
         fissure.comms.MessageFields.MESSAGE_NAME: "detectorReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def saveFile(component: object, sensor_node_id=0, operation="", filepath="", data=""):
@@ -2899,7 +2938,8 @@ async def saveFile(component: object, sensor_node_id=0, operation="", filepath="
             fissure.comms.MessageFields.MESSAGE_NAME: "flowGraphFinishedIQ",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
-        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        if component.dashboard_connected:
+            await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     elif operation == "Download":
         # Save
@@ -2914,7 +2954,8 @@ async def saveFile(component: object, sensor_node_id=0, operation="", filepath="
                 fissure.comms.MessageFields.MESSAGE_NAME: "fileDownloaded",
                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
-            await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+            if component.dashboard_connected:
+                await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates=""):
@@ -2927,7 +2968,8 @@ async def findGPS_CoordinatesResults(component: object, tab_index=0, coordinates
         fissure.comms.MessageFields.MESSAGE_NAME: "findGPS_CoordinatesResults",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
@@ -2946,7 +2988,8 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
         fissure.comms.MessageFields.MESSAGE_NAME: "alertReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
@@ -2992,7 +3035,8 @@ async def exploit(component: object, sensor_node_id: str, protocol:str, modulati
         fissure.comms.MessageFields.MESSAGE_NAME: "exploitReturn",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def snreport(component: object, sensor_node_id:str, text:str):
@@ -3008,7 +3052,8 @@ async def snreport(component: object, sensor_node_id:str, text:str):
         fissure.comms.MessageFields.MESSAGE_NAME: "snreport",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def gpsBeaconEnableDisableIP_Return(component: object, sensor_node_id:str, gps_tak_beacon_status: bool):
@@ -3025,7 +3070,8 @@ async def gpsBeaconEnableDisableIP_Return(component: object, sensor_node_id:str,
         fissure.comms.MessageFields.MESSAGE_NAME: "gpsBeaconEnableDisableIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def uptimeIP_Return(component: object, sensor_node_id:str, uptime: str):
@@ -3042,7 +3088,8 @@ async def uptimeIP_Return(component: object, sensor_node_id:str, uptime: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "uptimeIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def memoryIP_Return(component: object, sensor_node_id:str, memory: str):
@@ -3059,7 +3106,8 @@ async def memoryIP_Return(component: object, sensor_node_id:str, memory: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "memoryIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def diskIP_Return(component: object, sensor_node_id:str, disk: str):
@@ -3076,7 +3124,8 @@ async def diskIP_Return(component: object, sensor_node_id:str, disk: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "diskIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def cpuIP_Return(component: object, sensor_node_id:str, cpu: str):
@@ -3093,7 +3142,8 @@ async def cpuIP_Return(component: object, sensor_node_id:str, cpu: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "cpuIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def processesIP_Return(component: object, sensor_node_id:str, processes: str):
@@ -3110,7 +3160,8 @@ async def processesIP_Return(component: object, sensor_node_id:str, processes: s
         fissure.comms.MessageFields.MESSAGE_NAME: "processesIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def ifconfigIP_Return(component: object, sensor_node_id:str, ifconfig: str):
@@ -3127,7 +3178,8 @@ async def ifconfigIP_Return(component: object, sensor_node_id:str, ifconfig: str
         fissure.comms.MessageFields.MESSAGE_NAME: "ifconfigIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def iwconfigIP_Return(component: object, sensor_node_id:str, iwconfig: str):
@@ -3144,7 +3196,8 @@ async def iwconfigIP_Return(component: object, sensor_node_id:str, iwconfig: str
         fissure.comms.MessageFields.MESSAGE_NAME: "iwconfigIP_Return",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg) 
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg) 
 
 
 ##########################################################################
@@ -3267,7 +3320,8 @@ async def SOI_Check(component: object, trigger_mode=""):
                     fissure.comms.MessageFields.MESSAGE_NAME: "SOI Chosen",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
-                await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+                if component.dashboard_connected:
+                    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     # SOI quantity reached
     elif trigger_mode == 2:
@@ -3286,7 +3340,8 @@ async def SOI_Check(component: object, trigger_mode=""):
                 fissure.comms.MessageFields.MESSAGE_NAME: "SOI Chosen",
                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
-            await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+            if component.dashboard_connected:
+                await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
     return returned_SOI
 
@@ -3385,7 +3440,8 @@ async def checkPlugin(component: object, sensor_node_id: int):
             fissure.comms.MessageFields.MESSAGE_NAME: "checkSensorNodePluginResults",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
-        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        if component.dashboard_connected:
+            await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def checkSensorNodePluginResults(component: object, sensor_node_id: int, plugin_status: dict):
@@ -3434,7 +3490,8 @@ async def checkSensorNodePluginResults(component: object, sensor_node_id: int, p
     #     fissure.comms.MessageFields.MESSAGE_NAME: "checkSensorNodePluginResults",
     #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     # }
-    # await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    # if component.dashboard_connected:
+        # await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def savePlugin(component: object, plugin_name: str, plugin_data: str):
@@ -3512,7 +3569,8 @@ async def sendPlugin(component: object, plugin_name: str) -> None:
         fissure.comms.MessageFields.MESSAGE_NAME: "savePlugin",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 async def transferPlugins(component: object, sensor_node_id: int, plugin_names: List[str], install: bool=False):
     """Send Plugin to Sensor Node
@@ -3753,7 +3811,8 @@ async def requestPluginsTransferInstall(component: object, sensor_node_id: int, 
         fissure.comms.MessageFields.MESSAGE_NAME: "requestPluginsTransferInstall",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def uninstallPlugins(component: object, sensor_node_id: int, plugin_names: str):
@@ -3855,7 +3914,8 @@ async def requestPluginNamesHiprfisr(component: object):
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginNamesHiprfisr",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def openPluginHiprfisr(component: object, plugin_name: str):
@@ -3880,7 +3940,8 @@ async def openPluginHiprfisr(component: object, plugin_name: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginTableData",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def closePluginHiprfisr(component: object):
@@ -3955,7 +4016,8 @@ async def pluginAddProtocolHiprfisr(component: object, protocol_name: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def pluginSetProtocolParameters(component: object, protocol_name: str, parameters: dict):
@@ -3972,7 +4034,8 @@ async def pluginSetProtocolParameters(component: object, protocol_name: str, par
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def pluginAddProtocolModType(component: object, protocol_name: str, mod_type: str):
@@ -3989,7 +4052,8 @@ async def pluginAddProtocolModType(component: object, protocol_name: str, mod_ty
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def pluginRemoveProtocolModTypes(component: object, protocol_name: str, mod_types: str):
@@ -4006,7 +4070,8 @@ async def pluginRemoveProtocolModTypes(component: object, protocol_name: str, mo
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_types: List[List[str]]):
@@ -4023,7 +4088,8 @@ async def pluginEditProtocolPktTypes(component: object, protocol_name: str, pkt_
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginProtocolParameters",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def plugin_get_operation_parameters(component: object, plugin: str, operation: str):
@@ -4097,7 +4163,8 @@ async def plugin_get_operation_parameters(component: object, plugin: str, operat
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationParameters",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def plugin_get_operations(component: object, plugin: str):
@@ -4138,7 +4205,8 @@ async def plugin_get_operations(component: object, plugin: str):
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperations",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 async def run_plugin_operation(component: object, sensor_node_id: int, plugin: str, operation: str, parameters: dict = {}):
@@ -4492,7 +4560,8 @@ async def pluginOperationStarted(component: object, sensor_node_id: int, operati
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStarted",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 async def pluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
     """Handle Plugin Operation Stopped Event
@@ -4522,4 +4591,5 @@ async def pluginOperationStopped(component: object, sensor_node_id: int, operati
         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStopped",
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
-    await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+    if component.dashboard_connected:
+        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

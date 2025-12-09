@@ -182,8 +182,7 @@ fi
 #        Run the Full Installer        #
 ########################################
 DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-mkdir -p "$DIR/Install_Log"
-LOGFILE="$DIR/Install_Log/installer.log"
+LOGFILE="$DIR/Installer/fissure_install.log"
 
 # Log both bash and python output
 exec > >(tee -a "$LOGFILE") 2>&1

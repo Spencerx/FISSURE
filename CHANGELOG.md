@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-08
+
+Headless HIPRFISR bug fixes.
+
+### Added
+
+- Pull request #103: Fixed sensor node alert sender IP vs. Meshtastic message fields
+- Added fissure_install.log to .gitignore
+- Ignoring unapproved plugins via .gitignore
+
+### Changed
+
+- Renamed installer.log to fissure_install.log and placed in Installer folder during install
+
+### Fixed
+
+- Adding checks for dashboard_connected with the dashboard socket in HIPRFISR code to prevent freezing with headless HIPRFISR
+- Removed creation of Install_Log folder during install
+- Local sensor nodes set their nickname to "Local Sensor Node" in SensorNode.py
+
 ## 2025-12-07
 
 Meshtastic networking overhaul.
