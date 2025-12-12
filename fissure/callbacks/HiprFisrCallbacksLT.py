@@ -418,6 +418,12 @@ async def alertReturnLT(component: object, sensor_node_id=0, alert_text=""):
     """
     Forwards alertReturn Message to the Dashboard.
     """
+    # Classify Signals by Frequency
+    classification_summary = fissure.utils.library.classifyFrequencyFromTextDirect(alert_text)
+    if classification_summary:
+        alert_text = f"{alert_text}\n{classification_summary}"
+    component.logger.info(alert_text)  # TODO: Provide cleaned up console text for alerts
+
     # Forward to Dashboard
     PARAMETERS = {
         "sensor_node_id": sensor_node_id,
@@ -433,7 +439,7 @@ async def alertReturnLT(component: object, sensor_node_id=0, alert_text=""):
     
 async def takPlotLT(component: object, msg=[]):
     """
-    Forwards the GPS coordinate results message to Tak.
+    Forwards CoT messages to TAK.
     """
     uid = str(msg[0])
     lat = float(msg[1])
@@ -443,13 +449,35 @@ async def takPlotLT(component: object, msg=[]):
     remarks = str(msg[5])
     type = str(msg[6]) if len(msg) > 6 else "a-f-G-U-H"
 
+    # TAK times must be ISO-like
     time = time.replace(" ", "T")
     
+    # Apply callsign prefix
     prefix = component.settings['callsign_prefix']
     callsign = f"{prefix}-{uid}"
     uid = callsign
 
-    await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
+    # Classify based on frequency extracted from UID
+    try:
+        freq_text = fissure.utils.common.extractFrequencyFromUID(uid)
+        if freq_text:
+            classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_text)
+
+            # classification_text already looks like:
+            # [Protocol=... | Region=... | Priority=... | Notes=...]
+            if classification_text:
+                remarks = f"{remarks}\n{classification_text}"
+
+    except Exception as e:
+        component.logger.error(f"Frequency classification error in takPlotLT: {e}")
+
+    # Forward to TAK
+    try:
+        await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
+    except Exception as e:
+        component.logger.error(f"Error sending COT to TAK (LT): {e}")
+        tb = traceback.format_exc()
+        component.logger.debug(tb)
     
 
 async def exploitLT(component: object, msg=[]):

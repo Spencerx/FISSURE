@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-12
+
+Simple database frequency lookup for protocols on alerts.
+
+### Added
+
+- Added a frequency_lookup table to the database. Columns: id, freq_low, freq_high, protocol_name, region, priority, notes
+- Created a library utility function (classifyFrequencyFromTextDirect) which takes in text with a frequency unit or alert text following a pattern and returns the first table match in bounds with the highest priority
+- Created a common utility function that converts CoT UID text to a frequency string with a label (extractFrequencyFromUID)
+- Updated these functions to classify signals from frequency: alertReturn, alertReturnLT, takPlot, takPlotLT
+
 ## 2025-12-08
 
 Headless HIPRFISR bug fixes.
