@@ -68,7 +68,7 @@ sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
 
 #sudo python3 -m pip install tensorflow --break-system-packages
-python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
+sudo python3 -m pip install pytak --break-system-packages
 output=$(uname -a); if echo $output | grep -qi "raspi"; then python3 -m pip install tensorflow --break-system-packages; else python3 -m pip install tensorflow_cpu --break-system-packages; fi  # TODO: Fix to work with sudo
 
 sudo apt install -y nodejs npm build-essential libgtk-3-dev libwebkit2gtk-4.0-dev  # netron

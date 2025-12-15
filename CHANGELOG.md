@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-15
+
+Fixing pytak installer and freezing bugs.
+
+### Changed
+
+- Installing pytak with sudo
+- Removed pytak from TAK Server installation across all dependencies
+
+### Fixed
+
+- Adding pytak to the Misc. Dependencies for all operating systems
+- Disabling auto connect to TAK server in the FISSURE config file to prevent freezing without a TAK server
+
 ## 2025-12-12
 
 Simple database frequency lookup for protocols on alerts.
@@ -53,7 +67,7 @@ Meshtastic networking overhaul.
 
 - Removed SensorNode class and associated functions in HiprFisr.py
 - Reworked Meshtastic node registration logic (new vs. existing node behavior)
-- Overhauled heartbeat handling: Meshtastic nodes no longer trated like IP nodes
+- Overhauled heartbeat handling: Meshtastic nodes no longer treated like IP nodes
 - Updated send_msg behavior to use assigned_id instead of legacy identifier
 - Dashboard mapping updated to rely strictly on UUID references
 - Refactored node update paths for consistent state management

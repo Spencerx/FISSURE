@@ -89,6 +89,7 @@ sudo python3 -m pip install geopy --break-system-packages
 sudo python3 -m pip install sounddevice --break-system-packages
 sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
+sudo python3 -m pip install pytak --break-system-packages
 sudo python3 -m pip install tensorflow-cpu --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron

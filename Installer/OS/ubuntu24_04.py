@@ -79,7 +79,7 @@ sudo python3 -m pip install qasync --break-system-packages
 sudo python3 -m pip install pydotplus --break-system-packages
 
 #sudo python3 -m pip install tensorflow_cpu --break-system-packages
-python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
+sudo python3 -m pip install pytak --break-system-packages
 output=$(uname -a); if echo $output | grep -qi "raspi"; then python3 -m pip install tensorflow --break-system-packages; else python3 -m pip install tensorflow_cpu --break-system-packages; fi  # TODO: Fix to work with sudo
 
 #sudo apt-get install -y snapd  # TODO: container fix
@@ -2756,9 +2756,6 @@ else
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
     "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
-    
-    # Install pytak library
-    python3 -m pip install pytak --break-system-packages
     
     # Import webadmin.p12:
 

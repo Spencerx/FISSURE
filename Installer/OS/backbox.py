@@ -66,6 +66,7 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
+sudo python3 -m pip install pytak
 sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron

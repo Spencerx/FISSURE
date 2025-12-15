@@ -68,6 +68,7 @@ sudo python3 -m pip install geopy
 sudo python3 -m pip install sounddevice
 sudo python3 -m pip install qasync
 sudo python3 -m pip install pydotplus
+sudo python3 -m pip install pytak
 sudo python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
@@ -2514,10 +2515,6 @@ if [ -n "$(find . -maxdepth 1 -type d -name 'takserver-docker-*' -print -quit)" 
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'takserver.pem' | head -n 1)" \
     "$(find ~/Installed_by_FISSURE/takserver-docker-*/tak/certs/files/ -name 'webadmin.p12' | head -n 1)" \
     "$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' takserver-5.3-RELEASE-24)"
-
-    # Install pytak library
-    
-    python3 -m pip install pytak
 
     # Import webadmin.p12:
 
