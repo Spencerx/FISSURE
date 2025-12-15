@@ -15,6 +15,7 @@ Fixing pytak installer and freezing bugs.
 - Adding pytak to the Misc. Dependencies for all operating systems
 - Disabling auto connect to TAK server in the FISSURE config file to prevent freezing without a TAK server
 - Unmerging IQEngine and TAK server installer items for Ubuntu 24.04
+- Updating first TAK server connect try in HiprFisr.py so it no longer blocks on auto connect without a reachable TAK server 
 
 ## 2025-12-12
 
