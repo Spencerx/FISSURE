@@ -128,6 +128,14 @@ AIS has published several articles highlighting FISSURE’s applications, update
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
 
+**Updated Node Networking** Nodes automatically connect to the HIPRFISR/hub over IP or Meshtastic and show up in WinTAK.
+
+![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
+
+**Headless HIPRFISR/Hub** The HIPRFISR can be run without the Dashboard using the `fissure-hiprfisr` command with "auto_connect_hiprfisr=false". A remote Dashboard can then be connected to the HIPRFISR over an IP network from the status bar.
+
+![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
+
 **Apptainer Containerization** Run FISSURE inside a lightweight Apptainer container for consistent, portable deployments with full GUI and hardware access.
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
@@ -145,10 +153,6 @@ AIS has published several articles highlighting FISSURE’s applications, update
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
 
 **Attack Alerts, Reports, Exploit Recommendations** Create custom messages from attacks that show up in the Dashboard. Stage new attacks with the return data from a single button click.
-
-![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
-
-**Alert Listeners** for creating backchannels that accept alerts. Includes: folder/file changes, Meshtastic, MQTT, serial, TCP/UDP, website polling, and ZMQ SUB.
 
 ![NEW](https://img.shields.io/badge/NEW-Feature-brightgreen) 
 

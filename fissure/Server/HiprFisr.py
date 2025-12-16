@@ -342,32 +342,38 @@ class HiprFisr:
         tak_port = fissure_config["tak"]["port"]
 
         # ---------------------------------------------------------
-        # AUTO MODE: wait until the server comes up, then connect
+        # AUTO MODE: non-blocking TAK startup
         # ---------------------------------------------------------
         if self.tak_mode == "auto":
-            self.logger.info(f"TAK auto-connect: checking {tak_ip}:{tak_port}")
+            self.logger.info(f"TAK auto-connect enabled → {tak_ip}:{tak_port}")
 
-            while not self.shutdown:
+            async def try_initial_connect():
+                TIMEOUT = 5
                 try:
-                    r, w = await asyncio.open_connection(tak_ip, tak_port)
-                    w.close()
-                    await w.wait_closed()
-                    self.logger.info("TAK server reachable, launching pytak...")
-                    break
-                except:
-                    await asyncio.sleep(1)
+                    await asyncio.wait_for(
+                        asyncio.open_connection(tak_ip, tak_port),
+                        timeout=TIMEOUT
+                    )
+                    self.logger.info("TAK server reachable at startup.")
+                except Exception:
+                    self.logger.warning(
+                        f"TAK server not reachable within {TIMEOUT}s. "
+                        "Continuing startup; pytak will reconnect automatically."
+                    )
 
-            if not self.shutdown:
-                self.tak_task = asyncio.create_task(self.run_tak_loop(tak_config, auto_reconnect=True))
+                # Launch pytak (handles its own reconnection)
+                self.tak_task = asyncio.create_task(
+                    self.run_tak_loop(tak_config, auto_reconnect=True)
+                )
                 self.child_tasks.append(self.tak_task)
 
-        elif self.tak_mode == "manual":
-            self.logger.info("TAK manual mode: waiting for user to connect")
-            # You can trigger manual start later with:
-            # self.tak_task = asyncio.create_task(self.run_tak_loop(tak_config, auto_reconnect=False))
+            # Fire background task without blocking HIPRFISR startup
+            asyncio.create_task(try_initial_connect())
 
+        elif self.tak_mode == "manual":
+            self.logger.info("TAK manual mode: waiting for user input")
         else:
-            self.logger.info("TAK is disabled in config")
+            self.logger.info("TAK disabled in config")
 
         # ---------------------------------------------------------
         # Main HIPRFISR event loop

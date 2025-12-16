@@ -1,6 +1,33 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-15
+
+Fixing pytak installer and freezing bugs.
+
+### Changed
+
+- Installing pytak with sudo
+- Removed pytak from TAK Server installation across all dependencies
+
+### Fixed
+
+- Adding pytak to the Misc. Dependencies for all operating systems
+- Disabling auto connect to TAK server in the FISSURE config file to prevent freezing without a TAK server
+- Unmerging IQEngine and TAK server installer items for Ubuntu 24.04
+- Updating first TAK server connect try in HiprFisr.py so it no longer blocks on auto connect without a reachable TAK server 
+
+## 2025-12-12
+
+Simple database frequency lookup for protocols on alerts.
+
+### Added
+
+- Added a frequency_lookup table to the database. Columns: id, freq_low, freq_high, protocol_name, region, priority, notes
+- Created a library utility function (classifyFrequencyFromTextDirect) which takes in text with a frequency unit or alert text following a pattern and returns the first table match in bounds with the highest priority
+- Created a common utility function that converts CoT UID text to a frequency string with a label (extractFrequencyFromUID)
+- Updated these functions to classify signals from frequency: alertReturn, alertReturnLT, takPlot, takPlotLT
+
 ## 2025-12-08
 
 Headless HIPRFISR bug fixes.
@@ -42,7 +69,7 @@ Meshtastic networking overhaul.
 
 - Removed SensorNode class and associated functions in HiprFisr.py
 - Reworked Meshtastic node registration logic (new vs. existing node behavior)
-- Overhauled heartbeat handling: Meshtastic nodes no longer trated like IP nodes
+- Overhauled heartbeat handling: Meshtastic nodes no longer treated like IP nodes
 - Updated send_msg behavior to use assigned_id instead of legacy identifier
 - Dashboard mapping updated to rely strictly on UUID references
 - Refactored node update paths for consistent state management

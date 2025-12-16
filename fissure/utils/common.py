@@ -545,6 +545,51 @@ def get_library_version():
         return "maint-3.10"
 
 
+def extractFrequencyFromUID(uid: str):
+    """
+    Extracts a frequency from a UID such as:
+        FTN-ALERT-311MHz
+        HACKRF-433_MHz
+        SENSOR-908mhz
+        ANYTHING-2412
+
+    Returns a frequency string suitable for classifyFrequencyFromTextDirect(),
+    such as "311 MHz" or "908.4 MHz", or None if not found.
+    """
+
+    import re
+
+    # Normalize UID for easier parsing
+    text = uid.replace("_", " ").replace("-", " ")
+
+    # Look for number + optional decimal + optional unit
+    m = re.search(r"(\d+(\.\d+)?)\s*(MHz|mhz|kHz|khz|Hz|hz)?", text)
+    if not m:
+        return None
+
+    value_str = m.group(1)
+    unit = (m.group(3) or "").lower()
+
+    # If no explicit unit was found, assume MHz for values < 10,000
+    if not unit:
+        if float(value_str) < 10000:
+            unit = "mhz"
+        else:
+            unit = "hz"
+
+    # Normalize unit capitalization and spacing
+    unit_map = {
+        "mhz": "MHz",
+        "khz": "kHz",
+        "hz": "Hz",
+    }
+
+    unit_str = unit_map.get(unit, "MHz")  # default to MHz if unknown
+
+    # Build a frequency string consumable by classifyFrequencyFromTextDirect
+    return f"{value_str} {unit_str}"
+
+
 ############################################# GPS Functions ####################################################
 
 def format_coordinates(lat, lon, format_type):

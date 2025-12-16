@@ -2976,6 +2976,10 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     """
     Forwards alertReturn Message to the Dashboard.
     """
+    # Classify Signals by Frequency
+    classification_summary = fissure.utils.library.classifyFrequencyFromTextDirect(alert_text)
+    if classification_summary:
+        alert_text = f"{alert_text}\n{classification_summary}"
     component.logger.info(alert_text)  # TODO: Provide cleaned up console text for alerts
 
     # Forward to Dashboard
@@ -2994,8 +2998,23 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
 
 async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
     """
-    Forwards the GPS coordinate results message to TAK.
+    Forwards CoT messages to TAK.
     """
+    # Classify based on frequency extracted from UID
+    try:
+        freq_hz = fissure.utils.common.extractFrequencyFromUID(uid)
+        if freq_hz:
+            classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_hz)
+
+            # classification_text is already formatted like:
+            # [Protocol=... | Region=... | Priority=... | Notes=...]
+            if classification_text:
+                remarks = f"{remarks}\n{classification_text}"
+
+    except Exception as e:
+        component.logger.error(f"Frequency classification error in takPlot: {e}")
+
+    # Forward to TAK
     try:
         await component.send_cot(uid, uid, lat, lon, alt, time, remarks, type)
     except Exception as e:
