@@ -9,6 +9,7 @@ References:
 """
 import asyncio
 import csv
+import json
 import logging
 import numpy as np
 import os
@@ -26,20 +27,20 @@ except ImportError:
 
 # add wifi_lib to path and import modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from wifi_lib.query_iface import verify_interface, get_channels
+from wifi_lib.query_iface import verify_interface, get_channels, choose_interface
 from wifi_lib.configure_iface import set_monitor_mode, set_channel
 from wifi_lib.oui import OUILookup, get_vendor_common_name
 
 class OperationMain(Operation):
     """WiFi AP Scanner
     """
-    def __init__(self, dev: str, duration: float = -1, dwell: float = 1, power: float = -100, channels: Union[List[int], None] = None, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
+    def __init__(self, dev: Union[str, None] = None, duration: float = -1, dwell: float = 1, power: float = -100, channels: Union[List[int], None] = None, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
         """
         Initialize the Wifi AP Scanner.
 
         Parameters
         ----------
-        dev : str
+        dev : str, optional
             Network interface to use for scanning (e.g., 'wlan0').
         duration : float, optional
             Duration of the scan in seconds. Default is -1 for indefinite scanning.
@@ -62,6 +63,12 @@ class OperationMain(Operation):
         super().__init__(sensor_node_id=sensor_node_id, logger=logger, alert_callback=alert_callback, tak_cot_callback=tak_cot_callback)
 
         # developer defined init
+        if dev is None:
+            # choose interface
+            dev = choose_interface(logger=self.logger)
+            if dev is None:
+                self.logger.error("No suitable WiFi interface found for scanning.")
+                raise ValueError("No suitable WiFi interface found for scanning.")
         self.dev = dev
         self.duration = float(duration)
         self.dwell = float(dwell)
@@ -80,7 +87,9 @@ class OperationMain(Operation):
             'dev': self.dev
         }
 
-        self.aps = {} # AP table
+        self.ssids = {} # SSID table
+
+        self.artifacts = {} # artifact table
 
         # build tshark command
         self.fields_ordered = [
@@ -181,6 +190,7 @@ class OperationMain(Operation):
         """
         # run end time
         tend = np.inf if self.duration == -1 else time.time() + self.duration
+        self._mac_reported = {}
         while not self._stop:
             for channel in self.channels:
                 # yield event loop and check for stop conditions
@@ -192,13 +202,6 @@ class OperationMain(Operation):
                     # stop scan
                     self.logger.debug("Scan duration reached. Stopping scan...")
                     await self.stop()
-                    return
-
-                # set monitor mode
-                configured = set_monitor_mode(self.dev, raise_error=True, logger=self.logger)
-                if not configured:
-                    self.logger.debug(f"Failed to set monitor mode on interface {self.dev}.")
-                    self.logger.error("Operation environment setup failed.")
                     return
 
                 # set channel
@@ -233,27 +236,65 @@ class OperationMain(Operation):
 
                         # get ssid
                         ssid_raw = row[self.fields.get('ssid')]
-                        if ssid_raw == '<MISSING>' or ssid_raw == '' or ssid_raw is None:
-                            # no ssid
-                            ssid = None
+                        if ssid_raw in ['<MISSING>', '']:
+                            ssid = ssid_raw
+                        elif ssid_raw is None:
+                            ssid = ''
                         else:
                             ssid = ''
                             for i in range(0,len(ssid_raw),2):
                                 ssid += chr(int(ssid_raw[i:i+2], 16))
 
-                        # report AP if beacon or association request
-                        type_subtype = int(row[self.fields.get('type_subtype')], 16)
-                        freq = float(row[self.fields.get('freq')])
+                        # report AP and stations based on frame type/subtype
+                        subtype_idx = self.fields.get('type_subtype')
+                        if subtype_idx is None:
+                            self.logger.debug("type_subtype field index not found; skipping row.")
+                            continue
+                        type_subtype = int(row[subtype_idx], 16)
+                        freq_idx = self.fields.get('freq')
+                        if freq_idx is None:
+                            self.logger.debug("freq field index not found; skipping row.")
+                            continue
+                        freq = float(row[freq_idx])
+                        sa_idx = self.fields.get('sa')
+                        da_idx = self.fields.get('da')
+                        
+                        # Management frames (Type 0)
                         if type_subtype == 8: # beacon
-                            await self.add_ap(ssid, row[self.fields.get('sa')], freq, power)
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='ap')
+                        elif type_subtype == 5: # probe response (from AP)
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='ap')
+                        elif type_subtype == 4: # probe request (from station)
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='station')
                         elif type_subtype == 0: # association request
-                            await self.add_ap(ssid, row[self.fields.get('da')], freq, power)
+                            if da_idx is not None:
+                                await self.add_ap(ssid, row[da_idx], freq, power, emtype='ap')  # DA is AP
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='station')  # SA is station
+                        elif type_subtype == 1: # association response
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='ap')  # SA is AP
+                            if da_idx is not None:
+                                await self.add_ap(ssid, row[da_idx], freq, power, emtype='station')  # DA is station
+                        elif type_subtype == 2: # reassociation request
+                            if da_idx is not None:
+                                await self.add_ap(ssid, row[da_idx], freq, power, emtype='ap')  # DA is AP
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='station')  # SA is station
+                        elif type_subtype == 3: # reassociation response
+                            if sa_idx is not None:
+                                await self.add_ap(ssid, row[sa_idx], freq, power, emtype='ap')  # SA is AP
+                            if da_idx is not None:
+                                await self.add_ap(ssid, row[da_idx], freq, power, emtype='station')  # DA is station
                         else:
-                            self.logger.debug(f"Frame type_subtype {type_subtype} not beacon or association request; skipping.")
+                            self.logger.debug(f"Frame type_subtype {type_subtype} not handled; skipping.")
                 if nrows == 0:
                     self.logger.warning(f"No data captured on channel {channel}.")
 
-    async def add_ap(self, ssid: str, mac: str, freq: float, power: float) -> None:
+    async def add_ap(self, ssid: str, mac: str, freq: float, power: float, emtype: str) -> None:
         """
         Add the AP to the AP table if not already present and report.
 
@@ -262,56 +303,117 @@ class OperationMain(Operation):
         ssid : str
             SSID of the access point.
         mac : str
-            MAC address of the access point.
+            MAC address of the emitter.
         freq : float
-            Frequency of the access point.
+            Frequency of the emitter.
         power : float
-            Signal power of the access point.
+            Signal power of the emitter.
+        emtype : str
+            Type of the emitter (e.g., 'ap' or 'station').
         """
-        if mac == '':
-            self.logger.debug("Empty MAC address received; skipping.")
+        vendor = self.oui_lookup.match(mac)
 
-        elif mac not in self._curr_ap:
-            self._curr_ap.append(mac)
-            vendor = self.oui_lookup.match(mac)
+        # update ssid document
+        self.update_ssid_doc(ssid, mac, freq, power, emtype, vendor)
 
-            # get vendor plain text
-            vendor_plain = get_vendor_common_name(vendor)
+        # check if reported recently
+        if mac in self._mac_reported:
+            last_time = self._mac_reported[mac]
+            if time.time() - last_time < self.dwell:
+                # already reported in this scan cycle
+                self.logger.debug(f"AP with MAC {mac} already reported recently; skipping.")
+                return
+            else:
+                self._mac_reported[mac] = time.time()
+        else:
+            self._mac_reported[mac] = time.time()
 
-            # add to AP table
-            self.aps[mac] = {
-                'vendor': vendor,
-                'vendor_plain': vendor_plain,
+        if ssid is None or ssid == '':
+            ssid = f'{emtype.upper()}_{mac}'
+
+        # send alert
+        await self.alert_callback(self.sensor_node_id, self.opid, f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', logger=self.logger)
+
+        # send tak cot
+        await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=ssid, remarks=f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S', logger=self.logger)
+
+    def update_ssid_doc(self, ssid: str, mac: str, freq: float, power: float, emtype: str, vendor: Union[str, None]) -> None:
+        """
+        Update the SSID document in the database.
+
+        Parameters
+        ----------
+        ssid : str
+            SSID of the access point.
+        mac : str
+            MAC address of the emitter.
+        freq : float
+            Frequency of the emitter (in MHz).
+        power : float
+            Signal power of the emitter (in dBm).
+        emtype : str
+            Type of the emitter ('ap' or 'station').
+        vendor : Union[str, None]
+            Vendor of the emitter.
+        """
+        if ssid not in self.ssids:
+            self.ssids[ssid] = {
                 'ssid': ssid,
-                'stations': {}
+                'aps': [{'mac': mac, 'freq': freq, 'power': power, 'vendor': vendor}] if emtype == 'ap' else [],
+                'stations': [{'mac': mac, 'freq': freq, 'power': power, 'vendor': vendor}] if emtype == 'station' else [],
             }
 
-            if ssid is None or ssid == '':
-                ssid = mac
-
-            # send alert
-            await self.alert_callback(self.sensor_node_id, self.opid, f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', logger=self.logger)
-
-            # send tak cot
-            await self.tak_cot_callback(self.sensor_node_id, self.opid, uid=ssid, remarks=f'Wifi AP vendor "{vendor}" Detected: SSID={ssid} MAC={mac} FREQ={freq}MHz POWER={power}dBm', lat=True, lon=True, alt=True, time=True, type='a-h-G-E-S', logger=self.logger)
+            # create artifact for SSID
+            art_fname = self.artifact_manager.get_filename_for_artifact(self.opid, '.json')
+            with open(art_fname, 'w') as f:
+                json.dump(self.ssids[ssid], f, indent=4)
+            artifact_id = self.create_artifact(art_fname, f'Wifi SSID={ssid}', 'json')
+            self.artifacts[ssid] = artifact_id
 
         else:
-            self.logger.debug(f"AP with MAC {mac} already reported in this scan cycle.")
+            update = False
+            if emtype == 'ap' and mac not in [entry['mac'] for entry in self.ssids[ssid]['aps']]:
+                self.ssids[ssid]['aps'].append({'mac': mac, 'freq': freq, 'power': power, 'vendor': vendor})
+                update = True
+            elif emtype == 'station' and mac not in [entry['mac'] for entry in self.ssids[ssid]['stations']]:
+                self.ssids[ssid]['stations'].append({'mac': mac, 'freq': freq, 'power': power, 'vendor': vendor})
+                update = True
+
+            if update:
+                # update artifact for SSID
+                artid = self.artifacts.get(ssid)
+                if artid is not None:
+                    artifact = self.artifact_manager.get_artifact(artid)
+                    if artifact is None:
+                        self.logger.warning(f"Artifact with ID {artid} not found for SSID {ssid}.")
+
+                    else:
+                        art_fname = artifact.file_path
+                        with open(art_fname, 'w') as f:
+                            json.dump(self.ssids[ssid], f, indent=4)
+                        flag = self.update_artifact(artid)
+                        if not flag:
+                            self.logger.warning(f"Failed to update artifact for SSID {ssid}.")
+                else:
+                    self.logger.warning(f"No artifact found for SSID {ssid} to update.")
+
+        self.logger.debug(f"Updating SSID document: SSID={ssid} MAC={mac}")
 
 if __name__ == "__main__":
     """Run the plugin script as a standalone program for testing purposes.
     """
     from fissure.utils.plugins.test_operation import run_test
+    dev = choose_interface()
     run_test(
         OperationMain,
         {
-            'dev': 'wlx00c0cab5f8c9',
+            'dev': dev,
             'duration': -1,
             'dwell': 0.5,
             'power': -100,
             'channels': list(range(1,10)) + [124,128,140]
         },
         {
-            'dev': 'wlx00c0cab5f8c9'
+            'dev': dev
         }
     )

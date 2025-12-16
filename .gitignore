@@ -30,3 +30,4 @@ Plugins/*
 .env  # Some currently unused env files, but often contains secrets, so better be safe than sorry
 .venv
 env.py
+artifacts*
