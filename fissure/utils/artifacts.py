@@ -22,6 +22,7 @@ class Artifact:
     created_at: str
     file_size: int
     metadata: Dict[str, Any]
+    modified_at: Optional[str] = None
     checksum: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -269,7 +270,49 @@ class ArtifactManager:
             List of all artifacts
         """
         return list(self._artifacts.values())
-    
+
+    def update_artifact(self, artifact_id: str, file_path: Union[str, None] = None, metadata: Union[Dict[str, Any], None] = None) -> bool:
+        """Update an artifact's metadata and optionally its file.
+        
+        Parameters
+        ----------
+        artifact_id : str
+            The artifact ID
+        file_path : Union[str, None], optional
+            New file path for the artifact, by default None
+        metadata : Union[Dict[str, Any], None], optional
+            New metadata to merge into existing metadata, by default None
+            
+        Returns
+        -------
+        bool
+            True if updated successfully, False otherwise
+        """
+        artifact = self._artifacts.get(artifact_id)
+        if not artifact:
+            self.logger.error(f"Artifact not found: {artifact_id}")
+            return False
+        
+        if file_path:
+            if not os.path.exists(file_path):
+                self.logger.error(f"New artifact file does not exist: {file_path}")
+                return False
+            artifact.file_path = file_path
+        else:
+            file_path = artifact.file_path
+        artifact.file_size = os.path.getsize(file_path)
+        artifact.checksum = self._calculate_checksum(file_path)
+        
+        if metadata:
+            artifact.metadata.update(metadata)
+
+        artifact.modified_at = datetime.now().isoformat()
+        
+        self._save_index()
+        
+        self.logger.info(f"Updated artifact {artifact_id}: {artifact.name}")
+        return True
+
     def delete_artifact(self, artifact_id: str) -> bool:
         """Delete an artifact and its file.
         

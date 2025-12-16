@@ -26,7 +26,8 @@ class TestArtifact:
             created_at="2024-01-01T00:00:00",
             file_size=1024,
             metadata={"test": True},
-            checksum="abc123"
+            checksum="abc123",
+            modified_at="2024-01-01T01:00:00"
         )
         
         assert artifact.id == "test-id"
@@ -35,9 +36,10 @@ class TestArtifact:
         assert artifact.artifact_type == "log"
         assert artifact.file_size == 1024
         assert artifact.metadata == {"test": True}
+        assert artifact.modified_at == "2024-01-01T01:00:00"
     
-    def test_artifact_to_dict(self):
-        """Test converting artifact to dictionary."""
+    def test_artifact_creation_without_modified_at(self):
+        """Test creating an Artifact instance without modified_at."""
         artifact = Artifact(
             id="test-id",
             operation_id="op-123",
@@ -50,12 +52,30 @@ class TestArtifact:
             checksum="abc123"
         )
         
+        assert artifact.modified_at is None
+    
+    def test_artifact_to_dict(self):
+        """Test converting artifact to dictionary."""
+        artifact = Artifact(
+            id="test-id",
+            operation_id="op-123",
+            name="Test Artifact",
+            file_path="/tmp/test.log",
+            artifact_type="log",
+            created_at="2024-01-01T00:00:00",
+            file_size=1024,
+            metadata={"test": True},
+            checksum="abc123",
+            modified_at="2024-01-01T01:00:00"
+        )
+        
         artifact_dict = artifact.to_dict()
         
         assert isinstance(artifact_dict, dict)
         assert artifact_dict["id"] == "test-id"
         assert artifact_dict["operation_id"] == "op-123"
         assert artifact_dict["metadata"] == {"test": True}
+        assert artifact_dict["modified_at"] == "2024-01-01T01:00:00"
     
     def test_artifact_from_dict(self):
         """Test creating artifact from dictionary."""
@@ -68,7 +88,8 @@ class TestArtifact:
             "created_at": "2024-01-01T00:00:00",
             "file_size": 1024,
             "metadata": {"test": True},
-            "checksum": "abc123"
+            "checksum": "abc123",
+            "modified_at": "2024-01-01T01:00:00"
         }
         
         artifact = Artifact.from_dict(data)
@@ -76,6 +97,7 @@ class TestArtifact:
         assert artifact.id == "test-id"
         assert artifact.operation_id == "op-123"
         assert artifact.metadata == {"test": True}
+        assert artifact.modified_at == "2024-01-01T01:00:00"
 
 
 class TestArtifactManager:
@@ -353,6 +375,121 @@ class TestArtifactManager:
         # Verify checksum is consistent
         checksum2 = artifact_manager._calculate_checksum(test_file_path)
         assert checksum == checksum2
+    
+    def test_update_artifact_metadata_only(self, artifact_manager, test_file):
+        """Test updating artifact metadata without changing file."""
+        operation_id = "test-op-123"
+        
+        # Create artifact
+        artifact_id = artifact_manager.create_artifact(
+            operation_id=operation_id,
+            file_path=test_file,
+            name="Test Log",
+            artifact_type="log",
+            metadata={"version": 1, "source": "test"}
+        )
+        
+        # Get original artifact
+        original_artifact = artifact_manager.get_artifact(artifact_id)
+        assert original_artifact.modified_at is None
+        original_checksum = original_artifact.checksum
+        
+        # Update metadata
+        result = artifact_manager.update_artifact(
+            artifact_id=artifact_id,
+            metadata={"version": 2, "updated_by": "test_suite"}
+        )
+        
+        assert result is True
+        
+        # Verify updates
+        updated_artifact = artifact_manager.get_artifact(artifact_id)
+        assert updated_artifact.modified_at is not None
+        assert updated_artifact.metadata["version"] == 2
+        assert updated_artifact.metadata["source"] == "test"  # Original metadata preserved
+        assert updated_artifact.metadata["updated_by"] == "test_suite"
+        assert updated_artifact.checksum == original_checksum  # File unchanged
+    
+    def test_update_artifact_with_new_file(self, artifact_manager, test_file, temp_dir):
+        """Test updating artifact with a new file."""
+        operation_id = "test-op-123"
+        
+        # Create artifact
+        artifact_id = artifact_manager.create_artifact(
+            operation_id=operation_id,
+            file_path=test_file,
+            name="Test Log",
+            artifact_type="log"
+        )
+        
+        # Create new file with different content
+        new_test_file = os.path.join(temp_dir, "new_test_file.txt")
+        with open(new_test_file, 'w') as f:
+            f.write("This is updated content for the test file.")
+        
+        # Get original artifact
+        original_artifact = artifact_manager.get_artifact(artifact_id)
+        original_size = original_artifact.file_size
+        original_checksum = original_artifact.checksum
+        
+        # Update with new file
+        result = artifact_manager.update_artifact(
+            artifact_id=artifact_id,
+            file_path=new_test_file,
+            metadata={"updated_reason": "new_content"}
+        )
+        
+        assert result is True
+        
+        # Verify updates
+        updated_artifact = artifact_manager.get_artifact(artifact_id)
+        assert updated_artifact.modified_at is not None
+        assert updated_artifact.file_path == new_test_file
+        assert updated_artifact.file_size != original_size
+        assert updated_artifact.checksum != original_checksum
+        assert updated_artifact.metadata["updated_reason"] == "new_content"
+    
+    def test_update_nonexistent_artifact(self, artifact_manager):
+        """Test updating a nonexistent artifact."""
+        result = artifact_manager.update_artifact(
+            artifact_id="nonexistent-id",
+            metadata={"test": "data"}
+        )
+        assert result is False
+    
+    def test_update_artifact_with_nonexistent_file(self, artifact_manager, test_file):
+        """Test updating artifact with nonexistent new file."""
+        operation_id = "test-op-123"
+        
+        # Create artifact
+        artifact_id = artifact_manager.create_artifact(
+            operation_id=operation_id,
+            file_path=test_file,
+            name="Test Log",
+            artifact_type="log"
+        )
+        
+        # Try to update with nonexistent file
+        result = artifact_manager.update_artifact(
+            artifact_id=artifact_id,
+            file_path="/nonexistent/file.txt"
+        )
+        
+        assert result is False
+    
+    def test_create_artifact_has_no_modified_at(self, artifact_manager, test_file):
+        """Test that newly created artifacts have modified_at as None."""
+        operation_id = "test-op-123"
+        
+        artifact_id = artifact_manager.create_artifact(
+            operation_id=operation_id,
+            file_path=test_file,
+            name="Test Log",
+            artifact_type="log"
+        )
+        
+        artifact = artifact_manager.get_artifact(artifact_id)
+        assert artifact.modified_at is None
 
 
 class TestGlobalArtifactManager:
