@@ -528,7 +528,7 @@ async def takPlotGpsUpdateLT(component: object, msg=[]):
     prefix = component.settings['callsign_prefix']
     callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
 
-    await component.sensor_node_tracker.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+    await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
 
 
 async def gpsBeaconEnableMeshtasticLT(component: object, sensor_node_id: str):

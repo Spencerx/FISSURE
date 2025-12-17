@@ -3033,7 +3033,7 @@ async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, 
     prefix = component.settings['callsign_prefix']
     callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
 
-    await component.sensor_node_tracker.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+    await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -4385,37 +4385,55 @@ async def sendPluginNamesTakResults(component: object, tak_uid: str, sensor_node
         Plugin names
     """
     component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {tak_uid}")
-    try:
-        msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
+    print("AAAAAAAAAAAAAAAAAAAAAAA")
+    print(tak_uid)
+    print(sensor_node_id)
+    print(plugin_names)
 
-        # Ensure msg is an Element; if pytak returned a string, try to parse it
-        if not isinstance(msg, ET.Element):
-            try:
-                msg = ET.fromstring(msg)
-            except Exception:
-                component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
-                return
+    event_uid = f"{tak_uid}-pluginlist-{int(time.time()*1000)}"
+    print(event_uid)
+    msg = {
+        "type": "event",
+        "uid": event_uid,
+        "data": {
+            "event_type": "plugin_list",
+            "plugins": plugin_names
+        }
+    }
 
-        # Find existing <detail> or create one if missing
-        detail = msg.find("detail")
-        if detail is None:
-            detail = ET.SubElement(msg, "detail")
+    await fissure.utils.tak_messages.send(component, msg)
 
-        # add <remarks> as a child element (not an attribute)
-        remarks = ET.SubElement(detail, "remarks")
-        # prepare remarks with plugin names
-        remarks.text = "FTN plugins: " + ", ".join(plugin_names)
+    # try:
+    #     msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
 
-        # Convert to bytes
-        msg_bytes = ET.tostring(msg, encoding='utf-8')
+    #     # Ensure msg is an Element; if pytak returned a string, try to parse it
+    #     if not isinstance(msg, ET.Element):
+    #         try:
+    #             msg = ET.fromstring(msg)
+    #         except Exception:
+    #             component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
+    #             return
 
-        # send the message
-        component.logger.debug("Sending TAK plugin names message: " + msg_bytes.decode('utf-8'))
-        component.clitool.tx_queue.put_nowait(msg_bytes)
-    except Exception as e:
-        component.logger.error(f"Failed to send TAK plugin names: {e}")
-        tb = traceback.format_exc()
-        component.logger.debug(tb)
+    #     # Find existing <detail> or create one if missing
+    #     detail = msg.find("detail")
+    #     if detail is None:
+    #         detail = ET.SubElement(msg, "detail")
+
+    #     # add <remarks> as a child element (not an attribute)
+    #     remarks = ET.SubElement(detail, "remarks")
+    #     # prepare remarks with plugin names
+    #     remarks.text = "FTN plugins: " + ", ".join(plugin_names)
+
+    #     # Convert to bytes
+    #     msg_bytes = ET.tostring(msg, encoding='utf-8')
+
+    #     # send the message
+    #     component.logger.debug("Sending TAK plugin names message: " + msg_bytes.decode('utf-8'))
+    #     component.clitool.tx_queue.put_nowait(msg_bytes)
+    # except Exception as e:
+    #     component.logger.error(f"Failed to send TAK plugin names: {e}")
+    #     tb = traceback.format_exc()
+    #     component.logger.debug(tb)
 
 async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name: str, sensor_node_id: int=0):
     """Request Sensor Node plugin action names for TAK
@@ -4472,37 +4490,55 @@ async def sendPluginActionNamesTakResults(component: object, tak_uid: str, senso
         Plugin action names
     """
     component.logger.debug(f"Preparing to send TAK plugin action names for TAK UID: {tak_uid}")
-    try:
-        msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
 
-        # Ensure msg is an Element; if pytak returned a string, try to parse it
-        if not isinstance(msg, ET.Element):
-            try:
-                msg = ET.fromstring(msg)
-            except Exception:
-                component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
-                return
+    # Generate unique event UID
+    event_uid = f"{tak_uid}-actions-{int(time.time() * 1000)}"
 
-        # Find existing <detail> or create one if missing
-        detail = msg.find("detail")
-        if detail is None:
-            detail = ET.SubElement(msg, "detail")
+    msg = {
+        "type": "event",
+        "uid": event_uid,
+        "data": {
+            "event_type": "plugin_actions",   # <plugin_actions> in XML
+            "plugin_name": plugin_name,       # scalar
+            "actions": action_names           # list
+        }
+    }
 
-        # add <remarks> as a child element (not an attribute)
-        remarks = ET.SubElement(detail, "remarks")
-        # prepare remarks with plugin action names
-        remarks.text = f"FTN plugin actions: {plugin_name}: " + ", ".join(action_names)
+    await fissure.utils.tak_messages.send(component, msg)
 
-        # Convert to bytes
-        msg_bytes = ET.tostring(msg, encoding='utf-8')
+    
 
-        # send the message
-        component.logger.debug("Sending TAK plugin action names message: " + msg_bytes.decode('utf-8'))
-        component.clitool.tx_queue.put_nowait(msg_bytes)
-    except Exception as e:
-        component.logger.error(f"Failed to send TAK plugin action names: {e}")
-        tb = traceback.format_exc()
-        component.logger.debug(tb)
+    # try:
+    #     msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
+
+    #     # Ensure msg is an Element; if pytak returned a string, try to parse it
+    #     if not isinstance(msg, ET.Element):
+    #         try:
+    #             msg = ET.fromstring(msg)
+    #         except Exception:
+    #             component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
+    #             return
+
+    #     # Find existing <detail> or create one if missing
+    #     detail = msg.find("detail")
+    #     if detail is None:
+    #         detail = ET.SubElement(msg, "detail")
+
+    #     # add <remarks> as a child element (not an attribute)
+    #     remarks = ET.SubElement(detail, "remarks")
+    #     # prepare remarks with plugin action names
+    #     remarks.text = f"FTN plugin actions: {plugin_name}: " + ", ".join(action_names)
+
+    #     # Convert to bytes
+    #     msg_bytes = ET.tostring(msg, encoding='utf-8')
+
+    #     # send the message
+    #     component.logger.debug("Sending TAK plugin action names message: " + msg_bytes.decode('utf-8'))
+    #     component.clitool.tx_queue.put_nowait(msg_bytes)
+    # except Exception as e:
+    #     component.logger.error(f"Failed to send TAK plugin action names: {e}")
+    #     tb = traceback.format_exc()
+    #     component.logger.debug(tb)
 
 
 async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: int, plugin_name: str, action_name: str, parameters: dict):

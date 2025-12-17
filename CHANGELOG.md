@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-17
+
+Updating TAK messaging.
+
+### Added
+
+- Added unified TAK message API supporting pin, event, and track message types
+- Added structured XML payloads under "fissure" for plugin lists, actions, detections, SOIs, and targets
+- Added automatic UID generation for event messages to prevent map icon conflicts
+- Added tak_messages.py utility file for uniformity
+
+### Changed
+
+- Replaced remarks-based message parsing with structured XML parsing
+- Using pytak for sending all messages to TAK
+- Updated plugin_list and plugin_action responses to use new formatting
+
+### Fixed
+
+- Fixed malformed XML issues caused by manual CoT construction
+- Fixed suppressed-point events appearing as pins on the map
+
 ## 2025-12-15
 
 Fixing pytak installer and freezing bugs.
