@@ -411,82 +411,233 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def send_tak_cot(self, sensor_node_id: Union[int, str], opid: str, uid: str, remarks: str, lat: Union[float, bool] = True, lon: Union[float, bool] = True, alt: Union[float, bool] = True, time: Union[float, bool] = True, type: str="a-f-G-U-H", logger: None = None) -> None:
-        """Send a TAK message.
+    # async def send_tak_cot(self, sensor_node_id: Union[int, str], opid: str, uid: str, remarks: str, lat: Union[float, bool] = True, lon: Union[float, bool] = True, alt: Union[float, bool] = True, time: Union[float, bool] = True, type: str="a-f-G-U-H", logger: None = None) -> None:
+    #     """Send a TAK message.
 
-        Parameters
-        ----------
-        sensor_node_id : Union[int, str]
-            Sensor node ID
-        opid : str
-            Operation ID
-        uid : str
-            Unique ID for the TAK message.
-        remarks : str
-            Remarks to include in the TAK message.
-        lat : Union[float, bool], optional
-            Latitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
-        lon : Union[float, bool], optional
-            Longitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
-        alt : Union[float, bool], optional
-            Altitude in meters, by default True to use current Sensor Node GPS position. False to omit.
-        time : Union[float, bool], optional
-            Timestamp as a Unix epoch float, by default True to use current time. False to omit.
-        type : str, optional
-            Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
-        logger : None, optional
-            Unused placeholder for debugging.
+    #     Parameters
+    #     ----------
+    #     sensor_node_id : Union[int, str]
+    #         Sensor node ID
+    #     opid : str
+    #         Operation ID
+    #     uid : str
+    #         Unique ID for the TAK message.
+    #     remarks : str
+    #         Remarks to include in the TAK message.
+    #     lat : Union[float, bool], optional
+    #         Latitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
+    #     lon : Union[float, bool], optional
+    #         Longitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
+    #     alt : Union[float, bool], optional
+    #         Altitude in meters, by default True to use current Sensor Node GPS position. False to omit.
+    #     time : Union[float, bool], optional
+    #         Timestamp as a Unix epoch float, by default True to use current time. False to omit.
+    #     type : str, optional
+    #         Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
+    #     logger : None, optional
+    #         Unused placeholder for debugging.
+    #     """
+    #     # Prepare inputs
+    #     if lat is True:
+    #         lat = self.gps_position.get('latitude', 0.0)
+    #     if lon is True:
+    #         lon = self.gps_position.get('longitude', 0.0)
+    #     if alt is True:
+    #         alt = self.gps_position.get('altitude', 0.0)
+    #     if time is True:
+    #         time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    #     if remarks == "GPS UPDATE":
+    #         msg_name = "takPlotGpsUpdate"
+    #     else:
+    #         msg_name = "takPlot"
+
+    #     # Prepare values
+    #     if self.network_type == "IP":
+    #         PARAMETERS = {
+    #             "uid": uid,
+    #             "lat": lat,
+    #             "lon": lon,
+    #             "alt": alt,
+    #             "time": time,
+    #             "type": type,
+    #             "remarks": remarks
+    #         }
+    #     elif self.network_type == "Meshtastic":
+    #         if lat is False or lon is False or alt is False:
+    #             self.logger.error("TAK message requires latitude, longitude, and altitude.")
+    #             return
+    #         if time is False:
+    #             time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    #         msg_name += "LT"
+    #         PARAMETERS = {
+    #             "msg": [
+    #                 PARAMETERS["uid"],
+    #                 PARAMETERS["lat"],
+    #                 PARAMETERS["lon"],
+    #                 PARAMETERS["alt"],
+    #                 PARAMETERS["time"],
+    #                 PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
+    #             ]
+    #         }
+
+    #     # Send message
+    #     msg = {
+    #         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+    #         fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
+    #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    #     }
+    #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  # TODO: meshtastic socket support
+
+
+    async def send_tak_cot(self, msg: dict) -> None:
         """
-        # Prepare inputs
+        Unified TAK message sender (node → HIPRFISR).
+
+        Plugins send a dictionary containing any of:
+
+            msg = {
+                "msg_type": "pin" | "track" | "event",   # optional, default="pin"
+                "uid": str,                               # required
+                "lat": float | True,                      # True = auto-fill from node GPS
+                "lon": float | True,
+                "alt": float | True,
+                "time": str | True,                       # True = auto-fill now()
+                "remarks": str,
+                "tak_icon": str,                          # TAK icon e.g. "a-h-G-E-S"
+                "opid": str,
+                "data": dict                              # only for event messages
+            }
+
+        Missing fields are ignored.
+        True values for lat/lon/alt/time trigger auto-resolution.
+        """
+
+        # --------------------------------------------------
+        # Validate minimal required field
+        # --------------------------------------------------
+        if "uid" not in msg:
+            self.logger.error("send_tak_cot() missing required field: uid")
+            return
+
+        # --------------------------------------------------
+        # Resolve msg_type
+        # --------------------------------------------------
+        msg_type = msg.get("msg_type")
+        if not msg_type:
+            # auto-detect: GPS UPDATE => track
+            if msg.get("remarks") == "GPS UPDATE":
+                msg_type = "track"
+            else:
+                msg_type = "pin"
+
+        # --------------------------------------------------
+        # Normalize GPS + timestamp (only if fields exist)
+        # --------------------------------------------------
+        # lat
+        lat = msg.get("lat")
         if lat is True:
-            lat = self.gps_position.get('latitude', 0.0)
+            lat = self.gps_position.get("latitude", 0.0)
+
+        # lon
+        lon = msg.get("lon")
         if lon is True:
-            lon = self.gps_position.get('longitude', 0.0)
+            lon = self.gps_position.get("longitude", 0.0)
+
+        # alt
+        alt = msg.get("alt")
         if alt is True:
-            alt = self.gps_position.get('altitude', 0.0)
-        if time is True:
-            time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        if remarks == "GPS UPDATE":
-            msg_name = "takPlotGpsUpdate"
-        else:
-            msg_name = "takPlot"
+            alt = self.gps_position.get("altitude", 0.0)
 
-        # Prepare values
+        # time
+        timestamp = msg.get("time")
+        if timestamp is True:
+            timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        elif isinstance(timestamp, str):
+            timestamp = timestamp.replace(" ", "T")  # safety normalization
+
+        # optional fields
+        remarks = msg.get("remarks")
+        tak_icon = msg.get("tak_icon")
+        opid = msg.get("opid")
+        data = msg.get("data")  # for event messages only
+        uid = msg["uid"]
+
+        # --------------------------------------------------
+        # Build payload (include ONLY present fields)
+        # --------------------------------------------------
+        payload = {"msg_type": msg_type, "uid": uid}
+
+        # Add fields only if provided or auto-resolved
+        if lat is not None: payload["lat"] = lat
+        if lon is not None: payload["lon"] = lon
+        if alt is not None: payload["alt"] = alt
+        if timestamp is not None: payload["time"] = timestamp
+        if remarks is not None: payload["remarks"] = remarks
+        if tak_icon is not None: payload["tak_icon"] = tak_icon
+        if opid is not None: payload["opid"] = opid
+        if data is not None: payload["data"] = data
+
+        # --------------------------------------------------
+        # IP MODE → send takReturn
+        # --------------------------------------------------
         if self.network_type == "IP":
-            PARAMETERS = {
-                "uid": uid,
-                "lat": lat,
-                "lon": lon,
-                "alt": alt,
-                "time": time,
-                "type": type,
-                "remarks": remarks
-            }
-        elif self.network_type == "Meshtastic":
-            if lat is False or lon is False or alt is False:
-                self.logger.error("TAK message requires latitude, longitude, and altitude.")
-                return
-            if time is False:
-                time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-            msg_name += "LT"
-            PARAMETERS = {
-                "msg": [
-                    PARAMETERS["uid"],
-                    PARAMETERS["lat"],
-                    PARAMETERS["lon"],
-                    PARAMETERS["alt"],
-                    PARAMETERS["time"],
-                    PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
-                ]
+
+            msg_out = {
+                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "takReturn",
+                fissure.comms.MessageFields.PARAMETERS: {
+                    "payload": payload
+                },
             }
 
-        # Send message
-        msg = {
-            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  # TODO: meshtastic socket support
+            await self.hiprfisr_socket.send_msg(
+                fissure.comms.MessageTypes.COMMANDS, msg_out
+            )
+            return
+
+        # --------------------------------------------------
+        # MESHTASTIC MODE → legacy LT list format
+        # --------------------------------------------------
+        elif self.network_type == "Meshtastic":
+
+            # Validate minimal numeric fields
+            if lat is None or lon is None or alt is None:
+                self.logger.error("Meshtastic TAK requires lat/lon/alt.")
+                return
+
+            # Use resolved timestamp
+            if timestamp is None:
+                timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+            lt_msg = [
+                uid,
+                lat,
+                lon,
+                alt,
+                timestamp,
+                (remarks[:20] if isinstance(remarks, str) else None),
+            ]
+
+            msg_out = {
+                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "takReturnLT",
+                fissure.comms.MessageFields.PARAMETERS: {
+                    "msg": lt_msg,
+                    "opid": opid,
+                },
+            }
+
+            await self.hiprfisr_socket.send_msg(
+                fissure.comms.MessageTypes.COMMANDS, msg_out
+            )
+            return
+
+        # --------------------------------------------------
+        # Unknown network type
+        # --------------------------------------------------
+        else:
+            self.logger.error(f"Unknown network type for TAK: {self.network_type}")
+            return
 
 
     async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: Union[int, str] = 0) -> None:
@@ -3144,23 +3295,43 @@ class SensorNode(object):
         # Beacon GPS Position to HIPFISR then TAK
         if self.gps_tak_beacon == True:
             if self.network_type == "IP":
+                # PARAMETERS = {
+                #     "uid": self.identifier,
+                #     "lat": self.gps_position['latitude'],
+                #     "lon": self.gps_position['longitude'],
+                #     "alt": self.gps_position['altitude'],
+                #     "time": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                #     "remarks": "GPS UPDATE"
+                # }
+                # msg = {
+                #     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                #     fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdate",  # TODO replace
+                #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+                # }
                 PARAMETERS = {
-                    "uid": self.identifier,
-                    "lat": self.gps_position['latitude'],
-                    "lon": self.gps_position['longitude'],
-                    "alt": self.gps_position['altitude'],
-                    "time": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                    "remarks": "GPS UPDATE"
+                    "payload": {
+                        "msg_type": "track",   # always a track update for GPS beacon
+                        "uid": self.identifier,
+                        "lat": self.gps_position.get("latitude", 0.0),
+                        "lon": self.gps_position.get("longitude", 0.0),
+                        "alt": self.gps_position.get("altitude", 0.0),
+                        "time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                        "remarks": "GPS UPDATE",
+                        "sensor_node_id": "", #self.sensor_node_id,
+                        "opid": "gps_beacon",      # helpful for debugging
+                    }
                 }
+
                 msg = {
                     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdate",
+                    fissure.comms.MessageFields.MESSAGE_NAME: "takReturn",
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
+
                 await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
             elif self.network_type == "Meshtastic":
-                PARAMETERS = {
+                PARAMETERS = {  # TODO Replace
                     "msg": [
                         self.uuid,
                         self.gps_position['latitude'],
@@ -3173,7 +3344,7 @@ class SensorNode(object):
                 msg = {
                     fissure.comms.MessageFields.SOURCE: self.assigned_id,
                     fissure.comms.MessageFields.DESTINATION: fissure.comms.Identifiers.HIPRFISR_LT,  # TODO: obtain HIPRFISR ID some other way
-                    fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdateLT",
+                    fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdateLT",  # TODO replace
                     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
                 }
                 await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)

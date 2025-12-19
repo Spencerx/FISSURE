@@ -1,6 +1,26 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-19
+
+Updating the FISSURE plugin to TAK message chain to pass dictionaries.
+
+### Added
+
+- Added "iw" package to the installer
+- hackrf_sweep and rtl_power detectors in the Tools folder for scanning specific frequency bands
+
+### Changed
+
+- Removed HIPRFISR TAK send code and replaced with utility calls in the callback functions.
+- Renamed HIPRFISR callback for TAK messages to takReturn()
+- Updated SensorNode.py send_tak_cot() to use a dictionary when accepting inputs from FISSURE plugins and sending to the HIPRFISR
+- Updated GPS beacons and plugin querying returns to use new dictionaries for TAK messages
+
+### Fixed
+
+- Added support for optional dictionary fields in tak_messages.py utilities
+
 ## 2025-12-17
 
 Updating TAK messaging.

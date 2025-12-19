@@ -2996,44 +2996,144 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
+#######################################
+async def takReturn(component, payload: dict):
     """
-    Forwards CoT messages to TAK.
+    TAK message schema (required vs. optional).
+
+    ------------------------------------------------------------
+    PIN MESSAGE
+    Required:
+        msg_type = "pin"
+        uid
+        lat
+        lon
+        callsign    # provided by utility if missing
+
+    Optional:
+        alt (default 0)
+        remarks (default "")
+        stale (default 999999999)
+        tak_icon (default "a-f-G-U-H")
+        how (optional)
+        # extra metadata ignored unless placed in data
+
+    ------------------------------------------------------------
+    TRACK MESSAGE
+    Required:
+        msg_type = "track"
+        uid
+        lat
+        lon
+        callsign    # REQUIRED for proper labeling; utility will supply one
+                    # using HIPRFISR prefix + nickname/uid
+
+    Optional:
+        alt (default 0)
+        stale (default 60)
+        tak_icon (default "b-m-p-w")
+        how (optional)
+        # extra metadata ignored unless utility extended
+
+    ------------------------------------------------------------
+    EVENT MESSAGE
+    Required:
+        msg_type = "event"
+        uid
+        data["event_type"]
+
+    Optional:
+        stale (default 30)
+        tak_icon (default "b-f-t-r")
+        data[...]  # all structured metadata goes here:
+                # freqs, deltas, classifications, plugin lists, etc.
+
+    ------------------------------------------------------------
     """
-    # Classify based on frequency extracted from UID
-    try:
-        freq_hz = fissure.utils.common.extractFrequencyFromUID(uid)
-        if freq_hz:
-            classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_hz)
-
-            # classification_text is already formatted like:
-            # [Protocol=... | Region=... | Priority=... | Notes=...]
-            if classification_text:
-                remarks = f"{remarks}\n{classification_text}"
-
-    except Exception as e:
-        component.logger.error(f"Frequency classification error in takPlot: {e}")
-
-    # Forward to TAK
-    try:
-        await component.send_cot(uid, uid, lat, lon, alt, time, remarks, type)
-    except Exception as e:
-        component.logger.error(f"Error sending COT to TAK: {e}")
-        tb = traceback.format_exc()
-        component.logger.debug(tb)
+    # -------------------------------------
+    # Forward to TAK via utility layer
+    # -------------------------------------
+    await fissure.utils.tak_messages.send(component, payload)
 
 
-async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
-    """
-    Forwards the sensor node GPS coordinates message to TAK.
-    """
-    time = time.replace(" ", "T")
-    max_history = 5
+##########################################
+# async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
+#     """
+#     Forwards CoT messages to TAK.
+#     """
+#     # Classify based on frequency extracted from UID
+#     try:
+#         freq_hz = fissure.utils.common.extractFrequencyFromUID(uid)
+#         if freq_hz:
+#             classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_hz)
 
-    prefix = component.settings['callsign_prefix']
-    callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
+#             # classification_text is already formatted like:
+#             # [Protocol=... | Region=... | Priority=... | Notes=...]
+#             if classification_text:
+#                 remarks = f"{remarks}\n{classification_text}"
 
-    await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+#     except Exception as e:
+#         component.logger.error(f"Frequency classification error in takPlot: {e}")
+
+#     # Forward to TAK
+#     try:
+#         # await component.send_cot(uid, uid, lat, lon, alt, time, remarks, type)
+
+#         # Get TAK server settings
+#         settings: dict = fissure.utils.get_fissure_config()
+#         s_addr = settings["tak"]["ip_addr"]
+#         s_port = settings["tak"]["port"]
+#         tak_cert = settings["tak"]["cert"]
+#         tak_key = settings["tak"]["key"]
+
+#         msg = {
+#             "type": "pin",
+#             "uid": uid,
+#             "callsign": uid,
+#             "lat": lat,
+#             "lon": lon,
+#             "alt": alt,
+#             "remarks": remarks
+#         }
+
+#         await fissure.utils.tak_messages.send(component, msg)
+
+#     except Exception as e:
+#         component.logger.error(f"Error sending COT to TAK: {e}")
+#         tb = traceback.format_exc()
+#         component.logger.debug(tb)
+
+
+# async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
+#     """
+#     Forwards the sensor node GPS coordinates message to TAK.
+#     """
+#     time = time.replace(" ", "T")
+#     max_history = 5
+
+#     prefix = component.settings['callsign_prefix']
+#     callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
+
+#     # await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+
+#     # print("SEND TRACK")
+#     # if not hasattr(component, "_test_lon"):
+#     #    component._test_lon = lon   # initialize based on first call input
+#     # component._test_lon += 1
+#     # lon = component._test_lon
+
+#     msg = {
+#         "type": "track",
+#         "uid": uid,              # IMPORTANT: must stay the same each update
+#         "callsign": callsign,
+#         "lat": lat,
+#         "lon": lon,
+#         "alt": alt,
+#         # "cot_type": "b-m-p-w",       # optional override
+#         # "stale": 60                    # 60 sec expiration window, or in the future: "2035-01-01T00:00:00Z"
+#     }
+
+#     await fissure.utils.tak_messages.send(component, msg)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -4385,15 +4485,10 @@ async def sendPluginNamesTakResults(component: object, tak_uid: str, sensor_node
         Plugin names
     """
     component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {tak_uid}")
-    print("AAAAAAAAAAAAAAAAAAAAAAA")
-    print(tak_uid)
-    print(sensor_node_id)
-    print(plugin_names)
 
     event_uid = f"{tak_uid}-pluginlist-{int(time.time()*1000)}"
-    print(event_uid)
     msg = {
-        "type": "event",
+        "msg_type": "event",
         "uid": event_uid,
         "data": {
             "event_type": "plugin_list",
@@ -4495,7 +4590,7 @@ async def sendPluginActionNamesTakResults(component: object, tak_uid: str, senso
     event_uid = f"{tak_uid}-actions-{int(time.time() * 1000)}"
 
     msg = {
-        "type": "event",
+        "msg_type": "event",
         "uid": event_uid,
         "data": {
             "event_type": "plugin_actions",   # <plugin_actions> in XML
@@ -4506,7 +4601,7 @@ async def sendPluginActionNamesTakResults(component: object, tak_uid: str, senso
 
     await fissure.utils.tak_messages.send(component, msg)
 
-    
+
 
     # try:
     #     msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)

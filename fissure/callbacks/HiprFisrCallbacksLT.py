@@ -473,7 +473,27 @@ async def takPlotLT(component: object, msg=[]):
 
     # Forward to TAK
     try:
-        await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
+        # await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
+
+        # Get TAK server settings
+        settings: dict = fissure.utils.get_fissure_config()
+        s_addr = settings["tak"]["ip_addr"]
+        s_port = settings["tak"]["port"]
+        tak_cert = settings["tak"]["cert"]
+        tak_key = settings["tak"]["key"]
+
+        msg = {
+            "type": "pin",
+            "uid": uid,
+            "callsign": uid,
+            "lat": lat,
+            "lon": lon,
+            "alt": alt,
+            "remarks": remarks
+        }
+
+        await fissure.utils.tak_messages.send(component, msg)
+
     except Exception as e:
         component.logger.error(f"Error sending COT to TAK (LT): {e}")
         tb = traceback.format_exc()
@@ -528,7 +548,26 @@ async def takPlotGpsUpdateLT(component: object, msg=[]):
     prefix = component.settings['callsign_prefix']
     callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
 
-    await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+    # await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+
+    # print("SEND TRACK")
+    # if not hasattr(component, "_test_lon"):
+    #    component._test_lon = lon   # initialize based on first call input
+    # component._test_lon += 1
+    # lon = component._test_lon
+
+    msg = {
+        "type": "track",
+        "uid": uid,              # IMPORTANT: must stay the same each update
+        "callsign": callsign,
+        "lat": lat,
+        "lon": lon,
+        "alt": alt,
+        # "cot_type": "b-m-p-w",       # optional override
+        # "stale": 60                    # 60 sec expiration window, or in the future: "2035-01-01T00:00:00Z"
+    }
+
+    await fissure.utils.tak_messages.send(component, msg)
 
 
 async def gpsBeaconEnableMeshtasticLT(component: object, sensor_node_id: str):

@@ -2,6 +2,10 @@
 import xml.etree.ElementTree as ET
 import pytak
 from datetime import datetime, timezone
+from fissure.utils.common import extractFrequencyFromUID
+from fissure.utils.library import classifyFrequencyFromTextDirect
+
+
 
 # ---------------------------------------------------------
 # Base COT builder
@@ -80,88 +84,138 @@ async def send(component, message: dict):
     """
     Unified TAK message sender.
 
-    message["type"] = "pin" | "event" | "track"
-    message["uid"]  = CoT UID
-    Other fields vary by type.
+    Expected input fields (all optional except msg_type and uid):
+
+        msg_type    : "pin" | "event" | "track"
+        uid         : CoT UID
+        lat/lon/alt : floats
+        time        : ISO 8601 string
+        remarks     : text
+        stale       : int (seconds)
+        tak_icon    : CoT symbol type ("a-f-G-U-H", "b-m-p-w", etc.)
+        callsign    : optional callsign override
+        data        : dict for event messages
+        how         : TAK "how" value (optional)
     """
 
-    mtype = message["type"]
+    # -------------------------------------------------
+    # Validate required fields
+    # -------------------------------------------------
+    if "msg_type" not in message:
+        component.logger.error("TAK send() missing required field: msg_type")
+        return
+    if "uid" not in message:
+        component.logger.error("TAK send() missing required field: uid")
+        return
+
+    mtype = message["msg_type"]
+    uid   = message["uid"]
+
+    # Common optional fields
+    lat      = message.get("lat")
+    lon      = message.get("lon")
+    alt      = message.get("alt", 0)
+    time     = message.get("time")
+    stale    = message.get("stale")
+    how      = message.get("how")
+    remarks  = message.get("remarks", "")
+    tak_icon = message.get("tak_icon")
 
     # =====================================================
     # 1. PIN (map-visible position marker)
     # =====================================================
     if mtype == "pin":
+
+        # Callsign fallback for pins
+        callsign = message.get("callsign", uid)
+
+        # -------------------------------------
+        # Apply frequency classification
+        # -------------------------------------
+        try:
+            freq_hz = extractFrequencyFromUID(uid)
+            if freq_hz:
+                cls = classifyFrequencyFromTextDirect(freq_hz)
+                if cls:
+                    remarks = f"{remarks}\n{cls}" if remarks else cls
+        except Exception as e:
+            component.logger.error(f"[TAK] Frequency classification error: {e}")
+
+        # Build base event
         msg, detail = _build_base_event(
-            uid=message["uid"],
-            stale=message.get("stale", 999999999)
+            uid=uid,
+            stale=stale if stale is not None else 999999999
         )
 
-        # Manually set CoT type (since pytak.gen_cot_xml cannot accept type=)
-        msg.set("type", message.get("cot_type", "a-f-G-U-H"))
-        # msg.set("how", message.get("how", "m-g"))
+        msg.set("type", tak_icon or "a-f-G-U-H")
+        if how:
+            msg.set("how", how)
 
-        # contact & remarks
-        ET.SubElement(detail, "contact", {"callsign": message["callsign"]})
-        ET.SubElement(detail, "remarks").text = message.get("remarks", "")
+        ET.SubElement(detail, "contact", {"callsign": callsign})
+        ET.SubElement(detail, "remarks").text = remarks
 
-        # point visible on map
-        _set_point_pin(msg, message["lat"], message["lon"], message.get("alt", 0))
+        _set_point_pin(msg, lat, lon, alt)
 
         return _send_to_tak(component, msg)
 
     # =====================================================
-    # 2. EVENT (structured, non-pin, multi-purpose)
+    # 2. EVENT (structured, non-pin)
     # =====================================================
     if mtype == "event":
 
         msg, detail = _build_base_event(
-            uid=message["uid"],
-            stale=message.get("stale", 30)
+            uid=uid,
+            stale=stale if stale is not None else 30
         )
 
-        # Always use a non-pin, non-icon CoT type for FISSURE events.
-        msg.set("type", message.get("cot_type", "b-f-t-r"))
+        msg.set("type", tak_icon or "b-f-t-r")
+        if how:
+            msg.set("how", how)
 
-        # Create <fissure> root
         fiss = ET.SubElement(detail, "fissure")
 
         data = message.get("data", {})
         event_type = data.get("event_type", "generic")
 
-        # Create <plugin_list>, <detection>, <targets>, etc.
         event_node = ET.SubElement(fiss, event_type)
-
-        # Serialize everything under this event
         _serialize_payload(event_node, data, skip_keys={"event_type"})
 
-        # Suppress map pin
         _set_point_suppressed(msg)
-
         return _send_to_tak(component, msg)
 
     # =====================================================
-    # 3. TRACK (auto-tracking, NO history needed)
+    # 3. TRACK (auto-tracking)
     # =====================================================
     if mtype == "track":
+
+        prefix = component.settings.get("callsign_prefix", "NODE")
+        node_meta = component.nodes.get(uid, {})
+
+        nickname = (
+            message.get("callsign")
+            or node_meta.get("callsign")
+            or node_meta.get("nickname")
+        )
+
+        if not nickname:
+            callsign = f"{prefix}-{uid[:8]}"
+        else:
+            if nickname.lower().startswith(prefix.lower() + "-"):
+                callsign = nickname
+            else:
+                callsign = f"{prefix}-{nickname}"
+
         msg, detail = _build_base_event(
-            uid=message["uid"],
-            stale=message.get("stale", 60)
+            uid=uid,
+            stale=stale if stale is not None else 60
         )
 
-        # Set CoT type for moving unit
-        msg.set("type", message.get("cot_type", "b-m-p-w"))
+        msg.set("type", tak_icon or "b-m-p-w")
+        if how:
+            msg.set("how", how)
 
-        # Add callsign if provided
-        if "callsign" in message:
-            ET.SubElement(detail, "contact", {"callsign": message["callsign"]})
-
-        # Current position pin (TAK will automatically build tracks over time)
-        _set_point_pin(
-            msg,
-            message["lat"],
-            message["lon"],
-            message.get("alt", 0)
-        )
+        ET.SubElement(detail, "contact", {"callsign": callsign})
+        _set_point_pin(msg, lat, lon, alt)
 
         return _send_to_tak(component, msg)
 
