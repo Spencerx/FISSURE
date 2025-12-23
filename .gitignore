@@ -12,7 +12,7 @@ Plugins/*
 !Plugins/plugin_template/**
 !Plugins/tpms/**
 !Plugins/wifi/**
-
+!Plugins/test/
 
 # MacOS Files
 .DS_Store

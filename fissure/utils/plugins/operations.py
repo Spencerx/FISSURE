@@ -434,6 +434,7 @@ class Operation(object):
         """
         try:
             return self.artifact_manager.create_artifact(
+                source_id=str(self.sensor_node_id),
                 operation_id=self.opid,
                 file_path=file_path,
                 name=name,

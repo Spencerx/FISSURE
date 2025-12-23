@@ -29,6 +29,7 @@ import fissure.callbacks
 import fissure.comms
 import fissure.utils
 from fissure.utils import PLUGIN_DIR
+from fissure.utils.artifacts import ArtifactManager
 
 import uuid
 import logging
@@ -293,8 +294,10 @@ class SensorNode(object):
                 self.gps_position['latitude'], self.gps_position['longitude']
             )
 
-        self.operations = {}
+        self.operations = {} # operation tracking dictionary
 
+        # initialize artifact manager
+        self.artifact_manager = ArtifactManager(logger=self.logger)
 
     async def initialize_comms(self):
         if self.network_type == "IP":
@@ -487,6 +490,52 @@ class SensorNode(object):
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  # TODO: meshtastic socket support
+
+
+    async def create_artifact(self, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
+        """Create a new artifact record.
+        
+        Parameters
+        ----------
+        operation_id : str
+            ID of the operation that created the artifact
+        file_path : str
+            Path to the artifact file
+        name : str
+            Human-readable name for the artifact
+        artifact_type : str
+            Type of artifact (e.g., "log", "data", "image")
+        metadata : Dict[str, Any], optional
+            Additional metadata for the artifact
+            
+        Returns
+        -------
+        str
+            The artifact ID
+        """
+        artifact_id = self.artifact_manager.create_artifact(
+            source_id=self.identifier,
+            operation_id=operation_id,
+            file_path=file_path,
+            name=name,
+            artifact_type=artifact_type,
+            metadata=metadata
+        )
+
+        # notify hiprfisr of new artifact
+        artifact = self.artifact_manager.get_artifact(artifact_id)
+        if artifact is None:
+            self.logger.error(f"Failed to retrieve newly created artifact {artifact_id} for notification.")
+            return artifact_id
+        PARAMETERS = {
+            "artifact": artifact.to_dict()
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "updateArtifact",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
     async def run_plugin_operation(self, component: object, plugin: str, operation: str, parameters: Dict[str, Any], sensor_node_id: Union[int, str] = 0) -> None:

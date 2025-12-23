@@ -19,6 +19,7 @@ class TestArtifact:
         """Test creating an Artifact instance."""
         artifact = Artifact(
             id="test-id",
+            source_id="source-123",
             operation_id="op-123",
             name="Test Artifact",
             file_path="/tmp/test.log",
@@ -31,6 +32,7 @@ class TestArtifact:
         )
         
         assert artifact.id == "test-id"
+        assert artifact.source_id == "source-123"
         assert artifact.operation_id == "op-123"
         assert artifact.name == "Test Artifact"
         assert artifact.artifact_type == "log"
@@ -39,9 +41,10 @@ class TestArtifact:
         assert artifact.modified_at == "2024-01-01T01:00:00"
     
     def test_artifact_creation_without_modified_at(self):
-        """Test creating an Artifact instance without modified_at."""
+        """Test creating an Artifact instance with modified_at same as created_at."""
         artifact = Artifact(
             id="test-id",
+            source_id="source-123",
             operation_id="op-123",
             name="Test Artifact",
             file_path="/tmp/test.log",
@@ -49,15 +52,17 @@ class TestArtifact:
             created_at="2024-01-01T00:00:00",
             file_size=1024,
             metadata={"test": True},
-            checksum="abc123"
+            checksum="abc123",
+            modified_at="2024-01-01T00:00:00"  # Same as created_at
         )
         
-        assert artifact.modified_at is None
+        assert artifact.modified_at == artifact.created_at
     
     def test_artifact_to_dict(self):
         """Test converting artifact to dictionary."""
         artifact = Artifact(
             id="test-id",
+            source_id="source-123",
             operation_id="op-123",
             name="Test Artifact",
             file_path="/tmp/test.log",
@@ -73,6 +78,7 @@ class TestArtifact:
         
         assert isinstance(artifact_dict, dict)
         assert artifact_dict["id"] == "test-id"
+        assert artifact_dict["source_id"] == "source-123"
         assert artifact_dict["operation_id"] == "op-123"
         assert artifact_dict["metadata"] == {"test": True}
         assert artifact_dict["modified_at"] == "2024-01-01T01:00:00"
@@ -81,6 +87,7 @@ class TestArtifact:
         """Test creating artifact from dictionary."""
         data = {
             "id": "test-id",
+            "source_id": "source-123",
             "operation_id": "op-123",
             "name": "Test Artifact",
             "file_path": "/tmp/test.log",
@@ -95,6 +102,7 @@ class TestArtifact:
         artifact = Artifact.from_dict(data)
         
         assert artifact.id == "test-id"
+        assert artifact.source_id == "source-123"
         assert artifact.operation_id == "op-123"
         assert artifact.metadata == {"test": True}
         assert artifact.modified_at == "2024-01-01T01:00:00"
@@ -172,6 +180,7 @@ class TestArtifactManager:
         operation_id = "test-op-123"
         
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -202,6 +211,7 @@ class TestArtifactManager:
             f.write("Test content")
         
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file_path,
             name="Test File",
@@ -215,6 +225,7 @@ class TestArtifactManager:
         operation_id = "test-op-123"
         
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path="/nonexistent/file.txt",
             name="Missing File",
@@ -228,6 +239,7 @@ class TestArtifactManager:
         operation_id = "test-op-123"
         
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -256,11 +268,11 @@ class TestArtifactManager:
             f.write("Another test file")
         
         # Create artifacts for first operation
-        id1 = artifact_manager.create_artifact(operation_id, test_file, "File 1", "log")
-        id2 = artifact_manager.create_artifact(operation_id, test_file2, "File 2", "data")
+        id1 = artifact_manager.create_artifact("test-source", operation_id, test_file, "File 1", "log")
+        id2 = artifact_manager.create_artifact("test-source", operation_id, test_file2, "File 2", "data")
         
         # Create artifact for second operation
-        id3 = artifact_manager.create_artifact(other_operation_id, test_file, "File 3", "log")
+        id3 = artifact_manager.create_artifact("test-source", other_operation_id, test_file, "File 3", "log")
         
         artifacts = artifact_manager.get_artifacts_by_operation(operation_id)
         
@@ -275,8 +287,8 @@ class TestArtifactManager:
         operation_id1 = "test-op-123"
         operation_id2 = "test-op-456"
         
-        artifact_manager.create_artifact(operation_id1, test_file, "File 1", "log")
-        artifact_manager.create_artifact(operation_id2, test_file, "File 2", "data")
+        artifact_manager.create_artifact("test-source", operation_id1, test_file, "File 1", "log")
+        artifact_manager.create_artifact("test-source", operation_id2, test_file, "File 2", "data")
         
         all_artifacts = artifact_manager.get_all_artifacts()
         
@@ -287,6 +299,7 @@ class TestArtifactManager:
         operation_id = "test-op-123"
         
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -319,11 +332,11 @@ class TestArtifactManager:
             f.write("Another test file")
         
         # Create artifacts for target operation
-        artifact_manager.create_artifact(operation_id, test_file, "File 1", "log")
-        artifact_manager.create_artifact(operation_id, test_file2, "File 2", "data")
+        artifact_manager.create_artifact("test-source", operation_id, test_file, "File 1", "log")
+        artifact_manager.create_artifact("test-source", operation_id, test_file2, "File 2", "data")
         
         # Create artifact for other operation
-        artifact_manager.create_artifact(other_operation_id, test_file, "File 3", "log")
+        artifact_manager.create_artifact("test-source", other_operation_id, test_file, "File 3", "log")
         
         # Verify initial state
         target_artifacts = artifact_manager.get_artifacts_by_operation(operation_id)
@@ -345,6 +358,7 @@ class TestArtifactManager:
         # Create artifact with first manager instance
         am1 = ArtifactManager(base_dir=temp_dir)
         artifact_id = am1.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Persistent Test",
@@ -382,6 +396,7 @@ class TestArtifactManager:
         
         # Create artifact
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -391,7 +406,8 @@ class TestArtifactManager:
         
         # Get original artifact
         original_artifact = artifact_manager.get_artifact(artifact_id)
-        assert original_artifact.modified_at is None
+        original_modified_at = original_artifact.modified_at
+        assert original_modified_at == original_artifact.created_at  # Initially same
         original_checksum = original_artifact.checksum
         
         # Update metadata
@@ -404,7 +420,7 @@ class TestArtifactManager:
         
         # Verify updates
         updated_artifact = artifact_manager.get_artifact(artifact_id)
-        assert updated_artifact.modified_at is not None
+        assert updated_artifact.modified_at != original_modified_at  # Should be different now
         assert updated_artifact.metadata["version"] == 2
         assert updated_artifact.metadata["source"] == "test"  # Original metadata preserved
         assert updated_artifact.metadata["updated_by"] == "test_suite"
@@ -416,6 +432,7 @@ class TestArtifactManager:
         
         # Create artifact
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -463,6 +480,7 @@ class TestArtifactManager:
         
         # Create artifact
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -477,11 +495,12 @@ class TestArtifactManager:
         
         assert result is False
     
-    def test_create_artifact_has_no_modified_at(self, artifact_manager, test_file):
-        """Test that newly created artifacts have modified_at as None."""
+    def test_create_artifact_has_modified_at_set_to_created_at(self, artifact_manager, test_file):
+        """Test that newly created artifacts have modified_at set to created_at."""
         operation_id = "test-op-123"
         
         artifact_id = artifact_manager.create_artifact(
+            source_id="test-source",
             operation_id=operation_id,
             file_path=test_file,
             name="Test Log",
@@ -489,7 +508,7 @@ class TestArtifactManager:
         )
         
         artifact = artifact_manager.get_artifact(artifact_id)
-        assert artifact.modified_at is None
+        assert artifact.modified_at == artifact.created_at
 
 
 class TestGlobalArtifactManager:

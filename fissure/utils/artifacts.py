@@ -14,16 +14,17 @@ import logging
 @dataclass
 class Artifact:
     """Represents an artifact created by an operation."""
-    id: str
-    operation_id: str
-    name: str
-    file_path: str
-    artifact_type: str
-    created_at: str
-    file_size: int
-    metadata: Dict[str, Any]
-    modified_at: Optional[str] = None
-    checksum: Optional[str] = None
+    id: str # Unique ID for the artifact
+    source_id: str # ID of the source that created the artifact
+    operation_id: str # ID of the operation that created the artifact
+    name: str # Human-readable name for the artifact
+    file_path: str # Path to the artifact file
+    artifact_type: str # Type of artifact (e.g., "log", "data", "image")
+    file_size: int # Size of the artifact file in bytes
+    created_at: str # ISO formatted creation timestamp
+    modified_at: str # ISO formatted modification timestamp
+    metadata: Dict[str, Any] # Additional metadata for the artifact
+    checksum: str # SHA256 checksum of the artifact file
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert artifact to dictionary for JSON serialization."""
@@ -35,7 +36,7 @@ class Artifact:
         return cls(**data)
 
 
-class ArtifactManager:
+class ArtifactManager(object):
     """Manages artifacts on the sensor node."""
     
     def __init__(self, base_dir: Union[str, None] = None, logger: Union[logging.Logger, None] = None):
@@ -49,17 +50,13 @@ class ArtifactManager:
             Logger instance, defaults to None to use module logger
         """
         if base_dir is None:
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts"
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_node"
         self.base_dir = base_dir
+        os.makedirs(base_dir, exist_ok=True)
         self.logger = logger or logging.getLogger(__name__)
         self.index_file = os.path.join(base_dir, "index.json")
-        
-        # Ensure base directory exists
-        os.makedirs(base_dir, exist_ok=True)
-        
-        # Load existing index
         self._artifacts = self._load_index()
-    
+
     def _load_index(self) -> Dict[str, Artifact]:
         """Load the artifact index from disk.
         
@@ -86,7 +83,7 @@ class ArtifactManager:
                 json.dump(data, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save artifact index: {e}")
-    
+
     def _calculate_checksum(self, file_path: str) -> str:
         """Calculate SHA256 checksum of a file.
         
@@ -162,11 +159,13 @@ class ArtifactManager:
         _, file_dir = self.create_operation_dir(operation_id)
         return os.path.join(file_dir, str(uuid.uuid4()) + ext)
 
-    def create_artifact(self, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
+    def create_artifact(self, source_id: str, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
         """Create a new artifact record.
         
         Parameters
         ----------
+        source_id : str
+            ID of the source that created the artifact
         operation_id : str
             ID of the operation that created the artifact
         file_path : str
@@ -211,25 +210,28 @@ class ArtifactManager:
         checksum = self._calculate_checksum(file_path)
 
         # Create artifact record
+        created_at = datetime.now().isoformat()
         artifact = Artifact(
             id=artifact_id,
+            source_id=source_id,
             operation_id=operation_id,
             name=name,
             file_path=file_path,
             artifact_type=artifact_type,
-            created_at=datetime.now().isoformat(),
+            created_at=created_at,
+            modified_at=created_at,
             file_size=file_size,
             checksum=checksum,
             metadata=metadata or {}
         )
-        
+
         # Store in index
         self._artifacts[artifact_id] = artifact
         self._save_index()
         
         self.logger.info(f"Created artifact {artifact_id}: {name} ({artifact_type})")
         return artifact_id
-    
+
     def get_artifact(self, artifact_id: str) -> Optional[Artifact]:
         """Get an artifact by ID.
         
@@ -376,6 +378,162 @@ class ArtifactManager:
         
         return deleted_count
 
+
+class ArtifactTracker(object):
+    """Tracks artifacts across the system."""
+    def __init__(self, base_dir: Union[str, None] = None, logger: Union[logging.Logger, None] = None):
+        """Initialize the artifact manager.
+        
+        Parameters
+        ----------
+        base_dir : Union[str, None], optional
+            Base directory for storing artifacts, defaults to None to use "artifacts_system" directory in FISSURE root
+        logger : Union[logging.Logger, None], optional
+            Logger instance, defaults to None to use module logger
+        """
+        if base_dir is None:
+            # default to system-specific artifacts directory
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_system"
+        self.base_dir = base_dir
+        self.logger = logger or logging.getLogger(__name__)
+        self.index_file = os.path.join(base_dir, "index.json")
+        
+        # Ensure base directory exists
+        os.makedirs(base_dir, exist_ok=True)
+        
+        # Load existing index
+        self._artifacts = self._load_index()
+
+    def _load_index(self) -> Dict[str, Artifact]:
+        """Load the artifact index from disk.
+        
+        Returns
+        -------
+        Dict[str, Artifact]
+            Mapping of artifact IDs to Artifact instances
+        """
+        if not os.path.exists(self.index_file):
+            return {}
+        try:
+            with open(self.index_file, 'r') as f:
+                data = json.load(f)
+            return {aid: Artifact.from_dict(artifact_data) for aid, artifact_data in data.items()}
+        except Exception as e:
+            self.logger.error(f"Failed to load artifact index: {e}")
+            return {}
+    
+    def _save_index(self) -> None:
+        """Save the artifact index to disk."""
+        try:
+            data = {aid: artifact.to_dict() for aid, artifact in self._artifacts.items()}
+            with open(self.index_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            self.logger.error(f"Failed to save artifact index: {e}")
+
+    def sync_index(self, artifacts: List[Union[Artifact, dict]]) -> None:
+        """Update the artifact index with a provided list of artifacts.
+
+        Parameters
+        ----------
+        artifacts : List[Union[Artifact, dict]]
+            List of artifacts to sync
+        """
+        for artifact in artifacts:
+            self.add_artifact(artifact, update_index=False)
+        self._save_index()
+
+    def add_artifact(self, artifact: Union[Artifact, dict], update_index: bool = True) -> None:
+        """Add an artifact to the tracker.
+
+        Parameters
+        ----------
+        artifact : Union[Artifact, dict]
+            The artifact to add, either as an Artifact instance or a dictionary
+        update_index : bool, optional
+            Whether to update the index file after adding, by default True
+        """
+        if isinstance(artifact, dict):
+            artifact = Artifact.from_dict(artifact)
+        if artifact.id in self._artifacts and self._artifacts[artifact.id].checksum == artifact.checksum:
+            self.logger.debug(f"Artifact {artifact.id} already exists with same checksum; skipping add")
+            return  # No action needed for duplicate with same checksum
+        self.logger.debug(f"Adding artifact {artifact.id}: {artifact.name}")
+        self._artifacts[artifact.id] = artifact
+        if update_index:
+            self.logger.info(f"Artifact {artifact.id} added to tracker")
+            self._save_index()
+
+    def get_artifact(self, artifact_id: str) -> Optional[Artifact]:
+        """Get an artifact by ID.
+        
+        Parameters
+        ----------
+        artifact_id : str
+            The artifact ID
+            
+        Returns
+        -------
+        Optional[Artifact]
+            The artifact or None if not found
+        """
+        return self._artifacts.get(artifact_id)
+
+    def update_artifact(self, artifact: Union[Artifact, dict]) -> bool:
+        """Update an artifact's metadata and optionally its file.
+        
+        Parameters
+        ----------
+        artifact : Union[Artifact, dict]
+            The artifact to update, either as an Artifact instance or a dictionary
+
+        Returns
+        -------
+        bool
+            True if updated successfully, False otherwise
+        """
+        if isinstance(artifact, dict):
+            artifact = Artifact.from_dict(artifact)
+
+        existing_artifact = self._artifacts.get(artifact.id)
+        if not existing_artifact:
+            self.add_artifact(artifact)
+            return True
+
+        existing_artifact.name = artifact.name
+        existing_artifact.artifact_type = artifact.artifact_type
+        existing_artifact.metadata.update(artifact.metadata)
+        if artifact.file_path:
+            existing_artifact.file_path = artifact.file_path
+        existing_artifact.file_size = artifact.file_size
+        existing_artifact.modified_at = artifact.modified_at
+        existing_artifact.checksum = artifact.checksum
+
+        self._save_index()
+        self.logger.info(f"Updated artifact {artifact.id}: {artifact.name}")
+        return True
+
+    def get_artifacts_source_id(self, source_id: str, sortby: Optional[str] = None) -> List[Artifact]:
+        """Get all artifacts created by a specific source.
+
+        Parameters
+        ----------
+        source_id : str
+            The source ID
+        sortby : Optional[str], optional
+            Metadata key to sort by, by default None
+
+        Returns
+        -------
+        List[Artifact]
+            List of artifacts created by the source
+        """
+        artifacts = [artifact for artifact in self._artifacts.values() if artifact.source_id == source_id]
+
+        if sortby is not None:
+            artifacts = sorted(artifacts, key=lambda x: x.__getattribute__(sortby))
+
+        return artifacts
 
 # Global artifact manager instance
 _artifact_manager = None
