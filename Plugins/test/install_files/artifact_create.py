@@ -9,15 +9,15 @@ import sys
 from typing import Callable, Union
 
 try:
-    from fissure.utils.plugins.operations import Operation
+    from fissure.utils.plugins.operations import Operation, ArtifactManager
 except ImportError:
     # add fissure to path and import modules
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-    from fissure.utils.plugins.operations import Operation
+    from fissure.utils.plugins.operations import Operation, ArtifactManager
 
 class OperationMain(Operation):
     """Artifact Creation Test Operation"""
-    def __init__(self, frequency: int = 10, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: Union[Callable, None] = None, tak_cot_callback: Union[Callable, None] = None) -> None:
+    def __init__(self, frequency: int = 10, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: Union[Callable, None] = None, tak_cot_callback: Union[Callable, None] = None, artifact_manager: Union[ArtifactManager, None] = None) -> None:
         """Initialize the Artifact Creation Test Operation.
 
         Parameters
@@ -28,16 +28,20 @@ class OperationMain(Operation):
             The ID of the sensor node, by default 0
         logger : logging.Logger, optional
             Logger instance for logging, by default None
-        alert_callback : callable, optional
-            Callback function for alerts, by default None
-        tak_cot_callback : callable, optional
-            Callback function for TAK CoT messages, by default None
+        alert_callback : Union[Callable, None], optional
+            Callback function for alerts, by default None for logger-only alerts
+        tak_cot_callback : Union[Callable, None], optional
+            Callback function for TAK CoT messages, by default None for logger-only TAK CoT messages
+        artifact_manager : Union[ArtifactManager, None], optional
+            ArtifactManager instance for managing artifacts, by default None to use the global artifact manager
         """
         # templated common init
-        super().__init__(sensor_node_id=sensor_node_id, logger=logger, alert_callback=alert_callback, tak_cot_callback=tak_cot_callback)
+        super().__init__(sensor_node_id=sensor_node_id, logger=logger, alert_callback=alert_callback, tak_cot_callback=tak_cot_callback, artifact_manager=artifact_manager)
 
         # developer defined init
         self.frequency = int(frequency)
+
+        self._stop = False
 
     async def run(self) -> None:
         """Run the Artifact Creation Test Operation."""

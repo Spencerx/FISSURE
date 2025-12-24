@@ -382,7 +382,7 @@ class ArtifactManager(object):
 class ArtifactTracker(object):
     """Tracks artifacts across the system."""
     def __init__(self, base_dir: Union[str, None] = None, logger: Union[logging.Logger, None] = None):
-        """Initialize the artifact manager.
+        """Initialize the artifact tracker.
         
         Parameters
         ----------

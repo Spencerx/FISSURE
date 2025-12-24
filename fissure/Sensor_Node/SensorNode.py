@@ -299,6 +299,18 @@ class SensorNode(object):
         # initialize artifact manager
         self.artifact_manager = ArtifactManager(logger=self.logger)
 
+        # Store reference to original create_artifact method
+        self._original_create_artifact = self.artifact_manager.create_artifact
+        
+        # overload artifact manager create artifact to notify hiprfisr
+        def create_artifact_wrapper(source_id: str, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
+            # Call original synchronous method
+            artifact_id = self._original_create_artifact(source_id, operation_id, file_path, name, artifact_type, metadata)
+            # Schedule async notification in background
+            asyncio.create_task(self._notify_hiprfisr_of_artifact(artifact_id))
+            return artifact_id
+        self.artifact_manager.create_artifact = create_artifact_wrapper
+
     async def initialize_comms(self):
         if self.network_type == "IP":
 
@@ -483,50 +495,20 @@ class SensorNode(object):
                 ]
             }
 
-        # Send message
-        msg = {
-            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  # TODO: meshtastic socket support
 
-
-    async def create_artifact(self, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
-        """Create a new artifact record.
+    async def _notify_hiprfisr_of_artifact(self, artifact_id: str) -> None:
+        """Notify HIPRFISR of a new artifact (async helper method).
         
         Parameters
         ----------
-        operation_id : str
-            ID of the operation that created the artifact
-        file_path : str
-            Path to the artifact file
-        name : str
-            Human-readable name for the artifact
-        artifact_type : str
-            Type of artifact (e.g., "log", "data", "image")
-        metadata : Dict[str, Any], optional
-            Additional metadata for the artifact
-            
-        Returns
-        -------
-        str
-            The artifact ID
+        artifact_id : str
+            The artifact ID to notify about
         """
-        artifact_id = self.artifact_manager.create_artifact(
-            source_id=self.identifier,
-            operation_id=operation_id,
-            file_path=file_path,
-            name=name,
-            artifact_type=artifact_type,
-            metadata=metadata
-        )
-
         # notify hiprfisr of new artifact
         artifact = self.artifact_manager.get_artifact(artifact_id)
         if artifact is None:
             self.logger.error(f"Failed to retrieve newly created artifact {artifact_id} for notification.")
-            return artifact_id
+            return
         PARAMETERS = {
             "artifact": artifact.to_dict()
         }
@@ -602,6 +584,7 @@ class SensorNode(object):
         parameters["sensor_node_id"] = sensor_node_id
         parameters["alert_callback"] = self.send_alert
         parameters["tak_cot_callback"] = self.send_tak_cot
+        parameters["artifact_manager"] = self.artifact_manager
         parameters["logger"] = self.logger
 
         # Initialize the operation class instance

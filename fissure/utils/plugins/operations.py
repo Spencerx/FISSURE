@@ -9,12 +9,12 @@ import os
 import uuid
 import re
 import sys
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, Callable
 
 from fissure.Sensor_Node.utils.resources import Resource
-from fissure.utils.artifacts import get_artifact_manager
+from fissure.utils.artifacts import ArtifactManager, get_artifact_manager
 
-_base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback']
+_base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback', 'artifact_manager']
 
 async def send_alert(sensor_node_id: Union[int, str], opid: str, message: str, logger=logging.getLogger(__name__)) -> None:
     """Placeholder for alert callback if none is provided.
@@ -106,7 +106,7 @@ def run_decorator(func):
         return
     return wrapper
 
-def stop_decorator(func) -> None:
+def stop_decorator(func) -> Callable:
     async def wrapper(self) -> None:
         self.logger.info(f"Stopping {self.__class__.__name__}...")
         self._stop = True
@@ -117,7 +117,7 @@ def stop_decorator(func) -> None:
         self.logger.info(f"{self.__class__.__name__} stopped.")
     return wrapper
 
-def teardown_decorator(func) -> None:
+def teardown_decorator(func) -> Callable:
     async def wrapper(self) -> None:
         self.logger.info(f"Tearing down operation environment for {self.__class__.__name__}...")
 
@@ -183,7 +183,7 @@ def operation_class_decorator(cls):
 class Operation(object):
     """Base class for plugin operations.
     """
-    def __init__(self, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: callable = None, tak_cot_callback: callable = None) -> None:
+    def __init__(self, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: Union[Callable, None] = None, tak_cot_callback: Union[Callable, None] = None, artifact_manager: Union[ArtifactManager, None] = None) -> None:
         """Initialize the Operation class.
 
         Parameters
@@ -192,10 +192,12 @@ class Operation(object):
             The ID of the sensor node, by default 0
         logger : logging.Logger, optional
             Logger instance for logging, by default logging.getLogger(__name__)
-        alert_callback : callable, optional
-            Callback function for alerts, by default None
-        tak_cot_callback : callable, optional
-            Callback function for TAK CoT messages, by default None
+        alert_callback : Union[Callable, None], optional
+            Callback function for alerts, by default None for logger-only alerts
+        tak_cot_callback : Union[Callable, None], optional
+            Callback function for TAK CoT messages, by default None for logger-only TAK CoT messages
+        artifact_manager : Union[ArtifactManager, None], optional
+            ArtifactManager instance for managing artifacts, by default None to use the global artifact manager
         """
         # input parameters
         self.sensor_node_id = sensor_node_id
@@ -206,12 +208,13 @@ class Operation(object):
             tak_cot_callback = send_tak_cot
         self.alert_callback = alert_callback
         self.tak_cot_callback = tak_cot_callback
+        if artifact_manager is not None:
+            self.artifact_manager = artifact_manager
+        else:
+            self.artifact_manager = get_artifact_manager()
 
         # unique operation ID
         self.opid = str(uuid.uuid4())
-
-        # create artifact manager instance
-        self.artifact_manager = get_artifact_manager()
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -355,7 +358,7 @@ class Operation(object):
         self.logger.info(f"Resources defined: {resources}")
         self.resources = [
             Resource(
-                pid=os.getpid(),
+                pid=str(os.getpid()),
                 op_uuid=self.opid,
                 type=res_info.get('type'),
                 model=res_info.get('model'),

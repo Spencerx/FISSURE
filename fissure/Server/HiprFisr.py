@@ -24,6 +24,7 @@ import pytak
 import pytak
 from fissure.utils.tak_server import load_config as load_tak_config
 from fissure.utils.tak_server import TakReceiver
+from fissure.utils.artifacts import ArtifactTracker
 
 HEARTBEAT_LOOP_DELAY = 0.1  # Seconds
 EVENT_LOOP_DELAY = 0.1
@@ -165,6 +166,9 @@ class HiprFisr:
         self.register_callbacks(fissure.callbacks.GenericCallbacks)
         self.register_callbacks(fissure.callbacks.HiprFisrCallbacks)
         self.register_callbacks(fissure.callbacks.HiprFisrCallbacksLT)
+
+        # Initialize artifact tracker
+        self.artifact_tracker = ArtifactTracker(logger=self.logger)
 
         self.logger.info("=== READY ===")
         self.logger.info(f"Server listening @ {listen_addr}")

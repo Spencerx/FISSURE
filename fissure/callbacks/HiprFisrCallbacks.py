@@ -4612,3 +4612,35 @@ async def pluginOperationStopped(component: object, sensor_node_id: int, operati
     }
     if component.dashboard_connected:
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+def updateArtifact(component: object, artifact: dict):
+    """Handle New or Updated Artifact Event
+
+    Parameters
+    ----------
+    component : object
+        Component
+    artifact : dict
+        Artifact data
+    """
+    artifact_id = artifact.get('id', None)
+    if artifact_id is None:
+        component.logger.error("Artifact missing 'id' field")
+        return
+
+    if not artifact.get('source_id') == component.local_node_uuid:
+        # Remote artifact; handle file path
+        file_path = artifact.get('file_path')
+        checksum = artifact.get('checksum')
+        if os.path.exists(file_path) and checksum is not None:
+            existing_artifact = component.artifact_tracker.get_artifact(artifact_id)
+            if existing_artifact is not None:
+                if existing_artifact.get('checksum') == checksum:
+                    existing_file_path = existing_artifact.get('file_path')
+                    if os.path.exists(existing_file_path):
+                        artifact.file_path = existing_file_path
+                else:
+                    artifact.file_path = f"sensor-{artifact.get('source_id')}://{artifact.file_path}"
+
+    component.artifact_tracker.update_artifact(artifact)
