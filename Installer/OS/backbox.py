@@ -88,6 +88,7 @@ sudo python3 -m pip install msgpack
 sudo python3 -m pip install eventlet
 sudo python3 -m pip install psycopg2-binary
 sudo python3 -m pip install python-dotenv
+sudo apt-get install -y iw
 . ~/.bashrc
 """,True,"Minimum Install"))
 

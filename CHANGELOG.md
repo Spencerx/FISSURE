@@ -1,6 +1,48 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-19
+
+Updating the FISSURE plugin to TAK message chain to pass dictionaries.
+
+### Added
+
+- Added "iw" package to the installer
+- hackrf_sweep and rtl_power detectors in the Tools folder for scanning specific frequency bands
+
+### Changed
+
+- Removed HIPRFISR TAK send code and replaced with utility calls in the callback functions.
+- Renamed HIPRFISR callback for TAK messages to takReturn()
+- Updated SensorNode.py send_tak_cot() to use a dictionary when accepting inputs from FISSURE plugins and sending to the HIPRFISR
+- Updated GPS beacons and plugin querying returns to use new dictionaries for TAK messages
+
+### Fixed
+
+- Added support for optional dictionary fields in tak_messages.py utilities
+
+## 2025-12-17
+
+Updating TAK messaging.
+
+### Added
+
+- Added unified TAK message API supporting pin, event, and track message types
+- Added structured XML payloads under "fissure" for plugin lists, actions, detections, SOIs, and targets
+- Added automatic UID generation for event messages to prevent map icon conflicts
+- Added tak_messages.py utility file for uniformity
+
+### Changed
+
+- Replaced remarks-based message parsing with structured XML parsing
+- Using pytak for sending all messages to TAK
+- Updated plugin_list and plugin_action responses to use new formatting
+
+### Fixed
+
+- Fixed malformed XML issues caused by manual CoT construction
+- Fixed suppressed-point events appearing as pins on the map
+
 ## 2025-12-15
 
 Fixing pytak installer and freezing bugs.

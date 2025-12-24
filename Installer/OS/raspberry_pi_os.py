@@ -98,6 +98,7 @@ sudo python3 -m pip install eventlet --break-system-packages
 sudo python3 -m pip install psycopg2-binary --break-system-packages
 sudo python3 -m pip install python-dotenv --break-system-packages
 sudo python3 -m pip install "numpy<2.0" --force-reinstall --break-system-packages  # newer versions cause issues
+sudo apt-get install -y iw
 . ~/.bashrc
 """,True,"Minimum Install"))
 
