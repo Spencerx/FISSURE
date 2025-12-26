@@ -4745,7 +4745,7 @@ async def pluginOperationStopped(component: object, sensor_node_id: int, operati
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-def updateArtifact(component: object, artifact: dict):
+async def updateArtifact(component: object, artifact: dict) -> None:
     """Handle New or Updated Artifact Event
 
     Parameters
@@ -4760,7 +4760,8 @@ def updateArtifact(component: object, artifact: dict):
         component.logger.error("Artifact missing 'id' field")
         return
 
-    if not artifact.get('source_id') == component.local_node_uuid:
+    source_id = artifact.get('source_id')
+    if not source_id == component.local_node_uuid:
         # Remote artifact; handle file path
         file_path = artifact.get('file_path')
         checksum = artifact.get('checksum')
@@ -4772,6 +4773,37 @@ def updateArtifact(component: object, artifact: dict):
                     if os.path.exists(existing_file_path):
                         artifact.file_path = existing_file_path
                 else:
-                    artifact.file_path = f"sensor-{artifact.get('source_id')}://{artifact.file_path}"
+                    artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
 
     component.artifact_tracker.update_artifact(artifact)
+
+    component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {source_id}")
+
+    name = artifact.get("name", None)
+    if name is None:
+        component.logger.error("Artifact missing 'name' field, cannot send metadata to TAK")
+        return
+    
+    timestamp = artifact.get("modified_at", None)
+    if timestamp is None:
+        component.logger.error("Artifact missing 'modified_at' field, cannot send metadata to TAK")
+        return
+
+    artid = artifact.get("id", None)
+    if artid is None:
+        component.logger.error("Artifact missing 'id' field, cannot send metadata to TAK")
+        return
+
+    event_uid = f"{source_id}-artifact_metadata-{int(time.time()*1000)}"
+    msg = {
+        "msg_type": "event",
+        "uid": event_uid,
+        "data": {
+            "event_type": "artifact_metadata",
+            "name": name,
+            "timestamp": timestamp,
+            "artid": artid
+        }
+    }
+
+    await fissure.utils.tak_messages.send(component, msg)
