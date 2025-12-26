@@ -155,6 +155,11 @@ class TakReceiver(pytak.QueueWorker):
                 elif remarks.text.startswith("FTN Requested: Plugin Action Stop"):
                     self._logger.info(f"FTN Plugin Stop Requested for UID: {uid}")
                     await HiprFisrCallbacks.stop_all_plugin_operations(self.hipfisr, uid, sensor_node_id=0)
+                elif remarks.text.startswith("FTN Requested: Artifact Download:"):
+                    artid = remarks.text.split("FTN Requested: Artifact Download:")[-1].strip()
+                    self._logger.info(f"FTN Artifact Download Requested for artifact id: {artid}")
+                    # TODO: implement artifact download sending
+                    #await HiprFisrCallbacks.sendArtifactFileTak(self.hipfisr, uid, artid, sensor_node_id=0)
         except ET.ParseError as e:
             self._logger.error("XML Parse Error: %s", e)
 
