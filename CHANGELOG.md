@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2025-12-29
+
+Updating OpenWebRX installer.
+
+### Fixed
+
+- Removing interactive installer for OpenWebRX and adding prints for password prompts.
+
 ## 2025-12-19
 
 Updating the FISSURE plugin to TAK message chain to pass dictionaries.

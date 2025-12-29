@@ -2303,10 +2303,12 @@ ls ~/Installed_by_FISSURE/dump978/dump978
 
 # # OpenWebRX
 # programs_dragonOS_noble.append(('OpenWebRX',
-# """wget -O - https://repo.openwebrx.de/debian/key.gpg.txt | sudo apt-key add
+# """echo -e "\nEnter sudo password for adding key (hidden prompt)\n"
+# wget -O - https://repo.openwebrx.de/debian/key.gpg.txt | sudo apt-key add
 # echo 'deb https://repo.openwebrx.de/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/openwebrx.list
 # sudo apt-get update
-# sudo apt-get install -y openwebrx
+# sudo DEBIAN_FRONTEND=noninteractive apt-get install -y openwebrx
+# sudo openwebrx admin adduser admin
 # sudo systemctl stop openwebrx
 # sudo systemctl disable openwebrx  # Prevents starting on boot
 # ########## Verify ##########
