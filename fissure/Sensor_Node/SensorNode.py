@@ -305,7 +305,7 @@ class SensorNode(object):
         # overload artifact manager create artifact to notify hiprfisr
         def create_artifact_wrapper(source_id: str, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
             # Call original synchronous method
-            artifact_id = self._original_create_artifact(source_id, operation_id, file_path, name, artifact_type, metadata)
+            artifact_id = self._original_create_artifact(self.uuid, operation_id, file_path, name, artifact_type, metadata)
             # Schedule async notification in background
             asyncio.create_task(self._notify_hiprfisr_of_artifact(artifact_id))
             return artifact_id
