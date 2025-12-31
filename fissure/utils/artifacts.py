@@ -9,48 +9,146 @@ from datetime import datetime
 from dataclasses import dataclass, asdict
 from typing import List, Optional, Dict, Any, Union, Tuple
 import logging
+import gzip
+import re
+
+ARTIFACT_NODE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_node"
+ARTIFACT_SYSTEM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_system"
+
+
+def calculate_file_checksum(file_path: str) -> str:
+    """Calculate SHA256 checksum of a file.
+    
+    Parameters
+    ----------
+    file_path : str
+        Path to the file
+
+    Returns
+    -------
+    str
+        SHA256 checksum of the file
+    """
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
 
 
 @dataclass
 class Artifact:
     """Represents an artifact created by an operation."""
-    id: str # Unique ID for the artifact
-    source_id: str # ID of the source that created the artifact
-    operation_id: str # ID of the operation that created the artifact
-    name: str # Human-readable name for the artifact
-    file_path: str # Path to the artifact file
-    artifact_type: str # Type of artifact (e.g., "log", "data", "image")
-    file_size: int # Size of the artifact file in bytes
-    created_at: str # ISO formatted creation timestamp
-    modified_at: str # ISO formatted modification timestamp
-    metadata: Dict[str, Any] # Additional metadata for the artifact
-    checksum: str # SHA256 checksum of the artifact file
+    id: str  # Unique ID for the artifact
+    source_id: str  # ID of the source that created the artifact
+    operation_id: str  # ID of the operation that created the artifact
+    name: str  # Human-readable name for the artifact
+    file_path: str  # Path to the artifact file
+    artifact_type: str  # Type of artifact (e.g., "log", "data", "image")
+    file_size: int  # Size of the artifact file in bytes
+    created_at: str  # ISO formatted creation timestamp
+    modified_at: str  # ISO formatted modification timestamp
+    metadata: Dict[str, Any]  # Additional metadata for the artifact
+    checksum: str  # SHA256 checksum of the artifact file
+
+    def __post_init__(self):
+        """Validate that no fields are None."""
+        for field_name, field_value in self.__dict__.items():
+            if field_value is None:
+                raise ValueError(f"Field '{field_name}' cannot be None")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert artifact to dictionary for JSON serialization."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Artifact':
-        """Create artifact from dictionary."""
+    def from_dict(cls, data: Dict[str, Any], enforce_fields: bool = False) -> 'Artifact':
+        """Create artifact from dictionary.
+        
+        Parameters
+        ----------
+        data : Dict[str, Any]
+            Dictionary representation of the artifact
+        enforce_fields : bool, optional
+            Whether to enforce presence of all fields, by default False
+        """
+        if 'id' not in data or data['id'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: id")
+            data['id'] = str(uuid.uuid4())
+
+        if 'source_id' not in data or data['source_id'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: source_id")
+            data['source_id'] = "unknown_source"
+
+        if 'operation_id' not in data or data['operation_id'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: operation_id")
+            data['operation_id'] = "unknown_operation"
+
+        if 'name' not in data or data['name'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: name")
+            data['name'] = "unknown_artifact"
+
+        if 'file_path' not in data or data['file_path'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: file_path")
+            data['file_path'] = ""
+
+        if 'artifact_type' not in data or data['artifact_type'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: artifact_type")
+            data['artifact_type'] = "unknown_type"
+
+        if 'file_size' not in data or data['file_size'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: file_size")
+            if 'file_path' in data and os.path.exists(data['file_path']):
+                data['file_size'] = os.path.getsize(data['file_path'])
+            else:
+                data['file_size'] = 0
+
+        if 'created_at' not in data or data['created_at'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: created_at")
+            data['created_at'] = datetime.now().isoformat()
+
+        if 'modified_at' not in data or data['modified_at'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: modified_at")
+            data['modified_at'] = data['created_at']
+
+        if 'metadata' not in data or data['metadata'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: metadata")
+            data['metadata'] = {}
+
+        if 'checksum' not in data or data['checksum'] is None:
+            if enforce_fields:
+                raise ValueError("Missing required field: checksum")
+            if 'file_path' in data and os.path.exists(data['file_path']):
+                data['checksum'] = calculate_file_checksum(data['file_path'])
+            else:
+                data['checksum'] = ""
+
         return cls(**data)
 
 
 class ArtifactManager(object):
     """Manages artifacts on the sensor node."""
     
-    def __init__(self, base_dir: Union[str, None] = None, logger: Union[logging.Logger, None] = None):
+    def __init__(self, base_dir: str = ARTIFACT_NODE_DIR, logger: Union[logging.Logger, None] = None):
         """Initialize the artifact manager.
         
         Parameters
         ----------
         base_dir : Union[str, None], optional
-            Base directory for storing artifacts, defaults to None to use "artifacts" directory in FISSURE root
+            Base directory for storing artifacts, defaults to ARTIFACT_NODE_DIR
         logger : Union[logging.Logger, None], optional
             Logger instance, defaults to None to use module logger
         """
-        if base_dir is None:
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_node"
         self.base_dir = base_dir
         os.makedirs(base_dir, exist_ok=True)
         self.logger = logger or logging.getLogger(__name__)
@@ -97,12 +195,8 @@ class ArtifactManager(object):
         str
             SHA256 checksum of the file
         """
-        sha256_hash = hashlib.sha256()
         try:
-            with open(file_path, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(chunk)
-            return sha256_hash.hexdigest()
+            return calculate_file_checksum(file_path)
         except Exception as e:
             self.logger.error(f"Failed to calculate checksum for {file_path}: {e}")
             return ""
@@ -273,6 +367,45 @@ class ArtifactManager(object):
         """
         return list(self._artifacts.values())
 
+    def get_data(self, artifact_id: str, compress: bool = False) -> Optional[bytes]:
+        """Retrieve data from an artifact's file.
+
+        Parameters
+        ----------
+        artifact_id : str
+            The artifact ID
+        compress : bool, optional
+            Whether to compress the data after retrieval, by default False
+
+        Returns
+        -------
+        Optional[bytes]
+            The artifact data or None if not found/error
+        """
+        artifact = self._artifacts.get(artifact_id)
+        if not artifact:
+            self.logger.error(f"Artifact not found: {artifact_id}")
+            return None
+
+        if re.match(r'^sensor-[\w-]+://', artifact.file_path):
+            self.logger.error(f"Cannot retrieve data from remote artifact: {artifact.file_path}")
+            return None
+        elif not os.path.exists(artifact.file_path):
+            self.logger.error(f"Artifact file does not exist: {artifact.file_path}")
+            return None
+        
+        try:
+            with open(artifact.file_path, 'rb') as f:
+                data = f.read()
+        except Exception as e:
+            self.logger.error(f"Failed to read data from artifact {artifact_id}: {e}")
+            return None
+
+        if compress:
+            data = gzip.compress(data)
+
+        return data
+
     def update_artifact(self, artifact_id: str, file_path: Union[str, None] = None, metadata: Union[Dict[str, Any], None] = None) -> bool:
         """Update an artifact's metadata and optionally its file.
         
@@ -381,19 +514,16 @@ class ArtifactManager(object):
 
 class ArtifactTracker(object):
     """Tracks artifacts across the system."""
-    def __init__(self, base_dir: Union[str, None] = None, logger: Union[logging.Logger, None] = None):
+    def __init__(self, base_dir: str = ARTIFACT_SYSTEM_DIR, logger: Union[logging.Logger, None] = None):
         """Initialize the artifact tracker.
         
         Parameters
         ----------
         base_dir : Union[str, None], optional
-            Base directory for storing artifacts, defaults to None to use "artifacts_system" directory in FISSURE root
+            Base directory for storing artifacts, defaults to ARTIFACT_SYSTEM_DIR
         logger : Union[logging.Logger, None], optional
             Logger instance, defaults to None to use module logger
         """
-        if base_dir is None:
-            # default to system-specific artifacts directory
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_system"
         self.base_dir = base_dir
         self.logger = logger or logging.getLogger(__name__)
         self.index_file = os.path.join(base_dir, "index.json")
@@ -512,6 +642,96 @@ class ArtifactTracker(object):
         self._save_index()
         self.logger.info(f"Updated artifact {artifact.id}: {artifact.name}")
         return True
+
+    def save_data(self, artifact_id: str, data: bytes, compressed: bool = False) -> bool:
+        """Save data to an artifact's file.
+
+        Parameters
+        ----------
+        artifact_id : str
+            The artifact ID
+        data : bytes
+            The data to write to the artifact file
+        compressed : bool, optional
+            Whether to compress the data before saving, by default False
+
+        Returns
+        -------
+        bool
+            True if saved successfully, False otherwise
+        """
+        artifact = self._artifacts.get(artifact_id)
+        if not artifact:
+            self.logger.error(f"Artifact not found: {artifact_id}")
+            return False
+        
+        target_path = os.path.join(self.base_dir, artifact.source_id, artifact.operation_id, os.path.basename(artifact.file_path))
+
+        if compressed:
+            data = gzip.decompress(data)
+
+        try:
+            with open(target_path, 'wb') as f:
+                f.write(data)
+        except Exception as e:
+            self.logger.error(f"Failed to save data to artifact {artifact_id}: {e}")
+            return False
+
+        artifact.file_path = target_path
+
+        file_size = os.path.getsize(target_path)
+        if file_size != artifact.file_size:
+            self.logger.warning(f"File size mismatch when saving data to artifact {artifact_id}: expected {artifact.file_size}, got {file_size}")
+            artifact.file_size = file_size
+        
+        checksum_calc = calculate_file_checksum(target_path)
+        if checksum_calc != artifact.checksum:
+            self.logger.warning(f"Checksum mismatch when saving data to artifact {artifact_id}: expected {artifact.checksum}, got {checksum_calc}")
+            artifact.checksum = checksum_calc
+        
+        self._artifacts[artifact_id] = artifact
+        self._save_index()
+        self.logger.info(f"Saved data to artifact {artifact_id}: {artifact.name}")
+        return True
+
+    def get_data(self, artifact_id: str, compress: bool = False) -> Optional[bytes]:
+        """Retrieve data from an artifact's file.
+
+        Parameters
+        ----------
+        artifact_id : str
+            The artifact ID
+        compress : bool, optional
+            Whether to compress the data after retrieval, by default False
+
+        Returns
+        -------
+        Optional[bytes]
+            The artifact data or None if not found/error
+        """
+        artifact = self._artifacts.get(artifact_id)
+        if not artifact:
+            self.logger.error(f"Artifact not found: {artifact_id}")
+            return None
+
+        if re.match(r'^sensor-[\w-]+://', artifact.file_path):
+            self.logger.error(f"Cannot retrieve data from remote artifact: {artifact.file_path}")
+            return None
+        elif not os.path.exists(artifact.file_path):
+            self.logger.error(f"Artifact file does not exist: {artifact.file_path}")
+            return None
+        
+        try:
+            with open(artifact.file_path, 'rb') as f:
+                data = f.read()
+        except Exception as e:
+            self.logger.error(f"Failed to read data from artifact {artifact_id}: {e}")
+            return None
+
+        if compress:
+            data = gzip.compress(data)
+
+        return data
 
     def get_artifacts_source_id(self, source_id: str, sortby: Optional[str] = None) -> List[Artifact]:
         """Get all artifacts created by a specific source.

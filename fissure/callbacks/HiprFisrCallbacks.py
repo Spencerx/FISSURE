@@ -2,9 +2,10 @@
 # from fissure.comms.constants import *
 # from fissure_libutils import *
 import pytak
-from typing import List
+from typing import List, Optional
 import xml.etree.ElementTree as ET
 
+import base64
 import binascii
 import fissure.comms
 import fissure.utils
@@ -12,6 +13,8 @@ import fissure.utils.library
 from fissure.utils.common import PLUGIN_DIR
 from fissure.utils import plugin
 from fissure.utils import plugin_editor
+from fissure.utils.artifacts import ArtifactTracker
+from fissure.utils.tak_messages import create_artifact_data_package
 import os
 import time
 import yaml
@@ -4766,15 +4769,31 @@ async def updateArtifact(component: object, artifact: dict) -> None:
         file_path = artifact.get('file_path')
         checksum = artifact.get('checksum')
         if os.path.exists(file_path) and checksum is not None:
+            # a file exists; get existing artifact to compare checksum
             existing_artifact = component.artifact_tracker.get_artifact(artifact_id)
             if existing_artifact is not None:
+                # existing artifact; compare checksums
                 if existing_artifact.get('checksum') == checksum:
+                    # checksums match; use existing file path
                     existing_file_path = existing_artifact.get('file_path')
                     if os.path.exists(existing_file_path):
                         artifact.file_path = existing_file_path
                 else:
+                    # checksums do not match; set file path to sensor URI
                     artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
+            else:
+                # new artifact that points to a local file that exists; set file path to sensor URI
+                # calculate checksum of local file to verify
+                checksum = fissure.utils.calculate_file_checksum(file_path)
+                if checksum == artifact.get('checksum'):
+                    artifact.file_path = file_path
+                else:
+                    artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
+        else:
+            # artifact file does not exist locally; set file path to sensor URI
+            artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
 
+    # Update artifact tracker
     component.artifact_tracker.update_artifact(artifact)
 
     component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {source_id}")
@@ -4807,3 +4826,66 @@ async def updateArtifact(component: object, artifact: dict) -> None:
     }
 
     await fissure.utils.tak_messages.send(component, msg)
+
+
+async def transferArtifactRequest(component: object, artifact_id: str, destination: str, data: Optional[bytes]) -> None:
+    """Handle Artifact Transfer Request
+
+    Parameters
+    ----------
+    component : object
+        Component
+    artifact_id : str
+        Artifact ID
+    destination : str
+        Destination path, currently supported: 'tak', 'hiprfisr'
+    data : Optional[bytes]
+        File data if sent from source
+    """
+    artifact_tracker: ArtifactTracker = component.artifact_tracker
+
+    if data is not None:
+        # Received file data; save to local artifact path
+        if not artifact_tracker.save_data(artifact_id, data, compressed=True):
+            component.logger.error(f"Failed to save artifact data for artifact ID {artifact_id}")
+            return
+    else:
+        # No data received; determine if local data exists
+        data = artifact_tracker.get_data(artifact_id)
+
+        if data is None:
+            # no local data; request transfer from source
+            node_uuid = artifact['source_id']
+            PARAMETERS = {
+                "artifact_id": artifact_id,
+                "destination": destination,
+                "data": None
+            }
+            msg = {
+                fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "transferArtifactRequest",
+                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+
+            # Resolve Identity
+            identity = component.nodes[node_uuid].get("identity", None)
+            if identity is None:
+                component.logger.error(f"Could not resolve identity for sensor node UUID {node_uuid}")
+                return
+            
+            # Send through ROUTER
+            await component.sensor_node_router.send_msg(
+                fissure.comms.MessageTypes.COMMANDS,
+                msg,
+                target_ids=[identity]
+            )
+
+    if data is not None:
+        # Send data to destination
+        if destination == 'tak':
+            # Send artifact via TAK
+            artifact = component.artifact_tracker.get_artifact(artifact_id)
+            await fissure.utils.tak_messages.send_artifact_event(component, artifact, data)
+
+        elif destination == 'hiprfisr':
+            component.logger.info(f"Artifact {artifact_id} saved to hiprfisr")

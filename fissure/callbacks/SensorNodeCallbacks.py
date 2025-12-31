@@ -3,6 +3,8 @@ import fissure.comms
 import fissure.utils
 import fissure.utils.hardware
 from fissure.utils import plugin
+from fissure.utils.artifacts import ArtifactManager
+import logging
 import os
 import shutil
 import subprocess
@@ -15,6 +17,7 @@ import asyncio
 import zmq
 from typing import List
 import re
+from typing import Optional
 
 
 async def updateLoggingLevels(component: object, new_console_level="", new_file_level=""):
@@ -1676,3 +1679,41 @@ async def iwconfigIP(component: object, sensor_node_id: str):
         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
     }
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+async def transferArtifactRequest(component: object, artifact_id: str, destination: str, data: Optional[bytes]) -> None:
+    """
+    Transfer Artifact Request
+
+    Parameters
+    ----------
+    component : object
+        Component
+    artifact_id : str
+        Artifact ID
+    destination : str
+        Transfer destination ('tak' or 'hiprfisr')
+    data : Optional[bytes]
+        Artifact data, currently unused
+    """
+    logger: logging.Logger = component.logger # type: ignore
+    artifact_manager: ArtifactManager = component.artifact_manager # type: ignore
+
+    data = artifact_manager.get_data(artifact_id, compress=True)
+    if data is None:
+        logger.error(f"Artifact data not found or could not be read: {artifact_id}")
+        return
+
+    PARAMETERS = {
+        "artifact_id": artifact_id,
+        "destination": destination,
+        "data": data,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "transferArtifactRequest",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+    await component.hiprfisr_socket.send_msg(
+        fissure.comms.MessageTypes.COMMANDS, msg
+    )
