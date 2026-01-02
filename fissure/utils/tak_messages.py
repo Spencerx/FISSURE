@@ -437,6 +437,11 @@ async def send_artifact_event(component: object, artifact: Union[Artifact, dict]
     ackrequest.set("ackrequested", "true")
     ackrequest.set("tag", f"DP-{artifact.name[:20].upper().replace(' ', '_')}")
 
+    '''# TEMPORARY TEST: Target specific user "LONE STAR" for artifact download
+    dest = ET.SubElement(detail, "dest")
+    dest.set("callsign", "LONE STAR")
+    print(f"=== TARGETING ARTIFACT TO USER: LONE STAR ===")'''
+
     # Set point coordinates exactly like WinTAK (0,0 with high uncertainty)
     point = msg.find("point")
     if point is None:
@@ -695,21 +700,20 @@ def _create_tak_manifest_with_certs(artifact: Union[Artifact, dict], zip_entry_p
 
 
 async def upload_data_package_to_tak_server(tak_data: bytes, sha256_hash: str, filename: str, component) -> str:
-    """Upload data package to TAK server sync endpoint with improved error handling and fallback methods."""
+    """Upload data package to TAK server sync endpoint with proper client certificate authentication."""
     try:
         import aiohttp
         import ssl
         import socket
+        import tempfile
         
         # Get TAK server configuration
         fissure_config = get_fissure_config()
         tak_config = fissure_config.get('tak', {})
         
-        # Try both the configured port and the standard HTTPS API port
         tak_internal_ip = tak_config.get('ip_addr', 'localhost')
-        configured_port = tak_config.get('port', '8089')  # This is usually the raw CoT port
         api_port = '8443'  # Standard TAK server HTTPS API port
-        cert_path = tak_config.get('webadmin_cert', '')
+        p12_cert_path = tak_config.get('webadmin_cert', '')
         
         # Get external/host IP address for WinTAK clients to access
         external_ip = tak_config.get('external_ip')
@@ -723,49 +727,131 @@ async def upload_data_package_to_tak_server(tak_data: bytes, sha256_hash: str, f
                 external_ip = "169.254.152.101"
                 component.logger.warning(f"Could not auto-detect external IP, using fallback: {external_ip}")
         
-        component.logger.info(f"TAK server - Internal IP: {tak_internal_ip}, External IP: {external_ip}")
-        component.logger.info(f"TAK ports - Configured: {configured_port}, API: {api_port}")
+        component.logger.info(f"TAK server - Internal IP: {tak_internal_ip}:{api_port}, External IP: {external_ip}")
         
-        # Create SSL context
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        # Try different upload methods in order of preference
-        upload_success = False
+        # Download URL for clients
         download_url = f"https://{external_ip}:{api_port}/Marti/sync/content?hash={sha256_hash}"
         
-        # Method 1: Try standard API port (8443) with /Marti/sync/upload
-        if not upload_success:
+        # Check if P12 certificate exists
+        if not p12_cert_path or not os.path.exists(p12_cert_path):
+            component.logger.error(f"Client certificate not found: {p12_cert_path}")
+            component.logger.error("TAK server upload requires client certificate authentication")
+            return download_url
+        
+        component.logger.info(f"Using client certificate: {p12_cert_path}")
+        
+        # Convert P12 certificate to PEM for aiohttp
+        cert_pem_path = None
+        key_pem_path = None
+        
+        try:
+            # Import cryptography if available
+            try:
+                from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.primitives.serialization import pkcs12
+                
+                # Load P12 certificate
+                with open(p12_cert_path, 'rb') as f:
+                    p12_data = f.read()
+                
+                private_key, certificate, additional_certificates = pkcs12.load_key_and_certificates(
+                    p12_data, b'atakatak'  # Standard TAK password
+                )
+                
+                if private_key and certificate:
+                    # Convert to PEM format
+                    key_pem = private_key.private_bytes(
+                        encoding=serialization.Encoding.PEM,
+                        format=serialization.PrivateFormat.PKCS8,
+                        encryption_algorithm=serialization.NoEncryption()
+                    )
+                    
+                    cert_pem = certificate.public_bytes(serialization.Encoding.PEM)
+                    
+                    # Save to temporary files
+                    with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.key') as key_file:
+                        key_file.write(key_pem)
+                        key_pem_path = key_file.name
+                    
+                    with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.crt') as cert_file:
+                        cert_file.write(cert_pem)
+                        cert_pem_path = cert_file.name
+                    
+                    component.logger.info("✅ Successfully converted P12 to PEM format")
+                else:
+                    raise Exception("Could not extract key/certificate from P12 file")
+                    
+            except ImportError:
+                component.logger.error("cryptography library not available - cannot convert P12 certificate")
+                return download_url
+            
+            # Create SSL context with client certificate
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE  # Accept self-signed certs
+            ssl_context.load_cert_chain(cert_pem_path, key_pem_path)
+            
+            component.logger.info("✅ SSL context created with client certificate")
+            
+            # Prepare upload data
+            data = aiohttp.FormData()
+            data.add_field('assetfile', tak_data, filename=filename, content_type='application/zip')
+            
+            # Headers
+            headers = {
+                'User-Agent': 'FISSURE-TAK-Client/1.0',
+                'Accept': 'application/json, */*',
+                'Connection': 'close'
+            }
+            
+            # Try upload to TAK server
             upload_url = f"https://{tak_internal_ip}:{api_port}/Marti/sync/upload"
-            component.logger.info(f"Method 1: Trying upload to {upload_url}")
-            upload_success = await _attempt_upload(upload_url, tak_data, filename, sha256_hash, component, ssl_context)
-        
-        # Method 2: Try with /Marti/api/sync/upload (alternative endpoint)
-        if not upload_success:
-            upload_url = f"https://{tak_internal_ip}:{api_port}/Marti/api/sync/upload"
-            component.logger.info(f"Method 2: Trying upload to {upload_url}")
-            upload_success = await _attempt_upload(upload_url, tak_data, filename, sha256_hash, component, ssl_context)
-        
-        # Method 3: Try with configured port instead of 8443
-        if not upload_success and configured_port != api_port:
-            upload_url = f"https://{tak_internal_ip}:{configured_port}/Marti/sync/upload"
-            component.logger.info(f"Method 3: Trying upload to {upload_url}")
-            upload_success = await _attempt_upload(upload_url, tak_data, filename, sha256_hash, component, ssl_context)
-        
-        # Method 4: Try HTTP instead of HTTPS (some TAK servers might not use SSL for API)
-        if not upload_success:
-            upload_url = f"http://{tak_internal_ip}:{api_port}/Marti/sync/upload"
-            component.logger.info(f"Method 4: Trying HTTP upload to {upload_url}")
-            upload_success = await _attempt_upload_http(upload_url, tak_data, filename, sha256_hash, component)
-        
-        if upload_success:
-            component.logger.info(f"Successfully uploaded data package: {filename}")
-        else:
-            component.logger.warning("All upload methods failed - data package will need to be uploaded manually")
-            component.logger.info(f"Manual upload: Save package and upload via WebTAK interface")
-        
-        return download_url
+            component.logger.info(f"Uploading to: {upload_url}")
+            
+            async with aiohttp.ClientSession(
+                connector=aiohttp.TCPConnector(ssl=ssl_context),
+                timeout=aiohttp.ClientTimeout(total=60)
+            ) as session:
+                
+                component.logger.info(f"Uploading {len(tak_data)} bytes with client certificate...")
+                
+                async with session.post(upload_url, data=data, headers=headers) as response:
+                    component.logger.info(f"Upload response status: {response.status}")
+                    
+                    # Read response for debugging
+                    try:
+                        response_text = await response.text()
+                        if response_text:
+                            component.logger.info(f"Upload response: {response_text[:300]}")
+                    except Exception as e:
+                        component.logger.warning(f"Could not read response body: {e}")
+                    
+                    if response.status in [200, 201, 202]:
+                        component.logger.info("✅ Successfully uploaded data package to TAK server!")
+                        return download_url
+                    elif response.status == 409:
+                        component.logger.info("✅ Data package already exists on TAK server")
+                        return download_url
+                    elif response.status == 401:
+                        component.logger.error("❌ Authentication failed - check client certificate")
+                        return download_url
+                    elif response.status == 403:
+                        component.logger.error("❌ Forbidden - check TAK server permissions")
+                        return download_url
+                    else:
+                        component.logger.error(f"❌ Upload failed with HTTP {response.status}")
+                        return download_url
+            
+        except Exception as e:
+            component.logger.error(f"Certificate upload failed: {e}")
+            return download_url
+            
+        finally:
+            # Clean up temporary certificate files
+            if cert_pem_path and os.path.exists(cert_pem_path):
+                os.unlink(cert_pem_path)
+            if key_pem_path and os.path.exists(key_pem_path):
+                os.unlink(key_pem_path)
                     
     except ImportError:
         component.logger.warning("aiohttp not available - cannot upload to TAK server")
@@ -781,106 +867,3 @@ async def upload_data_package_to_tak_server(tak_data: bytes, sha256_hash: str, f
         external_ip = tak_config.get('external_ip', "169.254.152.101")
         download_url = f"https://{external_ip}:8443/Marti/sync/content?hash={sha256_hash}"
         return download_url
-
-
-async def _attempt_upload(upload_url: str, tak_data: bytes, filename: str, sha256_hash: str, component, ssl_context) -> bool:
-    """Attempt HTTPS upload with detailed error reporting."""
-    try:
-        import aiohttp
-        
-        # Prepare the file upload with standard multipart form
-        data = aiohttp.FormData()
-        data.add_field('assetfile', tak_data, filename=filename, content_type='application/zip')
-        
-        # Try with minimal headers first
-        headers = {
-            'User-Agent': 'FISSURE-TAK-Client/1.0',
-            'Accept': 'application/json, */*',
-            'Connection': 'close'
-        }
-        
-        async with aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(ssl=ssl_context),
-            timeout=aiohttp.ClientTimeout(total=60)
-        ) as session:
-            component.logger.info(f"Uploading {len(tak_data)} bytes...")
-            
-            async with session.post(upload_url, data=data, headers=headers) as response:
-                component.logger.info(f"Response status: {response.status}")
-                component.logger.info(f"Response headers: {dict(response.headers)}")
-                
-                # Try to read response body
-                try:
-                    response_text = await response.text()
-                    if response_text:
-                        component.logger.info(f"Response body: {response_text[:500]}")
-                    else:
-                        component.logger.info("Empty response body")
-                except Exception as e:
-                    component.logger.warning(f"Could not read response body: {e}")
-                    response_text = ""
-                
-                # Check for success status codes
-                if response.status in [200, 201, 202]:  # 202 = Accepted (async processing)
-                    component.logger.info("Upload successful!")
-                    return True
-                elif response.status == 409:
-                    component.logger.info("File already exists on server - treating as success")
-                    return True
-                elif response.status == 401:
-                    component.logger.error("Authentication required - upload failed")
-                    return False
-                elif response.status == 403:
-                    component.logger.error("Forbidden - check TAK server permissions")
-                    return False
-                elif response.status == 404:
-                    component.logger.error("Upload endpoint not found - trying alternative endpoint")
-                    return False
-                elif response.status == 500:
-                    component.logger.error("TAK server internal error")
-                    return False
-                else:
-                    component.logger.error(f"Unexpected response code: {response.status}")
-                    component.logger.error(f"This might be the 'Received unexpected http response code' error")
-                    return False
-                        
-    except aiohttp.ClientConnectorError as e:
-        component.logger.error(f"Connection error: {e}")
-        return False
-    except aiohttp.ClientResponseError as e:
-        component.logger.error(f"HTTP response error: {e}")
-        return False
-    except Exception as e:
-        component.logger.error(f"Upload attempt failed: {e}")
-        return False
-
-
-async def _attempt_upload_http(upload_url: str, tak_data: bytes, filename: str, sha256_hash: str, component) -> bool:
-    """Attempt HTTP upload (no SSL) as fallback."""
-    try:
-        import aiohttp
-        
-        data = aiohttp.FormData()
-        data.add_field('assetfile', tak_data, filename=filename, content_type='application/zip')
-        
-        headers = {
-            'User-Agent': 'FISSURE-TAK-Client/1.0',
-            'Accept': 'application/json, */*'
-        }
-        
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=60)) as session:
-            component.logger.info(f"Trying HTTP upload (no SSL)...")
-            
-            async with session.post(upload_url, data=data, headers=headers) as response:
-                component.logger.info(f"HTTP Response status: {response.status}")
-                
-                if response.status in [200, 201, 202, 409]:
-                    component.logger.info("HTTP upload successful!")
-                    return True
-                else:
-                    component.logger.error(f"HTTP upload failed with status: {response.status}")
-                    return False
-                        
-    except Exception as e:
-        component.logger.error(f"HTTP upload attempt failed: {e}")
-        return False
