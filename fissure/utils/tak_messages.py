@@ -307,48 +307,52 @@ def _format_xml_pretty(element):
 
 
 def create_artifact_data_package(artifact: Union[Artifact, dict], file_data: bytes) -> Tuple[bytes, str]:
-    """Create TAK-compatible data package for artifact with certificate signing."""
+    """Create TAK-compatible data package for artifact - WinTAK format (simplified, no certificates)."""
     
     if isinstance(artifact, dict):
         artifact = Artifact.from_dict(artifact)
 
-    # Get TAK certificate path from config
-    fissure_config = get_fissure_config()
-    cert_path = fissure_config['tak'].get('webadmin_cert')
-    
-    # Generate a proper package name and subdirectory structure like WinTAK
-    package_name = f"DP-{artifact.name[:20].upper()}"  # Max 20 chars, uppercase
+    # Generate a proper package name matching WinTAK conventions
+    package_name = f"DP-{artifact.name[:20].upper().replace(' ', '_')}"
     package_uid = artifact.id
     
-    # Create subdirectory like WinTAK does (using first part of artifact ID)
-    subdir = artifact.id.replace('-', '')[:32]  # Remove dashes, take first 32 chars
+    # Create subdirectory like WinTAK does (use sanitized artifact ID)
+    subdir = artifact.id.replace('-', '').replace('_', '')[:32]
+    if not subdir:
+        subdir = "artifacts"
     
     # Create temporary ZIP file
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as temp_zip:
         with zipfile.ZipFile(temp_zip.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
             # Add the artifact file in subdirectory structure like WinTAK
             artifact_filename = os.path.basename(artifact.file_path)
+            # Ensure we have a valid filename
+            if not artifact_filename:
+                artifact_filename = f"{artifact.name}.bin"
+            
             zip_entry_path = f"{subdir}/{artifact_filename}"
             zipf.writestr(zip_entry_path, file_data)
 
-            # Create MANIFEST.xml with certificate info
-            if cert_path and os.path.exists(cert_path):
-                manifest_xml = _create_tak_manifest_with_certs(artifact, zip_entry_path, cert_path)
-                print(f"\n=== SIGNED MANIFEST XML ===\n{manifest_xml}\n")
-            else:
-                # Fallback to unsigned manifest
-                manifest = ET.Element("MissionPackageManifest", version="2")
-                config = ET.SubElement(manifest, "Configuration")
-                ET.SubElement(config, "Parameter", name="name", value=package_name)
-                ET.SubElement(config, "Parameter", name="uid", value=package_uid)
-                contents = ET.SubElement(manifest, "Contents")
-                ET.SubElement(contents, "Content", 
-                             zipEntry=zip_entry_path,
-                             ignore="false")
-                manifest_xml = _format_xml_pretty(manifest)
-                print(f"\n=== UNSIGNED MANIFEST XML ===\n{manifest_xml}\n")
+            # Create simple MANIFEST.xml matching WinTAK format exactly
+            manifest = ET.Element("MissionPackageManifest", version="2")
             
-            zipf.writestr("MANIFEST.xml", manifest_xml.encode('UTF-8'))
+            # Configuration - name first, then uid (order matters for WinTAK)
+            config = ET.SubElement(manifest, "Configuration")
+            ET.SubElement(config, "Parameter", name="name", value=package_name)
+            ET.SubElement(config, "Parameter", name="uid", value=package_uid)
+            
+            # Contents section
+            contents = ET.SubElement(manifest, "Contents")
+            ET.SubElement(contents, "Content", 
+                         zipEntry=zip_entry_path,
+                         ignore="false")
+            
+            # Format XML to match WinTAK style (pretty print with proper indentation)
+            manifest_xml = _format_xml_pretty(manifest)
+            print(f"\n=== WINTAK-COMPATIBLE MANIFEST XML ===\n{manifest_xml}\n")
+            
+            # Save manifest in MANIFEST folder exactly like WinTAK
+            zipf.writestr("MANIFEST/manifest.xml", manifest_xml.encode('UTF-8'))
         
         # Read the ZIP data
         with open(temp_zip.name, "rb") as f:
@@ -357,19 +361,19 @@ def create_artifact_data_package(artifact: Union[Artifact, dict], file_data: byt
         # Clean up temp file
         os.unlink(temp_zip.name)
     
-    # Sign the data package if certificate is available
-    if cert_path and os.path.exists(cert_path):
-        print("=== SIGNING DATA PACKAGE WITH TAK CERTIFICATE ===")
-        zip_data = _sign_data_package(zip_data, cert_path)
-        print("=== DATA PACKAGE SIGNED ===")
-    else:
-        print("=== WARNING: No TAK certificate found, sending unsigned data package ===")
+    print("=== DATA PACKAGE CREATED (WINTAK-COMPATIBLE FORMAT) ===")
+    print(f"Package Name: {package_name}")
+    print(f"Package UID: {package_uid}")  
+    print(f"Subdirectory: {subdir}")
+    print(f"Artifact File: {artifact_filename}")
+    print(f"ZIP Entry Path: {zip_entry_path}")
+    print("======================================================")
     
     return zip_data, artifact_filename
 
 
 async def send_artifact_event(component: object, artifact: Union[Artifact, dict], artifact_data: bytes) -> None:
-    """Send artifact event to TAK clients with certificate authentication - WinTAK compatible format."""
+    """Send artifact event to TAK clients with WinTAK-compatible data package format."""
     if isinstance(artifact, dict):
         artifact = Artifact.from_dict(artifact)
 
@@ -382,48 +386,66 @@ async def send_artifact_event(component: object, artifact: Union[Artifact, dict]
     # Build CoT message manually for fileshare - match WinTAK format exactly
     msg, detail = _build_base_event(
         uid=f"FISSURE-DP-{artifact_id}",  # More descriptive UID
-        stale=10  # 10 second stale time like WinTAK example
+        stale=300  # 5 minute stale time (longer for file transfers)
     )
 
-    # Set proper CoT type for data package - WinTAK uses b-f-t-r not b-f-t-d
+    # Set proper CoT type for data package - WinTAK uses b-f-t-r for file transfers
     msg.set("type", "b-f-t-r")  # File transfer request (like WinTAK)
-    msg.set("version", "2")  # Version 2 like WinTAK
+    msg.set("version", "2.0")  # Version 2.0 like WinTAK
     
-    # Don't set 'how' attribute - WinTAK doesn't include it
+    # Set proper time attributes
+    import datetime
+    now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    msg.set("time", now)
+    msg.set("start", now)
+    stale_time = (datetime.datetime.utcnow() + datetime.timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    msg.set("stale", stale_time)
 
     # Upload the data package to TAK server first
-    package_filename = f"DP-{artifact.name[:20].upper()}.zip"
+    package_filename = f"DP-{artifact.name[:20].upper().replace(' ', '_')}.zip"
+    
+    # TEMPORARY: Save package to Downloads for manual comparison/upload
+    downloads_path = os.path.expanduser("~/Downloads")
+    local_package_path = os.path.join(downloads_path, f"FISSURE_{package_filename}")
+    try:
+        with open(local_package_path, "wb") as f:
+            f.write(tak_data)
+        print(f"=== SAVED DATA PACKAGE TO: {local_package_path} ===")
+        print("You can manually compare this with WinTAK packages or upload via WebTAK")
+        component.logger.info(f"Data package saved locally: {local_package_path}")
+    except Exception as e:
+        component.logger.error(f"Could not save package locally: {e}")
+    
+    # Try to upload to TAK server
     sender_url = await upload_data_package_to_tak_server(tak_data, sha256_hash, package_filename, component)
     
     # Create fileshare element directly under detail (TAK standard)
     fileshare = ET.SubElement(detail, "fileshare")
     
-    # Add attributes exactly like WinTAK format
+    # Add attributes exactly like WinTAK format (order matters for some TAK clients)
     fileshare.set("filename", package_filename)
-    fileshare.set("senderUrl", sender_url)
+    fileshare.set("senderUrl", sender_url)  
     fileshare.set("sizeInBytes", str(len(tak_data)))
     fileshare.set("sha256", sha256_hash)
-    
-    # Add sender information matching WinTAK format
     fileshare.set("senderUid", f"FISSURE-{artifact.source_id}")
     fileshare.set("senderCallsign", f"FISSURE-{artifact.source_id[:8]}")
-    fileshare.set("name", f"DP-{artifact.name[:20].upper()}")
+    fileshare.set("name", f"DP-{artifact.name[:20].upper().replace(' ', '_')}")
 
     # Add ackrequest element like WinTAK
     ackrequest = ET.SubElement(detail, "ackrequest")
     ackrequest.set("uid", f"ack-{artifact_id[:8]}")
-    ackrequest.set("ackrequested", "")
-    ackrequest.set("tag", f"DP-{artifact.name[:20].upper()}")
+    ackrequest.set("ackrequested", "true")
+    ackrequest.set("tag", f"DP-{artifact.name[:20].upper().replace(' ', '_')}")
 
-    # Set point coordinates exactly like WinTAK
+    # Set point coordinates exactly like WinTAK (0,0 with high uncertainty)
     point = msg.find("point")
     if point is None:
         point = ET.SubElement(msg, "point")
-    point.set("lat", "0")
-    point.set("lon", "0") 
-    point.set("hae", "0")
-    point.set("ce", "9999999")
-    point.set("le", "9999999")
+    point.set("lat", "0.0")
+    point.set("lon", "0.0") 
+    point.set("hae", "0.0")
+    point.set("ce", "9999999.0")
+    point.set("le", "9999999.0")
 
     # Log the final CoT message for debugging
     msg_xml = ET.tostring(msg, encoding="utf-8").decode("utf-8")
@@ -431,12 +453,12 @@ async def send_artifact_event(component: object, artifact: Union[Artifact, dict]
     print(msg_xml)
     print("======================\n")
 
-    print("=== DATA PACKAGE UPLOADED TO TAK SERVER ===")
+    print("=== DATA PACKAGE DETAILS ===")
     print(f"SHA256: {sha256_hash}")
     print(f"Size: {len(tak_data)} bytes")
     print(f"Filename: {package_filename}")
     print(f"Download URL: {sender_url}")
-    print("===============================================")
+    print("============================")
 
     return _send_to_tak(component, msg)
 
@@ -673,7 +695,7 @@ def _create_tak_manifest_with_certs(artifact: Union[Artifact, dict], zip_entry_p
 
 
 async def upload_data_package_to_tak_server(tak_data: bytes, sha256_hash: str, filename: str, component) -> str:
-    """Upload data package to TAK server sync endpoint."""
+    """Upload data package to TAK server sync endpoint with improved error handling and fallback methods."""
     try:
         import aiohttp
         import ssl
@@ -683,113 +705,182 @@ async def upload_data_package_to_tak_server(tak_data: bytes, sha256_hash: str, f
         fissure_config = get_fissure_config()
         tak_config = fissure_config.get('tak', {})
         
-        # Internal TAK server IP for upload (Docker container)
+        # Try both the configured port and the standard HTTPS API port
         tak_internal_ip = tak_config.get('ip_addr', 'localhost')
-        tak_port = tak_config.get('port', '8443')
+        configured_port = tak_config.get('port', '8089')  # This is usually the raw CoT port
+        api_port = '8443'  # Standard TAK server HTTPS API port
         cert_path = tak_config.get('webadmin_cert', '')
         
         # Get external/host IP address for WinTAK clients to access
-        # Check if external IP is configured in FISSURE config first
         external_ip = tak_config.get('external_ip')
         
         if not external_ip:
-            # Try to get the host's external IP address automatically
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                    # Connect to a remote address to determine local IP
                     s.connect(("8.8.8.8", 80))
                     external_ip = s.getsockname()[0]
             except Exception:
-                # Fallback to known external IP from WinTAK example
                 external_ip = "169.254.152.101"
                 component.logger.warning(f"Could not auto-detect external IP, using fallback: {external_ip}")
         
-        component.logger.info(f"TAK internal IP: {tak_internal_ip}, External IP for clients: {external_ip}")
+        component.logger.info(f"TAK server - Internal IP: {tak_internal_ip}, External IP: {external_ip}")
+        component.logger.info(f"TAK ports - Configured: {configured_port}, API: {api_port}")
         
-        # Upload URL uses internal IP (for Docker container)
-        upload_url = f"https://{tak_internal_ip}:{tak_port}/Marti/sync/upload"
-        
-        # Download URL uses external IP (for WinTAK clients)
-        download_url = f"https://{external_ip}:{tak_port}/Marti/sync/content?hash={sha256_hash}"
-        
-        component.logger.info(f"Attempting upload to: {upload_url}")
-        component.logger.info(f"Will provide download URL: {download_url}")
-        
-        # Create SSL context with client certificate
+        # Create SSL context
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
         
-        if cert_path and os.path.exists(cert_path):
-            # For p12 files, we need different handling
-            try:
-                # Try to load as p12 certificate for client auth
-                component.logger.info(f"Loading p12 certificate: {cert_path}")
-                # Note: aiohttp doesn't directly support p12 files, we may need to convert
-                # For now, just disable cert verification and try the upload
-            except Exception as e:
-                component.logger.warning(f"Could not load TAK certificate for SSL: {e}")
+        # Try different upload methods in order of preference
+        upload_success = False
+        download_url = f"https://{external_ip}:{api_port}/Marti/sync/content?hash={sha256_hash}"
         
-        # First, let's test if the TAK server is reachable
-        try:
-            # Test basic connectivity to TAK server
-            test_url = f"https://{tak_internal_ip}:{tak_port}/Marti/api/version"
-            component.logger.info(f"Testing TAK server connectivity: {test_url}")
-            
-            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context)) as session:
-                async with session.get(test_url, timeout=aiohttp.ClientTimeout(total=10)) as test_response:
-                    if test_response.status == 200:
-                        component.logger.info("TAK server is reachable")
-                    else:
-                        component.logger.warning(f"TAK server responded with status: {test_response.status}")
-        except Exception as e:
-            component.logger.error(f"Cannot reach TAK server: {e}")
-            # Continue anyway, maybe it's just the test endpoint
+        # Method 1: Try standard API port (8443) with /Marti/sync/upload
+        if not upload_success:
+            upload_url = f"https://{tak_internal_ip}:{api_port}/Marti/sync/upload"
+            component.logger.info(f"Method 1: Trying upload to {upload_url}")
+            upload_success = await _attempt_upload(upload_url, tak_data, filename, sha256_hash, component, ssl_context)
         
-        # Prepare multipart form data
-        data = aiohttp.FormData()
-        data.add_field('assetfile', tak_data, filename=filename, content_type='application/zip')
+        # Method 2: Try with /Marti/api/sync/upload (alternative endpoint)
+        if not upload_success:
+            upload_url = f"https://{tak_internal_ip}:{api_port}/Marti/api/sync/upload"
+            component.logger.info(f"Method 2: Trying upload to {upload_url}")
+            upload_success = await _attempt_upload(upload_url, tak_data, filename, sha256_hash, component, ssl_context)
         
-        try:
-            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context)) as session:
-                component.logger.info(f"Uploading {len(tak_data)} bytes to TAK server...")
-                async with session.post(upload_url, data=data, timeout=aiohttp.ClientTimeout(total=60)) as response:
-                    component.logger.info(f"Upload response status: {response.status}")
-                    response_text = await response.text()
-                    component.logger.info(f"Upload response: {response_text[:200]}...")  # First 200 chars
-                    
-                    if response.status == 200:
-                        component.logger.info(f"Successfully uploaded data package to TAK server: {filename}")
-                        component.logger.info(f"Download URL for clients: {download_url}")
-                        return download_url
-                    else:
-                        component.logger.error(f"Failed to upload to TAK server. Status: {response.status}")
-                        component.logger.error(f"Full response: {response_text}")
-                        # Still return the URL - maybe the file was uploaded despite the error
-                        return download_url
-        except aiohttp.ClientConnectorError as e:
-            component.logger.error(f"Connection error uploading to TAK server: {e}")
-            component.logger.error("This might indicate TAK server is not running or not accessible")
-            return download_url
-        except Exception as e:
-            component.logger.error(f"Unexpected error during upload: {e}")
-            return download_url
+        # Method 3: Try with configured port instead of 8443
+        if not upload_success and configured_port != api_port:
+            upload_url = f"https://{tak_internal_ip}:{configured_port}/Marti/sync/upload"
+            component.logger.info(f"Method 3: Trying upload to {upload_url}")
+            upload_success = await _attempt_upload(upload_url, tak_data, filename, sha256_hash, component, ssl_context)
+        
+        # Method 4: Try HTTP instead of HTTPS (some TAK servers might not use SSL for API)
+        if not upload_success:
+            upload_url = f"http://{tak_internal_ip}:{api_port}/Marti/sync/upload"
+            component.logger.info(f"Method 4: Trying HTTP upload to {upload_url}")
+            upload_success = await _attempt_upload_http(upload_url, tak_data, filename, sha256_hash, component)
+        
+        if upload_success:
+            component.logger.info(f"Successfully uploaded data package: {filename}")
+        else:
+            component.logger.warning("All upload methods failed - data package will need to be uploaded manually")
+            component.logger.info(f"Manual upload: Save package and upload via WebTAK interface")
+        
+        return download_url
                     
     except ImportError:
         component.logger.warning("aiohttp not available - cannot upload to TAK server")
-        # Fallback - use configured or known external IP
         fissure_config = get_fissure_config()
         tak_config = fissure_config.get('tak', {})
         external_ip = tak_config.get('external_ip', "169.254.152.101")
-        tak_port = tak_config.get('port', '8443')
-        download_url = f"https://{external_ip}:{tak_port}/Marti/sync/content?hash={sha256_hash}"
+        download_url = f"https://{external_ip}:8443/Marti/sync/content?hash={sha256_hash}"
         return download_url
     except Exception as e:
-        component.logger.error(f"Error uploading to TAK server: {e}")
-        # Fallback - use configured or known external IP
+        component.logger.error(f"Error in upload_data_package_to_tak_server: {e}")
         fissure_config = get_fissure_config()
         tak_config = fissure_config.get('tak', {})
         external_ip = tak_config.get('external_ip', "169.254.152.101")
-        tak_port = tak_config.get('port', '8443')
-        download_url = f"https://{external_ip}:{tak_port}/Marti/sync/content?hash={sha256_hash}"
+        download_url = f"https://{external_ip}:8443/Marti/sync/content?hash={sha256_hash}"
         return download_url
+
+
+async def _attempt_upload(upload_url: str, tak_data: bytes, filename: str, sha256_hash: str, component, ssl_context) -> bool:
+    """Attempt HTTPS upload with detailed error reporting."""
+    try:
+        import aiohttp
+        
+        # Prepare the file upload with standard multipart form
+        data = aiohttp.FormData()
+        data.add_field('assetfile', tak_data, filename=filename, content_type='application/zip')
+        
+        # Try with minimal headers first
+        headers = {
+            'User-Agent': 'FISSURE-TAK-Client/1.0',
+            'Accept': 'application/json, */*',
+            'Connection': 'close'
+        }
+        
+        async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=ssl_context),
+            timeout=aiohttp.ClientTimeout(total=60)
+        ) as session:
+            component.logger.info(f"Uploading {len(tak_data)} bytes...")
+            
+            async with session.post(upload_url, data=data, headers=headers) as response:
+                component.logger.info(f"Response status: {response.status}")
+                component.logger.info(f"Response headers: {dict(response.headers)}")
+                
+                # Try to read response body
+                try:
+                    response_text = await response.text()
+                    if response_text:
+                        component.logger.info(f"Response body: {response_text[:500]}")
+                    else:
+                        component.logger.info("Empty response body")
+                except Exception as e:
+                    component.logger.warning(f"Could not read response body: {e}")
+                    response_text = ""
+                
+                # Check for success status codes
+                if response.status in [200, 201, 202]:  # 202 = Accepted (async processing)
+                    component.logger.info("Upload successful!")
+                    return True
+                elif response.status == 409:
+                    component.logger.info("File already exists on server - treating as success")
+                    return True
+                elif response.status == 401:
+                    component.logger.error("Authentication required - upload failed")
+                    return False
+                elif response.status == 403:
+                    component.logger.error("Forbidden - check TAK server permissions")
+                    return False
+                elif response.status == 404:
+                    component.logger.error("Upload endpoint not found - trying alternative endpoint")
+                    return False
+                elif response.status == 500:
+                    component.logger.error("TAK server internal error")
+                    return False
+                else:
+                    component.logger.error(f"Unexpected response code: {response.status}")
+                    component.logger.error(f"This might be the 'Received unexpected http response code' error")
+                    return False
+                        
+    except aiohttp.ClientConnectorError as e:
+        component.logger.error(f"Connection error: {e}")
+        return False
+    except aiohttp.ClientResponseError as e:
+        component.logger.error(f"HTTP response error: {e}")
+        return False
+    except Exception as e:
+        component.logger.error(f"Upload attempt failed: {e}")
+        return False
+
+
+async def _attempt_upload_http(upload_url: str, tak_data: bytes, filename: str, sha256_hash: str, component) -> bool:
+    """Attempt HTTP upload (no SSL) as fallback."""
+    try:
+        import aiohttp
+        
+        data = aiohttp.FormData()
+        data.add_field('assetfile', tak_data, filename=filename, content_type='application/zip')
+        
+        headers = {
+            'User-Agent': 'FISSURE-TAK-Client/1.0',
+            'Accept': 'application/json, */*'
+        }
+        
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=60)) as session:
+            component.logger.info(f"Trying HTTP upload (no SSL)...")
+            
+            async with session.post(upload_url, data=data, headers=headers) as response:
+                component.logger.info(f"HTTP Response status: {response.status}")
+                
+                if response.status in [200, 201, 202, 409]:
+                    component.logger.info("HTTP upload successful!")
+                    return True
+                else:
+                    component.logger.error(f"HTTP upload failed with status: {response.status}")
+                    return False
+                        
+    except Exception as e:
+        component.logger.error(f"HTTP upload attempt failed: {e}")
+        return False
