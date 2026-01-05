@@ -742,7 +742,14 @@ class SensorNode(object):
 
         # Initialize the operation class instance
         try:
-            operation_inst = operation_main(**parameters)
+            # Get the init signature to check for supported parameters
+            init_signature = inspect.signature(operation_main.__init__)
+            init_params = set(init_signature.parameters.keys())
+            
+            # Filter parameters to only include those accepted by the class
+            filtered_parameters = {k: v for k, v in parameters.items() if k in init_params}
+            
+            operation_inst = operation_main(**filtered_parameters)
         except Exception as e:
             tb_str = traceback.format_exc()
             self.logger.error(f"Error initializing operation class from {plugin_script_path}: {e}\n{tb_str}")
