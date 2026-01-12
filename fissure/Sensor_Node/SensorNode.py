@@ -29,6 +29,7 @@ import fissure.callbacks
 import fissure.comms
 import fissure.utils
 from fissure.utils import PLUGIN_DIR
+from fissure.utils.artifacts import ArtifactManager
 
 import uuid
 import logging
@@ -293,8 +294,22 @@ class SensorNode(object):
                 self.gps_position['latitude'], self.gps_position['longitude']
             )
 
-        self.operations = {}
+        self.operations = {} # operation tracking dictionary
 
+        # initialize artifact manager
+        self.artifact_manager = ArtifactManager(logger=self.logger)
+
+        # Store reference to original create_artifact method
+        self._original_create_artifact = self.artifact_manager.create_artifact
+        
+        # overload artifact manager create artifact to notify hiprfisr
+        def create_artifact_wrapper(source_id: str, operation_id: str, file_path: str, name: str, artifact_type: str, metadata: Union[Dict[str, Any], None] = None) -> str:
+            # Call original synchronous method
+            artifact_id = self._original_create_artifact(self.uuid, operation_id, file_path, name, artifact_type, metadata)
+            # Schedule async notification in background
+            asyncio.create_task(self._notify_hiprfisr_of_artifact(artifact_id))
+            return artifact_id
+        self.artifact_manager.create_artifact = create_artifact_wrapper
 
     async def initialize_comms(self):
         if self.network_type == "IP":
@@ -590,11 +605,6 @@ class SensorNode(object):
                 },
             }
 
-            await self.hiprfisr_socket.send_msg(
-                fissure.comms.MessageTypes.COMMANDS, msg_out
-            )
-            return
-
         # --------------------------------------------------
         # MESHTASTIC MODE → legacy LT list format
         # --------------------------------------------------
@@ -624,17 +634,40 @@ class SensorNode(object):
                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
 
-            await self.hiprfisr_socket.send_msg(
-                fissure.comms.MessageTypes.COMMANDS, msg_out
-            )
-            return
-
         # --------------------------------------------------
         # Unknown network type
         # --------------------------------------------------
         else:
             self.logger.error(f"Unknown network type for TAK: {self.network_type}")
             return
+
+        await self.hiprfisr_socket.send_msg(
+            fissure.comms.MessageTypes.COMMANDS, msg_out
+        )
+
+
+    async def _notify_hiprfisr_of_artifact(self, artifact_id: str) -> None:
+        """Notify HIPRFISR of a new artifact (async helper method).
+        
+        Parameters
+        ----------
+        artifact_id : str
+            The artifact ID to notify about
+        """
+        # notify hiprfisr of new artifact
+        artifact = self.artifact_manager.get_artifact(artifact_id)
+        if artifact is None:
+            self.logger.error(f"Failed to retrieve newly created artifact {artifact_id} for notification.")
+            return
+        PARAMETERS = {
+            "artifact": artifact.to_dict()
+        }
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "updateArtifact",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS
+        }
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 
@@ -738,11 +771,19 @@ class SensorNode(object):
         parameters["sensor_node_id"] = sensor_node_id
         parameters["alert_callback"] = self.send_alert
         parameters["tak_cot_callback"] = self.send_tak_cot
+        parameters["artifact_manager"] = self.artifact_manager
         parameters["logger"] = self.logger
 
         # Initialize the operation class instance
         try:
-            operation_inst = operation_main(**parameters)
+            # Get the init signature to check for supported parameters
+            init_signature = inspect.signature(operation_main.__init__)
+            init_params = set(init_signature.parameters.keys())
+            
+            # Filter parameters to only include those accepted by the class
+            filtered_parameters = {k: v for k, v in parameters.items() if k in init_params}
+            
+            operation_inst = operation_main(**filtered_parameters)
         except Exception as e:
             tb_str = traceback.format_exc()
             self.logger.error(f"Error initializing operation class from {plugin_script_path}: {e}\n{tb_str}")

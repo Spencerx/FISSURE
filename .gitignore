@@ -12,7 +12,7 @@ Plugins/*
 !Plugins/plugin_template/**
 !Plugins/tpms/**
 !Plugins/wifi/**
-
+!Plugins/test/
 
 # MacOS Files
 .DS_Store
@@ -30,3 +30,4 @@ Plugins/*
 .env  # Some currently unused env files, but often contains secrets, so better be safe than sorry
 .venv
 env.py
+artifacts*

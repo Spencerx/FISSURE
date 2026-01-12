@@ -178,7 +178,8 @@ startup_automation_mode: Manual
 tak:
   cert: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.pem
   connect_mode: disabled  # auto/manual/disabled
-  ip_addr: localhost
+  ip_addr: localhost # tak server IP for local communication
+  external_ip: 169.254.152.101 # tak server external IP for clients to connect
   key: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.key
   port: 8089
   tak_on_startup: 'False'

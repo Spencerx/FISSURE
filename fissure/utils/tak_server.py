@@ -197,6 +197,32 @@ class TakReceiver(pytak.QueueWorker):
 
         try:
             root = ET.fromstring(data_decode)
+            
+            # Deleting after testing Artifact Download
+#            uid = root.get("uid", "unknown")
+#            remarks = root.find(".//detail/remarks")
+#            if remarks is not None and remarks.text:
+#                if remarks.text == "FTN Requested: Plugin Names":
+#                    self._logger.info(f"FTN Plugin Names Requested for UID: {uid}")
+#                    await HiprFisrCallbacks.sendPluginNamesTak(self.hipfisr, uid, sensor_node_id=0)
+#                elif remarks.text.startswith("FTN Requested: Plugin Actions:"):
+#                    plugin_name = remarks.text.split("FTN Requested: Plugin Actions:")[-1].strip()
+#                    self._logger.info(f"FTN Plugin Action Names Requested: {plugin_name} for UID: {uid}")
+#                    await HiprFisrCallbacks.sendPluginActionNamesTak(self.hipfisr, uid, plugin_name, sensor_node_id=0)
+#                elif remarks.text.startswith("FTN Requested: Plugin Action:"):
+#                    remaining = remarks.text.split("FTN Requested: Plugin Action:")[-1].strip()
+#                    plugin_name, action_name = remaining.split(":", 1)
+#                    plugin_name = plugin_name.strip()
+#                    action_name = action_name.strip()
+#                    self._logger.info(f"FTN Plugin Action Requested: {action_name} for UID: {uid}")
+#                    await HiprFisrCallbacks.sendPluginActionTak(self.hipfisr, uid, sensor_node_id=0, plugin_name=plugin_name, action_name=action_name, parameters={})
+#                elif remarks.text.startswith("FTN Requested: Plugin Action Stop"):
+#                    self._logger.info(f"FTN Plugin Stop Requested for UID: {uid}")
+#                    await HiprFisrCallbacks.stop_all_plugin_operations(self.hipfisr, uid, sensor_node_id=0)
+#                elif remarks.text.startswith("FTN Requested: Artifact Download:"):
+#                    artid = remarks.text.split("FTN Requested: Artifact Download:")[-1].strip()
+#                    self._logger.info(f"FTN Artifact Download Requested for artifact id: {artid}")
+#                    await HiprFisrCallbacks.transferArtifactRequest(self.hipfisr, artid, 'tak', None)
 
             # Event metadata
             event_uid = root.get("uid", "unknown")
