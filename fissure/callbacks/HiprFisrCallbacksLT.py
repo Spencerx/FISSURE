@@ -16,6 +16,7 @@ import yaml
 import asyncio
 import socket
 import shutil
+from datetime import datetime, timezone
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -437,67 +438,67 @@ async def alertReturnLT(component: object, sensor_node_id=0, alert_text=""):
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
     
     
-async def takPlotLT(component: object, msg=[]):
-    """
-    Forwards CoT messages to TAK.
-    """
-    uid = str(msg[0])
-    lat = float(msg[1])
-    lon = float(msg[2])
-    alt = float(msg[3])
-    time = str(msg[4])
-    remarks = str(msg[5])
-    type = str(msg[6]) if len(msg) > 6 else "a-f-G-U-H"
+# async def takPlotLT(component: object, msg=[]):
+#     """
+#     Forwards CoT messages to TAK.
+#     """
+#     uid = str(msg[0])
+#     lat = float(msg[1])
+#     lon = float(msg[2])
+#     alt = float(msg[3])
+#     time = str(msg[4])
+#     remarks = str(msg[5])
+#     type = str(msg[6]) if len(msg) > 6 else "a-f-G-U-H"
 
-    # TAK times must be ISO-like
-    time = time.replace(" ", "T")
+#     # TAK times must be ISO-like
+#     time = time.replace(" ", "T")
     
-    # Apply callsign prefix
-    prefix = component.settings['callsign_prefix']
-    callsign = f"{prefix}-{uid}"
-    uid = callsign
+#     # Apply callsign prefix
+#     prefix = component.settings['callsign_prefix']
+#     callsign = f"{prefix}-{uid}"
+#     uid = callsign
 
-    # Classify based on frequency extracted from UID
-    try:
-        freq_text = fissure.utils.common.extractFrequencyFromUID(uid)
-        if freq_text:
-            classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_text)
+#     # Classify based on frequency extracted from UID
+#     try:
+#         freq_text = fissure.utils.common.extractFrequencyFromUID(uid)
+#         if freq_text:
+#             classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_text)
 
-            # classification_text already looks like:
-            # [Protocol=... | Region=... | Priority=... | Notes=...]
-            if classification_text:
-                remarks = f"{remarks}\n{classification_text}"
+#             # classification_text already looks like:
+#             # [Protocol=... | Region=... | Priority=... | Notes=...]
+#             if classification_text:
+#                 remarks = f"{remarks}\n{classification_text}"
 
-    except Exception as e:
-        component.logger.error(f"Frequency classification error in takPlotLT: {e}")
+#     except Exception as e:
+#         component.logger.error(f"Frequency classification error in takPlotLT: {e}")
 
-    # Forward to TAK
-    try:
-        # await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
+#     # Forward to TAK
+#     try:
+#         # await component.send_cot(uid, callsign, lat, lon, alt, time, remarks, type)
 
-        # Get TAK server settings
-        settings: dict = fissure.utils.get_fissure_config()
-        s_addr = settings["tak"]["ip_addr"]
-        s_port = settings["tak"]["port"]
-        tak_cert = settings["tak"]["cert"]
-        tak_key = settings["tak"]["key"]
+#         # Get TAK server settings
+#         settings: dict = fissure.utils.get_fissure_config()
+#         s_addr = settings["tak"]["ip_addr"]
+#         s_port = settings["tak"]["port"]
+#         tak_cert = settings["tak"]["cert"]
+#         tak_key = settings["tak"]["key"]
 
-        msg = {
-            "type": "pin",
-            "uid": uid,
-            "callsign": uid,
-            "lat": lat,
-            "lon": lon,
-            "alt": alt,
-            "remarks": remarks
-        }
+#         msg = {
+#             "type": "pin",
+#             "uid": uid,
+#             "callsign": uid,
+#             "lat": lat,
+#             "lon": lon,
+#             "alt": alt,
+#             "remarks": remarks
+#         }
 
-        await fissure.utils.tak_messages.send(component, msg)
+#         await fissure.utils.tak_messages.send(component, msg)
 
-    except Exception as e:
-        component.logger.error(f"Error sending COT to TAK (LT): {e}")
-        tb = traceback.format_exc()
-        component.logger.debug(tb)
+#     except Exception as e:
+#         component.logger.error(f"Error sending COT to TAK (LT): {e}")
+#         # tb = traceback.format_exc()
+#         # component.logger.debug(tb)
     
 
 async def exploitLT(component: object, msg=[]):
@@ -520,54 +521,128 @@ async def exploitLT(component: object, msg=[]):
     }
     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+
+async def takReturnLT(component: object, msg=[]):
+    """
+    Meshtastic LT TAK return callback.
+
+    msg schema:
+
+        [0] msg_type : "track" | "event"
+        [1] time     : ISO string
+        [2] uid      : str
+        [3] lat      : float | None
+        [4] lon      : float | None
+        [5] data     : dict  | None
+    """
+    try:
+        if not isinstance(msg, list) or len(msg) < 6:
+            return
+
+        msg_type = msg[0]
+        timestamp = msg[1]
+        uid = msg[2]
+        lat = msg[3]
+        lon = msg[4]
+        data = msg[5]
+
+        if msg_type not in ("track", "event"):
+            return
+
+        if not uid:
+            return
+
+        if not timestamp:
+            timestamp = datetime.now(timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+
+        payload = {
+            "msg_type": msg_type,
+            "uid": str(uid),
+            "time": str(timestamp).replace(" ", "T"),
+        }
+
+        # ----------------------------
+        # TRACK
+        # ----------------------------
+        if msg_type == "track":
+            if lat is None or lon is None:
+                return
+
+            payload.update({
+                "lat": float(lat),
+                "lon": float(lon),
+                "alt": 0.0,
+            })
+
+        # ----------------------------
+        # EVENT
+        # ----------------------------
+        elif msg_type == "event":
+            if not isinstance(data, dict):
+                return
+            if "event_type" not in data:
+                return
+
+            payload["data"] = data
+
+        await fissure.utils.tak_messages.send(component, payload)
+
+    except Exception as e:
+        try:
+            fissure.utils.common.logger.error(f"takReturnLT failed: {e}")
+        except Exception:
+            pass
+
     
-async def takPlotGpsUpdateLT(component: object, msg=[]):
-    """
-    Forwards the GPS coordinate results message to TAK.
-    """
-    uid = str(msg[0])
-    lat = float(msg[1])
-    lon = float(msg[2])
-    alt = float(msg[3])
-    time = str(msg[4])
-    remarks = str(msg[5])
+# async def takPlotGpsUpdateLT(component: object, msg=[]):
+#     """
+#     Forwards the GPS coordinate results message to TAK.
+#     """
+#     uid = str(msg[0])
+#     lat = float(msg[1])
+#     lon = float(msg[2])
+#     alt = float(msg[3])
+#     time = str(msg[4])
+#     remarks = str(msg[5])
 
-    time = time.replace(" ", "T")
+#     time = time.replace(" ", "T")
 
-    max_history = 5
+#     max_history = 5
 
-    # Reject if node is not registered yet
-    node = component.nodes.get(uid)
-    if node is None:
-        component.logger.warning(
-            f"Message 'takPlotGpsUpdateLT' from unknown uuid={uid}"
-        )
-        return
+#     # Reject if node is not registered yet
+#     node = component.nodes.get(uid)
+#     if node is None:
+#         component.logger.warning(
+#             f"Message 'takPlotGpsUpdateLT' from unknown uuid={uid}"
+#         )
+#         return
 
-    # Send to TAK  
-    prefix = component.settings['callsign_prefix']
-    callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
+#     # Send to TAK  
+#     prefix = component.settings['callsign_prefix']
+#     callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
 
-    # await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
+#     # await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
 
-    # print("SEND TRACK")
-    # if not hasattr(component, "_test_lon"):
-    #    component._test_lon = lon   # initialize based on first call input
-    # component._test_lon += 1
-    # lon = component._test_lon
+#     # print("SEND TRACK")
+#     # if not hasattr(component, "_test_lon"):
+#     #    component._test_lon = lon   # initialize based on first call input
+#     # component._test_lon += 1
+#     # lon = component._test_lon
 
-    msg = {
-        "type": "track",
-        "uid": uid,              # IMPORTANT: must stay the same each update
-        "callsign": callsign,
-        "lat": lat,
-        "lon": lon,
-        "alt": alt,
-        # "cot_type": "b-m-p-w",       # optional override
-        # "stale": 60                    # 60 sec expiration window, or in the future: "2035-01-01T00:00:00Z"
-    }
+#     msg = {
+#         "type": "track",
+#         "uid": uid,              # IMPORTANT: must stay the same each update
+#         "callsign": callsign,
+#         "lat": lat,
+#         "lon": lon,
+#         "alt": alt,
+#         # "cot_type": "b-m-p-w",       # optional override
+#         # "stale": 60                    # 60 sec expiration window, or in the future: "2035-01-01T00:00:00Z"
+#     }
 
-    await fissure.utils.tak_messages.send(component, msg)
+#     await fissure.utils.tak_messages.send(component, msg)
 
 
 async def gpsBeaconEnableMeshtasticLT(component: object, sensor_node_id: str):

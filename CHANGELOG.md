@@ -1,6 +1,25 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-1-12
+
+Modifying TAK-HIPRFISR messaging and bug fixes.
+
+### Added
+
+- Added a wait option to run_plugin_operation to block on operations
+
+### Changed
+
+- Commented out the old low throughput TAK functions that do not lead to the consolidated TAK utilities
+- Modified the TAK receive at the HIPRFISR to allow message parameters in the xml and avoid string parsing
+
+### Fixed
+
+- Python strip() filepath issues with the second installer script
+- Meshtastic GPS beacon messages using new TAK functions
+- Timing error when running operations complete too quickly which would prevent start/stop status updates from occurring 
+
 ## 2025-12-29
 
 Updating OpenWebRX installer.
