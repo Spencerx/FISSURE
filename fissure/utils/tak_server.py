@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import pytak
 from configparser import ConfigParser
 import logging
+import json
 
 from fissure.utils.common import get_fissure_config
 from fissure.callbacks import HiprFisrCallbacks
@@ -121,42 +122,215 @@ class TakReceiver(pytak.QueueWorker):
         self._logger = logger
         self.hipfisr = hipfisr
 
-    async def handle_data(self, data: str) -> None:
-        """
-        Handle data from the receive queue
+    # async def handle_data(self, data: str) -> None:
+    #     """
+    #     Handle data from the receive queue
 
-        Parameters
-        ----------
-        data : str
-            Data received from TAK server
+    #     Parameters
+    #     ----------
+    #     data : str
+    #         Data received from TAK server
+    #     """
+    #     data_decode = data.decode()
+    #     self._logger.debug("TAK Msg Received:\n%s\n", data_decode)
+    #     # print("TAK Msg Received:\n%s\n", data_decode)
+    #     try:
+    #         root = ET.fromstring(data_decode)
+    #         uid = root.get("uid", "unknown")
+    #         remarks = root.find(".//detail/remarks")
+    #         if remarks is not None and remarks.text:
+    #             # Plugin Names
+    #             if remarks.text == "FTN Requested: Plugin Names":
+    #                 self._logger.info(f"FTN Plugin Names Requested for UID: {uid}")
+    #                 await HiprFisrCallbacks.sendPluginNamesTak(self.hipfisr, uid, sensor_node_id=0)
+                
+    #             # List of Plugin Actions
+    #             elif remarks.text.startswith("FTN Requested: Plugin Actions:"):
+    #                 plugin_name = remarks.text.split("FTN Requested: Plugin Actions:")[-1].strip()
+    #                 self._logger.info(f"FTN Plugin Action Names Requested: {plugin_name} for UID: {uid}")
+    #                 await HiprFisrCallbacks.sendPluginActionNamesTak(self.hipfisr, uid, plugin_name, sensor_node_id=0)
+
+    #             # Execute Plugin Action
+    #             elif remarks.text.startswith("FTN Requested: Plugin Action:"):
+    #                 remaining = remarks.text.split("FTN Requested: Plugin Action:")[-1].strip()
+    #                 plugin_name, action_name = remaining.split(":", 1)
+    #                 plugin_name = plugin_name.strip()
+    #                 action_name = action_name.strip()
+    #                 self._logger.info(f"FTN Plugin Action Requested: {action_name} for UID: {uid}")
+    #                 await HiprFisrCallbacks.sendPluginActionTak(self.hipfisr, uid, sensor_node_id=0, plugin_name=plugin_name, action_name=action_name, parameters={})
+
+    #             # Stop Plugin Action
+    #             elif remarks.text.startswith("FTN Requested: Plugin Action Stop"):
+    #                 self._logger.info(f"FTN Plugin Stop Requested for UID: {uid}")
+    #                 await HiprFisrCallbacks.stop_all_plugin_operations(self.hipfisr, uid, sensor_node_id=0)
+    #     except ET.ParseError as e:
+    #         self._logger.error("XML Parse Error: %s", e)
+
+
+
+    async def handle_data(self, data: bytes) -> None:
         """
-        data_decode = data.decode()
-        self._logger.debug("TAK Msg Received:\n%s\n", data_decode)
-        # print("TAK Msg Received:\n%s\n", data_decode)
+        Handle data from the receive queue.
+
+        Expects WinTAK->FISSURE requests in:
+        <event ... uid="{request_uid}" type="t-x-fissure">
+            <detail>
+                <fissure>
+                    <request>plugin_action</request>
+                    <request_id>fissure-req-...</request_id>
+                    <node_uid>...</node_uid>
+                    <requester_uid>...</requester_uid>              (optional)
+                    <requester_callsign>...</requester_callsign>    (optional)
+                    <plugin_name>...</plugin_name>
+                    <action_name>...</action_name>
+                    <parameters_json>{...}</parameters_json>        (optional; JSON object)
+                </fissure>
+            </detail>
+        </event>
+        """
+        try:
+            data_decode = data.decode("utf-8", errors="replace")
+        except Exception:
+            data_decode = str(data)
+
+        self._logger.info("TAK Msg Received:\n%s\n", data_decode)
+
         try:
             root = ET.fromstring(data_decode)
-            uid = root.get("uid", "unknown")
-            remarks = root.find(".//detail/remarks")
-            if remarks is not None and remarks.text:
-                if remarks.text == "FTN Requested: Plugin Names":
-                    self._logger.info(f"FTN Plugin Names Requested for UID: {uid}")
-                    await HiprFisrCallbacks.sendPluginNamesTak(self.hipfisr, uid, sensor_node_id=0)
-                elif remarks.text.startswith("FTN Requested: Plugin Actions:"):
-                    plugin_name = remarks.text.split("FTN Requested: Plugin Actions:")[-1].strip()
-                    self._logger.info(f"FTN Plugin Action Names Requested: {plugin_name} for UID: {uid}")
-                    await HiprFisrCallbacks.sendPluginActionNamesTak(self.hipfisr, uid, plugin_name, sensor_node_id=0)
-                elif remarks.text.startswith("FTN Requested: Plugin Action:"):
-                    remaining = remarks.text.split("FTN Requested: Plugin Action:")[-1].strip()
-                    plugin_name, action_name = remaining.split(":", 1)
-                    plugin_name = plugin_name.strip()
-                    action_name = action_name.strip()
-                    self._logger.info(f"FTN Plugin Action Requested: {action_name} for UID: {uid}")
-                    await HiprFisrCallbacks.sendPluginActionTak(self.hipfisr, uid, sensor_node_id=0, plugin_name=plugin_name, action_name=action_name, parameters={})
-                elif remarks.text.startswith("FTN Requested: Plugin Action Stop"):
-                    self._logger.info(f"FTN Plugin Stop Requested for UID: {uid}")
-                    await HiprFisrCallbacks.stop_all_plugin_operations(self.hipfisr, uid, sensor_node_id=0)
+
+            # Event metadata
+            event_uid = root.get("uid", "unknown")
+            event_type = root.get("type", "unknown")
+
+            detail = root.find(".//detail")
+            if detail is None:
+                return
+
+            fissure = detail.find("fissure")
+            if fissure is None:
+                return
+
+            request = (fissure.findtext("request") or "").strip().lower()
+            if not request:
+                return
+
+            # Correlation ID
+            request_id = (fissure.findtext("request_id") or "").strip() or event_uid
+
+            # Required target node
+            node_uid = (fissure.findtext("node_uid") or "").strip()
+
+            # Optional requester identity
+            requester_uid = (fissure.findtext("requester_uid") or "").strip()
+            requester_callsign = (fissure.findtext("requester_callsign") or "").strip()
+
+            if not node_uid:
+                self._logger.warning(
+                    "FISSURE request missing node_uid (request=%s, request_id=%s, event_uid=%s, event_type=%s, requester_uid=%s)",
+                    request, request_id, event_uid, event_type, requester_uid or "none"
+                )
+                return
+
+            plugin_name = (fissure.findtext("plugin_name") or "").strip()
+            action_name = (fissure.findtext("action_name") or "").strip()
+
+            # -----------------------------
+            # parameters_json (ONLY)
+            # -----------------------------
+            parameters = {}
+
+            params_json = fissure.findtext("parameters_json")
+            if params_json:
+                try:
+                    parsed = json.loads(params_json)
+                    if not isinstance(parsed, dict):
+                        raise ValueError("parameters_json must decode to a JSON object")
+                    parameters = parsed
+                except Exception as e:
+                    self._logger.warning(
+                        "Invalid parameters_json (node_uid=%s, request_id=%s): %s",
+                        node_uid, request_id, str(e)
+                    )
+                    return
+
+            self._logger.info(
+                "FISSURE RX request=%s node_uid=%s request_id=%s event_uid=%s requester_uid=%s callsign=%s parameters=%s",
+                request,
+                node_uid,
+                request_id,
+                event_uid,
+                requester_uid or "none",
+                requester_callsign or "none",
+                list(parameters.keys()) if parameters else "none",
+            )
+
+            # -----------------------------
+            # Dispatch
+            # -----------------------------
+            if request in ("plugin_names", "plugins", "get_plugin_names"):
+                await HiprFisrCallbacks.sendPluginNamesTak(
+                    self.hipfisr,
+                    node_uid,
+                    sensor_node_id=0
+                )
+
+            elif request in ("plugin_actions", "get_plugin_actions"):
+                if not plugin_name:
+                    self._logger.warning(
+                        "plugin_actions requested but plugin_name missing (node_uid=%s, request_id=%s)",
+                        node_uid, request_id
+                    )
+                    return
+
+                await HiprFisrCallbacks.sendPluginActionNamesTak(
+                    self.hipfisr,
+                    node_uid,
+                    plugin_name,
+                    sensor_node_id=0
+                )
+
+            elif request in ("plugin_action", "execute_plugin_action", "run_plugin_action"):
+                if not plugin_name or not action_name:
+                    self._logger.warning(
+                        "plugin_action missing plugin_name/action_name (node_uid=%s, request_id=%s, plugin=%s, action=%s)",
+                        node_uid,
+                        request_id,
+                        plugin_name or "missing",
+                        action_name or "missing"
+                    )
+                    return
+
+                await HiprFisrCallbacks.sendPluginActionTak(
+                    self.hipfisr,
+                    node_uid,
+                    sensor_node_id=0,
+                    plugin_name=plugin_name,
+                    action_name=action_name,
+                    parameters=parameters,
+                )
+
+            elif request in ("plugin_action_stop", "stop_plugin_action", "stop_all"):
+                await HiprFisrCallbacks.stop_all_plugin_operations(
+                    self.hipfisr,
+                    node_uid,
+                    sensor_node_id=0
+                )
+
+            else:
+                self._logger.debug(
+                    "Ignoring unknown request '%s' (node_uid=%s, request_id=%s)",
+                    request, node_uid, request_id
+                )
+
         except ET.ParseError as e:
             self._logger.error("XML Parse Error: %s", e)
+        except Exception as e:
+            self._logger.exception("handle_data failed: %s", e)
+
+
+
+
+
 
     async def run(self) -> None:
         """
