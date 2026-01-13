@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-1-13
+
+Fixing artifact download errors.
+
+### Fixed
+
+- Rewrote updateArtifact() to use valid Python syntax
+- Updating utils init file to support importing artifact functions
+
 ## 2026-1-12
 
 Modifying TAK-HIPRFISR messaging and bug fixes.

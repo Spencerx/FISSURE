@@ -4768,7 +4768,7 @@ async def updateArtifact(component: object, artifact: dict) -> None:
         # Remote artifact; handle file path
         file_path = artifact.get('file_path')
         checksum = artifact.get('checksum')
-        if os.path.exists(file_path) and checksum is not None:
+        if file_path and os.path.exists(file_path) and checksum is not None:
             # a file exists; get existing artifact to compare checksum
             existing_artifact = component.artifact_tracker.get_artifact(artifact_id)
             if existing_artifact is not None:
@@ -4776,22 +4776,22 @@ async def updateArtifact(component: object, artifact: dict) -> None:
                 if existing_artifact.get('checksum') == checksum:
                     # checksums match; use existing file path
                     existing_file_path = existing_artifact.get('file_path')
-                    if os.path.exists(existing_file_path):
-                        artifact.file_path = existing_file_path
+                    if existing_file_path and os.path.exists(existing_file_path):
+                        artifact["file_path"] = existing_file_path
                 else:
                     # checksums do not match; set file path to sensor URI
-                    artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
+                    artifact["file_path"] = f"sensor-{source_id}://{artifact.get('file_path')}"
             else:
                 # new artifact that points to a local file that exists; set file path to sensor URI
                 # calculate checksum of local file to verify
-                checksum = fissure.utils.calculate_file_checksum(file_path)
-                if checksum == artifact.get('checksum'):
-                    artifact.file_path = file_path
+                checksum_local = fissure.utils.calculate_file_checksum(file_path)
+                if checksum_local == artifact.get('checksum'):
+                    artifact["file_path"] = file_path
                 else:
-                    artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
+                    artifact["file_path"] = f"sensor-{source_id}://{artifact.get('file_path')}"
         else:
             # artifact file does not exist locally; set file path to sensor URI
-            artifact.file_path = f"sensor-{source_id}://{artifact.file_path}"
+            artifact["file_path"] = f"sensor-{source_id}://{artifact.get('file_path')}"
 
     # Update artifact tracker
     component.artifact_tracker.update_artifact(artifact)

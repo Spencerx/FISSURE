@@ -293,6 +293,7 @@ class TakReceiver(pytak.QueueWorker):
             # -----------------------------
             # Dispatch
             # -----------------------------
+            # Query
             if request in ("plugin_names", "plugins", "get_plugin_names"):
                 await HiprFisrCallbacks.sendPluginNamesTak(
                     self.hipfisr,
@@ -300,6 +301,7 @@ class TakReceiver(pytak.QueueWorker):
                     sensor_node_id=0
                 )
 
+            # Load Plugin
             elif request in ("plugin_actions", "get_plugin_actions"):
                 if not plugin_name:
                     self._logger.warning(
@@ -315,6 +317,7 @@ class TakReceiver(pytak.QueueWorker):
                     sensor_node_id=0
                 )
 
+            # Execute Action
             elif request in ("plugin_action", "execute_plugin_action", "run_plugin_action"):
                 if not plugin_name or not action_name:
                     self._logger.warning(
@@ -335,12 +338,34 @@ class TakReceiver(pytak.QueueWorker):
                     parameters=parameters,
                 )
 
+            # Stop Action
             elif request in ("plugin_action_stop", "stop_plugin_action", "stop_all"):
                 await HiprFisrCallbacks.stop_all_plugin_operations(
                     self.hipfisr,
                     node_uid,
                     sensor_node_id=0
                 )
+            
+            # Artifact Download
+            elif request in ("artifact_download", "get_artifact", "download_artifact"):
+                artifact_id = parameters.get("artifact_id")
+
+                if not artifact_id:
+                    self._logger.warning(
+                        "artifact_download requested but artifact_id missing (node_uid=%s, request_id=%s)",
+                        node_uid, request_id
+                    )
+                    return
+
+                self._logger.info(
+                    "Artifact download requested (artifact_id=%s, node_uid=%s, request_id=%s)",
+                    artifact_id, node_uid, request_id
+                )
+
+                # Match the original behavior: request transfer to TAK, with no inline data
+                await HiprFisrCallbacks.transferArtifactRequest(self.hipfisr, artifact_id, "tak", None)
+
+
 
             else:
                 self._logger.debug(
