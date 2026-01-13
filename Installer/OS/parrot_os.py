@@ -821,6 +821,7 @@ fi
 if [ "$(ls -A """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/)" ]; 
 then
   sudo apt-get install -y libsndfile1-dev
+  sudo apt-get install -y clang
   cd """ + fissure_directory + """/Custom_Blocks/maint-3.10/gr-ieee802-11/
   sudo rm -Rf build
   mkdir build

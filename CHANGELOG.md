@@ -9,6 +9,8 @@ Fixing artifact download errors.
 
 - Rewrote updateArtifact() to use valid Python syntax
 - Updating utils init file to support importing artifact functions
+- Removing extra quote in RTL-SDR installer verify line
+- Installing new clang dependency with gr-ieee802.11
 
 ## 2026-1-12
 
