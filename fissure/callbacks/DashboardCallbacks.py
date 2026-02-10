@@ -1524,15 +1524,15 @@ async def responsePluginOperationParameters(component: object, plugin: str, oper
     res_table.resizeRowsToContents()
 
 
-async def responsePluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict) -> None:
+async def responsePluginOperationStarted(component: object, node_uid: str, operation_id: str, plugin: str, operation: str, parameters: dict) -> None:
     """Handle Request for Plugin Operation Started
 
     Parameters
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     operation_id : str
         Operation ID
     plugin : str
@@ -1549,15 +1549,15 @@ async def responsePluginOperationStarted(component: object, sensor_node_id: int,
     operations_list.scrollToBottom()
 
 
-async def responsePluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
+async def responsePluginOperationStopped(component: object, node_uid: str, operation_id: str, plugin: str, operation: str) -> None:
     """Handle Request for Plugin Operation Stopped
 
     Parameters
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    sensor_node_id : str
+        Sensor node UID
     operation_id : str
         Operation ID
     plugin : str

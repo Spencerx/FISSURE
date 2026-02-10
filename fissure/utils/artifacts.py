@@ -11,6 +11,7 @@ from typing import List, Optional, Dict, Any, Union, Tuple
 import logging
 import gzip
 import re
+import zipfile
 
 ARTIFACT_NODE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_node"
 ARTIFACT_SYSTEM_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/artifacts_system"
@@ -510,6 +511,53 @@ class ArtifactManager(object):
                 self.logger.error(f"Failed to remove operation directory {op_dir}: {e}")
         
         return deleted_count
+
+
+    def create_zip_artifact_from_folder(
+        self,
+        source_id: str,
+        operation_id: str,
+        folder: str,
+        name: str,
+        metadata: dict,
+        arc_prefix: Optional[str] = None,
+    ):
+        """
+        Zips up a folder and creates an artifact for the zip file. Used in sending SOI evidence to TAK.
+        
+        :param self: Description
+        :param source_id: Description
+        :type source_id: str
+        :param operation_id: Description
+        :type operation_id: str
+        :param folder: Description
+        :type folder: str
+        :param name: Description
+        :type name: str
+        :param metadata: Description
+        :type metadata: dict
+        :param arc_prefix: Description
+        :type arc_prefix: str | None
+        """
+
+        zip_path = self.get_filename_for_artifact(operation_id, ".zip")
+
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for root, _, files in os.walk(folder):
+                for fn in files:
+                    full = os.path.join(root, fn)
+                    rel = os.path.relpath(full, folder)
+                    arcname = os.path.join(arc_prefix or "", rel)
+                    zf.write(full, arcname=arcname)
+
+        return self.create_artifact(
+            source_id=source_id,
+            operation_id=operation_id,
+            file_path=zip_path,
+            name=name,
+            artifact_type="application/zip",
+            metadata=metadata,
+        )
 
 
 class ArtifactTracker(object):

@@ -244,7 +244,7 @@ def getPacketTypesDirect(conn, protocol):
             cur.close()
 
     
-def classifyFrequencyFromTextDirect(text):
+def classifyFrequencyFromTextDirect(text, protocol_only=False):
     """
     Extracts a frequency from the given text (supports HackRF sweep formats
     and generic MHz/kHz/Hz formats), performs a direct database lookup on
@@ -371,6 +371,9 @@ def classifyFrequencyFromTextDirect(text):
         notes  = best["notes"] or ""
         prio   = best["priority"]
 
+        if protocol_only:
+            return proto
+
         summary = (
             f"[Protocol={proto} | Region={region} | "
             f"Priority={prio} | Notes={notes.strip()}]"
@@ -392,6 +395,7 @@ def classifyFrequencyFromTextDirect(text):
                 conn.close()
             except Exception:
                 pass
+
 
 
 # =============================================================

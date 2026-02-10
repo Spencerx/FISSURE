@@ -2980,7 +2980,7 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     Forwards alertReturn Message to the Dashboard.
     """
     # Classify Signals by Frequency
-    classification_summary = fissure.utils.library.classifyFrequencyFromTextDirect(alert_text)
+    classification_summary = fissure.utils.library.classifyFrequencyFromTextDirect(alert_text, False)
     if classification_summary:
         alert_text = f"{alert_text}\n{classification_summary}"
     component.logger.info(alert_text)  # TODO: Provide cleaned up console text for alerts
@@ -3068,7 +3068,7 @@ async def takReturn(component, payload: dict):
 #     try:
 #         freq_hz = fissure.utils.common.extractFrequencyFromUID(uid)
 #         if freq_hz:
-#             classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_hz)
+#             classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_hz, False)
 
 #             # classification_text is already formatted like:
 #             # [Protocol=... | Region=... | Priority=... | Notes=...]
@@ -3983,7 +3983,7 @@ async def uninstallPlugins(component: object, sensor_node_id: int, plugin_names:
         await uninstallPluginsDatabase(component, -1, plugin_names)
 
 
-async def removePlugin(component: object, sensor_node_id: int, plugin_name: str):
+async def removePlugin(component: object, node_uid: str, plugin_name: str):
     """Remove Plugin from Sensor Node
 
     **WARNING**: This will remove the plugin from the sensor node file system
@@ -3992,13 +3992,13 @@ async def removePlugin(component: object, sensor_node_id: int, plugin_name: str)
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     plugin_name : str
         Plugin name
     """
     PARAMETERS = {
-        "sensor_node_id": sensor_node_id,
+        "node_uid": node_uid,
         "plugin_name": plugin_name,
     }
     msg = {
@@ -4008,7 +4008,7 @@ async def removePlugin(component: object, sensor_node_id: int, plugin_name: str)
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4331,15 +4331,15 @@ async def plugin_get_operations(component: object, plugin: str):
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def run_plugin_operation(component: object, sensor_node_id: int, plugin: str, operation: str, parameters: dict = {}):
+async def run_plugin_operation(component: object, node_uid: str, plugin: str, operation: str, parameters: dict = {}):
     """Run a plugin operation on the sensor node.
 
     Parameters
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     plugin : str
         Plugin name
     operation : str
@@ -4351,7 +4351,7 @@ async def run_plugin_operation(component: object, sensor_node_id: int, plugin: s
         "plugin": plugin,
         "operation": operation,
         "parameters": parameters,
-        "sensor_node_id": sensor_node_id,
+        "node_uid": node_uid,
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4360,7 +4360,7 @@ async def run_plugin_operation(component: object, sensor_node_id: int, plugin: s
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4372,15 +4372,15 @@ async def run_plugin_operation(component: object, sensor_node_id: int, plugin: s
     )    
 
 
-async def stop_plugin_operation(component: object, sensor_node_id: int, operation_id: str):
+async def stop_plugin_operation(component: object, node_uid: str, operation_id: str):
     """Stop a running plugin operation on the sensor node.
 
     Parameters
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     operation_id : str
         Unique identifier for the operation to stop
     """
@@ -4394,7 +4394,7 @@ async def stop_plugin_operation(component: object, sensor_node_id: int, operatio
     }
 
     # Resolve Identity
-    uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4406,18 +4406,22 @@ async def stop_plugin_operation(component: object, sensor_node_id: int, operatio
     )
 
 
-async def stop_all_plugin_operations(component: object, tak_uid: str, sensor_node_id: int=0):
+async def stop_all_plugin_operations(component: object, requester_uid: str, node_uid: str):
     """Stop all running plugin operations on the sensor node.
 
     Parameters
     ----------
     component : object
-        Component
-    sensor_node_id : int
-        Sensor node ID
+        Component.
+    requester_uid : str
+        TAK UID.
+    node_uid : str
+        Sensor node UID.
     """
-    component.logger.info(f"Stopping all plugin operations on sensor node {sensor_node_id}")
-    PARAMETERS = {}
+    component.logger.info(f"Stopping all plugin operations on sensor node {node_uid}")
+    PARAMETERS = {
+        "node_uid": node_uid
+    }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
         fissure.comms.MessageFields.MESSAGE_NAME: "stop_all_plugin_operations",
@@ -4425,8 +4429,7 @@ async def stop_all_plugin_operations(component: object, tak_uid: str, sensor_nod
     }
 
     # Resolve Identity
-    # uuid, identity = component.resolve_sensor_node_identity(sensor_node_id)
-    identity = component.nodes[tak_uid].get("identity", None)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4438,21 +4441,21 @@ async def stop_all_plugin_operations(component: object, tak_uid: str, sensor_nod
     )
 
 
-async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: int=0):
+async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: str):
     """Request Sensor Node plugin names for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK unique identifier
-    sensor_node_id : int, optional
-        Sensor node ID, by default 0
+    node_uid : str
+        Sensor node UUID
     """
     PARAMETERS = {
-        "tak_uid": tak_uid,
-        "sensor_node_id": sensor_node_id,
+        "requester_uid": requester_uid,
+        "node_uid": node_uid,
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4461,7 +4464,7 @@ async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: in
     }
 
     # Resolve Identity
-    identity = component.nodes[tak_uid].get("identity", None)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4473,23 +4476,23 @@ async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: in
     )
 
 
-async def sendPluginNamesTakResults(component: object, tak_uid: str, sensor_node_id: int, plugin_names: List[str]):
+async def sendPluginNamesTakResults(component: object, requester_uid: str, node_uid: str, plugin_names: List[str]):
     """Handle Sensor Node plugin names for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK unique identifier
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     plugin_names : List[str]
         Plugin names
     """
-    component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {tak_uid}")
+    component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {requester_uid}")
 
-    event_uid = f"{tak_uid}-pluginlist-{int(time.time()*1000)}"
+    event_uid = f"{requester_uid}-pluginlist-{int(time.time()*1000)}"
     msg = {
         "msg_type": "event",
         "uid": event_uid,
@@ -4501,56 +4504,25 @@ async def sendPluginNamesTakResults(component: object, tak_uid: str, sensor_node
 
     await fissure.utils.tak_messages.send(component, msg)
 
-    # try:
-    #     msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
 
-    #     # Ensure msg is an Element; if pytak returned a string, try to parse it
-    #     if not isinstance(msg, ET.Element):
-    #         try:
-    #             msg = ET.fromstring(msg)
-    #         except Exception:
-    #             component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
-    #             return
-
-    #     # Find existing <detail> or create one if missing
-    #     detail = msg.find("detail")
-    #     if detail is None:
-    #         detail = ET.SubElement(msg, "detail")
-
-    #     # add <remarks> as a child element (not an attribute)
-    #     remarks = ET.SubElement(detail, "remarks")
-    #     # prepare remarks with plugin names
-    #     remarks.text = "FTN plugins: " + ", ".join(plugin_names)
-
-    #     # Convert to bytes
-    #     msg_bytes = ET.tostring(msg, encoding='utf-8')
-
-    #     # send the message
-    #     component.logger.debug("Sending TAK plugin names message: " + msg_bytes.decode('utf-8'))
-    #     component.clitool.tx_queue.put_nowait(msg_bytes)
-    # except Exception as e:
-    #     component.logger.error(f"Failed to send TAK plugin names: {e}")
-    #     tb = traceback.format_exc()
-    #     component.logger.debug(tb)
-
-async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name: str, sensor_node_id: int=0):
+async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin_name: str, node_uid: str):
     """Request Sensor Node plugin action names for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK unique identifier
     plugin_name : str
         Plugin name
-    sensor_node_id : int, optional
-        Sensor node ID, by default 0
+    node_uid : str
+        Sensor node UID
     """
     PARAMETERS = {
-        "tak_uid": tak_uid,
+        "requester_uid": requester_uid,
         "plugin_name": plugin_name,
-        "sensor_node_id": sensor_node_id,
+        "node_uid": node_uid,
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4559,7 +4531,7 @@ async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name:
     }
 
     # Resolve Identity
-    identity = component.nodes[tak_uid].get("identity", None)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4571,26 +4543,26 @@ async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name:
     )
 
 
-async def sendPluginActionNamesTakResults(component: object, tak_uid: str, sensor_node_id: int, plugin_name: str, action_names: List[str]):
+async def sendPluginActionNamesTakResults(component: object, requester_uid: str, node_uid: str, plugin_name: str, action_names: List[str]):
     """Handle Sensor Node plugin action names for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK unique identifier
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     plugin_name : str
         Plugin name
     action_names : List[str]
         Plugin action names
     """
-    component.logger.debug(f"Preparing to send TAK plugin action names for TAK UID: {tak_uid}")
+    component.logger.debug(f"Preparing to send TAK plugin action names for TAK UID: {requester_uid}")
 
     # Generate unique event UID
-    event_uid = f"{tak_uid}-actions-{int(time.time() * 1000)}"
+    event_uid = f"{requester_uid}-actions-{int(time.time() * 1000)}"
 
     msg = {
         "msg_type": "event",
@@ -4605,51 +4577,17 @@ async def sendPluginActionNamesTakResults(component: object, tak_uid: str, senso
     await fissure.utils.tak_messages.send(component, msg)
 
 
-
-    # try:
-    #     msg = pytak.gen_cot_xml(uid=tak_uid, stale=300)
-
-    #     # Ensure msg is an Element; if pytak returned a string, try to parse it
-    #     if not isinstance(msg, ET.Element):
-    #         try:
-    #             msg = ET.fromstring(msg)
-    #         except Exception:
-    #             component.logger.error("pytak.gen_cot_xml did not return a valid XML Element")
-    #             return
-
-    #     # Find existing <detail> or create one if missing
-    #     detail = msg.find("detail")
-    #     if detail is None:
-    #         detail = ET.SubElement(msg, "detail")
-
-    #     # add <remarks> as a child element (not an attribute)
-    #     remarks = ET.SubElement(detail, "remarks")
-    #     # prepare remarks with plugin action names
-    #     remarks.text = f"FTN plugin actions: {plugin_name}: " + ", ".join(action_names)
-
-    #     # Convert to bytes
-    #     msg_bytes = ET.tostring(msg, encoding='utf-8')
-
-    #     # send the message
-    #     component.logger.debug("Sending TAK plugin action names message: " + msg_bytes.decode('utf-8'))
-    #     component.clitool.tx_queue.put_nowait(msg_bytes)
-    # except Exception as e:
-    #     component.logger.error(f"Failed to send TAK plugin action names: {e}")
-    #     tb = traceback.format_exc()
-    #     component.logger.debug(tb)
-
-
-async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: int, plugin_name: str, action_name: str, parameters: dict):
+async def sendPluginActionTak(component: object, requester_uid: str, node_uid: str, plugin_name: str, action_name: str, parameters: dict):
     """Request Sensor Node plugin action for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK unique identifier
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     plugin_name : str
         Plugin name
     action_name : str
@@ -4660,8 +4598,8 @@ async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: i
     PARAMETERS = {
         "plugin_name": plugin_name,
         "action_name": action_name,
+        "node_uid": node_uid,
         "parameters": parameters,
-        "sensor_node_id": sensor_node_id,
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4670,7 +4608,7 @@ async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: i
     }
 
     # Resolve Identity
-    identity = component.nodes[tak_uid].get("identity", None)
+    identity = component.nodes[node_uid].get("identity", None)
     if identity is None:
         return
     
@@ -4682,15 +4620,15 @@ async def sendPluginActionTak(component: object, tak_uid: str, sensor_node_id: i
     )    
 
 
-async def pluginOperationStarted(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str, parameters: dict):
+async def pluginOperationStarted(component: object, node_uid: str, operation_id: str, plugin: str, operation: str, parameters: dict):
     """Handle Plugin Operation Started Event
 
     Parameters
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     operation_id : str
         Unique identifier for the operation
     plugin : str
@@ -4702,7 +4640,7 @@ async def pluginOperationStarted(component: object, sensor_node_id: int, operati
     """
     # Forward message to dashboard
     PARAMETERS = {
-        "sensor_node_id": sensor_node_id,
+        "node_uid": node_uid,
         "operation_id": operation_id,
         "plugin": plugin,
         "operation": operation,
@@ -4716,15 +4654,16 @@ async def pluginOperationStarted(component: object, sensor_node_id: int, operati
     if component.dashboard_connected:
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
-async def pluginOperationStopped(component: object, sensor_node_id: int, operation_id: str, plugin: str, operation: str) -> None:
+
+async def pluginOperationStopped(component: object, node_uid: str, operation_id: str, plugin: str, operation: str) -> None:
     """Handle Plugin Operation Stopped Event
 
     Parameters
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     operation_id : str
         Unique identifier for the operation
     plugin : str
@@ -4734,7 +4673,7 @@ async def pluginOperationStopped(component: object, sensor_node_id: int, operati
     """
     # Forward message to dashboard
     PARAMETERS = {
-        "sensor_node_id": sensor_node_id,
+        "node_uid": node_uid,
         "operation_id": operation_id,
         "plugin": plugin,
         "operation": operation,
@@ -4889,3 +4828,261 @@ async def transferArtifactRequest(component: object, artifact_id: str, destinati
 
         elif destination == 'hiprfisr':
             component.logger.info(f"Artifact {artifact_id} saved to hiprfisr")
+
+
+async def soiUpdate(component: object,
+                    sensor_node_id="",
+                    soi_id="",
+                    frequency_mhz=None,
+                    status="",
+                    operation_id="",
+                    artifact_id="",
+                    summary=None,
+                    lat=None,
+                    lon=None,
+                    alt=None,
+                    observation_time=None
+                    ):
+    """
+    SOI update callback (node -> HIPRFISR).
+
+    Stores/updates SOI state at the hub and forwards:
+    - a dashboard update (so WinTAK/Dashboard can update SOI table)
+    - a TAK EVENT (so SOI lifecycle is visible in TAK)
+
+    Behavior
+    --------
+    • Upserts a single SOI record (no duplicates)
+    • Uses a single payload blob: "summary"
+    • Supports stage + stage_order lifecycle
+    • Guards against out-of-order regressions
+    • Emits TAK event for each valid update
+    """
+
+    # ==============================================================
+    # 1) Normalize Inputs
+    # ==============================================================
+
+    if summary is None:
+        summary = {}
+    if not isinstance(summary, dict):
+        summary = {}
+
+    # Lifecycle
+    stage = summary.get("stage")
+    stage_order = summary.get("stage_order")
+    try:
+        stage_order = int(stage_order) if stage_order is not None else None
+    except Exception:
+        stage_order = None
+
+    # ML fields (single convention)
+    model_classification = summary.get("model_classification")
+    model_confidence = summary.get("model_confidence")
+
+    # normalize confidence -> percent int or None
+    try:
+        if model_confidence is not None:
+            model_confidence = int(round(float(model_confidence)))
+    except Exception:
+        model_confidence = None
+
+    # Avoid literal "None" strings propagating to CoT/WinTAK
+    if model_classification in (None, "None"):
+        model_classification = ""
+
+
+    # ==============================================================
+    # 2) Build Stable SOI Key
+    # ==============================================================
+
+    if soi_id:
+        soi_key = f"{sensor_node_id}:{soi_id}"
+    else:
+        soi_key = f"{sensor_node_id}:{operation_id or 'unknown'}"
+
+    now = time.time()
+
+
+    # ==============================================================
+    # 3) Frequency Database Classification
+    # ==============================================================
+
+    database_classification_result = ""
+    if frequency_mhz:
+        database_classification_result = (
+            fissure.utils.library.classifyFrequencyFromTextDirect(
+                str(frequency_mhz), True
+            )
+        )
+        component.logger.info(database_classification_result)
+
+
+    # ==============================================================
+    # 4) Update Hub-side SOI Store (Upsert + Ordering Guard)
+    # ==============================================================
+
+    existing = component.sois.get(soi_key, {})
+    prev_stage_order = existing.get("stage_order")
+
+    try:
+        prev_stage_order = int(prev_stage_order) if prev_stage_order is not None else None
+    except Exception:
+        prev_stage_order = None
+
+    # Prevent out-of-order regressions
+    if (stage_order is not None
+            and prev_stage_order is not None
+            and stage_order < prev_stage_order):
+        component.logger.info(
+            f"Ignoring out-of-order SOI update "
+            f"(new={stage_order} < prev={prev_stage_order})"
+        )
+        return
+
+    record = dict(existing)
+
+    record.update({
+        "soi_key": soi_key,
+        "sensor_node_id": sensor_node_id,
+        "soi_id": soi_id,
+        "frequency_mhz": frequency_mhz,
+        "status": status,
+        "operation_id": operation_id,
+        "artifact_id": artifact_id,
+
+        # keep the raw payload for debugging / future UI
+        "summary": summary,
+
+        "updated_at": now,
+        "stage": stage,
+        "stage_order": stage_order,
+
+        "model_classification": model_classification,
+        "model_confidence": model_confidence,
+        "database_classification": database_classification_result,
+    })
+
+    if "created_at" not in record:
+        record["created_at"] = now
+
+    component.sois[soi_key] = record
+
+
+    # ==============================================================
+    # 5) Forward to Dashboard (future)
+    # ==============================================================
+    # PARAMETERS = {"soi": record}
+    # msg = {
+    #     fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+    #     fissure.comms.MessageFields.MESSAGE_NAME: "soiUpdate",
+    #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    # }
+    # if component.dashboard_connected:
+    #     await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
+
+    # ==============================================================
+    # 6) Emit TAK EVENT
+    # ==============================================================
+
+    uid_core = soi_id or operation_id or soi_key
+    tak_uid = f"fissure-soi-{sensor_node_id}-{uid_core}"
+
+    tak_data = {
+        "event_type": "soi",
+        "sensor_node_id": sensor_node_id,
+        "soi_id": soi_id,
+        "frequency_mhz": frequency_mhz,
+        "status": status,
+        "operation_id": operation_id,
+        "artifact_id": artifact_id,
+
+        "model_classification": model_classification,
+        "model_confidence": model_confidence,
+        "database_classification": database_classification_result,
+
+        "stage": stage,
+        "stage_order": stage_order,
+    }
+
+    # Optional: if you want the raw payload visible downstream, keep ONE name.
+    # If you don't need it in TAK, delete this block entirely.
+    if summary:
+        tak_data["summary"] = summary
+
+    await fissure.utils.tak_messages.send(component, {
+        "msg_type": "event",
+        "uid": tak_uid,
+        "data": tak_data,
+        "tak_icon": "r-x-fissure-soi",
+        "lat": lat,
+        "lon": lon,
+        "alt": alt
+    })
+
+
+async def sendTargetsListTak(component: object, requester_uid: str = "", request_id: str = "", requester_callsign: str = "") -> None:
+    """
+    Respond to WinTAK 'targets_list' request by emitting one TAK event per target.
+    WinTAK will upsert rows by target_id.
+    """
+    try:
+        targets = getattr(component, "targets", {}) or {}
+    except Exception:
+        targets = {}
+
+    # If you want: emit an empty response marker event so WinTAK can clear state intentionally.
+    # For now, just send what exists.
+    for tgt_id, tgt in targets.items():
+        try:
+            # Normalize fields defensively
+            sensor_node_id = (tgt.get("sensor_node_id") or "").strip()
+            source_soi_id = (tgt.get("source_soi_id") or "").strip()
+            artifact_id = (tgt.get("artifact_id") or "").strip()
+            state = (tgt.get("state") or "").strip()
+            freq_mhz = tgt.get("frequency_mhz")
+
+            classification = tgt.get("classification") or {}
+            display_label = (classification.get("display_label") or "").strip()
+
+            loc = tgt.get("location") or {}
+            lat = loc.get("lat")
+            lon = loc.get("lon")
+            ce_m = loc.get("ce_m")
+            hae_m = loc.get("hae_m")
+
+            # Unique event uid for this transmission (don’t reuse target_id directly)
+            event_uid = f"fissure-target-{tgt_id}-{int(time.time()*1000)}"
+
+            tak_data = {
+                "event_type": "target",
+                "target_id": tgt_id,
+                "sensor_node_id": sensor_node_id,
+                "source_soi_id": source_soi_id,
+
+                "display_label": display_label,
+                "state": state,
+                "frequency_mhz": freq_mhz,
+                "artifact_id": artifact_id,
+
+                # include location if present
+                "lat": lat,
+                "lon": lon,
+                "ce_m": ce_m,
+                "hae_m": hae_m,
+
+                # optional correlation back to the request
+                "request_id": request_id,
+                "requester_uid": requester_uid,
+                "requester_callsign": requester_callsign,
+            }
+
+            await fissure.utils.tak_messages.send(component, {
+                "msg_type": "event",
+                "uid": event_uid,
+                "data": tak_data,
+            })
+
+        except Exception as e:
+            component.logger.error(f"Failed sending target {tgt_id} to TAK: {e}")

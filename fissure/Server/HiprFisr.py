@@ -84,6 +84,50 @@ class HiprFisr:
         # Get IP Address
         self.ip_address = fissure.utils.get_ip_address()
 
+        # TAK SOI Dictionary, # TODO: Replace with database lookup
+        self.sois = {}  # key -> SOI record dict
+        self.targets = {}
+        self.targets["tgt-00000000-0000-4000-8000-000000000001"] = {
+            "target_id": "tgt-00000000-0000-4000-8000-000000000001",
+            "sensor_node_id": "node-bravo-01",
+            "source_soi_id": "soi-demo-123",
+
+            "created_time": "2026-02-02T18:32:11Z",
+            "last_update_time": "2026-02-02T18:32:11Z",
+
+            "frequency_mhz": 311.0,
+
+            "classification": {
+                "display_label": "Garage Door Opener",
+                "candidates": [
+                    {
+                        "source": "database",
+                        "label": "Garage Door Opener"
+                    },
+                    {
+                        "source": "model",
+                        "label": "Garage_Door",
+                        "confidence": 0.62
+                    }
+                ]
+            },
+
+            # TAK-compatible geospatial fields
+            "location": {
+                "lat": 41.2457,        # north-central Pennsylvania
+                "lon": -76.9983,
+                "hae_m": 0,           # height above ellipsoid (meters)
+                "ce_m": 50,           # circular error radius (meters)
+                "timestamp": "2026-02-02T18:31:55Z",
+                "source": "node_last_known"
+            },
+
+            "state": "detected",
+
+            # action history / observations recorded by HIPRFISR
+            "history": []
+        }
+
         # Store Collected Wideband and Narrowband Signals in Lists
         self.wideband_list = []
         self.soi_list = []

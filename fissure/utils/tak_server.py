@@ -122,49 +122,6 @@ class TakReceiver(pytak.QueueWorker):
         self._logger = logger
         self.hipfisr = hipfisr
 
-    # async def handle_data(self, data: str) -> None:
-    #     """
-    #     Handle data from the receive queue
-
-    #     Parameters
-    #     ----------
-    #     data : str
-    #         Data received from TAK server
-    #     """
-    #     data_decode = data.decode()
-    #     self._logger.debug("TAK Msg Received:\n%s\n", data_decode)
-    #     # print("TAK Msg Received:\n%s\n", data_decode)
-    #     try:
-    #         root = ET.fromstring(data_decode)
-    #         uid = root.get("uid", "unknown")
-    #         remarks = root.find(".//detail/remarks")
-    #         if remarks is not None and remarks.text:
-    #             # Plugin Names
-    #             if remarks.text == "FTN Requested: Plugin Names":
-    #                 self._logger.info(f"FTN Plugin Names Requested for UID: {uid}")
-    #                 await HiprFisrCallbacks.sendPluginNamesTak(self.hipfisr, uid, sensor_node_id=0)
-                
-    #             # List of Plugin Actions
-    #             elif remarks.text.startswith("FTN Requested: Plugin Actions:"):
-    #                 plugin_name = remarks.text.split("FTN Requested: Plugin Actions:")[-1].strip()
-    #                 self._logger.info(f"FTN Plugin Action Names Requested: {plugin_name} for UID: {uid}")
-    #                 await HiprFisrCallbacks.sendPluginActionNamesTak(self.hipfisr, uid, plugin_name, sensor_node_id=0)
-
-    #             # Execute Plugin Action
-    #             elif remarks.text.startswith("FTN Requested: Plugin Action:"):
-    #                 remaining = remarks.text.split("FTN Requested: Plugin Action:")[-1].strip()
-    #                 plugin_name, action_name = remaining.split(":", 1)
-    #                 plugin_name = plugin_name.strip()
-    #                 action_name = action_name.strip()
-    #                 self._logger.info(f"FTN Plugin Action Requested: {action_name} for UID: {uid}")
-    #                 await HiprFisrCallbacks.sendPluginActionTak(self.hipfisr, uid, sensor_node_id=0, plugin_name=plugin_name, action_name=action_name, parameters={})
-
-    #             # Stop Plugin Action
-    #             elif remarks.text.startswith("FTN Requested: Plugin Action Stop"):
-    #                 self._logger.info(f"FTN Plugin Stop Requested for UID: {uid}")
-    #                 await HiprFisrCallbacks.stop_all_plugin_operations(self.hipfisr, uid, sensor_node_id=0)
-    #     except ET.ParseError as e:
-    #         self._logger.error("XML Parse Error: %s", e)
 
 
 
@@ -198,32 +155,6 @@ class TakReceiver(pytak.QueueWorker):
         try:
             root = ET.fromstring(data_decode)
             
-            # Deleting after testing Artifact Download
-#            uid = root.get("uid", "unknown")
-#            remarks = root.find(".//detail/remarks")
-#            if remarks is not None and remarks.text:
-#                if remarks.text == "FTN Requested: Plugin Names":
-#                    self._logger.info(f"FTN Plugin Names Requested for UID: {uid}")
-#                    await HiprFisrCallbacks.sendPluginNamesTak(self.hipfisr, uid, sensor_node_id=0)
-#                elif remarks.text.startswith("FTN Requested: Plugin Actions:"):
-#                    plugin_name = remarks.text.split("FTN Requested: Plugin Actions:")[-1].strip()
-#                    self._logger.info(f"FTN Plugin Action Names Requested: {plugin_name} for UID: {uid}")
-#                    await HiprFisrCallbacks.sendPluginActionNamesTak(self.hipfisr, uid, plugin_name, sensor_node_id=0)
-#                elif remarks.text.startswith("FTN Requested: Plugin Action:"):
-#                    remaining = remarks.text.split("FTN Requested: Plugin Action:")[-1].strip()
-#                    plugin_name, action_name = remaining.split(":", 1)
-#                    plugin_name = plugin_name.strip()
-#                    action_name = action_name.strip()
-#                    self._logger.info(f"FTN Plugin Action Requested: {action_name} for UID: {uid}")
-#                    await HiprFisrCallbacks.sendPluginActionTak(self.hipfisr, uid, sensor_node_id=0, plugin_name=plugin_name, action_name=action_name, parameters={})
-#                elif remarks.text.startswith("FTN Requested: Plugin Action Stop"):
-#                    self._logger.info(f"FTN Plugin Stop Requested for UID: {uid}")
-#                    await HiprFisrCallbacks.stop_all_plugin_operations(self.hipfisr, uid, sensor_node_id=0)
-#                elif remarks.text.startswith("FTN Requested: Artifact Download:"):
-#                    artid = remarks.text.split("FTN Requested: Artifact Download:")[-1].strip()
-#                    self._logger.info(f"FTN Artifact Download Requested for artifact id: {artid}")
-#                    await HiprFisrCallbacks.transferArtifactRequest(self.hipfisr, artid, 'tak', None)
-
             # Event metadata
             event_uid = root.get("uid", "unknown")
             event_type = root.get("type", "unknown")
@@ -249,6 +180,25 @@ class TakReceiver(pytak.QueueWorker):
             # Optional requester identity
             requester_uid = (fissure.findtext("requester_uid") or "").strip()
             requester_callsign = (fissure.findtext("requester_callsign") or "").strip()
+
+            # print("request_id: ", request_id)
+            # print("node_uid: ", node_uid)
+            # print("requester_uid: ", requester_uid)
+            # print("requester_callsign: ", requester_callsign)
+            # request_id:  fissure-req-0ed55a49-3038-4861-825d-c6a9785d5c0a
+            # node_uid:  fe241d26-c5e0-44d0-8bdd-48f7106fc4e2
+            # requester_uid:  a54d8311-fe41-5c16-8dc3-8e4457ba176c
+            # requester_callsign:  ANDY985
+
+
+            # Targets list
+            if request in ("targets_list", "target_list", "get_targets", "get_target_list"):
+                await HiprFisrCallbacks.sendTargetsListTak(
+                    self.hipfisr,
+                    requester_uid=requester_uid,
+                    request_id=request_id,
+                    requester_callsign=requester_callsign,
+                )
 
             if not node_uid:
                 self._logger.warning(
@@ -297,8 +247,8 @@ class TakReceiver(pytak.QueueWorker):
             if request in ("plugin_names", "plugins", "get_plugin_names"):
                 await HiprFisrCallbacks.sendPluginNamesTak(
                     self.hipfisr,
+                    requester_uid,
                     node_uid,
-                    sensor_node_id=0
                 )
 
             # Load Plugin
@@ -312,9 +262,9 @@ class TakReceiver(pytak.QueueWorker):
 
                 await HiprFisrCallbacks.sendPluginActionNamesTak(
                     self.hipfisr,
-                    node_uid,
+                    requester_uid,
                     plugin_name,
-                    sensor_node_id=0
+                    node_uid
                 )
 
             # Execute Action
@@ -331,8 +281,8 @@ class TakReceiver(pytak.QueueWorker):
 
                 await HiprFisrCallbacks.sendPluginActionTak(
                     self.hipfisr,
+                    requester_uid,
                     node_uid,
-                    sensor_node_id=0,
                     plugin_name=plugin_name,
                     action_name=action_name,
                     parameters=parameters,
@@ -342,10 +292,10 @@ class TakReceiver(pytak.QueueWorker):
             elif request in ("plugin_action_stop", "stop_plugin_action", "stop_all"):
                 await HiprFisrCallbacks.stop_all_plugin_operations(
                     self.hipfisr,
-                    node_uid,
-                    sensor_node_id=0
+                    requester_uid,
+                    node_uid
                 )
-            
+                        
             # Artifact Download
             elif request in ("artifact_download", "get_artifact", "download_artifact"):
                 artifact_id = parameters.get("artifact_id")
@@ -365,8 +315,6 @@ class TakReceiver(pytak.QueueWorker):
                 # Match the original behavior: request transfer to TAK, with no inline data
                 await HiprFisrCallbacks.transferArtifactRequest(self.hipfisr, artifact_id, "tak", None)
 
-
-
             else:
                 self._logger.debug(
                     "Ignoring unknown request '%s' (node_uid=%s, request_id=%s)",
@@ -377,10 +325,6 @@ class TakReceiver(pytak.QueueWorker):
             self._logger.error("XML Parse Error: %s", e)
         except Exception as e:
             self._logger.exception("handle_data failed: %s", e)
-
-
-
-
 
 
     async def run(self) -> None:

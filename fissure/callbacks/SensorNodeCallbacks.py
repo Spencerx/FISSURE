@@ -1321,7 +1321,7 @@ async def uninstallPlugins(component: object, sensor_node_id: int, plugin_names:
     await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def removePlugin(component: object, sensor_node_id: int, plugin_name: str):
+async def removePlugin(component: object, node_uid: str, plugin_name: str):
     """Remove Plugin
 
     **WARNING**: This will remove the plugin from the sensor node file system
@@ -1330,35 +1330,34 @@ async def removePlugin(component: object, sensor_node_id: int, plugin_name: str)
     ----------
     component : object
         Component
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     plugin_name : str
         Plugin name with file extension
     """
-    if sensor_node_id > -1:
-        # remove plugin
-        plugin.remove(plugin_name)
+    # Remove plugin
+    plugin.remove(plugin_name)
 
 
-async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: int):
+async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: str):
     """Send Plugin Names for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK UID
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     """
     try:
         plugin_names = plugin.get_local_plugin_names()
 
         # send plugin names
         PARAMETERS = {
-            "tak_uid": tak_uid,
-            "sensor_node_id": sensor_node_id,
+            "requester_uid": requester_uid,
+            "node_uid": node_uid,
             "plugin_names": plugin_names
         }
         msg = {
@@ -1366,35 +1365,35 @@ async def sendPluginNamesTak(component: object, tak_uid: str, sensor_node_id: in
             fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginNamesTakResults",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
-        component.logger.debug(f"Sending plugin names for TAK UID {tak_uid}: {plugin_names}")
+        component.logger.debug(f"Sending plugin names for TAK UID {requester_uid}: {plugin_names}")
         await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
     except Exception as e:
-        component.logger.error(f"Error sending plugin names for TAK UID {tak_uid}: {e}")
+        component.logger.error(f"Error sending plugin names for TAK UID {requester_uid}: {e}")
         tb = traceback.format_exc()
         component.logger.debug(tb)
 
 
-async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name: str, sensor_node_id: int):
+async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin_name: str, node_uid: str):
     """Send Plugin Action Names for TAK
 
     Parameters
     ----------
     component : object
         Component
-    tak_uid : str
+    requester_uid : str
         TAK UID
     plugin_name : str
         Plugin name
-    sensor_node_id : int
-        Sensor node ID
+    node_uid : str
+        Sensor node UID
     """
     try:
         action_names = plugin.get_plugin_actions(plugin_name, component.logger)
 
         # send action names
         PARAMETERS = {
-            "tak_uid": tak_uid,
-            "sensor_node_id": sensor_node_id,
+            "requester_uid": requester_uid,
+            "node_uid": node_uid,
             "plugin_name": plugin_name,
             "action_names": action_names
         }
@@ -1403,10 +1402,10 @@ async def sendPluginActionNamesTak(component: object, tak_uid: str, plugin_name:
             fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionNamesTakResults",
             fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
         }
-        component.logger.debug(f"Sending action names for plugin {plugin_name} and TAK UID {tak_uid}: {action_names}")
+        component.logger.debug(f"Sending action names for plugin {plugin_name} and TAK UID {requester_uid}: {action_names}")
         await component.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
     except Exception as e:
-        component.logger.error(f"Error sending action names for plugin {plugin_name} and TAK UID {tak_uid}: {e}")
+        component.logger.error(f"Error sending action names for plugin {plugin_name} and TAK UID {requester_uid}: {e}")
         tb = traceback.format_exc()
         component.logger.debug(tb)
 

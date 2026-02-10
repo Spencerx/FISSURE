@@ -526,7 +526,6 @@ class SensorNode(object):
         Missing fields are ignored.
         True values for lat/lon/alt/time trigger auto-resolution.
         """
-
         # --------------------------------------------------
         # Validate minimal required field
         # --------------------------------------------------
@@ -644,6 +643,81 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(
             fissure.comms.MessageTypes.COMMANDS, msg_out
         )
+    
+
+    async def send_soi_update(
+        self,
+        sensor_node_id,
+        soi_id,
+        frequency_mhz,
+        status,
+        operation_id="",
+        artifact_id="",
+        summary=None,
+        lat=None,    # float | True | None
+        lon=None,    # float | True | None
+        alt=None,    # float | True | None  (treat as HAE)
+        observation_time=None,   # str | True | None
+    ):
+        
+        # --------------------------------------------
+        # Normalize GPS + timestamp (match send_tak_cot)
+        # --------------------------------------------
+        if lat is True:
+            lat = self.gps_position.get("latitude")
+        if lon is True:
+            lon = self.gps_position.get("longitude")
+        if alt is True:
+            alt = self.gps_position.get("altitude")
+        if observation_time is True:
+            observation_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        elif isinstance(observation_time, str):
+            observation_time = observation_time.replace(" ", "T")
+
+        # --------------------------------------------
+        # Build PARAMETERS (include only if present)
+        # --------------------------------------------
+        PARAMETERS = {
+            "sensor_node_id": sensor_node_id,
+            "soi_id": soi_id,
+            "frequency_mhz": frequency_mhz,
+            "status": status,
+            "operation_id": operation_id or "",
+            "artifact_id": artifact_id or "",
+            "summary": summary or {},
+        }
+
+        # add location only if provided/resolved
+        if lat is not None: PARAMETERS["lat"] = float(lat)
+        if lon is not None: PARAMETERS["lon"] = float(lon)
+        if alt is not None: PARAMETERS["alt"] = float(alt)
+        if observation_time is not None: PARAMETERS["observation_time"] = observation_time
+
+        if self.network_type == "IP":
+            msg = {
+                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "soiUpdate",
+                fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+            }
+
+        elif self.network_type == "Meshtastic":
+            compact = {
+                "sensor_node_id": sensor_node_id,
+                "soi_id": str(soi_id)[:16],
+                "f": float(frequency_mhz),
+                "s": str(status)[:16],
+            }
+            msg = {
+                fissure.comms.MessageFields.SOURCE: self.assigned_id,
+                fissure.comms.MessageFields.MESSAGE_NAME: "soiUpdateLT",
+                fissure.comms.MessageFields.PARAMETERS: compact,
+            }
+
+        else:
+            self.logger.error("Unknown network type for SOI update")
+            return
+
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
     async def _notify_hiprfisr_of_artifact(self, artifact_id: str) -> None:
@@ -841,7 +915,7 @@ class SensorNode(object):
         # Send "started" immediately so fast ops still generate a start event
         try:
             PARAMETERS = {
-                "sensor_node_id": sensor_node_id,
+                "node_uid": sensor_node_id,
                 "operation_id": operation_id,
                 "plugin": plugin,
                 "operation": operation,
@@ -881,7 +955,7 @@ class SensorNode(object):
                 # Notify stopped (Dashboard list cleanup). Safe even if comms drops.
                 try:
                     PARAMETERS2 = {
-                        "sensor_node_id": sensor_node_id,
+                        "node_uid": sensor_node_id,
                         "operation_id": operation_id,
                         "plugin": plugin,
                         "operation": operation,
@@ -1078,7 +1152,7 @@ class SensorNode(object):
     #         return
 
 
-    async def stop_plugin_operation(self, component: object, operation_id: str, sensor_node_id: Union[int, str] = 0) -> None:
+    async def stop_plugin_operation(self, component: object, operation_id: str, node_uid: str) -> None:
         """
         Stops a plugin operation on the Sensor Node.
 
@@ -1086,6 +1160,8 @@ class SensorNode(object):
         ----------
         operation_id : str
             The ID of the operation to stop.
+        node_uid : str
+            The Sensor Node UID.
         
         Returns
         -------
@@ -1120,7 +1196,7 @@ class SensorNode(object):
 
         # Send a message to the Dashboard indicating the operation has stopped
         PARAMETERS = {
-            "sensor_node_id": sensor_node_id,
+            "node_uid": node_uid,
             "operation_id": operation_id,
             "plugin": operation.get("plugin"),
             "operation": operation.get("operation"),
@@ -1133,21 +1209,21 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    async def stop_all_plugin_operations(self, component: object, sensor_node_id: Union[int, str] = 0) -> None:
+    async def stop_all_plugin_operations(self, component: object, node_uid: str) -> None:
         """
         Stops all running plugin operations on the Sensor Node.
 
         Parameters
         ----------
-        sensor_node_id : Union[int, str], optional
-            Sensor node ID, by default 0.
+        node_uid : str
+            Sensor node UID.
         """
         self.logger.info("Stopping all plugin operations.")
         for operation_id in list(self.operations.keys()):
-            await self.stop_plugin_operation(component, operation_id, sensor_node_id)
+            await self.stop_plugin_operation(component, operation_id, node_uid)
 
 
-    async def plugin_action(self, component: object, plugin_name: str, action_name: str, parameters: Dict[str, Any] = {}, sensor_node_id: Union[int, str] = 0) -> None:
+    async def plugin_action(self, component: object, plugin_name: str, action_name: str, node_uid: str, parameters: Dict[str, Any] = {}) -> None:
         """
         Calls a specific action function within a plugin.
 
@@ -1157,6 +1233,8 @@ class SensorNode(object):
             The name of the plugin.
         action_name : str
             The name of the action function to invoke.
+        node_uid : str
+            The Sensor Node UID.
         parameters : Dict[str, Any], optional
             The parameters to pass to the action function.
         """
@@ -1194,9 +1272,9 @@ class SensorNode(object):
             # Invoke the action function
             try:
                 if inspect.iscoroutinefunction(action_func):
-                    await action_func(self, parameters, sensor_node_id)
+                    await action_func(self, parameters, node_uid)
                 else:
-                    action_func(self, parameters, sensor_node_id)
+                    action_func(self, parameters, node_uid)
             except Exception as e:
                 tb_str = traceback.format_exc()
                 self.logger.error(f"Error invoking plugin action {action_name} from {plugin_actions_module}: {e}\n{tb_str}")
@@ -1371,49 +1449,79 @@ class SensorNode(object):
 
     async def read_hiprfisr_messages(self):
         """
-        Read messages from the ZMQ message channel.
+        Read messages from the HIPRFISR ZMQ message channel.
+
+        IMPORTANT BEHAVIOR
+        -----------------
+        - Never blocks the receive loop on long-running actions
+        - plugin_action callbacks are spawned as background tasks
+        - short control commands (stop, queries, etc.) are awaited normally
+        - keeps message reception responsive so STOP works immediately
         """
 
         # If already terminated, do not enter the loop at all.
         if getattr(self.hiprfisr_socket, "terminated", False):
             return
 
+        # Ensure task tracking list exists
+        if not hasattr(self, "child_tasks"):
+            self.child_tasks = []
+
         while True:
-            # Allow graceful exit when shutdown has been requested.
+            # Graceful exit
             if self.shutdown or getattr(self.hiprfisr_socket, "terminated", False):
                 return
 
             try:
                 parsed = await self.hiprfisr_socket.recv_msg()
             except Exception:
-                # Socket error: mark terminated and exit the loop.
+                # Socket error: mark terminated and exit the loop
                 self.hiprfisr_socket.terminated = True
-                # self.hiprfisr_connected = False
                 return
 
             if parsed is None:
-                # tiny sleep prevents a busy-loop at 100% CPU
+                # prevent busy loop
                 await asyncio.sleep(0.01)
                 continue
 
-            # If we reach here, we actually received a real message.
-            # self.hiprfisr_connected = True
-
             msg_type = parsed.get(fissure.comms.MessageFields.TYPE)
 
-            if msg_type == fissure.comms.MessageTypes.COMMANDS:
-                try:
-                    await self.hiprfisr_socket.run_callback(self, parsed)
-                except Exception:
-                    pass
+            if msg_type != fissure.comms.MessageTypes.COMMANDS:
+                continue
 
-            elif msg_type == fissure.comms.MessageTypes.STATUS:
-                # you may add future handling, but nothing now
-                pass
+            msg_name = parsed.get(fissure.comms.MessageFields.MESSAGE_NAME)
 
-            else:
-                # unknown message type — ignore
-                pass
+            # ------------------------------------------------------------
+            # LONG-RUNNING COMMANDS → spawn (DO NOT await)
+            # ------------------------------------------------------------
+            if msg_name in {
+                "plugin_action",   # actions like promote_to_soi
+            }:
+                self.logger.debug(f"Spawning async callback for {msg_name}")
+
+                task = asyncio.create_task(
+                    self.hiprfisr_socket.run_callback(self, parsed),
+                    name=f"hiprfisr_cb:{msg_name}"
+                )
+
+                self.child_tasks.append(task)
+
+                # auto-cleanup finished tasks
+                task.add_done_callback(
+                    lambda t: self.child_tasks.remove(t)
+                    if t in self.child_tasks else None
+                )
+
+                continue
+
+            # ------------------------------------------------------------
+            # SHORT / CONTROL COMMANDS → await normally
+            # (stop_all_plugin_operations MUST be fast)
+            # ------------------------------------------------------------
+            try:
+                await self.hiprfisr_socket.run_callback(self, parsed)
+            except Exception:
+                self.logger.exception(f"Callback failed for {msg_name}")
 
 
     async def send_heartbeat(self):

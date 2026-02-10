@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-2-10
+
+SOI management and plugin operations fixes.
+
+### Added
+
+- Functions to update and store SOIs for TAK
+- Functions to import a target list for TAK
+- Applying database classification to SOIs at the HIPRFISR for TAK
+- Zip function for creating SOI evidence as an artifact for TAK
+- TAK callbacks for specific WinTAK button presses
+
+### Changed
+
+- Changing CoT type for events and populating lat/lon/alt in CoT
+
+### Fixed
+
+- Passing in the node UID to plugin start/stop actions
+- Updating node read_hiprfisr_messages() to create a new task for plugin actions to avoid blocking stop command
+
 ## 2026-1-13
 
 Fixing artifact download errors.

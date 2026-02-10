@@ -198,7 +198,9 @@ async def send(component, message: dict):
         event_node = ET.SubElement(fiss, event_type)
         _serialize_payload(event_node, data, skip_keys={"event_type"})
 
-        _set_point_suppressed(msg)
+        # _set_point_suppressed(msg)
+        _set_point_pin(msg, lat, lon, alt)  # Include lat/lon/hae but do not plot
+
         return _send_to_tak(component, msg)
 
     # =====================================================
