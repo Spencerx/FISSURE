@@ -26,6 +26,7 @@ import zipfile
 import importlib
 import traceback
 import zmq
+from datetime import datetime, timezone
 from fissure.Listeners import (
     MeshtasticListener,
     FilesystemListener,
@@ -4638,6 +4639,16 @@ async def pluginOperationStarted(component: object, node_uid: str, operation_id:
     parameters : dict
         Parameters for the operation
     """
+    # # Update hub node table (source for WinTAK roster)
+    # node = component.nodes.get(node_uid)
+    # if node:
+    #     node["status"] = f"Running: {operation}"
+    #     node["last_seen"] = time.time()
+    #     node["connected"] = True
+
+    # # Broadcast to WinTAK roster (same shape as your node_status event)
+    # await component.emit_node_status(uid=node_uid, status=node["status"])
+
     # Forward message to dashboard
     PARAMETERS = {
         "node_uid": node_uid,
@@ -4655,28 +4666,38 @@ async def pluginOperationStarted(component: object, node_uid: str, operation_id:
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def pluginOperationStopped(component: object, node_uid: str, operation_id: str, plugin: str, operation: str) -> None:
-    """Handle Plugin Operation Stopped Event
-
-    Parameters
-    ----------
-    component : object
-        Component
-    node_uid : str
-        Sensor node UID
-    operation_id : str
-        Unique identifier for the operation
-    plugin : str
-        Plugin name
-    operation : str
-        Operation name
+async def pluginOperationStopped(
+    component: object,
+    node_uid: str,
+    operation_id: str,
+    plugin: str,
+    operation: str,
+    success: bool = True,
+    error: str = "",
+) -> None:
     """
+    Handle Plugin Operation Stopped Event
+    """
+    # # Update node table + emit roster status
+    # status_text = "Idle" if success else "Error"
+
+    # node = component.nodes.get(node_uid)
+    # if node:
+    #     node["status"] = status_text
+    #     node["last_seen"] = time.time()
+    #     node["connected"] = True
+
+    # # Emit status even if node entry is missing (best-effort)
+    # await component.emit_node_status(uid=node_uid, status=status_text)
+
     # Forward message to dashboard
     PARAMETERS = {
         "node_uid": node_uid,
         "operation_id": operation_id,
         "plugin": plugin,
         "operation": operation,
+        "success": success,
+        "error": (error or "")[:2000],
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4685,6 +4706,7 @@ async def pluginOperationStopped(component: object, node_uid: str, operation_id:
     }
     if component.dashboard_connected:
         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+
 
 
 async def updateArtifact(component: object, artifact: dict) -> None:
@@ -5022,6 +5044,177 @@ async def soiUpdate(component: object,
     })
 
 
+async def targetUpdate(
+    component: object,
+    sensor_node_id="",
+    target_id="",
+    source_soi_id="",
+    frequency_mhz=None,
+    state="",
+    artifact_id="",
+    classification=None,
+    location=None,
+    history_entry=None,
+    summary=None,
+    lat=None,
+    lon=None,
+    alt=None,
+    observation_time=None,
+):
+    """
+    Target update callback (node -> HIPRFISR).
+
+    Stores/updates target state at the hub and emits a TAK EVENT.
+
+    Wire format (TAK)
+    -----------------
+    Sends ONE flat format that matches your existing targets_list parsing:
+      <target>
+        <display_label>...</display_label>
+        <lat>...</lat> <lon>...</lon> <hae_m>...</hae_m> <ce_m>...</ce_m>
+      </target>
+
+    Internal format (hub store)
+    ---------------------------
+    Keeps your canonical nested dict:
+      record["classification"] (nested)
+      record["location"] (nested)
+      record["history"]
+    """
+
+    if not target_id:
+        component.logger.info("Ignoring target update with empty target_id")
+        return
+
+    if classification is None or not isinstance(classification, dict):
+        classification = {}
+    if location is None or not isinstance(location, dict):
+        location = {}
+    if history_entry is None or not isinstance(history_entry, dict):
+        history_entry = {}
+    if summary is None or not isinstance(summary, dict):
+        summary = {}
+
+    # Prefer observation_time if provided; else use now
+    if isinstance(observation_time, str) and observation_time:
+        ts_iso = observation_time.replace(" ", "T")
+    else:
+        ts_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    now_epoch = time.time()
+
+    existing = component.targets.get(target_id, {})
+    record = dict(existing) if existing else {}
+
+    created_time = record.get("created_time") or ts_iso
+
+    # -----------------------------
+    # Merge location (canonical)
+    # -----------------------------
+    loc = dict(record.get("location") or {})
+    if location:
+        loc.update(location)
+
+    # If explicit coords provided, they win and update timestamp
+    if lat is not None and lon is not None:
+        loc.setdefault("source", "node_last_known")
+        loc["lat"] = float(lat)
+        loc["lon"] = float(lon)
+        if alt is not None:
+            loc["hae_m"] = float(alt)
+        loc["timestamp"] = ts_iso
+
+    # -----------------------------
+    # Merge classification (canonical)
+    # -----------------------------
+    cls = dict(record.get("classification") or {})
+    if classification:
+        cls.update(classification)
+
+    # -----------------------------
+    # History append (canonical)
+    # -----------------------------
+    hist = list(record.get("history") or [])
+    if history_entry:
+        if "timestamp" not in history_entry:
+            history_entry["timestamp"] = ts_iso
+        hist.append(history_entry)
+
+    # -----------------------------
+    # Upsert record
+    # -----------------------------
+    record.update({
+        "target_id": target_id,
+        "sensor_node_id": sensor_node_id,
+        "source_soi_id": source_soi_id,
+
+        "created_time": created_time,
+        "last_update_time": ts_iso,
+
+        "frequency_mhz": frequency_mhz,
+        "classification": cls,
+        "location": loc,
+
+        "state": state or record.get("state", "") or "detected",
+        "history": hist,
+
+        # optional debugging blob
+        "summary": summary,
+
+        # optional internal timing
+        "updated_at": now_epoch,
+    })
+    component.targets[target_id] = record
+
+    # -----------------------------
+    # TAK EVENT (flat format ONLY)
+    # -----------------------------
+    # Pull display_label + location from canonical store, but emit flat.
+    display_label = ""
+    try:
+        display_label = (cls.get("display_label") or "").strip()
+    except Exception:
+        display_label = ""
+
+    out_lat = loc.get("lat")
+    out_lon = loc.get("lon")
+    out_hae = loc.get("hae_m")
+    out_ce = loc.get("ce_m")
+    out_loc_ts = loc.get("timestamp") or ts_iso
+
+    tak_uid = f"fissure-target-{sensor_node_id}-{target_id}"
+
+    tak_data = {
+        "event_type": "target",
+        "sensor_node_id": sensor_node_id,
+        "target_id": target_id,
+        "source_soi_id": source_soi_id,
+
+        "display_label": display_label,
+        "state": record.get("state"),
+        "frequency_mhz": frequency_mhz,
+        "artifact_id": artifact_id or "",
+
+        # Flat location fields (what your WinTAK parser expects)
+        "lat": out_lat,
+        "lon": out_lon,
+        "hae_m": out_hae,
+        "ce_m": out_ce,
+        "timestamp": out_loc_ts,
+    }
+
+    await fissure.utils.tak_messages.send(component, {
+        "msg_type": "event",
+        "uid": tak_uid,
+        "data": tak_data,
+        "tak_icon": "r-x-fissure-target",
+        # also populate CoT <point> for TAK-native consumers
+        "lat": out_lat,
+        "lon": out_lon,
+        "alt": out_hae,
+    })
+
+
 async def sendTargetsListTak(component: object, requester_uid: str = "", request_id: str = "", requester_callsign: str = "") -> None:
     """
     Respond to WinTAK 'targets_list' request by emitting one TAK event per target.
@@ -5086,3 +5279,74 @@ async def sendTargetsListTak(component: object, requester_uid: str = "", request
 
         except Exception as e:
             component.logger.error(f"Failed sending target {tgt_id} to TAK: {e}")
+
+
+async def statusReturn(
+    component: object,
+    uid: str = "",
+    status: str = "",
+) -> None:
+    """
+    Node status update callback (node -> HIPRFISR).
+
+    - Updates component.nodes[uid]["status"]
+    - Broadcasts to dashboard (and later WinTAK roster)
+    - Optionally emits a TAK EVENT (best-effort) if TAK is enabled
+    """
+    if not uid:
+        component.logger.info("statusReturn received with empty uid")
+        return
+
+    node = component.nodes.get(uid)
+    if not node:
+        component.logger.warning(f"statusReturn: unknown node uid={uid}")
+        return
+
+    if not status:
+        status = "unknown"
+
+    # ---------------------------------------------------------
+    # UPDATE NODE ENTRY
+    # ---------------------------------------------------------
+    node["status"] = status
+    node["last_seen"] = time.time()
+    node["connected"] = True
+
+    component.logger.debug(f"Updated node {uid} status -> {status}")
+
+    # ---------------------------------------------------------
+    # BROADCAST TO DASHBOARD (UI)
+    # ---------------------------------------------------------
+    # update_msg = {
+    #     "msg_type": "node_status",
+    #     "uuid": uid,
+    #     "status": status,
+    #     "last_seen": node["last_seen"],
+    # }
+
+    # # Wire this to your real dashboard emitter
+    # if hasattr(component, "emit_dashboard_update"):
+    #     await component.emit_dashboard_update(update_msg)
+    # elif hasattr(component, "broadcast_dashboard"):
+    #     await component.broadcast_dashboard(update_msg)
+
+    # ---------------------------------------------------------
+    # SEND TO TAK AS EVENT
+    # ---------------------------------------------------------
+    if getattr(component, "clitool", None) is None:
+        # TAK disabled / not initialized
+        return
+
+    tak_payload = {
+        "msg_type": "event",
+        "uid": f"{uid}.status",
+        "stale": 30,
+        "data": {
+            "event_type": "node_status",
+            "node_uid": uid,
+            "status": status,
+        }
+    }
+
+    # This uses your existing forwarding wrapper (recommended)
+    await takReturn(component, tak_payload)

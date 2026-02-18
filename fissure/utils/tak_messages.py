@@ -237,6 +237,15 @@ async def send(component, message: dict):
         ET.SubElement(detail, "contact", {"callsign": callsign})
         _set_point_pin(msg, lat, lon, alt)
 
+        status = message.get("status") or node_meta.get("status") or "UNK"
+        version = message.get("version") or node_meta.get("version") or ""
+
+        fiss = ET.SubElement(detail, "fissure")
+        node = ET.SubElement(fiss, "node")
+        ET.SubElement(node, "status").text = str(status)
+        if version:
+            ET.SubElement(node, "version").text = str(version)
+
         return _send_to_tak(component, msg)
 
     # =====================================================

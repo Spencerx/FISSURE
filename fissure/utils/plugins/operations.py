@@ -14,7 +14,7 @@ from typing import Dict, Any, Union, Callable
 from fissure.Sensor_Node.utils.resources import Resource
 from fissure.utils.artifacts import ArtifactManager, get_artifact_manager
 
-_base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback', 'artifact_manager']
+_base_params = ['self', 'sensor_node_id', 'logger', 'alert_callback', 'tak_cot_callback', 'status_callback', 'target_callback', 'soi_callback', 'artifact_manager']
 
 async def send_alert(sensor_node_id: Union[int, str], opid: str, message: str, logger=logging.getLogger(__name__)) -> None:
     """Placeholder for alert callback if none is provided.
@@ -55,6 +55,18 @@ async def send_tak_cot(sensor_node_id: Union[int, str], opid: str, uid: str, rem
         The type, by default "a-f-G-U-H"
     """
     logger.info(f"TAK CoT {sensor_node_id}, {opid}: uid={uid}, lat={lat}, lon={lon}, alt={alt}, time={time}, type={type}, remarks={remarks}")
+
+async def send_status(sensor_node_id, opid, status_text, logger=None):
+    if logger:
+        logger.info(f"[status] {sensor_node_id} {opid}: {status_text}")
+
+async def send_target(sensor_node_id, opid, target_dict, logger=None):
+    if logger:
+        logger.info(f"[target] {sensor_node_id} {opid}: {target_dict}")
+
+async def send_soi(sensor_node_id, opid, soi_dict, logger=None):
+    if logger:
+        logger.info(f"[soi] {sensor_node_id} {opid}: {soi_dict}")
 
 def setup_decorator(func):
     async def wrapper(self) -> bool:
@@ -183,7 +195,17 @@ def operation_class_decorator(cls):
 class Operation(object):
     """Base class for plugin operations.
     """
-    def __init__(self, sensor_node_id: Union[int, str] = 0, logger: logging.Logger = logging.getLogger(__name__), alert_callback: Union[Callable, None] = None, tak_cot_callback: Union[Callable, None] = None, artifact_manager: Union[ArtifactManager, None] = None) -> None:
+    def __init__(
+            self, 
+            sensor_node_id: Union[int, str] = 0, 
+            logger: logging.Logger = logging.getLogger(__name__), 
+            alert_callback: Union[Callable, None] = None, 
+            tak_cot_callback: Union[Callable, None] = None, 
+            status_callback: Union[Callable, None] = None, 
+            target_callback: Union[Callable, None] = None, 
+            soi_callback: Union[Callable, None] = None, 
+            artifact_manager: Union[ArtifactManager, None] = None
+        ) -> None:
         """Initialize the Operation class.
 
         Parameters
@@ -196,6 +218,12 @@ class Operation(object):
             Callback function for alerts, by default None for logger-only alerts
         tak_cot_callback : Union[Callable, None], optional
             Callback function for TAK CoT messages, by default None for logger-only TAK CoT messages
+        status_callback : Union[Callable, None], optional
+            Callback function for reporting status to TAK and Dashboard
+        target_callback : Union[Callable, None], optional
+            Callback function for reporting targets to TAK and Dashboard
+        soi_callback : Union[Callable, None], optional
+            Callback function for reporting SOIs to TAK and Dashboard               
         artifact_manager : Union[ArtifactManager, None], optional
             ArtifactManager instance for managing artifacts, by default None to use the global artifact manager
         """
@@ -206,8 +234,17 @@ class Operation(object):
             alert_callback = send_alert
         if tak_cot_callback is None:
             tak_cot_callback = send_tak_cot
+        if status_callback is None:
+            status_callback = send_status
+        if target_callback is None:
+            target_callback = send_target
+        if soi_callback is None:
+            soi_callback = send_soi                
         self.alert_callback = alert_callback
         self.tak_cot_callback = tak_cot_callback
+        self.status_callback = status_callback
+        self.target_callback = target_callback
+        self.soi_callback = soi_callback
         if artifact_manager is not None:
             self.artifact_manager = artifact_manager
         else:

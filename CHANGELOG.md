@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-2-18
+
+Mechanisms for adding targets and displaying status.
+
+### Added
+
+- Functions for creating new targets
+- Operation callbacks for SOIs, status, and targets
+- Import target lists from WinTAK stored at the HIPRFISR
+
+### Changed
+
+- Providing status and version info in GPS position updates
+
 ## 2026-2-10
 
 SOI management and plugin operations fixes.

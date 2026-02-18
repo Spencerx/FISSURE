@@ -534,6 +534,8 @@ async def takReturnLT(component: object, msg=[]):
         [3] lat      : float | None
         [4] lon      : float | None
         [5] data     : dict  | None
+        [6] status   : str
+        [7] version  : str
     """
     try:
         if not isinstance(msg, list) or len(msg) < 6:
@@ -545,6 +547,8 @@ async def takReturnLT(component: object, msg=[]):
         lat = msg[3]
         lon = msg[4]
         data = msg[5]
+        status = msg[6]
+        version = msg[7]
 
         if msg_type not in ("track", "event"):
             return
@@ -574,6 +578,8 @@ async def takReturnLT(component: object, msg=[]):
                 "lat": float(lat),
                 "lon": float(lon),
                 "alt": 0.0,
+                "status": status,
+                "version": version,
             })
 
         # ----------------------------

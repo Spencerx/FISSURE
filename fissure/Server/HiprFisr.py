@@ -1129,6 +1129,7 @@ class HiprFisr:
                 "interval": sn_int,
                 "connected": True,
                 "assigned_id": final_assigned_id,
+                "status": "unknown", 
             }
             self.nodes[sn_uuid] = node
 
@@ -1144,6 +1145,8 @@ class HiprFisr:
             node["interval"]     = sn_int
             node["connected"]    = True
             node["assigned_id"]  = final_assigned_id
+            # node["status"]       = "unknown"  # If status ever goes in heartbeat, place status here
+            
 
             # print("updated existing entry")
 
