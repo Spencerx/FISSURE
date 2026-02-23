@@ -4621,91 +4621,91 @@ async def sendPluginActionTak(component: object, requester_uid: str, node_uid: s
     )    
 
 
-async def pluginOperationStarted(component: object, node_uid: str, operation_id: str, plugin: str, operation: str, parameters: dict):
-    """Handle Plugin Operation Started Event
+# async def pluginOperationStarted(component: object, node_uid: str, operation_id: str, plugin: str, operation: str, parameters: dict):
+#     """Handle Plugin Operation Started Event
 
-    Parameters
-    ----------
-    component : object
-        Component
-    node_uid : str
-        Sensor node UID
-    operation_id : str
-        Unique identifier for the operation
-    plugin : str
-        Plugin name
-    operation : str
-        Operation name
-    parameters : dict
-        Parameters for the operation
-    """
-    # # Update hub node table (source for WinTAK roster)
-    # node = component.nodes.get(node_uid)
-    # if node:
-    #     node["status"] = f"Running: {operation}"
-    #     node["last_seen"] = time.time()
-    #     node["connected"] = True
+#     Parameters
+#     ----------
+#     component : object
+#         Component
+#     node_uid : str
+#         Sensor node UID
+#     operation_id : str
+#         Unique identifier for the operation
+#     plugin : str
+#         Plugin name
+#     operation : str
+#         Operation name
+#     parameters : dict
+#         Parameters for the operation
+#     """
+#     # # Update hub node table (source for WinTAK roster)
+#     # node = component.nodes.get(node_uid)
+#     # if node:
+#     #     node["status"] = f"Running: {operation}"
+#     #     node["last_seen"] = time.time()
+#     #     node["connected"] = True
 
-    # # Broadcast to WinTAK roster (same shape as your node_status event)
-    # await component.emit_node_status(uid=node_uid, status=node["status"])
+#     # # Broadcast to WinTAK roster (same shape as your node_status event)
+#     # await component.emit_node_status(uid=node_uid, status=node["status"])
 
-    # Forward message to dashboard
-    PARAMETERS = {
-        "node_uid": node_uid,
-        "operation_id": operation_id,
-        "plugin": plugin,
-        "operation": operation,
-        "parameters": parameters,
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStarted",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    if component.dashboard_connected:
-        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+#     # Forward message to dashboard
+#     PARAMETERS = {
+#         "node_uid": node_uid,
+#         "operation_id": operation_id,
+#         "plugin": plugin,
+#         "operation": operation,
+#         "parameters": parameters,
+#     }
+#     msg = {
+#         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+#         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStarted",
+#         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+#     }
+#     if component.dashboard_connected:
+#         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-async def pluginOperationStopped(
-    component: object,
-    node_uid: str,
-    operation_id: str,
-    plugin: str,
-    operation: str,
-    success: bool = True,
-    error: str = "",
-) -> None:
-    """
-    Handle Plugin Operation Stopped Event
-    """
-    # # Update node table + emit roster status
-    # status_text = "Idle" if success else "Error"
+# async def pluginOperationStopped(
+#     component: object,
+#     node_uid: str,
+#     operation_id: str,
+#     plugin: str,
+#     operation: str,
+#     success: bool = True,
+#     error: str = "",
+# ) -> None:
+#     """
+#     Handle Plugin Operation Stopped Event
+#     """
+#     # # Update node table + emit roster status
+#     # status_text = "Idle" if success else "Error"
 
-    # node = component.nodes.get(node_uid)
-    # if node:
-    #     node["status"] = status_text
-    #     node["last_seen"] = time.time()
-    #     node["connected"] = True
+#     # node = component.nodes.get(node_uid)
+#     # if node:
+#     #     node["status"] = status_text
+#     #     node["last_seen"] = time.time()
+#     #     node["connected"] = True
 
-    # # Emit status even if node entry is missing (best-effort)
-    # await component.emit_node_status(uid=node_uid, status=status_text)
+#     # # Emit status even if node entry is missing (best-effort)
+#     # await component.emit_node_status(uid=node_uid, status=status_text)
 
-    # Forward message to dashboard
-    PARAMETERS = {
-        "node_uid": node_uid,
-        "operation_id": operation_id,
-        "plugin": plugin,
-        "operation": operation,
-        "success": success,
-        "error": (error or "")[:2000],
-    }
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStopped",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    if component.dashboard_connected:
-        await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+#     # Forward message to dashboard
+#     PARAMETERS = {
+#         "node_uid": node_uid,
+#         "operation_id": operation_id,
+#         "plugin": plugin,
+#         "operation": operation,
+#         "success": success,
+#         "error": (error or "")[:2000],
+#     }
+#     msg = {
+#         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+#         fissure.comms.MessageFields.MESSAGE_NAME: "responsePluginOperationStopped",
+#         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+#     }
+#     if component.dashboard_connected:
+#         await component.dashboard_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
 
@@ -5350,3 +5350,38 @@ async def statusReturn(
 
     # This uses your existing forwarding wrapper (recommended)
     await takReturn(component, tak_payload)
+
+
+async def refresh_status(component: object, requester_uid: str, node_uid: str):
+    """Stop all running plugin operations on the sensor node.
+
+    Parameters
+    ----------
+    component : object
+        Component.
+    requester_uid : str
+        TAK UID.
+    node_uid : str
+        Sensor node UID.
+    """
+    component.logger.info(f"Requesting position/status update from node {node_uid}")
+    PARAMETERS = {
+        "node_uid": node_uid
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "refresh_status",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+
+    # Resolve Identity
+    identity = component.nodes[node_uid].get("identity", None)
+    if identity is None:
+        return
+    
+    # Send through ROUTER
+    await component.sensor_node_router.send_msg(
+        fissure.comms.MessageTypes.COMMANDS,
+        msg,
+        target_ids=[identity]
+    )

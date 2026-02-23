@@ -20,7 +20,7 @@ Sensor Node:
      heartbeat_interval: 5
      heartbeat_interval_connected: 60
      hb_port: "6100"
-     ip_address: '192.168.1.128'               # '127.0.0.1' for local, anything else for remote
+     ip_address: '192.168.1.128'               # '127.0.0.1' for local - HIPRFISR IP Address
      iq:
           0:
                daughterboard: ''

@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-2-23
+
+Compile flow graphs for Plugins and TAK features for status and control.
+
+### Added
+
+- Compile flow graphs for Plugins folder installer option
+- TAK receive code for refreshing status and stopping operations
+
+### Changed
+
+- Adjusted functions for GPS beaconing to support on-demand single message responses
+
 ## 2026-2-18
 
 Mechanisms for adding targets and displaying status.

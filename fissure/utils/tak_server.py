@@ -314,6 +314,15 @@ class TakReceiver(pytak.QueueWorker):
 
                 # Match the original behavior: request transfer to TAK, with no inline data
                 await HiprFisrCallbacks.transferArtifactRequest(self.hipfisr, artifact_id, "tak", None)
+            
+            # Refresh Status
+            elif request in ("refresh_status"):
+                await HiprFisrCallbacks.refresh_status(
+                    self.hipfisr,
+                    requester_uid,
+                    node_uid
+                )
+                     
 
             else:
                 self._logger.debug(

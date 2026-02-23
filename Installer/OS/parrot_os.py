@@ -2341,6 +2341,12 @@ programs_parrot_os_6_1.append(('IQ Flow Graphs',
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
+# Plugin Flow Graphs
+programs_parrot_os_6_1.append(('Plugin Flow Graphs',
+"""cd """ + fissure_directory + """/Plugins/
+find . -name '*.grc' -exec grcc {} \;
+""",True,'Compile Flow Graphs'))
+
 # PD Flow Graphs
 programs_parrot_os_6_1.append(('PD Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/PD\ Flow\ Graphs/

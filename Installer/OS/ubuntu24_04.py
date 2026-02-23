@@ -2577,6 +2577,12 @@ programs_ubuntu24_04.append(('IQ Flow Graphs',
 find . -name '*.grc' -exec grcc {} \;
 """,True,'Compile Flow Graphs'))
 
+# Plugin Flow Graphs
+programs_ubuntu24_04.append(('Plugin Flow Graphs',
+"""cd """ + fissure_directory + """/Plugins/
+find . -name '*.grc' -exec grcc {} \;
+""",True,'Compile Flow Graphs'))
+
 # PD Flow Graphs
 programs_ubuntu24_04.append(('PD Flow Graphs',
 """cd """ + fissure_directory + """/Flow\ Graph\ Library/maint-3.10/PD\ Flow\ Graphs/

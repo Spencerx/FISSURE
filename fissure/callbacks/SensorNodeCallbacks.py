@@ -1716,3 +1716,33 @@ async def transferArtifactRequest(component: object, artifact_id: str, destinati
     await component.hiprfisr_socket.send_msg(
         fissure.comms.MessageTypes.COMMANDS, msg
     )
+
+
+async def refresh_status(component: object, node_uid: str) -> None:
+    """
+    Immediately sends a GPS update to the HIPRFISR.
+
+    Parameters
+    ----------
+    node_uid : str
+        Sensor node UID.
+    """
+    component.logger.info("Refreshing status and sending a GPS update to the HIPRFISR")
+
+    gps_manager = getattr(component, "gps_manager", None)
+    if not gps_manager:
+        component.logger.warning("No gps_manager available; cannot refresh status.")
+        return
+
+    gps_source = component.gps_source
+
+    # Determine the correct meshtastic argument
+    meshtastic_arg = None
+
+    if gps_source == "Meshtastic":
+        if component.network_type == "Meshtastic":
+            meshtastic_arg = component.hiprfisr_socket
+        else:
+            meshtastic_arg = component.meshtastic_serial_port
+
+    await gps_manager.send_gps_update_now(gps_source, meshtastic_arg)
