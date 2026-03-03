@@ -1746,3 +1746,66 @@ async def refresh_status(component: object, node_uid: str) -> None:
             meshtastic_arg = component.meshtastic_serial_port
 
     await gps_manager.send_gps_update_now(gps_source, meshtastic_arg)
+
+
+async def sendPluginActionParametersTak(
+    component: object,
+    plugin_name: str,
+    action_name: str,
+    node_uid: str,
+) -> None:
+    """
+    Node handler for hub->node request: "sendPluginActionParameters"
+
+    Returns the action schema back to HIPRFISR.
+    """
+
+    try:
+        component.logger.info(
+            f"Fetching schema for {plugin_name}.{action_name} (node_uid={node_uid})"
+        )
+
+        # Validate plugin directory exists
+        plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+        if not os.path.exists(plugin_path):
+            component.logger.error(f"Plugin path does not exist: {plugin_path}")
+            return
+
+        # Use existing utility function (importlib.util based)
+        schema = plugin.get_action_schema(plugin_name, action_name, component.logger)
+
+        # Normalize schema shape
+        if not isinstance(schema, dict):
+            schema = {"params": []}
+        if "params" not in schema or not isinstance(schema.get("params"), list):
+            schema["params"] = []
+
+        PARAMETERS = {
+            "plugin_name": plugin_name,
+            "action_name": action_name,
+            "node_uid": node_uid,
+            "schema": schema,
+        }
+
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionParametersResultsTak",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+
+        component.logger.debug(
+            f"Sending schema for {plugin_name}.{action_name} "
+            f"with {len(schema.get('params', []))} params"
+        )
+
+        # Node -> Hub
+        await component.hiprfisr_socket.send_msg(
+            fissure.comms.MessageTypes.COMMANDS,
+            msg
+        )
+
+    except Exception as e:
+        component.logger.error(
+            f"Error sending schema for {plugin_name}.{action_name}: {e}"
+        )
+        component.logger.debug(traceback.format_exc())

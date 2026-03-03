@@ -267,6 +267,26 @@ class TakReceiver(pytak.QueueWorker):
                     node_uid
                 )
 
+            # Customize Action
+            elif request in ("customize_action"):
+                if not plugin_name or not action_name:
+                    self._logger.warning(
+                        "plugin_action missing plugin_name/action_name (node_uid=%s, request_id=%s, plugin=%s, action=%s)",
+                        node_uid,
+                        request_id,
+                        plugin_name or "missing",
+                        action_name or "missing"
+                    )
+                    return
+
+                await HiprFisrCallbacks.sendPluginActionParametersTak(
+                    self.hipfisr,
+                    requester_uid,
+                    node_uid,
+                    plugin_name=plugin_name,
+                    action_name=action_name,
+                )                
+
             # Execute Action
             elif request in ("plugin_action", "execute_plugin_action", "run_plugin_action"):
                 if not plugin_name or not action_name:

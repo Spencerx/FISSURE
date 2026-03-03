@@ -346,3 +346,44 @@ def remove_from_database(plugin: str):
     """
     plugin_path = os.path.join(PLUGIN_DIR, plugin)
     run(['python', os.path.join(plugin_path, 'installer.py'), '-u'])
+
+
+def get_action_schema(plugin: str, action_name: str,
+                      logger: logging.getLogger = logging.getLogger(__name__)) -> dict:
+    """
+    Get Action Schema
+
+    Looks for a variable named:  <action_name>_schema  inside the plugin's actions.py
+    Example: promote_to_soi_schema = {"params": [...]}
+
+    Returns {"params": []} if not found or on failure.
+    """
+    actions_path = os.path.join(PLUGIN_DIR, plugin, "actions.py")
+
+    if not os.path.exists(actions_path):
+        return {"params": []}
+
+    try:
+        # Use a unique module name to reduce collisions if multiple plugins are loaded
+        spec = importlib.util.spec_from_file_location(f"{plugin}_actions", actions_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Cannot load module spec for {actions_path}")
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        schema_attr = f"{action_name}_schema"
+        schema = getattr(module, schema_attr, None)
+
+        if isinstance(schema, dict):
+            # Minimal sanity check: must have params list if present
+            params = schema.get("params", [])
+            if isinstance(params, list):
+                return schema
+
+        return {"params": []}
+
+    except Exception as e:
+        logger.error(f"Failed to load action schema from {actions_path}: {e}")
+        logger.debug("Traceback while loading schema:\n%s", traceback.format_exc())
+        return {"params": []}

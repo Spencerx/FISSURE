@@ -432,84 +432,6 @@ class SensorNode(object):
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
-    # async def send_tak_cot(self, sensor_node_id: Union[int, str], opid: str, uid: str, remarks: str, lat: Union[float, bool] = True, lon: Union[float, bool] = True, alt: Union[float, bool] = True, time: Union[float, bool] = True, type: str="a-f-G-U-H", logger: None = None) -> None:
-    #     """Send a TAK message.
-
-    #     Parameters
-    #     ----------
-    #     sensor_node_id : Union[int, str]
-    #         Sensor node ID
-    #     opid : str
-    #         Operation ID
-    #     uid : str
-    #         Unique ID for the TAK message.
-    #     remarks : str
-    #         Remarks to include in the TAK message.
-    #     lat : Union[float, bool], optional
-    #         Latitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
-    #     lon : Union[float, bool], optional
-    #         Longitude in decimal degrees, by default True to use current Sensor Node GPS position. False to omit.
-    #     alt : Union[float, bool], optional
-    #         Altitude in meters, by default True to use current Sensor Node GPS position. False to omit.
-    #     time : Union[float, bool], optional
-    #         Timestamp as a Unix epoch float, by default True to use current time. False to omit.
-    #     type : str, optional
-    #         Type of the TAK message, by default "a-f-G-U-H" for assumed friendly ground unit headquarters.
-    #     logger : None, optional
-    #         Unused placeholder for debugging.
-    #     """
-    #     # Prepare inputs
-    #     if lat is True:
-    #         lat = self.gps_position.get('latitude', 0.0)
-    #     if lon is True:
-    #         lon = self.gps_position.get('longitude', 0.0)
-    #     if alt is True:
-    #         alt = self.gps_position.get('altitude', 0.0)
-    #     if time is True:
-    #         time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-    #     if remarks == "GPS UPDATE":
-    #         msg_name = "takPlotGpsUpdate"
-    #     else:
-    #         msg_name = "takPlot"
-
-    #     # Prepare values
-    #     if self.network_type == "IP":
-    #         PARAMETERS = {
-    #             "uid": uid,
-    #             "lat": lat,
-    #             "lon": lon,
-    #             "alt": alt,
-    #             "time": time,
-    #             "type": type,
-    #             "remarks": remarks
-    #         }
-    #     elif self.network_type == "Meshtastic":
-    #         if lat is False or lon is False or alt is False:
-    #             self.logger.error("TAK message requires latitude, longitude, and altitude.")
-    #             return
-    #         if time is False:
-    #             time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-    #         msg_name += "LT"
-    #         PARAMETERS = {
-    #             "msg": [
-    #                 PARAMETERS["uid"],
-    #                 PARAMETERS["lat"],
-    #                 PARAMETERS["lon"],
-    #                 PARAMETERS["alt"],
-    #                 PARAMETERS["time"],
-    #                 PARAMETERS["remarks"][:20] if PARAMETERS["remarks"] else None
-    #             ]
-    #         }
-
-    #     # Send message
-    #     msg = {
-    #         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-    #         fissure.comms.MessageFields.MESSAGE_NAME: msg_name,
-    #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    #     }
-    #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)  # TODO: meshtastic socket support
-
-
     async def send_tak_cot(self, msg: dict) -> None:
         """
         Unified TAK message sender (node → HIPRFISR).
@@ -527,6 +449,23 @@ class SensorNode(object):
                 "tak_icon": str,                          # TAK icon e.g. "a-h-G-E-S"
                 "opid": str,
                 "data": dict                              # only for event messages
+
+                # Optional alert / evidence fields (pins):
+                "alert_kind": str,
+                "alert_summary": str,
+                "artifact_id": str,
+                "operation_id": str,      # evidence/artifact op id (not self.opid)
+                "sensor_node_id": str,
+
+                # Optional small scalar extras (kept intentionally small):
+                "count": int,
+                "duration_s": float,
+                "fps": float,
+                "frames_written": int,
+                "burst_index": int,
+                "burst_total": int,
+                "timestamp": str,
+                "name": str,
             }
 
         Missing fields are ignored.
@@ -553,29 +492,27 @@ class SensorNode(object):
         # --------------------------------------------------
         # Normalize GPS + timestamp (only if fields exist)
         # --------------------------------------------------
-        # lat
         lat = msg.get("lat")
         if lat is True:
             lat = self.gps_position.get("latitude", 0.0)
 
-        # lon
         lon = msg.get("lon")
         if lon is True:
             lon = self.gps_position.get("longitude", 0.0)
 
-        # alt
         alt = msg.get("alt")
         if alt is True:
             alt = self.gps_position.get("altitude", 0.0)
 
-        # time
         timestamp = msg.get("time")
         if timestamp is True:
             timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         elif isinstance(timestamp, str):
             timestamp = timestamp.replace(" ", "T")  # safety normalization
 
-        # optional fields
+        # --------------------------------------------------
+        # Optional fields (base schema)
+        # --------------------------------------------------
         remarks = msg.get("remarks")
         tak_icon = msg.get("tak_icon")
         opid = msg.get("opid")
@@ -587,21 +524,54 @@ class SensorNode(object):
         # --------------------------------------------------
         payload = {"msg_type": msg_type, "uid": uid}
 
-        # Add fields only if provided or auto-resolved
-        if lat is not None: payload["lat"] = lat
-        if lon is not None: payload["lon"] = lon
-        if alt is not None: payload["alt"] = alt
-        if timestamp is not None: payload["time"] = timestamp
-        if remarks is not None: payload["remarks"] = remarks
-        if tak_icon is not None: payload["tak_icon"] = tak_icon
-        if opid is not None: payload["opid"] = opid
-        if data is not None: payload["data"] = data
+        if lat is not None:
+            payload["lat"] = lat
+        if lon is not None:
+            payload["lon"] = lon
+        if alt is not None:
+            payload["alt"] = alt
+        if timestamp is not None:
+            payload["time"] = timestamp
+        if remarks is not None:
+            payload["remarks"] = remarks
+        if tak_icon is not None:
+            payload["tak_icon"] = tak_icon
+        if opid is not None:
+            payload["opid"] = opid
+        if data is not None:
+            payload["data"] = data
+
+        # --------------------------------------------------
+        # Pass-through extra fields (used by TAK utility layer)
+        # Keep this intentionally small + scalar.
+        # --------------------------------------------------
+        passthrough_keys = {
+            # pin alert structure
+            "alert_kind",
+            "alert_summary",
+            "artifact_id",
+            "operation_id",
+            "sensor_node_id",
+
+            # optional lightweight extras
+            "name",
+            "count",
+            "duration_s",
+            "fps",
+            "frames_written",
+            "burst_index",
+            "burst_total",
+            "timestamp",
+        }
+
+        for k in passthrough_keys:
+            if k in msg and msg[k] is not None:
+                payload[k] = msg[k]
 
         # --------------------------------------------------
         # IP MODE → send takReturn
         # --------------------------------------------------
         if self.network_type == "IP":
-
             msg_out = {
                 fissure.comms.MessageFields.IDENTIFIER: self.identifier,
                 fissure.comms.MessageFields.MESSAGE_NAME: "takReturn",
@@ -612,15 +582,14 @@ class SensorNode(object):
 
         # --------------------------------------------------
         # MESHTASTIC MODE → legacy LT list format
+        # (does NOT support arbitrary extra fields)
         # --------------------------------------------------
         elif self.network_type == "Meshtastic":
 
-            # Validate minimal numeric fields
             if lat is None or lon is None or alt is None:
                 self.logger.error("Meshtastic TAK requires lat/lon/alt.")
                 return
 
-            # Use resolved timestamp
             if timestamp is None:
                 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -630,7 +599,7 @@ class SensorNode(object):
                 uid,
                 lat,
                 lon,
-                data[:20] if isinstance(data, str) else None,
+                (data[:20] if isinstance(data, str) else None),
             ]
 
             msg_out = {
@@ -639,9 +608,6 @@ class SensorNode(object):
                 fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
             }
 
-        # --------------------------------------------------
-        # Unknown network type
-        # --------------------------------------------------
         else:
             self.logger.error(f"Unknown network type for TAK: {self.network_type}")
             return
@@ -856,7 +822,6 @@ class SensorNode(object):
 
         Behavior (low-traffic + no duplicates):
         - No pluginOperationStarted/Stopped messages
-        - Status is published via statusReturn ONLY, and ONLY on change (edge-triggered)
         - Node status auto-reverts to Idle when the LAST active operation completes
         - Finalizer is the ONLY owner of teardown + registry removal
         - stop_plugin_operation should only request stop + await task (no teardown/pop)
@@ -1139,262 +1104,6 @@ class SensorNode(object):
         return operation_id
 
 
-
-    # async def run_plugin_operation(
-    #     self,
-    #     component: object,
-    #     plugin: str,
-    #     operation: str,
-    #     parameters: Dict[str, Any],
-    #     sensor_node_id: Union[int, str] = 0,
-    #     wait: bool = False,
-    #     start_timeout: float = 2.0,
-    # ) -> Optional[str]:
-    #     """
-    #     Runs a plugin operation on the Sensor Node.
-
-    #     Fixes:
-    #     - Fast operations no longer get misclassified as "did not start successfully"
-    #     - Operations are always torn down on natural completion (task finalizer)
-    #     - Optional blocking (wait=True) for chaining operations in actions
-
-    #     Parameters
-    #     ----------
-    #     plugin : str
-    #         The name of the plugin.
-    #     operation : str
-    #         The plugin filename to run relative to the plugin directory.
-    #     parameters : dict
-    #         The operation parameters (user-provided).
-    #     sensor_node_id : Union[int, str]
-    #         The ID of the sensor node.
-    #     wait : bool
-    #         If True, wait for the operation to complete + teardown before returning.
-    #         If False, return after startup handshake (or immediate completion).
-    #     start_timeout : float
-    #         Seconds to wait for a long-running operation to report a non-None running() state.
-
-    #     Returns
-    #     -------
-    #     Optional[str]
-    #         operation_id (opid) if successfully scheduled; otherwise None.
-    #     """
-    #     self.logger.info(f"Running plugin operation: {plugin} - {operation} with parameters: {parameters}")
-
-    #     # Get the plugin path using the plugin name
-    #     plugin_path = os.path.join(PLUGIN_DIR, plugin)
-    #     if not os.path.exists(plugin_path):
-    #         self.logger.error(f"Plugin path does not exist: {plugin_path}")
-    #         return None
-    #     self.logger.info(f"Plugin path resolved: {plugin_path}")
-
-    #     # Get the plugin script path using the plugin name and operation
-    #     plugin_script_path = os.path.join(plugin_path, "install_files", operation)
-    #     if not os.path.exists(plugin_script_path):
-    #         self.logger.error(f"Plugin script does not exist: {plugin_script_path}")
-    #         return None
-    #     self.logger.info(f"Plugin script resolved: {plugin_script_path}")
-
-    #     # Import and run the main function from the plugin script
-    #     try:
-    #         spec = importlib.util.spec_from_file_location("plugin_module", plugin_script_path)
-    #         if spec is None or spec.loader is None:
-    #             self.logger.error(f"Could not load spec for plugin script: {plugin_script_path}")
-    #             return None
-    #         plugin_module = importlib.util.module_from_spec(spec)
-    #         spec.loader.exec_module(plugin_module)
-    #     except Exception as e:
-    #         tb_str = traceback.format_exc()
-    #         self.logger.error(f"Error importing plugin script {plugin_script_path}: {e}\n{tb_str}")
-    #         return None
-
-    #     # Get the main operation class
-    #     operation_main = getattr(plugin_module, "OperationMain", None)
-    #     if operation_main is None:
-    #         self.logger.error(f"No OperationMain class found in {plugin_script_path}")
-    #         return None
-    #     if not inspect.isclass(operation_main):
-    #         self.logger.error(f"OperationMain is not a class in {plugin_script_path}")
-    #         return None
-
-    #     # Get the resources required by the plugin script
-    #     if not hasattr(operation_main, "get_resources") or not callable(getattr(operation_main, "get_resources")):
-    #         self.logger.error(f"No callable get_resources() found in {plugin_script_path} OperationMain class")
-    #         return None
-    #     try:
-    #         resources = operation_main.get_resources()
-    #     except Exception as e:
-    #         tb_str = traceback.format_exc()
-    #         self.logger.error(f"Error calling get_resources() in {plugin_script_path}: {e}\n{tb_str}")
-    #         return None
-    #     if not isinstance(resources, dict):
-    #         self.logger.error(f"get_resources() did not return a dictionary: {resources}")
-    #         return None
-    #     self.logger.info(f"Plugin operation resources: {resources}")
-
-    #     # Record user parameters (for UI/reporting)
-    #     user_parameters = parameters.copy()
-
-    #     # Add the logger and callbacks to the parameters for Operation base class
-    #     parameters["sensor_node_id"] = sensor_node_id
-    #     parameters["alert_callback"] = self.send_alert
-    #     parameters["tak_cot_callback"] = self.send_tak_cot
-    #     parameters["status_callback"] = self.publish_status_to_hiprfisr
-    #     parameters["target_callback"] = self.send_target_update
-    #     parameters["soi_callback"] = self.send_soi_update
-    #     parameters["artifact_manager"] = self.artifact_manager
-    #     parameters["logger"] = self.logger
-
-    #     # Initialize the operation class instance
-    #     try:
-    #         # Get the init signature to check for supported parameters
-    #         init_signature = inspect.signature(operation_main.__init__)
-    #         init_params = set(init_signature.parameters.keys())
-            
-    #         # Filter parameters to only include those accepted by the class
-    #         filtered_parameters = {k: v for k, v in parameters.items() if k in init_params}
-            
-    #         operation_inst = operation_main(**filtered_parameters)
-    #     except Exception as e:
-    #         tb_str = traceback.format_exc()
-    #         self.logger.error(f"Error initializing operation class from {plugin_script_path}: {e}\n{tb_str}")
-    #         return None
-    #     self.logger.info(f"Plugin operation initialized: {operation}")
-
-    #     # Check required attributes/methods
-    #     if not hasattr(operation_inst, "opid"):
-    #         self.logger.error(f"No operation ID (opid) found in {plugin_script_path}")
-    #         return None
-    #     if not hasattr(operation_inst, "running") or not callable(operation_inst.running):
-    #         self.logger.error(f"No running flag found in {plugin_script_path}")
-    #         return None
-    #     if not hasattr(operation_inst, "stop") or not callable(operation_inst.stop):
-    #         self.logger.error(f"No callable stop() method found in {plugin_script_path}")
-    #         return None
-    #     if not hasattr(operation_inst, "teardown") or not callable(operation_inst.teardown):
-    #         self.logger.error(f"No callable teardown() method found in {plugin_script_path}")
-    #         return None
-    #     if not hasattr(operation_inst, "run") or not callable(operation_inst.run):
-    #         self.logger.error(f"No callable run() method found in {plugin_script_path} OperationMain class")
-    #         return None
-
-    #     # Set up the operation environment
-    #     try:
-    #         env_ready = await operation_inst.setup()
-    #     except Exception as e:
-    #         tb_str = traceback.format_exc()
-    #         self.logger.error(f"Error during setup() for {plugin_script_path}: {e}\n{tb_str}")
-    #         return None
-    #     if not env_ready:
-    #         self.logger.error(f"Plugin operation {operation} setup failed.")
-    #         return None
-    #     self.logger.info(f"Plugin operation environment for {operation} is ready.")
-
-    #     # Register the operation
-    #     operation_id = operation_inst.opid
-    #     self.operations[operation_id] = {
-    #         "plugin": plugin,
-    #         "operation": operation,
-    #         "parameters": parameters,
-    #         "resources": resources,
-    #         "status": operation_inst.running,
-    #         "stop": operation_inst.stop,
-    #         "teardown": operation_inst.teardown,
-    #         "start_time": time.time(),
-    #         "task": None,
-    #     }
-
-    #     # Start the plugin operation task
-    #     self.logger.info(f"Starting plugin operation {operation_id}")
-    #     task = asyncio.create_task(operation_inst.run(), name=f"op:{operation_id}")
-    #     self.operations[operation_id]["task"] = task
-
-    #     # # Send "started" immediately so fast ops still generate a start event
-    #     # try:
-    #     #     PARAMETERS = {
-    #     #         "node_uid": sensor_node_id,
-    #     #         "operation_id": operation_id,
-    #     #         "plugin": plugin,
-    #     #         "operation": operation,
-    #     #         "parameters": user_parameters,
-    #     #     }
-    #     #     msg = {
-    #     #         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-    #     #         fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStarted",
-    #     #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    #     #     }
-    #     #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-    #     # except Exception:
-    #     #     # Comms might be unreliable; do not fail the operation for UI messaging
-    #     #     self.logger.debug("Failed to send pluginOperationStarted (comms unreliable).")
-
-    #     # Finalizer: always teardown + remove from registry + (optional) notify stopped
-    #     async def _finalize_operation() -> None:
-    #         success = True
-    #         err_str = ""
-    #         try:
-    #             await task
-    #         except Exception:
-    #             success = False
-    #             err_str = traceback.format_exc()
-    #             self.logger.error(f"Plugin operation {operation_id} raised:\n{err_str}")
-    #         finally:
-    #             try:
-    #                 await operation_inst.teardown()
-    #             except Exception:
-    #                 self.logger.error(
-    #                     f"Error tearing down plugin operation {operation_id}:\n{traceback.format_exc()}"
-    #                 )
-
-    #             # Remove from registry to prevent stale entries
-    #             self.operations.pop(operation_id, None)
-
-    #             # # Notify stopped (Dashboard list cleanup). Safe even if comms drops.
-    #             # try:
-    #             #     PARAMETERS2 = {
-    #             #         "node_uid": sensor_node_id,
-    #             #         "operation_id": operation_id,
-    #             #         "plugin": plugin,
-    #             #         "operation": operation,
-    #             #         "success": success,
-    #             #         "error": err_str[:2000],
-    #             #     }
-    #             #     msg2 = {
-    #             #         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-    #             #         fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStopped",
-    #             #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS2,
-    #             #     }
-    #             #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg2)
-    #             # except Exception:
-    #             #     self.logger.debug("Failed to send pluginOperationStopped (comms unreliable).")
-
-    #     finalize_task = asyncio.create_task(_finalize_operation(), name=f"op_finalize:{operation_id}")
-
-    #     # Startup handshake: wait for running() to become non-None OR task to finish quickly
-    #     deadline = time.time() + float(start_timeout)
-    #     while operation_inst.running() is None and not task.done() and time.time() < deadline:
-    #         await asyncio.sleep(0.05)
-
-    #     if task.done():
-    #         # Completed quickly. If it raised, finalize_task will log + mark stopped.
-    #         exc = task.exception()
-    #         if exc is None:
-    #             self.logger.info(f"Plugin operation {operation_id} completed quickly.")
-    #         else:
-    #             self.logger.error(f"Plugin operation {operation_id} failed immediately: {exc!r}")
-    #         if wait:
-    #             await finalize_task
-    #         return operation_id
-
-    #     # Long-running (or still starting but past timeout)
-    #     self.logger.info(f"Plugin operation {operation_id} running (running()={operation_inst.running()}).")
-
-    #     if wait:
-    #         await finalize_task
-
-    #     return operation_id
-
-
     async def stop_plugin_operation(self, component: object, operation_id: str, node_uid: str) -> None:
         """
         Stops a plugin operation on the Sensor Node.
@@ -1440,114 +1149,6 @@ class SensorNode(object):
                 await asyncio.sleep(0.25)
         except Exception:
             self.logger.debug(f"stop_plugin_operation: status polling error for {operation_id}")
-
-
-    # async def stop_plugin_operation(self, component: object, operation_id: str, node_uid: str) -> None:
-    #     """
-    #     Stops a plugin operation on the Sensor Node and notifies HIPRFISR/Dashboard.
-
-    #     Parameters
-    #     ----------
-    #     operation_id : str
-    #         The ID of the operation to stop.
-    #     node_uid : str
-    #         The Sensor Node UID.
-    #     """
-    #     self.logger.info(f"Stopping plugin operation with ID: {operation_id}")
-
-    #     if operation_id not in self.operations:
-    #         self.logger.error(f"Operation ID {operation_id} not found.")
-    #         # # Best-effort notify "stopped" as failure (optional but useful for UI cleanup)
-    #         # try:
-    #         #     PARAMETERS = {
-    #         #         "node_uid": node_uid,
-    #         #         "operation_id": operation_id,
-    #         #         "plugin": "",
-    #         #         "operation": "",
-    #         #         "success": False,
-    #         #         "error": "Operation ID not found.",
-    #         #     }
-    #         #     msg = {
-    #         #         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-    #         #         fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStopped",
-    #         #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    #         #     }
-    #         #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-    #         # except Exception:
-    #         #     self.logger.debug("Failed to send pluginOperationStopped for missing op (comms unreliable).")
-    #         # return
-
-    #     op = self.operations[operation_id]
-    #     plugin = op.get("plugin") or ""
-    #     operation = op.get("operation") or ""
-
-    #     success = True
-    #     err_str = ""
-
-    #     # Request stop
-    #     if "stop" in op and callable(op["stop"]):
-    #         try:
-    #             await op["stop"]()
-    #         except Exception:
-    #             success = False
-    #             err_str = traceback.format_exc()
-    #             self.logger.error(f"Error stopping plugin operation {operation_id}:\n{err_str}")
-    #     else:
-    #         success = False
-    #         err_str = "No callable stop method for operation."
-    #         self.logger.error(f"{err_str} operation_id={operation_id}")
-
-    #     self.logger.info(f"Operation {operation_id} stop requested.")
-
-    #     # Wait until running() returns falsy (or task completes)
-    #     try:
-    #         while op.get("status") and callable(op["status"]) and op["status"]():
-    #             await asyncio.sleep(1)
-    #             self.logger.info(f"Operation {operation_id} is still running.")
-    #     except Exception:
-    #         success = False
-    #         err_str = (err_str + "\n" if err_str else "") + traceback.format_exc()
-    #         self.logger.error(f"Error while waiting for operation {operation_id} to stop:\n{traceback.format_exc()}")
-
-    #     self.logger.info(f"Operation {operation_id} has stopped.")
-
-    #     # Teardown
-    #     if "teardown" in op and callable(op["teardown"]):
-    #         try:
-    #             await op["teardown"]()
-    #         except Exception:
-    #             success = False
-    #             tb = traceback.format_exc()
-    #             err_str = (err_str + "\n" if err_str else "") + tb
-    #             self.logger.error(f"Error tearing down plugin operation {operation_id}:\n{tb}")
-    #     else:
-    #         # If teardown is missing, treat as failure only if you want.
-    #         # success = False
-    #         self.logger.warning(f"No callable teardown method for operation {operation_id}.")
-
-    #     self.logger.info(f"Operation {operation_id} has completed teardown.")
-
-    #     # Remove from registry to prevent stale entries / duplicate stop notifications
-    #     self.operations.pop(operation_id, None)
-
-    #     # # Notify HIPRFISR -> dashboard handler expects these fields
-    #     # try:
-    #     #     PARAMETERS = {
-    #     #         "node_uid": node_uid,
-    #     #         "operation_id": operation_id,
-    #     #         "plugin": plugin,
-    #     #         "operation": operation,
-    #     #         "success": bool(success),
-    #     #         "error": (err_str or "")[:2000],
-    #     #     }
-    #     #     msg = {
-    #     #         fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-    #     #         fissure.comms.MessageFields.MESSAGE_NAME: "pluginOperationStopped",
-    #     #         fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    #     #     }
-    #     #     await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-    #     # except Exception:
-    #     #     self.logger.debug("Failed to send pluginOperationStopped (comms unreliable).")
 
 
     async def stop_all_plugin_operations(self, component: object, node_uid: str) -> None:
@@ -4019,29 +3620,16 @@ class SensorNode(object):
             
             # Store DDM Values
             self.gps_position['latitude_ddm'], self.gps_position['longitude_ddm'] = fissure.utils.common.decimal_to_ddm(self.gps_position['latitude'], self.gps_position['longitude'])
-            self.logger.warning(f"Updating GPS position: {self.gps_position}")
+            self.logger.info(f"Updating GPS position: {self.gps_position}")
 
         # Failed GPS probe, stale value
         else:
             # TODO: Add a flag for stale
-            self.logger.warning(f"Failed to update GPS position. Keeping last position: {self.gps_position}")
+            self.logger.info(f"Failed to update GPS position. Keeping last position: {self.gps_position}")
 
         # Beacon GPS Position to HIPFISR then TAK
         if self.gps_tak_beacon == True:
             if self.network_type == "IP":
-                # PARAMETERS = {
-                #     "uid": self.identifier,
-                #     "lat": self.gps_position['latitude'],
-                #     "lon": self.gps_position['longitude'],
-                #     "alt": self.gps_position['altitude'],
-                #     "time": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                #     "remarks": "GPS UPDATE"
-                # }
-                # msg = {
-                #     fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                #     fissure.comms.MessageFields.MESSAGE_NAME: "takPlotGpsUpdate",  # TODO replace
-                #     fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-                # }
                 PARAMETERS = {
                     "payload": {
                         "msg_type": "track",   # always a track update for GPS beacon
@@ -4108,21 +3696,10 @@ class SensorNode(object):
         # Only do this on IP nodes for now (LT later)
         if getattr(self, "network_type", "") != "IP":
             return
+        
+        # Update status through GPS position update
+        await self.gpsUpdate(None)
 
-        PARAMETERS = {
-            "uid": self.identifier,
-            "status": self.current_status,
-            # Optional if you want ordering later:
-            # "time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        }
-
-        msg = {
-            fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-            fissure.comms.MessageFields.MESSAGE_NAME: "statusReturn",
-            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-        }
-
-        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
 
     ########################################################################

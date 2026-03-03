@@ -2980,11 +2980,11 @@ async def alertReturn(component: object, sensor_node_id=0, alert_text=""):
     """
     Forwards alertReturn Message to the Dashboard.
     """
-    # Classify Signals by Frequency
-    classification_summary = fissure.utils.library.classifyFrequencyFromTextDirect(alert_text, False)
-    if classification_summary:
-        alert_text = f"{alert_text}\n{classification_summary}"
-    component.logger.info(alert_text)  # TODO: Provide cleaned up console text for alerts
+    # # Classify Signals by Frequency
+    # classification_summary = fissure.utils.library.classifyFrequencyFromTextDirect(alert_text, False)
+    # if classification_summary:
+    #     alert_text = f"{alert_text}\n{classification_summary}"
+    # component.logger.info(alert_text)  # TODO: Provide cleaned up console text for alerts
 
     # Forward to Dashboard
     PARAMETERS = {
@@ -3055,89 +3055,58 @@ async def takReturn(component, payload: dict):
     ------------------------------------------------------------
     """
     # -------------------------------------
+    # Use default TAK icons if no tak_icon override present
+    # -------------------------------------
+    if "msg_type" not in payload:
+        component.logger.error("TAK send() missing required field: msg_type")
+        return
+    if "uid" not in payload:
+        component.logger.error("TAK send() missing required field: uid")
+        return
+    mtype = payload["msg_type"]
+    uid   = payload["uid"]
+
+    # Position and Status Updates
+    if mtype == "track":
+        node = component.nodes.get(uid)
+        if not node:
+            component.logger.warning(f"TAK send(): unknown node uid={uid}")
+            return
+
+        # 1) Pull NEW status from the payload (not from node cache)
+        incoming_status = payload.get("status")
+        status = (incoming_status or node.get("status") or "unknown").lower()
+
+        # 2) Update node cache with the latest info
+        node["status"] = status
+        node["last_seen"] = time.time()
+        node["connected"] = True
+
+        # Optional: cache last known position if present
+        if "lat" in payload and payload["lat"] is not None:
+            node["lat"] = payload["lat"]
+        if "lon" in payload and payload["lon"] is not None:
+            node["lon"] = payload["lon"]
+        if "alt" in payload and payload["alt"] is not None:
+            node["alt"] = payload["alt"]
+
+        # 3) Determine icon (unless overridden) and store it too
+        tak_icon = payload.get("tak_icon")
+        if not tak_icon:
+            if status in {"idle", "unknown"}:
+                tak_icon = component.settings["tak"]["node_idle_icon"]
+            else:
+                tak_icon = component.settings["tak"]["node_busy_icon"]
+            payload["tak_icon"] = tak_icon
+
+        node["tak_icon"] = tak_icon  # persist for later logic if you want
+
+        component.logger.debug(f"Updated node {uid}: status={status}, tak_icon={tak_icon}")
+
+    # -------------------------------------
     # Forward to TAK via utility layer
     # -------------------------------------
     await fissure.utils.tak_messages.send(component, payload)
-
-
-##########################################
-# async def takPlot(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str, type: str):
-#     """
-#     Forwards CoT messages to TAK.
-#     """
-#     # Classify based on frequency extracted from UID
-#     try:
-#         freq_hz = fissure.utils.common.extractFrequencyFromUID(uid)
-#         if freq_hz:
-#             classification_text = fissure.utils.library.classifyFrequencyFromTextDirect(freq_hz, False)
-
-#             # classification_text is already formatted like:
-#             # [Protocol=... | Region=... | Priority=... | Notes=...]
-#             if classification_text:
-#                 remarks = f"{remarks}\n{classification_text}"
-
-#     except Exception as e:
-#         component.logger.error(f"Frequency classification error in takPlot: {e}")
-
-#     # Forward to TAK
-#     try:
-#         # await component.send_cot(uid, uid, lat, lon, alt, time, remarks, type)
-
-#         # Get TAK server settings
-#         settings: dict = fissure.utils.get_fissure_config()
-#         s_addr = settings["tak"]["ip_addr"]
-#         s_port = settings["tak"]["port"]
-#         tak_cert = settings["tak"]["cert"]
-#         tak_key = settings["tak"]["key"]
-
-#         msg = {
-#             "type": "pin",
-#             "uid": uid,
-#             "callsign": uid,
-#             "lat": lat,
-#             "lon": lon,
-#             "alt": alt,
-#             "remarks": remarks
-#         }
-
-#         await fissure.utils.tak_messages.send(component, msg)
-
-#     except Exception as e:
-#         component.logger.error(f"Error sending COT to TAK: {e}")
-#         tb = traceback.format_exc()
-#         component.logger.debug(tb)
-
-
-# async def takPlotGpsUpdate(component: object, uid: str, lat: float, lon: float, alt: float, time: str, remarks: str):
-#     """
-#     Forwards the sensor node GPS coordinates message to TAK.
-#     """
-#     time = time.replace(" ", "T")
-#     max_history = 5
-
-#     prefix = component.settings['callsign_prefix']
-#     callsign = component.nodes[uid].get('callsign', f"{prefix}-{uid[:8]}")
-
-#     # await component.send_cot_gps_update(uid, callsign, lat, lon, alt, time, remarks, max_history)
-
-#     # print("SEND TRACK")
-#     # if not hasattr(component, "_test_lon"):
-#     #    component._test_lon = lon   # initialize based on first call input
-#     # component._test_lon += 1
-#     # lon = component._test_lon
-
-#     msg = {
-#         "type": "track",
-#         "uid": uid,              # IMPORTANT: must stay the same each update
-#         "callsign": callsign,
-#         "lat": lat,
-#         "lon": lon,
-#         "alt": alt,
-#         # "cot_type": "b-m-p-w",       # optional override
-#         # "stale": 60                    # 60 sec expiration window, or in the future: "2035-01-01T00:00:00Z"
-#     }
-
-#     await fissure.utils.tak_messages.send(component, msg)
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -4621,6 +4590,46 @@ async def sendPluginActionTak(component: object, requester_uid: str, node_uid: s
     )    
 
 
+async def sendPluginActionParametersTak(component: object, requester_uid: str, node_uid: str, plugin_name: str, action_name: str):
+    """Request Sensor Node plugin action for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    requester_uid : str
+        TAK unique identifier
+    node_uid : str
+        Sensor node UID
+    plugin_name : str
+        Plugin name
+    action_name : str
+        Plugin action name
+    """
+    PARAMETERS = {
+        "plugin_name": plugin_name,
+        "action_name": action_name,
+        "node_uid": node_uid,
+    }
+    msg = {
+        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+        fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionParametersTak",
+        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+    }
+
+    # Resolve Identity
+    identity = component.nodes[node_uid].get("identity", None)
+    if identity is None:
+        return
+    
+    # Send through ROUTER
+    await component.sensor_node_router.send_msg(
+        fissure.comms.MessageTypes.COMMANDS,
+        msg,
+        target_ids=[identity]
+    )    
+
+
 # async def pluginOperationStarted(component: object, node_uid: str, operation_id: str, plugin: str, operation: str, parameters: dict):
 #     """Handle Plugin Operation Started Event
 
@@ -5281,77 +5290,6 @@ async def sendTargetsListTak(component: object, requester_uid: str = "", request
             component.logger.error(f"Failed sending target {tgt_id} to TAK: {e}")
 
 
-async def statusReturn(
-    component: object,
-    uid: str = "",
-    status: str = "",
-) -> None:
-    """
-    Node status update callback (node -> HIPRFISR).
-
-    - Updates component.nodes[uid]["status"]
-    - Broadcasts to dashboard (and later WinTAK roster)
-    - Optionally emits a TAK EVENT (best-effort) if TAK is enabled
-    """
-    if not uid:
-        component.logger.info("statusReturn received with empty uid")
-        return
-
-    node = component.nodes.get(uid)
-    if not node:
-        component.logger.warning(f"statusReturn: unknown node uid={uid}")
-        return
-
-    if not status:
-        status = "unknown"
-
-    # ---------------------------------------------------------
-    # UPDATE NODE ENTRY
-    # ---------------------------------------------------------
-    node["status"] = status
-    node["last_seen"] = time.time()
-    node["connected"] = True
-
-    component.logger.debug(f"Updated node {uid} status -> {status}")
-
-    # ---------------------------------------------------------
-    # BROADCAST TO DASHBOARD (UI)
-    # ---------------------------------------------------------
-    # update_msg = {
-    #     "msg_type": "node_status",
-    #     "uuid": uid,
-    #     "status": status,
-    #     "last_seen": node["last_seen"],
-    # }
-
-    # # Wire this to your real dashboard emitter
-    # if hasattr(component, "emit_dashboard_update"):
-    #     await component.emit_dashboard_update(update_msg)
-    # elif hasattr(component, "broadcast_dashboard"):
-    #     await component.broadcast_dashboard(update_msg)
-
-    # ---------------------------------------------------------
-    # SEND TO TAK AS EVENT
-    # ---------------------------------------------------------
-    if getattr(component, "clitool", None) is None:
-        # TAK disabled / not initialized
-        return
-
-    tak_payload = {
-        "msg_type": "event",
-        "uid": f"{uid}.status",
-        "stale": 30,
-        "data": {
-            "event_type": "node_status",
-            "node_uid": uid,
-            "status": status,
-        }
-    }
-
-    # This uses your existing forwarding wrapper (recommended)
-    await takReturn(component, tak_payload)
-
-
 async def refresh_status(component: object, requester_uid: str, node_uid: str):
     """Stop all running plugin operations on the sensor node.
 
@@ -5385,3 +5323,53 @@ async def refresh_status(component: object, requester_uid: str, node_uid: str):
         msg,
         target_ids=[identity]
     )
+
+
+async def sendPluginActionParametersResultsTak(
+    component: object,
+    plugin_name: str,
+    action_name: str,
+    node_uid: str,
+    schema: dict,
+):
+    """Handle Sensor Node plugin action parameter schema for TAK
+
+    Parameters
+    ----------
+    component : object
+        Component
+    plugin_name : str
+        Plugin name
+    action_name : str
+        Plugin action name
+    node_uid : str
+        Sensor node UID
+    schema : dict
+        Action schema dict (expects {"params": [...]})
+    """
+
+    component.logger.debug(
+        f"Preparing to send TAK action schema for {plugin_name}.{action_name}"
+    )
+
+    # Normalize schema to predictable shape
+    if not isinstance(schema, dict):
+        schema = {"params": []}
+    if "params" not in schema or not isinstance(schema.get("params"), list):
+        schema["params"] = []
+
+    event_uid = f"actionschema-{plugin_name}-{action_name}-{int(time.time()*1000)}"
+
+    msg = {
+        "msg_type": "event",
+        "uid": event_uid,
+        "data": {
+            "event_type": "plugin_action_schema",
+            "plugin_name": plugin_name,
+            "action_name": action_name,
+            "node_uid": node_uid,
+            "schema": schema,
+        },
+    }
+
+    await fissure.utils.tak_messages.send(component, msg)

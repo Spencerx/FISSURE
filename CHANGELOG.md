@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-3-3
+
+Support for TAK alerts and action input parameters.
+
+### Added
+
+- Default TAK CoT types for node idle/busy in FISSURE YAML file.
+- Alert callbacks for populating tables in TAK
+- Support for querying action parameters from TAK
+
+### Changed
+
+- Pulling status from GPS position reports instead of its own message
+
 ## 2026-2-23
 
 Compile flow graphs for Plugins and TAK features for status and control.

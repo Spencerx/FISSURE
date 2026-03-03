@@ -172,6 +172,37 @@ async def send(component, message: dict):
         ET.SubElement(detail, "contact", {"callsign": callsign})
         ET.SubElement(detail, "remarks").text = remarks
 
+        # -------------------------------------
+        # Optional: structured FISSURE alert block for pins
+        # (lets WinTAK parse alerts without touching remarks)
+        # -------------------------------------
+        alert_kind = message.get("alert_kind")
+        alert_summary = message.get("alert_summary")
+        artifact_id = message.get("artifact_id")
+        operation_id = message.get("operation_id")
+        sensor_node_id = message.get("sensor_node_id")
+
+        # Gate: only add fissure/alert if caller provided at least a kind or artifact_id
+        if alert_kind or artifact_id:
+            fiss = ET.SubElement(detail, "fissure")
+            alert = ET.SubElement(fiss, "alert")
+
+            if alert_kind:
+                ET.SubElement(alert, "kind").text = str(alert_kind)
+
+            if alert_summary:
+                ET.SubElement(alert, "summary").text = str(alert_summary)
+
+            if artifact_id:
+                ET.SubElement(alert, "artifact_id").text = str(artifact_id)
+
+            if operation_id:
+                ET.SubElement(alert, "operation_id").text = str(operation_id)
+
+            if sensor_node_id:
+                ET.SubElement(alert, "sensor_node_id").text = str(sensor_node_id)
+
+
         _set_point_pin(msg, lat, lon, alt)
 
         return _send_to_tak(component, msg)
@@ -230,9 +261,13 @@ async def send(component, message: dict):
             stale=stale if stale is not None else 60
         )
 
-        msg.set("type", tak_icon or "b-m-p-w")
+        # msg.set("type", tak_icon or "b-m-p-w")
+        msg.set("type", tak_icon)  # or "a-f-G-E")
+        # msg.set("type", tak_icon or "a-f-G-E-X-M-C")
         if how:
             msg.set("how", how)
+
+        # ET.SubElement(detail, "color", {"argb": "ff0000ff"})
 
         ET.SubElement(detail, "contact", {"callsign": callsign})
         _set_point_pin(msg, lat, lon, alt)
