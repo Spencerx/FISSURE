@@ -4246,8 +4246,7 @@ def _slotMenuStandalone_ais_rx_demodClicked(dashboard: QtWidgets.QMainWindow):
     # Open the Flow Graph in GNU Radio Companion
     filepath = os.path.join(fissure.utils.get_fg_library_dir(dashboard.backend.os_info), "Standalone Flow Graphs", "ais_rx_demod.grc")
     osCommandString = 'gnuradio-companion "' + filepath + '" &'
-    os.system(osCommandString + " &")
-
+    os.system(osCommandString)
 
 @QtCore.pyqtSlot()
 def _slotMenuADSB_TowersClicked():

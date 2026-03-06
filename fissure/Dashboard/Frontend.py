@@ -3461,6 +3461,7 @@ def connect_iq_slots(dashboard: Dashboard):
     )
     dashboard.ui.pushButton_iq_convert.clicked.connect(lambda: IQDataTabSlots._slotIQ_ConvertClicked(dashboard))
     dashboard.ui.pushButton_iq_demod.clicked.connect(lambda: IQDataTabSlots._slotIQ_DemodClicked(dashboard))
+    dashboard.ui.pushButton_iq_convert_output_select.clicked.connect(lambda: IQDataTabSlots._slotIQ_ConvertOutputSelectClicked(dashboard))
 
     # Table Widget
     dashboard.ui.tableWidget_iq_append.horizontalHeader().sectionClicked.connect(

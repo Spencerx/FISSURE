@@ -25709,7 +25709,7 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>810</x>
-          <y>105</y>
+          <y>135</y>
           <width>65</width>
           <height>27</height>
          </rect>
@@ -26144,6 +26144,25 @@ p, li { white-space: pre-wrap; }
         </property>
         <property name="text">
          <string>Normalize to Target Data Range</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_iq_convert_output_select">
+        <property name="geometry">
+         <rect>
+          <x>810</x>
+          <y>105</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="text">
+         <string>Select</string>
         </property>
        </widget>
       </widget>

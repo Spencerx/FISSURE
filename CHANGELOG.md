@@ -1,7 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## 2026-3-3
+## 2026-3-06
+
+Installer fixes and data conversion fixes.
+
+### Added
+
+- ainfosec.dev link to README
+- Select button for IQ Data > Convert tab to pick the current directory in the IQ Viewer to use as the output directory
+
+### Changed
+
+- tak_on_startup variable in the config YAML file now support strings and booleans
+
+### Fixed
+
+- Modified opencv installer dependency to use `opencv-python-headless<4.12` to prevent numpy 2.0+ from being installed
+- Removed sudo from pip package installs
+- Fixing the data conversion algorithms to convert between data types better
+- Removed extra '&' in _slotMenuStandalone_ais_rx_demodClicked() flow graph filepath
+
+## 2026-3-03
 
 Support for TAK alerts and action input parameters.
 

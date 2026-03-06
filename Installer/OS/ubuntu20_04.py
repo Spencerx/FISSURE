@@ -20,78 +20,78 @@ sudo apt-get install -y python-setuptools python-dev build-essential
 sudo apt-get install -y curl
 curl https://bootstrap.pypa.io./pip/2.7/get-pip.py | sudo python2  # Installs pip 20.3.4
 sudo apt-get install -y python3-pip
-sudo python3 -m pip install cmake --upgrade
+python3 -m pip install cmake --upgrade
 sudo apt install -y python3-testresources
-sudo python3 -m pip install "setuptools<71"
-sudo python3 -m pip install --upgrade virtualenv
-sudo python3 -m pip install matplotlib
-sudo python3 -m pip install PyYAML==5.1
-sudo python3 -m pip install pyyaml
+python3 -m pip install "setuptools<71"
+python3 -m pip install --upgrade virtualenv
+python3 -m pip install matplotlib
+python3 -m pip install PyYAML==5.1
+python3 -m pip install pyyaml
 #wget http://archive.ubuntu.com/ubuntu/pool/universe/p/python-scipy/python-scipy_0.19.1-2ubuntu1_amd64.deb
 #sudo apt-get install -y ./python-scipy_0.19.1-2ubuntu1_amd64.deb
 #rm python-scipy_0.19.1-2ubuntu1_amd64.deb
-sudo python3 -m pip install scipy --upgrade
+python3 -m pip install scipy --upgrade
 sudo apt-get install -y gedit
 sudo apt-get install -y software-properties-common #python-software-properties # does Python3
 sudo add-apt-repository -y ppa:git-core/ppa
 sudo apt-get -y update
 sudo apt-get install -y git 
 sudo apt-get install -y libcanberra-gtk-module
-sudo python3 -m pip install bitarray
+python3 -m pip install bitarray
 sudo apt install net-tools
-sudo python3 -m pip install crcmod
-sudo python3 -m pip install pycrypto
-sudo python3 -m pip install --upgrade cryptography
+python3 -m pip install crcmod
+python3 -m pip install pycrypto
+python3 -m pip install --upgrade cryptography
 sudo apt-get install -y python-tk
-sudo python3 -m pip install pyzmq
+python3 -m pip install pyzmq
 sudo apt-get install -y libosmocore-dev
 sudo apt-get install -y liborc-0.4-dev
 sudo apt-get install -y expect
 sudo add-apt-repository --y ppa:wireshark-dev/stable  # Latest Wireshark
 sudo apt-get update
-sudo python3 -m pip install pyshark
+python3 -m pip install pyshark
 sudo apt install -y debconf
 echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt install -y tshark
-sudo python3 -m pip install pypcapfile
-sudo python2 -m pip install pypcapfile
-sudo python2 -m pip install netaddr
-sudo python3 -m pip install psutil
-sudo python3 -m pip install pyserial
+python3 -m pip install pypcapfile
+python2 -m pip install pypcapfile
+python2 -m pip install netaddr
+python3 -m pip install psutil
+python3 -m pip install pyserial
 sudo apt-get install -y gpsd-clients python-gi-cairo
-sudo python3 -m pip install pandas
+python3 -m pip install pandas
 sudo apt-get install -y dsniff
 sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d  # removes sudo apt-get update warnings
 sudo apt-get -y install ncurses-term
-sudo python3 -m pip install yellowbrick
-sudo python3 -m pip install seaborn
-sudo python3 -m pip install gpsd-py3
-sudo python3 -m pip install geopy
-sudo python3 -m pip install sounddevice
-sudo python3 -m pip install qasync
-sudo python3 -m pip install pydotplus
-sudo python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
-sudo python3 -m pip install tensorflow-cpu
+python3 -m pip install yellowbrick
+python3 -m pip install seaborn
+python3 -m pip install gpsd-py3
+python3 -m pip install geopy
+python3 -m pip install sounddevice
+python3 -m pip install qasync
+python3 -m pip install pydotplus
+python3 -m pip install pytak --break-system-packages  # TODO: Fix to work with sudo
+python3 -m pip install tensorflow-cpu
 sudo apt-get install -y snapd
 sudo snap install netron
-sudo python3 -m pip install ipython
-sudo python3 -m pip install scikit-learn==1.3.2
-sudo python3 -m pip uninstall opencv-python
-sudo python3 -m pip install opencv-python-headless
-sudo python3 -m pip install pyzipper
+python3 -m pip install ipython
+python3 -m pip install scikit-learn==1.3.2
+python3 -m pip uninstall opencv-python
+python3 -m pip install "opencv-python-headless<4.12"
+python3 -m pip install pyzipper
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
-sudo python3 -m pip install mgrs
+python3 -m pip install mgrs
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
-sudo python3 -m pip install watchdog
-sudo python3 -m pip install aiohttp
-sudo python3 -m pip install paho-mqtt
-sudo python3 -m pip install msgpack
-sudo python3 -m pip install eventlet
-sudo python3 -m pip install psycopg2-binary
-sudo python3 -m pip install python-dotenv
+python3 -m pip install watchdog
+python3 -m pip install aiohttp
+python3 -m pip install paho-mqtt
+python3 -m pip install msgpack
+python3 -m pip install eventlet
+python3 -m pip install psycopg2-binary
+python3 -m pip install python-dotenv
 sudo apt-get install -y iw
 . ~/.bashrc
 """,True,'Minimum Install'))
@@ -217,8 +217,8 @@ gnuradio-companion --help
 
 # Scapy
 programs_ubuntu20_04.append(('Scapy (33.1 MB)',
-"""sudo python3 -m pip install scapy
-sudo python2 -m pip install scapy==2.4.5
+"""python3 -m pip install scapy
+python2 -m pip install scapy==2.4.5
 #sudo apt-get install -y scapy
 ########## Verify ##########
 python2 -c "import scapy" && python3 -c "import scapy"
@@ -243,9 +243,9 @@ wireshark --help
 
 # PostgreSQL Database 
 programs_ubuntu20_04.append(('PostgreSQL Database',
-"""sudo python3 -m pip install python-dotenv
+"""python3 -m pip install python-dotenv
 sudo apt-get install -y libpq-dev
-sudo python3 -m pip install psycopg2
+python3 -m pip install psycopg2
 sudo apt-get install -y docker.io docker-compose-v2  # docker-compose-v2 or docker-compose-plugin?
 sudo usermod -aG docker ${USER}  # Reboot computer to use docker commands without sudo
 sudo apt install -y postgresql-client
@@ -279,7 +279,7 @@ programs_ubuntu20_04.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
 sudo apt-get install -y python3-pyserial
-sudo python3 -m pip install meshtastic
+python3 -m pip install meshtastic
 sudo usermod -aG dialout $USER  # log out & in/reboot
 sudo usermod -aG tty $USER
 echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
@@ -1162,7 +1162,7 @@ ls /usr/bin/designer
 
 # Grip
 programs_ubuntu20_04.append(('Grip (7.7 MB)',
-"""sudo python3 -m pip install grip
+"""python3 -m pip install grip
 ########## Verify ##########
 ls /usr/local/bin/grip
 """,True,'Development'))
@@ -1196,8 +1196,8 @@ ls /usr/local/bin/udpreplay
 # V2Verifier
 programs_ubuntu20_04.append(('V2Verifier (4.5 MB)',
 """sudo apt-get install -y libgmp3-dev python3-tk python3-pil.imagetk
-sudo python3 -m pip install fastecdsa
-sudo python3 -m pip install -U pyyaml
+python3 -m pip install fastecdsa
+python3 -m pip install -U pyyaml
 #sudo apt install -y git cmake libuhd-dev uhd-host swig libgmp3-dev python3-pip python3-tk python3-pil 
 #python3-pil.imagetk gnuradio
 #Needs gr-foo and gr-ieee802-11
@@ -1439,8 +1439,8 @@ rm baudline_1.08_linux_x86_64.tar.gz
 
 # Universal Radio Hacker
 programs_ubuntu20_04.append(('Universal Radio Hacker (130.0 MB)',
-"""sudo python3 -m pip install cython
-sudo python3 -m pip install urh
+"""python3 -m pip install cython
+python3 -m pip install urh
 ########## Verify ##########
 urh --version
 """,True,'SDR'))
@@ -1600,7 +1600,7 @@ git clone https://github.com/projecthorus/radiosonde_auto_rx.git
 cd radiosonde_auto_rx/auto_rx
 ./build.sh
 cp station.cfg.example station.cfg
-sudo python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
@@ -1679,11 +1679,11 @@ ls ~/Installed_by_FISSURE/linux-x64/IridiumLive
 programs_ubuntu20_04.append(('NETATTACK2 (884.8 kB)',
 """#sudo pip install netifaces  # fix for python2
 #sudo apt-get install -y python-scapy python-nmap python-nfqueue nmap  # this needs to be fixed, can it still run with python2?
-sudo python2 -m pip install netifaces
+python2 -m pip install netifaces
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/chrizator/netattack2.git
-sudo python2 -m pip install nmap
+python2 -m pip install nmap
 cd netattack2
 wget http://archive.ubuntu.com/ubuntu/pool/universe/libn/libnetfilter-queue/libnetfilter-queue1_1.0.2-2_amd64.deb
 sudo dpkg -i libnetfilter-queue1_1.0.2-2_amd64.deb
@@ -1696,7 +1696,7 @@ programs_ubuntu20_04.append(('Wifite (546.6 MB)',
 """echo "macchanger macchanger/automatically_run boolean false" | sudo debconf-set-selections
 # python, iwconfig, ifconfig, Aircrack-ng, tshark, reaver, bully, coWPAtty, pyrit, hashcat, hcxdumptool, hcxpcaptool
 sudo apt-get install -y build-essential libpcap-dev aircrack-ng pixiewps libssl-dev hashcat libcurl4-openssl-dev pkg-config macchanger
-sudo python3 -m pip install psycopg2-binary scapy
+python3 -m pip install psycopg2-binary scapy
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/derv82/wifite2.git
@@ -1763,7 +1763,7 @@ rtl_433 -help
 # RouterSploit
 programs_ubuntu20_04.append(('RouterSploit (494.3 MB)',
 """sudo apt-get install -y python3-pip libglib2.0-dev rustc
-sudo python3 -m pip install setuptools-rust
+python3 -m pip install setuptools-rust
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://www.github.com/threat9/routersploit
@@ -1792,9 +1792,9 @@ programs_ubuntu20_04.append(('monitor_rtl433 (52.2 MB)',
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mcbridejc/monitor_rtl433.git
 cd monitor_rtl433
-sudo python3 -m pip install . --force-reinstall --ignore-installed
-sudo python3 -m pip install python-dateutil
-sudo python3 -m pip install flask_table
+python3 -m pip install . --force-reinstall --ignore-installed
+python3 -m pip install python-dateutil
+python3 -m pip install flask_table
 ########## Verify ##########
 ls /usr/local/bin/monitor_rtl433
 """,True,'433 MHz'))
@@ -1875,7 +1875,7 @@ viking --help
 programs_ubuntu20_04.append(('PyGPSClient (42.5 MB)',
 """sudo apt install -y python3-pip python3-tk python3-pil python3-pil.imagetk
 sudo apt remove -y python3-cryptography
-sudo python3 -m pip install --upgrade PyGPSClient
+python3 -m pip install --upgrade PyGPSClient
 ########## Verify ##########
 ls /usr/local/bin/pygpsclient
 """,True,'GPS'))
@@ -1958,7 +1958,7 @@ gm -help
 
 # Spectrum Painter
 programs_ubuntu20_04.append(('Spectrum Painter (13.8 MB)',
-"""sudo python3 -m pip install numpy imageio 
+"""python3 -m pip install numpy imageio 
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/polygon/spectrum_painter.git
@@ -2014,7 +2014,7 @@ snap list bless-unofficial
 
 # trackerjacker
 programs_ubuntu20_04.append(('trackerjacker (6.1 MB)',
-"""sudo python3 -m pip install trackerjacker  # Downgrades Python3 Scapy from 2.4.5 to 2.4.0
+"""python3 -m pip install trackerjacker  # Downgrades Python3 Scapy from 2.4.5 to 2.4.0
 ########## Verify ##########
 sudo trackerjacker --help
 """,True,'802.11'))
@@ -2133,7 +2133,7 @@ ls /usr/bin/fldigi
 
 # pyFDA
 programs_ubuntu20_04.append(('pyFDA (11.7 MB)',
-"""sudo python3 -m pip install pyfda --use-pep517
+"""python3 -m pip install pyfda --use-pep517
 ########## Verify ##########
 pyfdax -h
 """,True,'Filters'))
@@ -2178,7 +2178,7 @@ ls /usr/bin/meld
 
 # nwdiag
 programs_ubuntu20_04.append(('nwdiag (30.3 MB)',
-"""sudo python3 -m pip install nwdiag
+"""python3 -m pip install nwdiag
 ########## Verify ##########
 packetdiag -h
 """,True,'Data'))
@@ -2341,7 +2341,7 @@ find . -name '*.grc' -exec grcc {} \;
 
 # pyais
 programs_ubuntu20_04.append(('pyais',
-"""sudo python3 -m pip install pyais
+"""python3 -m pip install pyais
 ########## Verify ##########
 ls /usr/local/lib/python3*/dist-packages/pyais
 """,True,'AIS'))
@@ -2365,10 +2365,10 @@ ls /usr/bin/binwalk
 
 # Read the Docs
 programs_ubuntu20_04.append(('Read the Docs',
-"""sudo python3 -m pip install sphinx
-sudo python3 -m pip install sphinx_rtd_theme
+"""python3 -m pip install sphinx
+python3 -m pip install sphinx_rtd_theme
 ########## Verify ##########
-sudo python3 -m pip show sphinx_rtd_theme
+python3 -m pip show sphinx_rtd_theme
 """,True,'Development'))
 
 # IQEngine

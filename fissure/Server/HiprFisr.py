@@ -187,7 +187,7 @@ class HiprFisr:
         self.start_database_docker_container()
         tak_info = self.settings.get("tak")
         run_tak = tak_info.get("tak_on_startup")
-        if run_tak == 'True':
+        if str(run_tak).lower() == "true":
             self.start_tak_docker_container()
 
         # Create the HIPRFISR ZMQ Nodes

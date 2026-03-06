@@ -21,13 +21,13 @@ sudo apt-get install -y curl
 sudo apt-get install -y python2
 curl https://bootstrap.pypa.io./pip/2.7/get-pip.py | sudo python2  # Installs pip 20.3.4
 sudo apt-get install -y python3-pip
-sudo python3 -m pip install cmake --upgrade --break-system-packages
+python3 -m pip install cmake --upgrade --break-system-packages
 sudo apt install -y python3-testresources
-sudo python3 -m pip install --upgrade setuptools --break-system-packages
-sudo python3 -m pip install --upgrade virtualenv --break-system-packages
-#sudo python3 -m pip install matplotlib  # This version conflicts with yellowbrick
-sudo python3 -m pip install PyYAML==5.1 --break-system-packages
-sudo python3 -m pip install pyyaml --break-system-packages
+python3 -m pip install --upgrade setuptools --break-system-packages
+python3 -m pip install --upgrade virtualenv --break-system-packages
+#python3 -m pip install matplotlib  # This version conflicts with yellowbrick
+python3 -m pip install PyYAML==5.1 --break-system-packages
+python3 -m pip install pyyaml --break-system-packages
 wget http://archive.ubuntu.com/ubuntu/pool/universe/p/python-scipy/python-scipy_0.19.1-2ubuntu1_amd64.deb
 sudo apt-get install -y ./python-scipy_0.19.1-2ubuntu1_amd64.deb  # FIX?
 rm python-scipy_0.19.1-2ubuntu1_amd64.deb
@@ -37,64 +37,64 @@ sudo add-apt-repository -y ppa:git-core/ppa
 sudo apt-get -y update
 sudo apt-get install -y git 
 sudo apt-get install -y libcanberra-gtk-module
-sudo python3 -m pip install bitarray --break-system-packages
+python3 -m pip install bitarray --break-system-packages
 sudo apt install net-tools
-sudo python3 -m pip install crcmod --break-system-packages
-sudo python3 -m pip install pycrypto --break-system-packages
+python3 -m pip install crcmod --break-system-packages
+python3 -m pip install pycrypto --break-system-packages
 sudo apt-get install -y python-tk
-sudo python3 -m pip install pyzmq --break-system-packages
+python3 -m pip install pyzmq --break-system-packages
 sudo apt-get install -y libosmocore-dev
 sudo apt-get install -y liborc-0.4-dev
 sudo apt-get install -y expect
 sudo add-apt-repository --y ppa:wireshark-dev/stable  # Latest Wireshark
 sudo apt-get update
-sudo python3 -m pip install pyshark --break-system-packages
+python3 -m pip install pyshark --break-system-packages
 sudo apt install -y debconf
 echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt install -y tshark
-sudo python3 -m pip install pypcapfile --break-system-packages
-sudo python2 -m pip install pypcapfile
-sudo python2 -m pip install netaddr
-sudo python3 -m pip install psutil --break-system-packages
-sudo python3 -m pip install pyserial --break-system-packages
+python3 -m pip install pypcapfile --break-system-packages
+python2 -m pip install pypcapfile
+python2 -m pip install netaddr
+python3 -m pip install psutil --break-system-packages
+python3 -m pip install pyserial --break-system-packages
 sudo apt-get install -y gpsd-clients python3-gi-cairo
-sudo python3 -m pip install pandas --break-system-packages
+python3 -m pip install pandas --break-system-packages
 sudo apt-get install -y dsniff
 sudo apt-get install -y ncurses-term
 sudo apt-get install -y eog
-sudo python2 -m pip install cryptography
-sudo python3 -m pip install yellowbrick --break-system-packages
-sudo python3 -m pip install seaborn --break-system-packages
+python2 -m pip install cryptography
+python3 -m pip install yellowbrick --break-system-packages
+python3 -m pip install seaborn --break-system-packages
 sudo apt-get install -y rtl-sdr
-sudo python3 -m pip install gpsd-py3 --break-system-packages
-sudo python3 -m pip install geopy --break-system-packages
-sudo python3 -m pip install sounddevice --break-system-packages
-sudo python3 -m pip install qasync --break-system-packages
-sudo python3 -m pip install pydotplus --break-system-packages
-sudo python3 -m pip install pytak --break-system-packages
-sudo python3 -m pip install tensorflow-cpu --break-system-packages
+python3 -m pip install gpsd-py3 --break-system-packages
+python3 -m pip install geopy --break-system-packages
+python3 -m pip install sounddevice --break-system-packages
+python3 -m pip install qasync --break-system-packages
+python3 -m pip install pydotplus --break-system-packages
+python3 -m pip install pytak --break-system-packages
+python3 -m pip install tensorflow-cpu --break-system-packages
 sudo apt-get install -y snapd
 sudo snap install netron
-sudo python3 -m pip install ipython --break-system-packages
-sudo python3 -m pip install scikit-learn==1.3.2 --break-system-packages
-sudo python3 -m pip uninstall opencv-python --break-system-packages
-sudo python3 -m pip install opencv-python-headless --break-system-packages
-sudo python3 -m pip install pyzipper --break-system-packages
+python3 -m pip install ipython --break-system-packages
+python3 -m pip install scikit-learn==1.3.2 --break-system-packages
+python3 -m pip uninstall opencv-python --break-system-packages
+python3 -m pip install "opencv-python-headless<4.12" --break-system-packages
+python3 -m pip install pyzipper --break-system-packages
 sudo apt-get install -y unzip
 sudo apt-get install -y usbutils
-sudo python3 -m pip install mgrs --break-system-packages
+python3 -m pip install mgrs --break-system-packages
 sudo apt-get install -y debconf-utils
 sudo apt-get install -y libzmq3-dev
 sudo apt-get install -y zstd
 sudo apt-get install -y xdg-utils
 sudo apt-get install -y p7zip-full
-sudo python3 -m pip install watchdog --break-system-packages
-sudo python3 -m pip install aiohttp --break-system-packages
-sudo python3 -m pip install paho-mqtt --break-system-packages
-sudo python3 -m pip install msgpack --break-system-packages
-sudo python3 -m pip install eventlet --break-system-packages
-sudo python3 -m pip install psycopg2-binary --break-system-packages
-sudo python3 -m pip install python-dotenv --break-system-packages
+python3 -m pip install watchdog --break-system-packages
+python3 -m pip install aiohttp --break-system-packages
+python3 -m pip install paho-mqtt --break-system-packages
+python3 -m pip install msgpack --break-system-packages
+python3 -m pip install eventlet --break-system-packages
+python3 -m pip install psycopg2-binary --break-system-packages
+python3 -m pip install python-dotenv --break-system-packages
 sudo apt-get install -y iw
 . ~/.bashrc
 """,True,"Minimum Install"))
@@ -218,9 +218,9 @@ gnuradio-companion --help
 # Scapy
 programs_kali.append(('Scapy (18.93 MB)',
 """sudo apt-get install -y python3-scapy
-sudo python2 -m pip install setuptools
-#sudo python3 -m pip install scapy --break-system-packages  # Causes errors
-sudo python2 -m pip install scapy==2.4.5  # Doesn't work on Kali
+python2 -m pip install setuptools
+#python3 -m pip install scapy --break-system-packages  # Causes errors
+python2 -m pip install scapy==2.4.5  # Doesn't work on Kali
 ########## Verify ##########
 python2 -c "import scapy" && python3 -c "import scapy"
 """,True,"Minimum Install"))
@@ -244,9 +244,9 @@ python2 -c "import scapy" && python3 -c "import scapy"
 
 # PostgreSQL Database 
 programs_kali.append(('PostgreSQL Database',
-"""sudo python3 -m pip install python-dotenv --break-system-packages
+"""python3 -m pip install python-dotenv --break-system-packages
 sudo apt-get install -y libpq-dev
-sudo python3 -m pip install psycopg2 --break-system-packages
+python3 -m pip install psycopg2 --break-system-packages
 sudo apt-get install -y docker.io
 sudo mkdir -p /usr/libexec/docker/cli-plugins/
 sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/libexec/docker/cli-plugins/docker-compose
@@ -285,7 +285,7 @@ programs_kali.append(('Meshtastic',
 """sudo apt-get install -y python3-serial
 sudo apt-get install -y python3-protobuf
 sudo apt-get install -y python3-serial
-sudo python3 -m pip install meshtastic --ignore-installed --break-system-packages
+python3 -m pip install meshtastic --ignore-installed --break-system-packages
 sudo usermod -aG dialout $USER  # log out & in/reboot
 sudo usermod -aG tty $USER
 echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"' | sudo tee /etc/udev/rules.d/99-meshtastic.rules
@@ -1258,7 +1258,7 @@ ls /usr/bin/designer
 
 # Grip
 programs_kali.append(('Grip (840.00 kB)',
-"""sudo python3 -m pip install grip --break-system-packages
+"""python3 -m pip install grip --break-system-packages
 ########## Verify ##########
 ls /usr/local/bin/grip
 """,True,'Development'))
@@ -1291,8 +1291,8 @@ ls /usr/local/bin/udpreplay
 # V2Verifier
 programs_kali.append(('V2Verifier (2.17 MB)',
 """sudo apt-get install -y libgmp3-dev python3-tk python3-pil.imagetk
-sudo python3 -m pip install fastecdsa --break-system-packages
-sudo python3 -m pip install -U pyyaml --break-system-packages
+python3 -m pip install fastecdsa --break-system-packages
+python3 -m pip install -U pyyaml --break-system-packages
 #sudo apt install -y git cmake libuhd-dev uhd-host swig libgmp3-dev python3-pip python3-tk python3-pil 
 #python3-pil.imagetk gnuradio
 #Needs gr-foo and gr-ieee802-11
@@ -1471,8 +1471,8 @@ rm baudline_1.08_linux_x86_64.tar.gz
 
 # Universal Radio Hacker
 programs_kali.append(('Universal Radio Hacker (105.40 MB)',
-"""sudo python3 -m pip install cython --break-system-packages
-sudo python3 -m pip install urh --break-system-packages
+"""python3 -m pip install cython --break-system-packages
+python3 -m pip install urh --break-system-packages
 ########## Verify ##########
 urh --version
 """,True,'SDR'))
@@ -1637,7 +1637,7 @@ git clone https://github.com/projecthorus/radiosonde_auto_rx.git
 cd radiosonde_auto_rx/auto_rx
 ./build.sh
 cp station.cfg.example station.cfg
-sudo python3 -m pip install -r requirements.txt --break-system-packages
+python3 -m pip install -r requirements.txt --break-system-packages
 ########## Verify ##########
 ls ~/Installed_by_FISSURE/radiosonde_auto_rx/auto_rx/auto_rx.py
 """,True,'Radiosonde'))
@@ -1716,11 +1716,11 @@ ls ~/Installed_by_FISSURE/linux-x64/IridiumLive
 programs_kali.append(('NETATTACK2',
 """#sudo pip install netifaces  # fix for python2
 #sudo apt-get install -y python-scapy python-nmap python-nfqueue nmap  # this needs to be fixed, can it still run with python2?
-sudo python2 -m pip install netifaces
+python2 -m pip install netifaces
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/chrizator/netattack2.git
-sudo python2 -m pip install nmap
+python2 -m pip install nmap
 cd netattack2
 wget http://archive.ubuntu.com/ubuntu/pool/universe/libn/libnetfilter-queue/libnetfilter-queue1_1.0.2-2_amd64.deb
 sudo dpkg -i libnetfilter-queue1_1.0.2-2_amd64.deb
@@ -1733,7 +1733,7 @@ sudo dpkg -i python-nfqueue_0.6-1build2_amd64.deb
 # ~ """echo "macchanger macchanger/automatically_run boolean false" | sudo debconf-set-selections
 # # python, iwconfig, ifconfig, Aircrack-ng, tshark, reaver, bully, coWPAtty, pyrit, hashcat, hcxdumptool, hcxpcaptool
 # ~ sudo apt-get install -y build-essential libpcap-dev aircrack-ng pixiewps libssl-dev hashcat libcurl4-openssl-dev pkg-config macchanger python-is-python3
-# ~ sudo python3 -m pip install psycopg2-binary --break-system-packages  #scapy (python3 scapy with pip causes errors)
+# ~ python3 -m pip install psycopg2-binary --break-system-packages  #scapy (python3 scapy with pip causes errors)
 # ~ mkdir -p ~/Installed_by_FISSURE
 # ~ cd ~/Installed_by_FISSURE
 # ~ git clone https://github.com/derv82/wifite2.git
@@ -1798,7 +1798,7 @@ rtl_433 -help
 # RouterSploit
 programs_kali.append(('RouterSploit (623.97 MB)',
 """sudo apt-get install -y python3-pip libglib2.0-dev rustc
-sudo python3 -m pip install setuptools-rust --break-system-packages
+python3 -m pip install setuptools-rust --break-system-packages
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://www.github.com/threat9/routersploit
@@ -1827,9 +1827,9 @@ programs_kali.append(('monitor_rtl433 (1.10 MB)',
 cd ~/Installed_by_FISSURE
 git clone https://github.com/mcbridejc/monitor_rtl433.git
 cd monitor_rtl433
-sudo python3 -m pip install . --force-reinstall --ignore-installed --break-system-packages
-sudo python3 -m pip install python-dateutil --break-system-packages
-sudo python3 -m pip install flask_table --break-system-packages
+python3 -m pip install . --force-reinstall --ignore-installed --break-system-packages
+python3 -m pip install python-dateutil --break-system-packages
+python3 -m pip install flask_table --break-system-packages
 ########## Verify ##########
 ls /usr/local/bin/monitor_rtl433
 """,True,'433 MHz'))
@@ -1911,7 +1911,7 @@ viking --help
 programs_kali.append(('PyGPSClient (5.29 MB)',
 """sudo apt install -y python3-pip python3-tk python3-pil python3-pil.imagetk
 sudo apt remove -y python3-cryptography
-sudo python3 -m pip install --upgrade PyGPSClient --break-system-packages --ignore-installed
+python3 -m pip install --upgrade PyGPSClient --break-system-packages --ignore-installed
 ########## Verify ##########
 ls /usr/local/bin/pygpsclient
 """,True,'GPS'))
@@ -1994,7 +1994,7 @@ gm -help
 
 # Spectrum Painter
 programs_kali.append(('Spectrum Painter (14.4 MB)',
-"""sudo python3 -m pip install numpy imageio --break-system-packages
+"""python3 -m pip install numpy imageio --break-system-packages
 mkdir -p ~/Installed_by_FISSURE
 cd ~/Installed_by_FISSURE
 git clone https://github.com/polygon/spectrum_painter.git
@@ -2058,7 +2058,7 @@ snap list bless-unofficial
 # trackerjacker (no longer complains about needing newer scapy version?, something else (netattack2?) resets it, some pieces don't work while running it)
 programs_kali.append(('trackerjacker',
 """sudo ln -s -f /usr/lib/x86_64-linux-gnu/libc.a /usr/lib/x86_64-linux-gnu/liblibc.a  # Python3.9 missing file
-sudo python3 -m pip install trackerjacker --break-system-packages
+python3 -m pip install trackerjacker --break-system-packages
 ########## Verify ##########
 sudo trackerjacker --help
 """,True,'802.11'))
@@ -2177,7 +2177,7 @@ ls /usr/bin/fldigi
 
 # pyFDA
 programs_kali.append(('pyFDA (5.77 MB)',
-"""sudo python3 -m pip install pyfda --use-pep517 --break-system-packages  # Has PEP issues with Python 3.10
+"""python3 -m pip install pyfda --use-pep517 --break-system-packages  # Has PEP issues with Python 3.10
 ########## Verify ##########
 pyfdax -h
 """,True,'Filters'))
@@ -2221,7 +2221,7 @@ ls /usr/bin/meld
 
 # nwdiag
 programs_kali.append(('nwdiag (29.14 MB)',
-"""sudo python3 -m pip install nwdiag --break-system-packages
+"""python3 -m pip install nwdiag --break-system-packages
 ########## Verify ##########
 packetdiag -h
 """,True,'Data'))
@@ -2387,7 +2387,7 @@ find . -name '*.grc' -exec grcc {} \;
 
 # pyais
 programs_kali.append(('pyais (628.00 kB)',
-"""sudo python3 -m pip install pyais --break-system-packages
+"""python3 -m pip install pyais --break-system-packages
 ########## Verify ##########
 ls /usr/local/lib/python3*/dist-packages/pyais
 """,True,'AIS'))
@@ -2411,10 +2411,10 @@ ls /usr/bin/binwalk
 
 # Read the Docs
 programs_kali.append(('Read the Docs (54.77 MB)',
-"""sudo python3 -m pip install sphinx --break-system-packages
-sudo python3 -m pip install sphinx_rtd_theme --break-system-packages
+"""python3 -m pip install sphinx --break-system-packages
+python3 -m pip install sphinx_rtd_theme --break-system-packages
 ########## Verify ##########
-sudo python3 -m pip show sphinx_rtd_theme
+python3 -m pip show sphinx_rtd_theme
 """,True,'Development'))
 
 # IQEngine
