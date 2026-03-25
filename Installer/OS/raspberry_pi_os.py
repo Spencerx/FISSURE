@@ -99,6 +99,8 @@ python3 -m pip install psycopg2-binary --break-system-packages
 python3 -m pip install python-dotenv --break-system-packages
 python3 -m pip install "numpy<2.0" --force-reinstall --break-system-packages  # newer versions cause issues
 sudo apt-get install -y iw
+sudo apt-get install -y python3-pyproj
+sudo apt-get install -y python3-uhd
 . ~/.bashrc
 """,True,"Minimum Install"))
 

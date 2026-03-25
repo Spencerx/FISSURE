@@ -1,6 +1,23 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-3-24
+
+TAK geolocation, multi-node actions, CoT logging, and plugin enhancements.
+
+### Added
+
+- python3-pyproj and python3-uhd dependencies to the installer
+- LFM beacon transmit flow graph to standalone flow graphs
+- Target patch functions from actions to the hub
+- Support for specifying expected node hardware in YAML to be used by filtering in plugin actions
+- Example target list YAML file for importing from TAK
+- Optional CoT logging support for TAK replay
+- CoT replay script for logged sessions
+- Multilateration utility functions for the hub
+- More TAK support for geolocation and multi-node actions
+- Action filtering for target classification/keywords
+
 ## 2026-3-06
 
 Installer fixes and data conversion fixes.

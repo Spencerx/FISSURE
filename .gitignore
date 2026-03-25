@@ -4,6 +4,9 @@ Logs/event.log
 certificates/
 Installer/fissure_install.log
 
+# CoT message logging
+Logs/CoT_Logs/
+
 # Plugins
 Plugins/*
 !Plugins/plugin_template/

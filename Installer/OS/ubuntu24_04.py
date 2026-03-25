@@ -109,6 +109,9 @@ sudo apt-get install -y iw
 
 sudo apt-get install -y gnome-terminal dbus-x11 gsettings-desktop-schemas  # Apptainer
 
+sudo apt-get install -y python3-pyproj
+sudo apt-get install -y python3-uhd
+
 #. ~/.bashrc  # TODO: container fix
 
 """,True,"Minimum Install"))

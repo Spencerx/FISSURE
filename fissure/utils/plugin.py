@@ -12,7 +12,7 @@ from psycopg2.extensions import connection
 import shutil
 from subprocess import Popen, run
 import traceback
-from typing import List
+from typing import List, Dict, Set, Any
 
 from fissure.utils import FISSURE_ROOT, PLUGIN_DIR
 from fissure.utils.library import (
@@ -100,35 +100,96 @@ def get_local_plugin_names():
                 plugins += [root]
     return plugins
 
-def get_plugin_actions(plugin: str, logger: logging.getLogger = logging.getLogger(__name__)) -> List[str]:
-    """Get Plugin Actions
+def get_plugin_actions(
+    plugin: str,
+    sensor_node_settings: dict = None,
+    logger: logging.Logger = logging.getLogger(__name__),
+) -> List[str]:
+    """Get plugin actions, optionally filtered by configured hardware."""
+    actions_path = os.path.join(PLUGIN_DIR, plugin, "actions.py")
+    actions: List[str] = []
 
-    Parameters
-    ----------
-    plugin : str
-        Plugin name
+    if not os.path.exists(actions_path):
+        return actions
 
-    Returns
-    -------
-    List[str]
-        List of action names
-    """
-    actions_path = os.path.join(PLUGIN_DIR, plugin, 'actions.py')
-    actions = []
-    if os.path.exists(actions_path):
-        try:
-            spec = importlib.util.spec_from_file_location("actions", actions_path)
-            if spec is None or spec.loader is None:
-                # Could not create a valid spec/loader for the actions module
-                raise ImportError(f"Cannot load module spec for {actions_path}")
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            
-            actions = [name for name, obj in inspect.getmembers(module, inspect.isfunction) if not name.startswith('_')]  # Exclude private functions
-        except Exception as e:
-            logger.error(f"Failed to load actions from {actions_path}: {e}")
-            logger.debug("Traceback while loading actions:\n%s", traceback.format_exc())
+    try:
+        module_name = f"{plugin}_actions"
+        spec = importlib.util.spec_from_file_location(module_name, actions_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Cannot load module spec for {actions_path}")
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        # 1) discover actual action functions defined in this file
+        discovered_actions = [
+            name
+            for name, obj in inspect.getmembers(module, inspect.iscoroutinefunction)
+            if not name.startswith("_") and obj.__module__ == module.__name__
+        ]
+
+        # 2) optional hardware metadata
+        action_hardware = getattr(module, "ACTION_HARDWARE", {}) or {}
+
+        # 3) if no settings were provided, return everything
+        if not sensor_node_settings:
+            return discovered_actions
+
+        configured_hw_types = get_configured_hardware_types(sensor_node_settings)
+
+        # 4) filter
+        filtered_actions = []
+        for action_name in discovered_actions:
+            required_hw = action_hardware.get(action_name)
+
+            # No hardware restriction -> available everywhere
+            if not required_hw:
+                filtered_actions.append(action_name)
+                continue
+
+            # Match any required hardware type
+            if any(hw in configured_hw_types for hw in required_hw):
+                filtered_actions.append(action_name)
+
+        actions = filtered_actions
+
+    except Exception as e:
+        logger.error(f"Failed to load actions from {actions_path}: {e}")
+        logger.debug("Traceback while loading actions:\n%s", traceback.format_exc())
+
     return actions
+
+def get_configured_hardware_types(sensor_node_settings: Dict[str, Any]) -> Set[str]:
+    """
+    Extract configured hardware types from sensor node settings.
+
+    Returns a set like:
+    {"USRP B20xmini", "802.11x Adapter"}
+    """
+    hw_types: set[str] = set()
+
+    try:
+        hardware = sensor_node_settings.get("Sensor Node", {}).get("hardware", {})
+
+        # SDRs
+        for _, sdr_cfg in (hardware.get("sdrs") or {}).items():
+            if isinstance(sdr_cfg, dict):
+                hw_type = sdr_cfg.get("type")
+                if hw_type:
+                    hw_types.add(hw_type)
+
+        # Wi-Fi adapters
+        wifi_adapters = hardware.get("wifi_adapters") or {}
+        if wifi_adapters:
+            hw_types.add("802.11x Adapter")
+
+        # Optional: always present logical hardware
+        hw_types.add("Computer")
+
+    except Exception:
+        pass
+
+    return hw_types
 
 def apply_csv_to_table(conn:connection, file: str, function: object):
     """Apply CSV Rows to PostgreSQL Table
@@ -387,3 +448,65 @@ def get_action_schema(plugin: str, action_name: str,
         logger.error(f"Failed to load action schema from {actions_path}: {e}")
         logger.debug("Traceback while loading schema:\n%s", traceback.format_exc())
         return {"params": []}
+
+
+def get_actions_for_classifications(
+    plugin: str,
+    classification_candidates: List[str],
+    logger: logging.Logger = logging.getLogger(__name__),
+) -> List[str]:
+    """
+    Load ACTION_TAGS from a plugin's actions.py and return matching action names.
+
+    Matching rules:
+    - Actions tagged with "All" always match
+    - Otherwise, an action matches if any of its tags match any classification candidate
+    """
+    actions_path = os.path.join(PLUGIN_DIR, plugin, "actions.py")
+
+    if not os.path.exists(actions_path):
+        logger.error(f"Actions file does not exist: {actions_path}")
+        return []
+
+    try:
+        spec = importlib.util.spec_from_file_location(f"{plugin}_actions", actions_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Cannot load module spec for {actions_path}")
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        action_tags = getattr(module, "ACTION_TAGS", None)
+        if not isinstance(action_tags, dict):
+            logger.warning(f"No valid ACTION_TAGS dictionary found in {actions_path}")
+            return []
+
+        candidates = {
+            str(x).strip()
+            for x in (classification_candidates or [])
+            if x is not None and str(x).strip()
+        }
+
+        matched = []
+        for action_name, tags in action_tags.items():
+            if not isinstance(action_name, str):
+                continue
+
+            if not isinstance(tags, (list, tuple, set)):
+                continue
+
+            normalized_tags = {
+                str(tag).strip()
+                for tag in tags
+                if tag is not None and str(tag).strip()
+            }
+
+            if "All" in normalized_tags or not candidates.isdisjoint(normalized_tags):
+                matched.append(action_name)
+
+        return sorted(matched)
+
+    except Exception as e:
+        logger.error(f"Failed to load action tags from {actions_path}: {e}")
+        logger.debug("Traceback while loading action tags:\n%s", traceback.format_exc())
+        return []

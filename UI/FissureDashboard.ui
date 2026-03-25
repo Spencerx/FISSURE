@@ -369,6 +369,7 @@
     <addaction name="actionNoise_source"/>
     <addaction name="separator"/>
     <addaction name="actionfrequency_translating"/>
+    <addaction name="actionlfm_beacon_transmit"/>
    </widget>
    <widget class="QMenu" name="menuSDR_Tools">
     <property name="title">
@@ -3581,6 +3582,11 @@
    </property>
    <property name="text">
     <string>Connect to TAK Server</string>
+   </property>
+  </action>
+  <action name="actionlfm_beacon_transmit">
+   <property name="text">
+    <string>lfm_beacon_transmit</string>
    </property>
   </action>
  </widget>

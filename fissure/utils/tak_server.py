@@ -244,31 +244,42 @@ class TakReceiver(pytak.QueueWorker):
             # Dispatch
             # -----------------------------
             # Query
-            if request in ("plugin_names", "plugins", "get_plugin_names"):
+            if request in ("plugin_names", "plugins", "get_plugin_names", "ecosystem_plugin_names"):
+                if request == "ecosystem_plugin_names":
+                    tak_context = "ecosystem"
+                else:
+                    tak_context = "node"
                 await HiprFisrCallbacks.sendPluginNamesTak(
                     self.hipfisr,
                     requester_uid,
                     node_uid,
+                    tak_context
                 )
 
             # Load Plugin
-            elif request in ("plugin_actions", "get_plugin_actions"):
+            elif request in ("plugin_actions", "get_plugin_actions", "ecosystem_plugin_actions"):
                 if not plugin_name:
                     self._logger.warning(
                         "plugin_actions requested but plugin_name missing (node_uid=%s, request_id=%s)",
                         node_uid, request_id
                     )
                     return
+                
+                if request == "ecosystem_plugin_actions":
+                    tak_context = "ecosystem"
+                else:
+                    tak_context = "node"
 
                 await HiprFisrCallbacks.sendPluginActionNamesTak(
                     self.hipfisr,
                     requester_uid,
                     plugin_name,
-                    node_uid
+                    node_uid,
+                    tak_context
                 )
 
             # Customize Action
-            elif request in ("customize_action"):
+            elif request in ("customize_action", "ecosystem_customize_action"):
                 if not plugin_name or not action_name:
                     self._logger.warning(
                         "plugin_action missing plugin_name/action_name (node_uid=%s, request_id=%s, plugin=%s, action=%s)",
@@ -278,6 +289,11 @@ class TakReceiver(pytak.QueueWorker):
                         action_name or "missing"
                     )
                     return
+                
+                if request == "ecosystem_customize_action":
+                    tak_context = "ecosystem"
+                else:
+                    tak_context = "node"
 
                 await HiprFisrCallbacks.sendPluginActionParametersTak(
                     self.hipfisr,
@@ -285,6 +301,7 @@ class TakReceiver(pytak.QueueWorker):
                     node_uid,
                     plugin_name=plugin_name,
                     action_name=action_name,
+                    tak_context=tak_context
                 )                
 
             # Execute Action
@@ -308,6 +325,70 @@ class TakReceiver(pytak.QueueWorker):
                     parameters=parameters,
                 )
 
+            # Execute Ecosystem Action
+            elif request == "ecosystem_execute_action":
+                if not plugin_name or not action_name:
+                    self._logger.warning(
+                        "ecosystem_execute_action missing plugin_name/action_name (node_uid=%s, request_id=%s, plugin=%s, action=%s)",
+                        node_uid,
+                        request_id,
+                        plugin_name or "missing",
+                        action_name or "missing"
+                    )
+                    return
+
+                node_uids_json = (fissure.findtext("node_uids_json") or "").strip()
+                if not node_uids_json:
+                    self._logger.warning(
+                        "ecosystem_execute_action missing node_uids_json (node_uid=%s, request_id=%s)",
+                        node_uid,
+                        request_id
+                    )
+                    return
+
+                try:
+                    selected_node_uids = json.loads(node_uids_json)
+                except Exception as exc:
+                    self._logger.warning(
+                        "ecosystem_execute_action invalid node_uids_json (node_uid=%s, request_id=%s, error=%s)",
+                        node_uid,
+                        request_id,
+                        exc
+                    )
+                    return
+
+                if not isinstance(selected_node_uids, list) or len(selected_node_uids) == 0:
+                    self._logger.warning(
+                        "ecosystem_execute_action node_uids_json was not a non-empty list (node_uid=%s, request_id=%s)",
+                        node_uid,
+                        request_id
+                    )
+                    return
+
+                for selected_node_uid in selected_node_uids:
+                    try:
+                        selected_node_uid = (selected_node_uid or "").strip()
+                        if not selected_node_uid:
+                            continue
+
+                        await HiprFisrCallbacks.sendPluginActionTak(
+                            self.hipfisr,
+                            requester_uid,
+                            selected_node_uid,
+                            plugin_name=plugin_name,
+                            action_name=action_name,
+                            parameters=parameters,
+                        )
+                    except Exception as exc:
+                        self._logger.warning(
+                            "ecosystem_execute_action failed for selected node (selected_node_uid=%s, request_id=%s, plugin=%s, action=%s, error=%s)",
+                            selected_node_uid,
+                            request_id,
+                            plugin_name,
+                            action_name,
+                            exc
+                        )
+
             # Stop Action
             elif request in ("plugin_action_stop", "stop_plugin_action", "stop_all"):
                 await HiprFisrCallbacks.stop_all_plugin_operations(
@@ -315,6 +396,55 @@ class TakReceiver(pytak.QueueWorker):
                     requester_uid,
                     node_uid
                 )
+            
+            # Stop Ecosystem Actions
+            elif request == "ecosystem_stop_action":
+                node_uids_json = (fissure.findtext("node_uids_json") or "").strip()
+                if not node_uids_json:
+                    self._logger.warning(
+                        "ecosystem_stop_action missing node_uids_json (node_uid=%s, request_id=%s)",
+                        node_uid,
+                        request_id
+                    )
+                    return
+
+                try:
+                    selected_node_uids = json.loads(node_uids_json)
+                except Exception as exc:
+                    self._logger.warning(
+                        "ecosystem_stop_action invalid node_uids_json (node_uid=%s, request_id=%s, error=%s)",
+                        node_uid,
+                        request_id,
+                        exc
+                    )
+                    return
+
+                if not isinstance(selected_node_uids, list) or len(selected_node_uids) == 0:
+                    self._logger.warning(
+                        "ecosystem_stop_action node_uids_json was not a non-empty list (node_uid=%s, request_id=%s)",
+                        node_uid,
+                        request_id
+                    )
+                    return
+
+                for selected_node_uid in selected_node_uids:
+                    try:
+                        selected_node_uid = (selected_node_uid or "").strip()
+                        if not selected_node_uid:
+                            continue
+
+                        await HiprFisrCallbacks.stop_all_plugin_operations(
+                            self.hipfisr,
+                            requester_uid,
+                            selected_node_uid,
+                        )
+                    except Exception as exc:
+                        self._logger.warning(
+                            "ecosystem_stop_action failed for selected node (selected_node_uid=%s, request_id=%s, error=%s)",
+                            selected_node_uid,
+                            request_id,
+                            exc
+                        )
                         
             # Artifact Download
             elif request in ("artifact_download", "get_artifact", "download_artifact"):
@@ -342,8 +472,40 @@ class TakReceiver(pytak.QueueWorker):
                     requester_uid,
                     node_uid
                 )
-                     
+            
+            # Query Target Actions
+            elif request in ("query_target_actions"):
+                if not plugin_name:
+                    self._logger.warning(
+                        "query_target_actions requested but plugin_name missing (node_uid=%s, request_id=%s)",
+                        node_uid, request_id
+                    )
+                    return
 
+                await HiprFisrCallbacks.sendPluginTargetActionsTak(
+                    self.hipfisr,
+                    requester_uid,
+                    plugin_name,
+                    node_uid,
+                    parameters=parameters,
+                )
+
+            # Geolocate Start
+            elif request in ("geolocate_target_start"):
+                await HiprFisrCallbacks.geolocate_target_start(
+                    self.hipfisr,
+                    requester_uid,
+                    parameters=parameters,
+                )
+
+            # Geolocate Stop
+            elif request in ("geolocate_target_stop"):
+                await HiprFisrCallbacks.geolocate_target_stop(
+                    self.hipfisr,
+                    requester_uid,
+                    parameters=parameters,
+                )
+                     
             else:
                 self._logger.debug(
                     "Ignoring unknown request '%s' (node_uid=%s, request_id=%s)",

@@ -1744,6 +1744,7 @@ def connect_menuBar_slots(dashboard: Dashboard):
     dashboard.window.actionAiS_TX.triggered.connect(lambda: MenuBarSlots._slotMenuStandaloneAiS_TX_Clicked(dashboard))
     dashboard.window.actionais_rx_demod.triggered.connect(lambda: MenuBarSlots._slotMenuStandalone_ais_rx_demodClicked(dashboard))
     dashboard.window.actiontesla_charge_port.triggered.connect(lambda: MenuBarSlots._slotMenuStandaloneTeslaChargePortClicked(dashboard))
+    dashboard.window.actionlfm_beacon_transmit.triggered.connect(lambda: MenuBarSlots._slotMenuStandaloneLFM_BeaconTransmitClicked(dashboard))
 
     # Tools Menu
     dashboard.window.actionUhd_find_devices.triggered.connect(lambda: MenuBarSlots._slotMenuUHD_FindDevicesClicked(dashboard))

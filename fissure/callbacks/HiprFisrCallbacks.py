@@ -37,6 +37,7 @@ from fissure.Listeners import (
     MQTTListener
 )
 
+
 """ HiprFisr Specific Callback Functions """
 
 DELAY_SHORT = 0.25  # seconds
@@ -3054,17 +3055,15 @@ async def takReturn(component, payload: dict):
 
     ------------------------------------------------------------
     """
-    # -------------------------------------
-    # Use default TAK icons if no tak_icon override present
-    # -------------------------------------
     if "msg_type" not in payload:
         component.logger.error("TAK send() missing required field: msg_type")
         return
     if "uid" not in payload:
         component.logger.error("TAK send() missing required field: uid")
         return
+
     mtype = payload["msg_type"]
-    uid   = payload["uid"]
+    uid = payload["uid"]
 
     # Position and Status Updates
     if mtype == "track":
@@ -3073,16 +3072,13 @@ async def takReturn(component, payload: dict):
             component.logger.warning(f"TAK send(): unknown node uid={uid}")
             return
 
-        # 1) Pull NEW status from the payload (not from node cache)
         incoming_status = payload.get("status")
         status = (incoming_status or node.get("status") or "unknown").lower()
 
-        # 2) Update node cache with the latest info
         node["status"] = status
         node["last_seen"] = time.time()
         node["connected"] = True
 
-        # Optional: cache last known position if present
         if "lat" in payload and payload["lat"] is not None:
             node["lat"] = payload["lat"]
         if "lon" in payload and payload["lon"] is not None:
@@ -3090,7 +3086,6 @@ async def takReturn(component, payload: dict):
         if "alt" in payload and payload["alt"] is not None:
             node["alt"] = payload["alt"]
 
-        # 3) Determine icon (unless overridden) and store it too
         tak_icon = payload.get("tak_icon")
         if not tak_icon:
             if status in {"idle", "unknown"}:
@@ -3099,14 +3094,126 @@ async def takReturn(component, payload: dict):
                 tak_icon = component.settings["tak"]["node_busy_icon"]
             payload["tak_icon"] = tak_icon
 
-        node["tak_icon"] = tak_icon  # persist for later logic if you want
-
+        node["tak_icon"] = tak_icon
         component.logger.debug(f"Updated node {uid}: status={status}, tak_icon={tak_icon}")
 
-    # -------------------------------------
+    # If this is a target-associated detection with usable fields,
+    # immediately feed it into hub multilateration and patch the target.
+    if mtype == "event":
+        try:
+            out = maybe_ingest_detection_for_geolocation(component, payload)
+            if out is not None:
+                target_id, patch, history_entry = out
+                await targetPatch(
+                    component,
+                    target_id=target_id,
+                    patch=patch,
+                    history_entry=history_entry,
+                    artifact_id="",
+                )
+        except Exception as e:
+            component.logger.error(f"takReturn geolocation ingest error: {e}")
+
     # Forward to TAK via utility layer
-    # -------------------------------------
     await fissure.utils.tak_messages.send(component, payload)
+
+
+def maybe_ingest_detection_for_geolocation(component, payload: dict):
+    """
+    Inspect a TAK event payload. If it is a target-associated detection with usable
+    position + power information, feed it into hub multilateration and return
+    a target patch when a location estimate is available.
+
+    Returns:
+        (target_id, patch, history_entry) or None
+    """
+    if not isinstance(payload, dict):
+        return None
+
+    if payload.get("msg_type") != "event":
+        return None
+
+    data = payload.get("data") or {}
+    if not isinstance(data, dict):
+        return None
+
+    if data.get("event_type") != "detection":
+        return None
+
+    target_id = str(data.get("target_id") or "").strip()
+    if not target_id:
+        return None
+
+    power_dbm = data.get("power_dbm")
+    if power_dbm in (None, ""):
+        return None
+
+    lat = payload.get("lat")
+    lon = payload.get("lon")
+    alt = payload.get("alt")
+    observation_time = payload.get("time")
+
+    if lat in (None, "") or lon in (None, ""):
+        return None
+
+    frequency_hz = None
+    try:
+        if data.get("frequency_hz") not in (None, ""):
+            frequency_hz = float(data.get("frequency_hz"))
+        elif data.get("frequency_mhz") not in (None, ""):
+            frequency_hz = float(data.get("frequency_mhz")) * 1e6
+    except Exception:
+        frequency_hz = None
+
+    sensor_node_id = str(data.get("sensor_node_id") or "").strip()
+
+    try:
+        est_out = _fissure_geo_process_measurement(
+            component,
+            target_id=target_id,
+            frequency_hz=frequency_hz,
+            sensor_node_id=sensor_node_id,
+            lat=float(lat),
+            lon=float(lon),
+            rssi_db=float(power_dbm),
+            observation_time=observation_time,
+        )
+    except Exception as e:
+        component.logger.error(
+            f"Detection geolocation ingest failed for target_id={target_id}: {e}"
+        )
+        return None
+
+    if est_out is None:
+        return None
+
+    est_lat, est_lon, ce_m = est_out
+
+    ts_iso = observation_time
+    if not isinstance(ts_iso, str) or not ts_iso:
+        ts_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    else:
+        ts_iso = ts_iso.replace(" ", "T")
+
+    patch = {
+        "location": {
+            "lat": float(est_lat),
+            "lon": float(est_lon),
+            "hae_m": float(alt or 0.0),
+            "ce_m": float(ce_m),
+            "timestamp": ts_iso,
+            "source": "hiprfisr_multilateration",
+        },
+        "state": "tracking",
+    }
+
+    history_entry = {
+        "event": "multilateration_update_from_detection",
+        "detector": data.get("detector", ""),
+        "sensor_node_id": sensor_node_id,
+    }
+
+    return target_id, patch, history_entry
 
 
 async def exploit(component: object, sensor_node_id: str, protocol:str, modulation:str, hardware:str, type:str, attack:str, variables:str):
@@ -4411,7 +4518,7 @@ async def stop_all_plugin_operations(component: object, requester_uid: str, node
     )
 
 
-async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: str):
+async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: str, tak_context: str):
     """Request Sensor Node plugin names for TAK
 
     Parameters
@@ -4422,10 +4529,13 @@ async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: st
         TAK unique identifier
     node_uid : str
         Sensor node UUID
+    tak_context : str
+        node or ecosystem
     """
     PARAMETERS = {
         "requester_uid": requester_uid,
         "node_uid": node_uid,
+        "tak_context": tak_context
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4446,7 +4556,7 @@ async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: st
     )
 
 
-async def sendPluginNamesTakResults(component: object, requester_uid: str, node_uid: str, plugin_names: List[str]):
+async def sendPluginNamesTakResults(component: object, requester_uid: str, node_uid: str, plugin_names: List[str], tak_context: str):
     """Handle Sensor Node plugin names for TAK
 
     Parameters
@@ -4459,23 +4569,36 @@ async def sendPluginNamesTakResults(component: object, requester_uid: str, node_
         Sensor node UID
     plugin_names : List[str]
         Plugin names
+    tak_context : str
+        node or ecosystem
     """
     component.logger.debug(f"Preparing to send TAK plugin names for TAK UID: {requester_uid}")
 
     event_uid = f"{requester_uid}-pluginlist-{int(time.time()*1000)}"
-    msg = {
-        "msg_type": "event",
-        "uid": event_uid,
-        "data": {
-            "event_type": "plugin_list",
-            "plugins": plugin_names
+
+    if tak_context == "ecosystem":
+        msg = {
+            "msg_type": "event",
+            "uid": event_uid,
+            "data": {
+                "event_type": "ecosystem_plugin_list",
+                "plugins": plugin_names
+            }
         }
-    }
+    else:
+        msg = {
+            "msg_type": "event",
+            "uid": event_uid,
+            "data": {
+                "event_type": "plugin_list",
+                "plugins": plugin_names
+            }
+        }
 
     await fissure.utils.tak_messages.send(component, msg)
 
 
-async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin_name: str, node_uid: str):
+async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin_name: str, node_uid: str, tak_context: str):
     """Request Sensor Node plugin action names for TAK
 
     Parameters
@@ -4488,11 +4611,14 @@ async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin
         Plugin name
     node_uid : str
         Sensor node UID
+    tak_context : str
+        node or ecosystem
     """
     PARAMETERS = {
         "requester_uid": requester_uid,
         "plugin_name": plugin_name,
         "node_uid": node_uid,
+        "tak_context": tak_context
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -4513,7 +4639,14 @@ async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin
     )
 
 
-async def sendPluginActionNamesTakResults(component: object, requester_uid: str, node_uid: str, plugin_name: str, action_names: List[str]):
+async def sendPluginActionNamesTakResults(
+    component: object, 
+    requester_uid: str, 
+    node_uid: str, 
+    plugin_name: str, 
+    action_names: List[str], 
+    tak_context: str
+):
     """Handle Sensor Node plugin action names for TAK
 
     Parameters
@@ -4528,21 +4661,34 @@ async def sendPluginActionNamesTakResults(component: object, requester_uid: str,
         Plugin name
     action_names : List[str]
         Plugin action names
+    tak_context : str
+        node or ecosystem
     """
     component.logger.debug(f"Preparing to send TAK plugin action names for TAK UID: {requester_uid}")
 
     # Generate unique event UID
     event_uid = f"{requester_uid}-actions-{int(time.time() * 1000)}"
 
-    msg = {
-        "msg_type": "event",
-        "uid": event_uid,
-        "data": {
-            "event_type": "plugin_actions",   # <plugin_actions> in XML
-            "plugin_name": plugin_name,       # scalar
-            "actions": action_names           # list
+    if tak_context == "ecosystem":
+        msg = {
+            "msg_type": "event",
+            "uid": event_uid,
+            "data": {
+                "event_type": "ecosystem_plugin_actions",   # <plugin_actions> in XML
+                "plugin_name": plugin_name,       # scalar
+                "actions": action_names           # list
+            }
         }
-    }
+    else:
+        msg = {
+            "msg_type": "event",
+            "uid": event_uid,
+            "data": {
+                "event_type": "plugin_actions",   # <plugin_actions> in XML
+                "plugin_name": plugin_name,       # scalar
+                "actions": action_names           # list
+            }
+        }
 
     await fissure.utils.tak_messages.send(component, msg)
 
@@ -4590,7 +4736,7 @@ async def sendPluginActionTak(component: object, requester_uid: str, node_uid: s
     )    
 
 
-async def sendPluginActionParametersTak(component: object, requester_uid: str, node_uid: str, plugin_name: str, action_name: str):
+async def sendPluginActionParametersTak(component: object, requester_uid: str, node_uid: str, plugin_name: str, action_name: str, tak_context: str):
     """Request Sensor Node plugin action for TAK
 
     Parameters
@@ -4605,11 +4751,14 @@ async def sendPluginActionParametersTak(component: object, requester_uid: str, n
         Plugin name
     action_name : str
         Plugin action name
+    tak_context : str
+        node or ecosystem
     """
     PARAMETERS = {
         "plugin_name": plugin_name,
         "action_name": action_name,
         "node_uid": node_uid,
+        "tak_context": tak_context
     }
     msg = {
         fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -5053,11 +5202,122 @@ async def soiUpdate(component: object,
     })
 
 
+# ---- Measurement aggregation support (sensor nodes can send raw samples via targetUpdate) ----
+def _fissure_geo_process_measurement(component, *, target_id, frequency_hz, sensor_node_id, lat, lon, rssi_db, observation_time):
+    """Store a raw measurement, run multilateration + CE when ready, and return (est_lat, est_lon, ce_m) or None."""
+    try:
+        # from fissure_geo import Sample, PathLossModel, MultilaterationEstimator, estimate_ce_from_samples
+        from fissure.utils.geo import (
+            Sample,
+            PathLossModel,
+            MultilaterationEstimator,
+            estimate_ce_from_samples,
+        )
+    except Exception:
+        return None
+
+    # Allow wifi/no-frequency measurements
+    try:
+        if frequency_hz is None:
+            freq_bin_hz = -1.0
+        else:
+            # Frequency binning to fuse slightly different reported center freqs (default 1 kHz bins)
+            freq_bin_hz = float(round(float(frequency_hz) / 1000.0) * 1000.0)
+    except Exception:
+        freq_bin_hz = -1.0
+
+    key = (str(target_id), float(freq_bin_hz))
+
+    if not hasattr(component, "_geo_targets"):
+        component._geo_targets = {}
+
+    st = component._geo_targets.get(key)
+    if st is None:
+        # Defaults; you can tune per target type later
+        model = PathLossModel(n=2.2, p0_db=-40.0)
+        est = MultilaterationEstimator(max_samples=120)
+        st = {"model": model, "est": est, "last_ce": 0.0, "ce_cached": 75.0}
+        component._geo_targets[key] = st
+
+    model = st["model"]
+    est = st["est"]
+
+    # Add sample
+    try:
+        est.add_measurement(lat=float(lat), lon=float(lon), rssi_db=float(rssi_db), t=0.0, model=model)
+    except Exception:
+        try:
+            est.add_sample(Sample(float(lat), float(lon), float(rssi_db), 0.0))
+        except Exception:
+            return None
+
+    if not getattr(est, "ready", False):
+        return None
+
+    # Estimate
+    try:
+        out = est.estimate_latlon(model)
+        if not out:
+            return None
+        est_lat, est_lon = out
+    except Exception:
+        return None
+
+    # CE (throttle)
+    import time as _time
+    now = _time.time()
+    if (now - float(st.get("last_ce", 0.0))) >= 6.0:
+        try:
+            samples_ref = getattr(est, "_samples", None) or getattr(est, "samples", None) or []
+            ce = estimate_ce_from_samples(samples_ref[-30:], model, confidence=0.90)
+            if ce is not None:
+                st["ce_cached"] = float(ce)
+        except Exception:
+            pass
+        st["last_ce"] = now
+
+    return (float(est_lat), float(est_lon), float(st.get("ce_cached", 75.0)))
+
+    # component.logger.info(f"HIPRFISR targetUpdate received target_id={target_id} state={state}")
+
+
+def _get_known_wifi_target_ids(component) -> List[str]:
+    """
+    Return target_ids for targets that look like known Wi-Fi targets.
+    """
+    out = []
+
+    for target_id, target in (component.targets or {}).items():
+        if not isinstance(target, dict):
+            continue
+
+        classification = target.get("classification") or {}
+        display_label = str(classification.get("display_label") or "").strip().lower()
+
+        candidate_labels = []
+        for candidate in classification.get("candidates", []):
+            if isinstance(candidate, dict):
+                label = str(candidate.get("label") or "").strip().lower()
+                if label:
+                    candidate_labels.append(label)
+
+        label_text = " ".join([display_label] + candidate_labels)
+
+        wifi = target.get("wifi") or {}
+        bssid = str(wifi.get("bssid") or "").strip()
+
+        if bssid or "wifi" in label_text or "802.11" in label_text:
+            out.append(str(target_id))
+
+    return out
+
+
 async def targetUpdate(
     component: object,
     sensor_node_id="",
     target_id="",
     source_soi_id="",
+    frequency_hz=None,
     frequency_mhz=None,
     state="",
     artifact_id="",
@@ -5090,10 +5350,67 @@ async def targetUpdate(
       record["location"] (nested)
       record["history"]
     """
-
     if not target_id:
         component.logger.info("Ignoring target update with empty target_id")
         return
+
+
+    # If this is a raw measurement update (no estimate yet), aggregate and compute on HIPRFISR.
+    # Convention: state="measurement" OR location contains rssi_db.
+    freq_hz = None
+    try:
+        if frequency_hz not in (None, ""):
+            freq_hz = float(frequency_hz)
+        elif frequency_mhz not in (None, ""):
+            freq_hz = float(frequency_mhz) * 1e6
+    except Exception:
+        freq_hz = None
+
+    is_measurement = (state == "measurement") or (isinstance(location, dict) and ("rssi_db" in location))
+    if is_measurement:
+        # Pull measurement fields (prefer nested location dict)
+        mlat = None
+        mlon = None
+        mrssi = None
+
+        if isinstance(location, dict):
+            mlat = location.get("lat", lat)
+            mlon = location.get("lon", lon)
+            mrssi = location.get("rssi_db", None)
+
+        if mrssi is None and isinstance(summary, dict):
+            mrssi = summary.get("rssi_db", None)
+
+        if (mlat is not None) and (mlon is not None) and (mrssi is not None):
+            est_out = _fissure_geo_process_measurement(
+                component,
+                target_id=target_id,
+                frequency_hz=freq_hz,
+                sensor_node_id=sensor_node_id,
+                lat=mlat,
+                lon=mlon,
+                rssi_db=mrssi,
+                observation_time=observation_time,
+            )
+            if est_out is None:
+                return  # stored only, not enough samples yet
+
+            est_lat, est_lon, ce_m = est_out
+
+            # Convert to a normal tracking update that will emit TAK below
+            state = "tracking"
+            lat = est_lat
+            lon = est_lon
+            if location is None or not isinstance(location, dict):
+                location = {}
+            location.update({
+                "lat": float(est_lat),
+                "lon": float(est_lon),
+                "ce_m": float(ce_m),
+                "source": "hiprfisr_multilateration",
+            })
+            if isinstance(summary, dict):
+                summary["ce_m"] = float(ce_m)
 
     if classification is None or not isinstance(classification, dict):
         classification = {}
@@ -5224,6 +5541,229 @@ async def targetUpdate(
     })
 
 
+def _deep_merge_dict(dst: dict, src: dict) -> dict:
+    """
+    Deep-merge src into dst in place.
+    Nested dicts are merged; scalars/lists overwrite.
+    """
+    for key, value in src.items():
+        if isinstance(value, dict) and isinstance(dst.get(key), dict):
+            _deep_merge_dict(dst[key], value)
+        else:
+            dst[key] = value
+    return dst
+
+
+def _default_geolocate_block() -> dict:
+    return {
+        "status": "idle",
+        "mode": "",
+        "plugin": "",
+        "action": "",
+        "node_uids": [],
+        "error": "",
+        "updated_time": "",
+    }
+
+
+def _normalize_target_record(record: dict, target_id: str) -> dict:
+    """
+    Ensure required canonical target fields exist and have sane types.
+    """
+    if not isinstance(record.get("classification"), dict):
+        record["classification"] = {}
+
+    if not isinstance(record.get("location"), dict):
+        record["location"] = {}
+
+    if not isinstance(record.get("geolocate"), dict):
+        record["geolocate"] = _default_geolocate_block()
+    else:
+        merged_geo = _default_geolocate_block()
+        merged_geo.update(record["geolocate"])
+        record["geolocate"] = merged_geo
+
+    if not isinstance(record.get("history"), list):
+        record["history"] = []
+
+    record.setdefault("target_id", target_id)
+    record.setdefault("sensor_node_id", "")
+    record.setdefault("source_soi_id", "")
+    record.setdefault("frequency_mhz", None)
+    record.setdefault("state", "detected")
+
+    return record
+
+
+def upsert_target_patch(
+    component,
+    *,
+    target_id: str,
+    patch: dict,
+    history_entry: dict = None,
+    artifact_id: str = "",
+):
+    """
+    Merge a canonical target-shaped patch into the authoritative hub record.
+    """
+    if not target_id:
+        return None
+
+    if not isinstance(patch, dict):
+        patch = {}
+
+    if history_entry is None or not isinstance(history_entry, dict):
+        history_entry = {}
+
+    ts_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_epoch = time.time()
+
+    existing = component.targets.get(target_id, {})
+    record = dict(existing) if existing else {}
+
+    created_time = record.get("created_time") or patch.get("created_time") or ts_iso
+
+    # --- SAVE geolocate BEFORE merge ---
+    existing_geolocate = record.get("geolocate")
+
+    _normalize_target_record(record, target_id)
+    _deep_merge_dict(record, patch)
+    _normalize_target_record(record, target_id)
+
+    # --- RESTORE geolocate if patch didn't include it ---
+    if "geolocate" not in patch and existing_geolocate:
+        record["geolocate"] = existing_geolocate
+
+    if history_entry:
+        entry = dict(history_entry)
+        entry.setdefault("timestamp", ts_iso)
+        record["history"].append(entry)
+
+    if artifact_id:
+        record["artifact_id"] = artifact_id
+
+    record["target_id"] = target_id
+    record["created_time"] = created_time
+    record["last_update_time"] = ts_iso
+    record["updated_at"] = now_epoch
+
+    component.targets[target_id] = record
+    return record
+
+
+async def targetPatch(
+    component: object,
+    target_id="",
+    patch=None,
+    history_entry=None,
+    artifact_id="",
+):
+    """
+    Canonical target patch callback (node -> HIPRFISR).
+
+    Stores/updates a target record at the hub using the same dictionary
+    structure used in the target store, then emits the flat TAK target event
+    that WinTAK already expects.
+    """
+    if not target_id:
+        component.logger.info("Ignoring target patch with empty target_id")
+        return
+
+    patch = patch or {}
+    history_entry = history_entry or {}
+
+    record = upsert_target_patch(
+        component,
+        target_id=target_id,
+        patch=patch,
+        history_entry=history_entry,
+        artifact_id=artifact_id or "",
+    )
+    if not record:
+        return
+
+    geo = record.get("geolocate") or {}
+
+    # Mark that this target actually received observations while geolocation is active.
+    # This intentionally does NOT trigger on empty hub-only UI/status refreshes.
+    if geo.get("status") in ("starting", "running", "stopping"):
+        loc_patch = patch.get("location") or {}
+        rf_patch = patch.get("rf") or {}
+        wifi_patch = patch.get("wifi") or {}
+
+        had_observation = any([
+            bool(history_entry),
+            bool(artifact_id),
+            ("lat" in loc_patch and "lon" in loc_patch),
+            ("ce_m" in loc_patch),
+            ("frequency_mhz" in patch),
+            ("last_observation_time" in rf_patch),
+            ("last_observation_time" in wifi_patch),
+            ("rssi_dbm" in wifi_patch),
+        ])
+
+        if had_observation:
+            geo["had_detections"] = True
+            record["geolocate"] = geo
+
+    cls = record.get("classification") or {}
+    loc = record.get("location") or {}
+
+    display_label = ""
+    try:
+        display_label = (record.get("display_label") or cls.get("display_label") or "").strip()
+    except Exception:
+        display_label = ""
+
+    out_lat = loc.get("lat")
+    out_lon = loc.get("lon")
+    out_hae = loc.get("hae_m")
+    out_ce = loc.get("ce_m")
+    out_loc_ts = loc.get("timestamp") or record.get("last_update_time")
+
+    sensor_node_id = record.get("sensor_node_id", "")
+    tak_uid = f"fissure-target-{sensor_node_id}-{target_id}"
+
+    wifi = record.get("wifi") or {}
+
+    tak_data = {
+        "event_type": "target",
+        "sensor_node_id": sensor_node_id,
+        "target_id": target_id,
+        "source_soi_id": record.get("source_soi_id", ""),
+        "display_label": display_label,
+        "state": record.get("state"),
+        "frequency_mhz": record.get("frequency_mhz"),
+        "artifact_id": record.get("artifact_id", ""),
+        "geolocation_status": geo.get("status", "idle"),
+        "geolocate_status": geo.get("status", "idle"),
+        "lat": out_lat,
+        "lon": out_lon,
+        "hae_m": out_hae,
+        "ce_m": out_ce,
+        "timestamp": out_loc_ts,
+
+        # Wi-Fi extras for UI/operator display
+        "ssid": wifi.get("ssid", ""),
+        "bssid": wifi.get("bssid", ""),
+        "channel": wifi.get("channel"),
+        "band": wifi.get("band", ""),
+        "rssi_dbm": wifi.get("rssi_dbm"),
+        "encryption": wifi.get("encryption", ""),
+        "last_observation_time": wifi.get("last_observation_time", ""),
+    }
+
+    await fissure.utils.tak_messages.send(component, {
+        "msg_type": "event",
+        "uid": tak_uid,
+        "data": tak_data,
+        "tak_icon": "r-x-fissure-target",
+        "lat": out_lat,
+        "lon": out_lon,
+        "alt": out_hae,
+    })
+
+
 async def sendTargetsListTak(component: object, requester_uid: str = "", request_id: str = "", requester_callsign: str = "") -> None:
     """
     Respond to WinTAK 'targets_list' request by emitting one TAK event per target.
@@ -5331,6 +5871,7 @@ async def sendPluginActionParametersResultsTak(
     action_name: str,
     node_uid: str,
     schema: dict,
+    tak_context: str
 ):
     """Handle Sensor Node plugin action parameter schema for TAK
 
@@ -5346,6 +5887,8 @@ async def sendPluginActionParametersResultsTak(
         Sensor node UID
     schema : dict
         Action schema dict (expects {"params": [...]})
+    tak_context : str
+        node or ecosystem
     """
 
     component.logger.debug(
@@ -5360,16 +5903,626 @@ async def sendPluginActionParametersResultsTak(
 
     event_uid = f"actionschema-{plugin_name}-{action_name}-{int(time.time()*1000)}"
 
-    msg = {
-        "msg_type": "event",
-        "uid": event_uid,
-        "data": {
-            "event_type": "plugin_action_schema",
-            "plugin_name": plugin_name,
-            "action_name": action_name,
-            "node_uid": node_uid,
-            "schema": schema,
-        },
-    }
+    if tak_context == "ecosystem":
+        msg = {
+            "msg_type": "event",
+            "uid": event_uid,
+            "data": {
+                "event_type": "ecosystem_plugin_action_schema",
+                "plugin_name": plugin_name,
+                "action_name": action_name,
+                "node_uid": node_uid,
+                "schema": schema,
+            },
+        }
+    else:
+        msg = {
+            "msg_type": "event",
+            "uid": event_uid,
+            "data": {
+                "event_type": "plugin_action_schema",
+                "plugin_name": plugin_name,
+                "action_name": action_name,
+                "node_uid": node_uid,
+                "schema": schema,
+            },
+        }
 
     await fissure.utils.tak_messages.send(component, msg)
+
+
+async def sendPluginTargetActionsTak(
+    component: object,
+    requester_uid: str,
+    plugin_name: str,
+    node_uid: str,
+    parameters: dict,
+):
+    """Request filtered plugin action names for a target context."""
+    try:
+        target_id = parameters.get("target_id")
+        if not target_id:
+            component.logger.error("query_target_actions missing target_id")
+            return
+
+        target = component.targets.get(target_id)
+        if not target:
+            component.logger.error(f"Target not found for target_id={target_id}")
+            return
+
+        classification_candidates = []
+
+        classification_info = (
+            target.get("type")
+            or target.get("classification")
+            or target.get("display_label")
+        )
+
+        # Case 1: simple string
+        if isinstance(classification_info, str):
+            label = classification_info.strip()
+            if label:
+                classification_candidates.append(label)
+
+        # Case 2: structured dict like your example
+        elif isinstance(classification_info, dict):
+            display_label = str(classification_info.get("display_label", "")).strip()
+            if display_label:
+                classification_candidates.append(display_label)
+
+            for candidate in classification_info.get("candidates", []):
+                if not isinstance(candidate, dict):
+                    continue
+                label = str(candidate.get("label", "")).strip()
+                if label:
+                    classification_candidates.append(label)
+
+        # Remove duplicates while preserving order
+        seen = set()
+        classification_candidates = [
+            c for c in classification_candidates
+            if not (c in seen or seen.add(c))
+        ]
+
+        component.logger.info(
+            f"Target action lookup for target_id={target_id}, "
+            f"classification_candidates={classification_candidates}"
+        )
+
+        PARAMETERS = {
+            "requester_uid": requester_uid,
+            "plugin_name": plugin_name,
+            "target_id": target_id,
+            "node_uid": node_uid,
+            "classification_candidates": classification_candidates,
+        }
+
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginTargetActionsTak",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+
+        identity = component.nodes.get(node_uid, {}).get("identity", None)
+        if identity is None:
+            component.logger.error(f"No identity for node_uid={node_uid}")
+            return
+
+        await component.sensor_node_router.send_msg(
+            fissure.comms.MessageTypes.COMMANDS,
+            msg,
+            target_ids=[identity]
+        )
+
+    except Exception as e:
+        component.logger.error(f"Error in sendPluginTargetActionsTak: {e}")
+        component.logger.debug(traceback.format_exc())
+
+
+async def geolocate_target_start(
+    component: object,
+    requester_uid: str,
+    parameters: dict,
+):
+    """Select nearest nodes and start appropriate geolocation-related action."""
+    try:
+        component.logger.info(f"geolocate_target_start called with parameters={parameters}")
+
+        target_id = parameters.get("target_id")
+        if not target_id:
+            component.logger.error("geolocate_target_start missing target_id")
+            return
+
+        target = component.targets.get(target_id)
+        if not target:
+            component.logger.error(f"Target not found for target_id={target_id}")
+            return
+
+        current_geo = target.get("geolocate") or {}
+        current_status = current_geo.get("status", "")
+
+        if current_status in ("starting", "running", "stopping"):
+            component.logger.warning(
+                f"Target {target_id} geolocation already active (status={current_status})"
+            )
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        search_similar_targets = bool(parameters.get("search_similar_targets", False))
+
+        target_location = target.get("location") or {}
+        target_lat = target_location.get("lat")
+        target_lon = target_location.get("lon")
+
+        if not fissure.utils.is_valid_lat_lon(target_lat, target_lon):
+            msg = "invalid_target_location"
+            component.logger.error(
+                f"Target {target_id} missing valid location: lat={target_lat}, lon={target_lon}"
+            )
+            _set_target_geolocate_status(
+                target,
+                status="error",
+                error=msg,
+            )
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        nearest_nodes = fissure.utils.get_nearest_nodes_to_target(
+            component,
+            target,
+            max_nodes=3,
+        )
+
+        if not nearest_nodes:
+            msg = "no_eligible_nodes"
+            component.logger.warning(
+                f"No eligible nodes with valid positions for target_id={target_id}"
+            )
+            _set_target_geolocate_status(
+                target,
+                status="error",
+                error=msg,
+            )
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        component.logger.info(
+            f"Nearest nodes for target_id={target_id}: "
+            + ", ".join(
+                f"{n['uid']} ({n['distance_m']:.1f} m)"
+                for n in nearest_nodes
+            )
+        )
+
+        config = _get_target_geolocate_action_config(
+            component,
+            target,
+            search_similar_targets=search_similar_targets,
+        )
+        if not config:
+            msg = "unsupported_target_type"
+            component.logger.warning(
+                f"No geolocate mapping for target_id={target_id}"
+            )
+            _set_target_geolocate_status(
+                target,
+                status="unsupported",
+                error=msg,
+            )
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        plugin_name = config["plugin_name"]
+        action_name = config["action_name"]
+        action_parameters = dict(config.get("parameters", {}))
+        mode = config.get("mode", "")
+
+        if "target_id" not in action_parameters and "target_ids" not in action_parameters:
+            action_parameters["target_id"] = target_id
+
+        if "search_similar_targets" not in action_parameters:
+            action_parameters["search_similar_targets"] = search_similar_targets
+
+        node_uid_list = [n["uid"] for n in nearest_nodes]
+
+        previous_state = target.get("state", "") or "imported"
+
+        _set_target_geolocate_status(
+            target,
+            status="starting",
+            mode=mode,
+            plugin=plugin_name,
+            action=action_name,
+            node_uids=node_uid_list,
+            error="",
+        )
+        target["geolocate"]["previous_state"] = previous_state
+        target["geolocate"]["had_detections"] = False
+        target["state"] = "tracking"
+
+        await targetPatch(component, target_id=target_id, patch={})
+
+        launched_nodes = []
+
+        for node_info in nearest_nodes:
+            node_uid = node_info["uid"]
+
+            try:
+                identity = component.nodes.get(node_uid, {}).get("identity", None)
+                if identity is None:
+                    component.logger.warning(
+                        f"Skipping node_uid={node_uid}: no identity"
+                    )
+                    continue
+
+                component.logger.info(
+                    f"Launching {action_name} on node_uid={node_uid} "
+                    f"(target_id={target_id}, distance={node_info['distance_m']:.1f}m)"
+                )
+
+                await sendPluginActionTak(
+                    component,
+                    requester_uid,
+                    node_uid,
+                    plugin_name=plugin_name,
+                    action_name=action_name,
+                    parameters=action_parameters,
+                )
+
+                launched_nodes.append(node_uid)
+
+            except Exception as node_err:
+                component.logger.error(
+                    f"Failed to launch on node_uid={node_uid}: {node_err}"
+                )
+                component.logger.debug(traceback.format_exc())
+
+        target = component.targets.get(target_id)
+        if not target:
+            component.logger.error(f"Target disappeared before running update: target_id={target_id}")
+            return
+
+        if not launched_nodes:
+            msg = "launch_failed"
+
+            component.logger.warning(
+                f"Geolocate start failed for target_id={target_id}"
+            )
+
+            _set_target_geolocate_status(
+                target,
+                status="error",
+                mode=mode,
+                plugin=plugin_name,
+                action=action_name,
+                node_uids=[],
+                error=msg,
+            )
+            # restore pre-start state if nothing launched
+            previous_state = (target.get("geolocate") or {}).get("previous_state", "") or "imported"
+            target["state"] = previous_state
+
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        component.logger.info(
+            f"Geolocate running for target_id={target_id} on nodes={launched_nodes}"
+        )
+
+        _set_target_geolocate_status(
+            target,
+            status="running",
+            mode=mode,
+            plugin=plugin_name,
+            action=action_name,
+            node_uids=launched_nodes,
+            error="",
+        )
+        await targetPatch(component, target_id=target_id, patch={})
+
+    except Exception as e:
+        component.logger.error(f"Error in geolocate_target_start: {e}")
+        component.logger.debug(traceback.format_exc())
+
+        target_id = parameters.get("target_id")
+        if target_id:
+            target = component.targets.get(target_id)
+            if target:
+                _set_target_geolocate_status(
+                    target,
+                    status="error",
+                    error="exception",
+                )
+                previous_state = (target.get("geolocate") or {}).get("previous_state", "")
+                if previous_state:
+                    target["state"] = previous_state
+                await targetPatch(component, target_id=target_id, patch={})
+
+
+def _get_target_geolocate_action_config(
+    component: object,
+    target: dict,
+    *,
+    search_similar_targets: bool = False,
+):
+    """
+    Resolve which plugin action should be launched for this target.
+
+    Returns:
+        {
+            "mode": "wifi_target" | "wifi_all" | "lfm_beacon" | "fixed_detection",
+            "plugin_name": "...",
+            "action_name": "...",
+            "parameters": {...},
+        }
+
+    Returns None if no supported mapping exists.
+    """
+    target_id = target.get("target_id", "")
+    classification = target.get("classification") or {}
+
+    display_label = str(classification.get("display_label") or "").strip().lower()
+
+    candidate_labels = []
+    for candidate in classification.get("candidates", []):
+        if isinstance(candidate, dict):
+            label = str(candidate.get("label") or "").strip().lower()
+            if label:
+                candidate_labels.append(label)
+
+    labels = [display_label] + candidate_labels
+    label_text = " ".join(labels)
+
+    frequency_mhz = target.get("frequency_mhz")
+
+    if "wifi" in label_text or "802.11" in label_text:
+        if search_similar_targets:
+            return {
+                "mode": "wifi_all",
+                "plugin_name": "nasc",
+                "action_name": "wifi_geolocate_all",
+                "parameters": {
+                    "target_ids": _get_known_wifi_target_ids(component),
+                    "search_similar_targets": True,
+                },
+            }
+
+        return {
+            "mode": "wifi_target",
+            "plugin_name": "nasc",
+            "action_name": "wifi_geolocate_target",
+            "parameters": {
+                "target_id": target_id,
+                "search_similar_targets": False,
+            },
+        }
+
+    if "lfm" in label_text or "beacon" in label_text:
+        return {
+            "mode": "lfm_beacon",
+            "plugin_name": "nasc",
+            "action_name": "lfm_beacon_geolocate",
+            "parameters": {
+                "target_id": target_id,
+                "freq_mhz": float(frequency_mhz) if frequency_mhz not in (None, "") else 433.0,
+                "min_detection_interval_s": 1.0,
+            },
+        }
+
+    if frequency_mhz not in (None, ""):
+        return {
+            "mode": "generic_frequency",
+            "plugin_name": "nasc",
+            "action_name": "usrp_b2x0_geolocate",
+            "parameters": {
+                "target_id": target_id,
+                "frequency_mhz": float(frequency_mhz) if frequency_mhz not in (None, "") else 2412.0,
+                "emit_every_s": 1.0,
+                "meas_every_s": 0.20,
+                "sample_rate": 1e6,
+                "gain_db": 65.0,
+                "detect_frequency": True,
+                "description": f"Generic frequency geolocation for {target_id}",
+            },
+        }
+
+    return None
+
+
+def _set_target_geolocate_status(
+    target: dict,
+    *,
+    status: str = "",
+    mode: str = "",
+    plugin: str = "",
+    action: str = "",
+    node_uids=None,
+    error: str = "",
+) -> None:
+    """
+    Update compact hub-side geolocation state stored on the target record.
+    """
+    if node_uids is None:
+        node_uids = []
+
+    geo = dict(target.get("geolocate") or {})
+    geo.update({
+        "status": status,
+        "mode": mode,
+        "plugin": plugin,
+        "action": action,
+        "node_uids": list(node_uids),
+        "error": error,
+        "updated_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    })
+    target["geolocate"] = geo
+
+
+def _clear_target_geolocate_status(target: dict) -> None:
+    """
+    Reset geolocation state on the target to a known idle baseline.
+    """
+    target["geolocate"] = {
+        "status": "idle",
+        "mode": "",
+        "plugin": "",
+        "action": "",
+        "node_uids": [],
+        "error": "",
+        "updated_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+
+
+async def geolocate_target_stop(
+    component: object,
+    requester_uid: str,
+    parameters: dict,
+):
+    """Stop geolocation for a target across all associated nodes."""
+    try:
+        component.logger.info(f"geolocate_target_stop called with parameters={parameters}")
+
+        target_id = parameters.get("target_id")
+        if not target_id:
+            component.logger.error("geolocate_target_stop missing target_id")
+            return
+
+        target = component.targets.get(target_id)
+        if not target:
+            component.logger.error(f"Target not found for target_id={target_id}")
+            return
+
+        geolocate = target.get("geolocate") or {}
+        node_uid_list = list(geolocate.get("node_uids") or [])
+
+        if not node_uid_list:
+            component.logger.warning(
+                f"No geolocate node_uids recorded for target_id={target_id}"
+            )
+
+            previous_state = geolocate.get("previous_state", "") or target.get("state", "") or "imported"
+            had_detections = bool(geolocate.get("had_detections", False))
+            target["state"] = "detected" if had_detections else previous_state
+
+            _set_target_geolocate_status(
+                target,
+                status="idle",
+                mode="",
+                plugin="",
+                action="",
+                node_uids=[],
+                error="",
+            )
+            target["geolocate"]["previous_state"] = ""
+            target["geolocate"]["had_detections"] = False
+
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        _set_target_geolocate_status(
+            target,
+            status="stopping",
+            mode=geolocate.get("mode", ""),
+            plugin=geolocate.get("plugin", ""),
+            action=geolocate.get("action", ""),
+            node_uids=node_uid_list,
+            error="",
+        )
+        await targetPatch(component, target_id=target_id, patch={})
+
+        stopped_nodes = []
+        failed_nodes = []
+
+        for node_uid in node_uid_list:
+            try:
+                if node_uid not in component.nodes:
+                    component.logger.warning(
+                        f"Skipping stop for node_uid={node_uid}: node not found"
+                    )
+                    failed_nodes.append(node_uid)
+                    continue
+
+                identity = component.nodes[node_uid].get("identity", None)
+                if identity is None:
+                    component.logger.warning(
+                        f"Skipping stop for node_uid={node_uid}: no identity"
+                    )
+                    failed_nodes.append(node_uid)
+                    continue
+
+                component.logger.info(
+                    f"Stopping geolocation for target_id={target_id} on node_uid={node_uid}"
+                )
+
+                await stop_all_plugin_operations(
+                    component,
+                    requester_uid,
+                    node_uid=node_uid,
+                )
+                stopped_nodes.append(node_uid)
+
+            except Exception as node_err:
+                component.logger.error(
+                    f"Failed to stop geolocation on node_uid={node_uid}: {node_err}"
+                )
+                component.logger.debug(traceback.format_exc())
+                failed_nodes.append(node_uid)
+
+        target = component.targets.get(target_id)
+        if not target:
+            component.logger.error(f"Target disappeared before final idle update: target_id={target_id}")
+            return
+
+        geolocate = target.get("geolocate") or {}
+        previous_state = geolocate.get("previous_state", "") or "imported"
+        had_detections = bool(geolocate.get("had_detections", False))
+
+        if failed_nodes and not stopped_nodes:
+            _set_target_geolocate_status(
+                target,
+                status="error",
+                mode=geolocate.get("mode", ""),
+                plugin=geolocate.get("plugin", ""),
+                action=geolocate.get("action", ""),
+                node_uids=node_uid_list,
+                error="stop_failed",
+            )
+            await targetPatch(component, target_id=target_id, patch={})
+            return
+
+        target["state"] = "detected" if had_detections else previous_state
+
+        _set_target_geolocate_status(
+            target,
+            status="idle",
+            mode="",
+            plugin="",
+            action="",
+            node_uids=[],
+            error="" if not failed_nodes else f"partial_stop_failed:{','.join(failed_nodes)}",
+        )
+        target["geolocate"]["previous_state"] = ""
+        target["geolocate"]["had_detections"] = False
+
+        await targetPatch(component, target_id=target_id, patch={})
+
+        component.logger.info(
+            f"Geolocate stopped for target_id={target_id}; "
+            f"stopped_nodes={stopped_nodes}, failed_nodes={failed_nodes}, "
+            f"restored_state={target.get('state')}, had_detections={had_detections}"
+        )
+
+    except Exception as e:
+        component.logger.error(f"Error in geolocate_target_stop: {e}")
+        component.logger.debug(traceback.format_exc())
+
+        target_id = parameters.get("target_id")
+        if target_id:
+            target = component.targets.get(target_id)
+            if target:
+                _set_target_geolocate_status(
+                    target,
+                    status="error",
+                    error="exception",
+                )
+                await targetPatch(component, target_id=target_id, patch={})

@@ -782,6 +782,68 @@ class SensorNode(object):
 
         await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
+        self.logger.info(f"SensorNode send_target_update called with target_id={target_id} state={state}")
+    
+
+    async def send_target_patch(
+        self,
+        target_id: str,
+        patch: dict,
+        history_entry: dict = None,
+        artifact_id: str = "",
+    ):
+        """
+        Target patch (node -> HIPRFISR).
+
+        IP path sends a canonical target-shaped patch that the hub merges into the
+        authoritative stored target record.
+
+        Meshtastic is intentionally left minimal for now.
+        """
+        if not target_id:
+            self.logger.error("send_target_patch missing target_id")
+            return
+
+        if not isinstance(patch, dict):
+            self.logger.error("send_target_patch patch must be a dict")
+            return
+
+        if history_entry is None:
+            history_entry = {}
+        elif not isinstance(history_entry, dict):
+            self.logger.error("send_target_patch history_entry must be a dict")
+            return
+
+        if self.network_type == "IP":
+            msg = {
+                fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+                fissure.comms.MessageFields.MESSAGE_NAME: "targetPatch",
+                fissure.comms.MessageFields.PARAMETERS: {
+                    "target_id": target_id,
+                    "patch": patch,
+                    "history_entry": history_entry,
+                    "artifact_id": artifact_id or "",
+                },
+            }
+
+        elif self.network_type == "Meshtastic":
+            compact = {
+                "target_id": str(target_id)[:16],
+                "st": str((patch or {}).get("state", ""))[:16],
+            }
+            msg = {
+                fissure.comms.MessageFields.SOURCE: self.assigned_id,
+                fissure.comms.MessageFields.MESSAGE_NAME: "targetUpdateLT",
+                fissure.comms.MessageFields.PARAMETERS: compact,
+            }
+
+        else:
+            self.logger.error("Unknown network type for target patch")
+            return
+
+        await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
+        self.logger.info(f"SensorNode send_target_patch called with target_id={target_id}")
+
 
     async def _notify_hiprfisr_of_artifact(self, artifact_id: str) -> None:
         """Notify HIPRFISR of a new artifact (async helper method).
@@ -955,7 +1017,7 @@ class SensorNode(object):
         parameters["alert_callback"] = self.send_alert
         parameters["tak_cot_callback"] = self.send_tak_cot
         parameters["status_callback"] = self.publish_status_to_hiprfisr  # operations can set status manually
-        parameters["target_callback"] = self.send_target_update
+        parameters["target_callback"] = self.send_target_patch  #self.send_target_update
         parameters["soi_callback"] = self.send_soi_update
         parameters["artifact_manager"] = self.artifact_manager
         parameters["logger"] = self.logger

@@ -1988,3 +1988,30 @@ async def probeCaribouLite():
         output = f"Error: {str(e)}"
 
     return output
+
+
+def get_default_sdr(settings):
+    """Return the default SDR config dict."""
+    hw = settings.get("Sensor Node", {}).get("hardware", {})
+    defaults = hw.get("defaults", {})
+    sdr_key = defaults.get("sdr")
+
+    sdrs = hw.get("sdrs", {})
+    return sdrs.get(sdr_key)
+
+
+def get_default_wifi(settings):
+    """Return the default Wi-Fi adapter config dict."""
+    hw = settings.get("Sensor Node", {}).get("hardware", {})
+    defaults = hw.get("defaults", {})
+    wifi_key = defaults.get("wifi_adapter")
+
+    wifi = hw.get("wifi_adapters", {})
+    return wifi.get(wifi_key)
+
+
+def get_default_wifi_interface(settings):
+    wifi = get_default_wifi(settings)
+    if not wifi:
+        return None
+    return wifi.get("interface")

@@ -16,15 +16,12 @@ import os
 import atexit
 import ssl
 from datetime import datetime, timezone, timedelta
+from threading import Lock
 from fissure.utils.tak_server import load_config as load_tak_config
 from fissure.utils.tak_server import TakReceiver
 import pytak
-
-
-import pytak
-from fissure.utils.tak_server import load_config as load_tak_config
-from fissure.utils.tak_server import TakReceiver
 from fissure.utils.artifacts import ArtifactTracker
+
 
 HEARTBEAT_LOOP_DELAY = 0.1  # Seconds
 EVENT_LOOP_DELAY = 0.1
@@ -87,46 +84,7 @@ class HiprFisr:
         # TAK SOI Dictionary, # TODO: Replace with database lookup
         self.sois = {}  # key -> SOI record dict
         self.targets = {}
-        self.targets["tgt-00000000-0000-4000-8000-000000000001"] = {
-            "target_id": "tgt-00000000-0000-4000-8000-000000000001",
-            "sensor_node_id": "node-bravo-01",
-            "source_soi_id": "soi-demo-123",
-
-            "created_time": "2026-02-02T18:32:11Z",
-            "last_update_time": "2026-02-02T18:32:11Z",
-
-            "frequency_mhz": 311.0,
-
-            "classification": {
-                "display_label": "Garage Door Opener",
-                "candidates": [
-                    {
-                        "source": "database",
-                        "label": "Garage Door Opener"
-                    },
-                    {
-                        "source": "model",
-                        "label": "Garage_Door",
-                        "confidence": 0.62
-                    }
-                ]
-            },
-
-            # TAK-compatible geospatial fields
-            "location": {
-                "lat": 41.2457,        # north-central Pennsylvania
-                "lon": -76.9983,
-                "hae_m": 0,           # height above ellipsoid (meters)
-                "ce_m": 50,           # circular error radius (meters)
-                "timestamp": "2026-02-02T18:31:55Z",
-                "source": "node_last_known"
-            },
-
-            "state": "detected",
-
-            # action history / observations recorded by HIPRFISR
-            "history": []
-        }
+        self.targets = fissure.utils.load_yaml("targets.yaml")
 
         # Store Collected Wideband and Narrowband Signals in Lists
         self.wideband_list = []
@@ -182,6 +140,9 @@ class HiprFisr:
 
         # Detect Operating System
         self.os_info = fissure.utils.get_os_info()
+
+        # Initialize Optional CoT Logging
+        self.init_cot_logging()
 
         # Start the Database Docker Container (if not running)
         self.start_database_docker_container()
@@ -1645,6 +1606,99 @@ class HiprFisr:
     #     Closes SensorNode object on exit.
     #     """
     #     asyncio.run(sensor.close())
+
+
+    def init_cot_logging(self):
+        cfg = self.settings.get("cot_logging", {}) or {}
+
+        enabled = cfg.get("cot_log_enabled", False)
+        self.cot_log_enabled_runtime = bool(enabled)
+
+        self.cot_log_lock = Lock()
+        self.cot_log_session_dir = None
+        self.cot_log_file_index = 1
+        self.cot_log_file_path = None
+        self.cot_log_max_file_size_bytes = int(cfg.get("max_file_size_mb", 10) * 1024 * 1024)
+        self.cot_log_max_file_count = int(cfg.get("max_file_count", 20))
+
+        if not self.cot_log_enabled_runtime:
+            return
+
+        base_dir = cfg.get("cot_log_directory", "./Logs/CoT_Logs")
+        if not base_dir:
+            base_dir = "./Logs/CoT_Logs"
+
+        # Resolve relative path from FISSURE root if you have it
+        try:
+            if not os.path.isabs(base_dir):
+                base_dir = os.path.join(fissure.utils.FISSURE_ROOT, base_dir)
+        except Exception:
+            base_dir = os.path.abspath(base_dir)
+
+        os.makedirs(base_dir, exist_ok=True)
+
+        session_name = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S")
+        session_dir = os.path.join(base_dir, session_name)
+        os.makedirs(session_dir, exist_ok=True)
+
+        self.cot_log_session_dir = session_dir
+        self.cot_log_file_path = os.path.join(session_dir, "cot_0001.xml")
+
+        self.logger.info(f"CoT logging enabled. Session directory: {session_dir}")
+
+
+    def rotate_cot_log_file(self):
+        self.cot_log_file_index += 1
+
+        if self.cot_log_file_index > self.cot_log_max_file_count:
+            self.logger.warning(
+                "CoT logging reached max file count. Disabling CoT logging for this session."
+            )
+            self.cot_log_enabled_runtime = False
+            return False
+
+        self.cot_log_file_path = os.path.join(
+            self.cot_log_session_dir,
+            f"cot_{self.cot_log_file_index:04d}.xml"
+        )
+
+        self.logger.info(f"Rotated CoT log file to: {self.cot_log_file_path}")
+        return True
+
+
+    def write_cot_log(self, msg_bytes):
+        if not getattr(self, "cot_log_enabled_runtime", False):
+            return
+
+        if not getattr(self, "cot_log_file_path", None):
+            return
+
+        try:
+            with self.cot_log_lock:
+
+                logged_ts = datetime.now(timezone.utc).isoformat()
+                xml_text = msg_bytes.decode("utf-8").strip()
+
+                record = (
+                    f"<!-- logged_ts={logged_ts} -->\n"
+                    f"{xml_text}\n\n"
+                )
+
+                record_bytes = record.encode("utf-8")
+
+                # Check if file rotation is needed
+                if os.path.exists(self.cot_log_file_path):
+                    current_size = os.path.getsize(self.cot_log_file_path)
+
+                    if current_size + len(record_bytes) > self.cot_log_max_file_size_bytes:
+                        if not self.rotate_cot_log_file():
+                            return
+
+                with open(self.cot_log_file_path, "ab") as f:
+                    f.write(record_bytes)
+
+        except Exception as e:
+            self.logger.error(f"Failed to write CoT log: {e}")
 
 
 if __name__ == "__main__":

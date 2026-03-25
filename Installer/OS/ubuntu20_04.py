@@ -93,6 +93,8 @@ python3 -m pip install eventlet
 python3 -m pip install psycopg2-binary
 python3 -m pip install python-dotenv
 sudo apt-get install -y iw
+sudo apt-get install -y python3-pyproj
+sudo apt-get install -y python3-uhd
 . ~/.bashrc
 """,True,'Minimum Install'))
 

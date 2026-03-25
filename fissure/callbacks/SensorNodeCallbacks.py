@@ -1339,7 +1339,7 @@ async def removePlugin(component: object, node_uid: str, plugin_name: str):
     plugin.remove(plugin_name)
 
 
-async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: str):
+async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: str, tak_context: str):
     """Send Plugin Names for TAK
 
     Parameters
@@ -1350,6 +1350,8 @@ async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: st
         TAK UID
     node_uid : str
         Sensor node UID
+    tak_context : str
+        node or ecosystem
     """
     try:
         plugin_names = plugin.get_local_plugin_names()
@@ -1358,7 +1360,8 @@ async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: st
         PARAMETERS = {
             "requester_uid": requester_uid,
             "node_uid": node_uid,
-            "plugin_names": plugin_names
+            "plugin_names": plugin_names,
+            "tak_context": tak_context
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -1373,7 +1376,7 @@ async def sendPluginNamesTak(component: object, requester_uid: str, node_uid: st
         component.logger.debug(tb)
 
 
-async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin_name: str, node_uid: str):
+async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin_name: str, node_uid: str, tak_context: str):
     """Send Plugin Action Names for TAK
 
     Parameters
@@ -1386,16 +1389,19 @@ async def sendPluginActionNamesTak(component: object, requester_uid: str, plugin
         Plugin name
     node_uid : str
         Sensor node UID
+    tak_context : str
+        node or ecosystem
     """
     try:
-        action_names = plugin.get_plugin_actions(plugin_name, component.logger)
+        action_names = plugin.get_plugin_actions(plugin_name, component.settings_dict, component.logger)
 
         # send action names
         PARAMETERS = {
             "requester_uid": requester_uid,
             "node_uid": node_uid,
             "plugin_name": plugin_name,
-            "action_names": action_names
+            "action_names": action_names,
+            "tak_context": tak_context
         }
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: component.identifier,
@@ -1753,6 +1759,7 @@ async def sendPluginActionParametersTak(
     plugin_name: str,
     action_name: str,
     node_uid: str,
+    tak_context: str
 ) -> None:
     """
     Node handler for hub->node request: "sendPluginActionParameters"
@@ -1785,6 +1792,7 @@ async def sendPluginActionParametersTak(
             "action_name": action_name,
             "node_uid": node_uid,
             "schema": schema,
+            "tak_context": tak_context
         }
 
         msg = {
@@ -1807,5 +1815,58 @@ async def sendPluginActionParametersTak(
     except Exception as e:
         component.logger.error(
             f"Error sending schema for {plugin_name}.{action_name}: {e}"
+        )
+        component.logger.debug(traceback.format_exc())
+
+
+async def sendPluginTargetActionsTak(
+    component: object,
+    requester_uid: str,
+    plugin_name: str,
+    node_uid: str,
+    target_id: str,
+    classification_candidates: List[str],
+) -> None:
+    """
+    Node handler for hub->node request: get plugin action names filtered by target classification.
+    """
+    try:
+        component.logger.info(
+            f"Fetching target actions for plugin={plugin_name}, "
+            f"target_id={target_id}, classifications={classification_candidates}"
+        )
+
+        plugin_path = os.path.join(fissure.utils.PLUGIN_DIR, plugin_name)
+        if not os.path.exists(plugin_path):
+            component.logger.error(f"Plugin path does not exist: {plugin_path}")
+            return
+
+        action_names = plugin.get_actions_for_classifications(
+            plugin_name,
+            classification_candidates,
+            component.logger
+        )
+
+        PARAMETERS = {
+            "requester_uid": requester_uid,
+            "node_uid": node_uid,
+            "plugin_name": plugin_name,
+            "action_names": action_names,
+        }
+
+        msg = {
+            fissure.comms.MessageFields.IDENTIFIER: component.identifier,
+            fissure.comms.MessageFields.MESSAGE_NAME: "sendPluginActionNamesTakResults",
+            fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
+        }
+        component.logger.debug(f"Sending action names for plugin {plugin_name} and TAK UID {requester_uid}: {action_names}")
+        await component.hiprfisr_socket.send_msg(
+            fissure.comms.MessageTypes.COMMANDS,
+            msg
+        )
+
+    except Exception as e:
+        component.logger.error(
+            f"Error sending target actions for plugin={plugin_name}, target_id={target_id}: {e}"
         )
         component.logger.debug(traceback.format_exc())

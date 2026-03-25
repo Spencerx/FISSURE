@@ -21,6 +21,11 @@ color8: '#FEFEFE'
 color9: '#EFEFEF'
 color_mode: Light Mode
 console_logging_level: INFO
+cot_logging:
+  cot_log_enabled: false
+  cot_log_directory: ./Logs/CoT_Logs
+  max_file_size_mb: 10
+  max_file_count: 20
 dashboard_hiprfisr_dealer_port: 5051
 dashboard_pub_port: 5057
 dataset_freq_shift_max: 0
@@ -177,7 +182,7 @@ sensor_node_pub_port: 5061
 startup_automation_mode: Manual
 tak:
   cert: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.pem
-  connect_mode: auto  # auto/manual/disabled
+  connect_mode: disabled  # auto/manual/disabled
   ip_addr: localhost # tak server IP for local communication
   external_ip: 192.168.1.128  # tak server external IP for clients to connect
   key: /home/user/Installed_by_FISSURE/takserver-docker-5.3-RELEASE-24/tak/certs/files/takserver.key

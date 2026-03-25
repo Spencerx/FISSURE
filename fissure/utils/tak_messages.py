@@ -91,6 +91,9 @@ def _send_to_tak(component, msg):
     msg_bytes = ET.tostring(msg, encoding="utf-8")
     component.logger.debug("Sending TAK message:\n" + msg_bytes.decode("utf-8"))
     component.logger.info("Sending TAK message:\n" + msg_bytes.decode("utf-8"))
+
+    component.write_cot_log(msg_bytes)
+
     component.clitool.tx_queue.put_nowait(msg_bytes)
 
 
