@@ -402,7 +402,7 @@ The FISSURE installer is helpful for staging computers or installing select soft
 
 Install FISSURE per usual on a general purpose computer. Install FISSURE on the remote computer in the same directory location as the local computer (until further notice) to avoid filepath errors with certain actions. To configure the sensor node for remote operation, edit the "default.yaml" file in the `./fissure/Sensor_Node/Sensor_Node_Config/` directory. Edit the following fields to change from local to remote operation:
 - nickname: (anything but "Local Sensor Node")
-- ip_address: (your remote sensor node computer's ip_address)
+- ip_address: (the HIPRFISR/hub IP address the sensor node connects to)
 
 Change the "autorun" field from from `false` to `true` to run the default autorun playlist file on startup and forgo remote operations. New autorun playlists can be generated and saved from the Dashboard Autorun tab.
 
@@ -427,6 +427,16 @@ sudo pkill python3
 sudo kill -9 <PID of __main__.py>
 sudo pkill python3 && sudo pkill -9 -f fissure
 ```
+
+**Headless Hub**
+
+The HIPRFISR can be launched without the Dashboard GUI to make TAK testing and operational deployments more efficient. Set the `auto_connect_hiprfisr` value to false in the FISSURE `config.yaml` file and open a new terminal after installation and enter:
+
+```
+fissure-hiprfisr
+```
+
+The hub will automatically connect up to the TAK server and remote nodes will be able to join without interaction. 
 
 **Remote Sensor Node Usage**
 
