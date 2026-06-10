@@ -111,7 +111,7 @@ class HiprFisr:
             fissure.comms.Identifiers.DASHBOARD: None,
             fissure.comms.Identifiers.PD: None,
             fissure.comms.Identifiers.TSI: None,
-            fissure.comms.Identifiers.SENSOR_NODE: [None, None, None, None, None],
+            fissure.comms.Identifiers.SENSOR_NODE: None,
         }
         self.session_active = False
         self.dashboard_connected = False
@@ -125,7 +125,6 @@ class HiprFisr:
         self.hiprfisr_serial_connected = False
 
         self.nodes = {}
-        self.dashboard_node_map = [None] * 5
         self.assigned_id_counter = 1  # TODO: make this persist, saving itself when updated
 
         # Load settings from Fissure Config YAML
@@ -618,7 +617,7 @@ class HiprFisr:
                        
                     # Send Meshtastic auto-connect serial connected message
                     if self.hiprfisr_serial_connected:
-                        PARAMETERS = None  #{"component_name": sensor_node_id}
+                        PARAMETERS = None
                         msg = {
                             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
                             fissure.comms.MessageFields.MESSAGE_NAME: "hiprfisrConnectedSerial",
@@ -833,17 +832,16 @@ class HiprFisr:
             node_times = []
             node_intervals = []
 
-            for idx in range(5):
-                hb_record = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE][idx]
+            hb_record = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
 
-                if hb_record is None:
-                    node_times.append(None)
-                    node_intervals.append(None)
-                else:
-                    timestamp = hb_record.get("time")
-                    interval = hb_record.get("interval")
-                    node_times.append(timestamp)
-                    node_intervals.append(interval)
+            if hb_record is None:
+                node_times.append(None)
+                node_intervals.append(None)
+            else:
+                timestamp = hb_record.get("time")
+                interval = hb_record.get("interval")
+                node_times.append(timestamp)
+                node_intervals.append(interval)
 
             heartbeat = {
                 fissure.comms.MessageFields.IDENTIFIER: self.identifier,
@@ -1127,62 +1125,36 @@ class HiprFisr:
             await self.meshtastic_node.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
             # print(f"Handshake sent → assigned_id={final_assigned_id}")
 
-        # ---------------------------------------------------------
-        # AUTO-SELECT LOCAL SENSOR NODE (UUID match)
-        # ---------------------------------------------------------
-        if sn_uuid == self.local_node_uuid and sn_uuid not in self.dashboard_node_map:
-
-            self.logger.info(f"[LOCAL NODE] Auto-selecting UUID {sn_uuid}")
-
-            # Find free dashboard slot (0-4)
-            dashboard_node_index = None
-            for idx, entry in enumerate(self.dashboard_node_map):
-                if entry is None:
-                    dashboard_node_index = idx
-                    break
-
-            if dashboard_node_index is None:
-                self.logger.warning("[LOCAL NODE] No free dashboard slots — skipping auto-select.")
-            else:
-                # Assign UUID into that slot
-                self.dashboard_node_map[dashboard_node_index] = sn_uuid
-
-                # Perform the callback that configures node settings etc.
-                cb = self.callbacks.get("nodeSelectIP")
-                if cb:
-                    await cb(self, dashboard_node_index, sn_uuid)
-                else:
-                    self.logger.error("nodeSelectIP callback not registered!")
 
         # ---------------------------------------------------------
         # Maintain heartbeat slot table (still uses identity)
         # ---------------------------------------------------------
-        slot_index = None
-        node_list = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
+        # slot_index = None
+        # node_list = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
 
-        # Existing slot
-        for idx, entry in enumerate(node_list):
-            if entry and entry.get("uuid") == sn_uuid:
-                slot_index = idx
-                break
+        # # Existing slot
+        # for idx, entry in enumerate(node_list):
+        #     if entry and entry.get("uuid") == sn_uuid:
+        #         slot_index = idx
+        #         break
 
-        # Free slot
-        if slot_index is None:
-            for idx, entry in enumerate(node_list):
-                if entry is None:
-                    slot_index = idx
-                    break
+        # # Free slot
+        # if slot_index is None:
+        #     for idx, entry in enumerate(node_list):
+        #         if entry is None:
+        #             slot_index = idx
+        #             break
 
-        if slot_index is None:
-            self.logger.error(f"No free heartbeat slots for sensor node identity={sn_id_zmq}")
-            return
+        # if slot_index is None:
+        #     self.logger.error(f"No free heartbeat slots for sensor node identity={sn_id_zmq}")
+        #     return
 
-        node_list[slot_index] = {
-            "uuid": sn_uuid,
-            "identity": sn_id_zmq,
-            "time": sn_time,
-            "interval": sn_int,
-        }
+        # node_list[slot_index] = {
+        #     "uuid": sn_uuid,
+        #     "identity": sn_id_zmq,
+        #     "time": sn_time,
+        #     "interval": sn_int,
+        # }
 
 
     async def check_heartbeats(self):
@@ -1273,111 +1245,37 @@ class HiprFisr:
         # -----------------------------------------------------------------
         # Sensor Node checks
         # -----------------------------------------------------------------
-        for uuid, node in list(self.nodes.items()):
-            # Do not track Meshtastic nodes (heartbeat intervals can vary among nodes)
-            if node["network_type"] == "Meshtastic":
-                continue
+        # for uuid, node in list(self.nodes.items()):
+        #     # Do not track Meshtastic nodes (heartbeat intervals can vary among nodes)
+        #     if node["network_type"] == "Meshtastic":
+        #         continue
 
-            # Calculate
-            last_seen = node["last_seen"]
-            interval = node.get("interval", global_interval)
-            cutoff = current_time - (interval * failure_multiple)
+            # # Calculate
+            # last_seen = node["last_seen"]
+            # interval = node.get("interval", global_interval)
+            # cutoff = current_time - (interval * failure_multiple)
 
-            # Node has gone silent → disconnected
-            if node["connected"] and last_seen < cutoff:
-                node["connected"] = False
+            # # Node has gone silent → disconnected  # TODO
+            # if node["connected"] and last_seen < cutoff:
+            #     node["connected"] = False
 
-                # Find which dashboard slot (0–4) this UUID is assigned to
-                try:
-                    dashboard_index = self.dashboard_node_map.index(uuid)
-                except ValueError:
-                    dashboard_index = None
+            #     # Find which dashboard slot (0–4) this UUID is assigned to
+            #     try:
+            #         dashboard_index = self.dashboard_node_map.index(uuid)
+            #     except ValueError:
+            #         dashboard_index = None
 
-                # If the dashboard is showing this node, notify it
-                if dashboard_index is not None and self.dashboard_connected:
-                    msg = {
-                        fissure.comms.MessageFields.IDENTIFIER: self.identifier,
-                        fissure.comms.MessageFields.MESSAGE_NAME: "componentDisconnected",
-                        fissure.comms.MessageFields.PARAMETERS: str(dashboard_index),
-                    }
-                    await self.dashboard_socket.send_msg(
-                        fissure.comms.MessageTypes.COMMANDS,
-                        msg
-                    )
-
-
-    def resolve_sensor_node_identity(self, dashboard_index: int):
-        """
-        Given a dashboard node index (0-4), return (uuid, identity) for the
-        corresponding sensor node, or (None, None) if not available.
-        """
-        # 1) Validate dashboard_index → UUID
-        uuid = self.dashboard_node_map[int(dashboard_index)]
-        if uuid is None:
-            self.logger.error(f"[resolve] No node assigned to dashboard index {dashboard_index}")
-            return None, None
-
-        # 2) Validate UUID exists in self.nodes
-        node_entry = self.nodes.get(uuid)
-        if not node_entry:
-            self.logger.error(f"[resolve] No node entry found for uuid {uuid}")
-            return None, None
-
-        # 3) Extract ROUTER identity
-        identity = node_entry.get("identity")
-        if not identity:
-            self.logger.error(f"[resolve] UUID {uuid} has no ROUTER identity")
-            return None, None
-
-        return uuid, identity
-    
-
-    def resolve_node_assigned_id(self, dashboard_index: int):
-        """
-        Given a dashboard node index (0-4), return (uuid, assigned_id) for the
-        corresponding sensor node, or (None, None) if not available.
-        """
-        # 1) Validate dashboard_index → UUID
-        uuid = self.dashboard_node_map[int(dashboard_index)]
-        if uuid is None:
-            self.logger.error(f"[resolve] No node assigned to dashboard index {dashboard_index}")
-            return None, None
-
-        # 2) Validate UUID exists in self.nodes
-        node_entry = self.nodes.get(uuid)
-        if not node_entry:
-            self.logger.error(f"[resolve] No node entry found for uuid {uuid}")
-            return None, None
-
-        # 3) Extract ROUTER identity
-        assigned_id = node_entry.get("assigned_id")
-        if not assigned_id:
-            self.logger.error(f"[resolve] UUID {uuid} has no assigned ID")
-            return None, None
-
-        return uuid, assigned_id
-
-
-    def resolve_dashboard_target(self, uuid: str):
-        """
-        Given a node UUID, find which dashboard node index (0-4)
-        this node is mapped to.
-
-        Returns (node_entry, dashboard_index) or (node_entry, None)
-        """
-        node = self.nodes.get(uuid)
-        if not node:
-            self.logger.warning(f"[resolve] No node entry for uuid={uuid}")
-            return None, None
-
-        # Reverse lookup: find which dashboard index currently maps to this UUID
-        for idx, mapped_uuid in enumerate(self.dashboard_node_map):
-            if mapped_uuid == uuid:
-                return node, idx
-
-        # UUID exists in nodes[] but not assigned to any dashboard slot
-        self.logger.warning(f"[resolve] UUID {uuid} is not assigned to any dashboard index")
-        return node, None
+            #     # If the dashboard is showing this node, notify it
+            #     if dashboard_index is not None and self.dashboard_connected:
+            #         msg = {
+            #             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
+            #             fissure.comms.MessageFields.MESSAGE_NAME: "componentDisconnected",
+            #             fissure.comms.MessageFields.PARAMETERS: str(dashboard_index),
+            #         }
+            #         await self.dashboard_socket.send_msg(
+            #             fissure.comms.MessageTypes.COMMANDS,
+            #             msg
+            #         )
 
 
     def resolve_uuid_from_assigned_id(self, assigned_id: int):
@@ -1410,20 +1308,12 @@ class HiprFisr:
         # Update New Levels for the HIPRFISR
         fissure.utils.update_logging_levels(self.logger, new_console_level, new_file_level)
 
-        # For Testing
-        # self.logger.info("INFO")
-        # self.logger.debug("DEBUG")
-        # self.logger.warning("WARNING")
-        # self.logger.error("ERROR")
-        # print(f"Logger level: {self.logger.level}")
-        # for handler in self.logger.handlers:
-        #     print(f"Handler {type(handler).__name__} level: {handler.level}")
-
         # Update Other Components
         PARAMETERS = {
-            "new_console_level": new_console_level, 
-            "new_file_level": new_file_level
+            "new_console_level": new_console_level,
+            "new_file_level": new_file_level,
         }
+
         msg = {
             fissure.comms.MessageFields.IDENTIFIER: self.identifier,
             fissure.comms.MessageFields.MESSAGE_NAME: "updateLoggingLevels",
@@ -1432,43 +1322,45 @@ class HiprFisr:
 
         if (self.pd_connected is True) and (self.tsi_connected is True):
             await self.backend_router.send_msg(
-                fissure.comms.MessageTypes.COMMANDS, msg, target_ids=[self.pd_id, self.tsi_id]
+                fissure.comms.MessageTypes.COMMANDS,
+                msg,
+                target_ids=[self.pd_id, self.tsi_id],
             )
 
         # -----------------------------------------
         # Send to all connected IP Sensor Nodes
         # -----------------------------------------
-        for dashboard_index, mapped_uuid in enumerate(self.dashboard_node_map):
-
-            # Skip empty dashboard slots
-            if mapped_uuid is None:
-                continue
-
-            # Resolve uuid -> identity via dashboard index
-            uuid, identity = self.resolve_sensor_node_identity(dashboard_index)
-            if identity is None or uuid is None:
-                continue
-
-            # Look up node entry to check network_type
-            node_entry = self.nodes.get(uuid)
+        for node_uid, node_entry in self.nodes.items():
             if not node_entry:
                 continue
 
-            # Only send to IP-based nodes (skip Meshtastic, etc.)
-            net_type = node_entry.get("network_type", "IP")
-            if net_type != "IP":
+            # Only send to IP-based nodes. Skip Meshtastic, etc.
+            network_type = node_entry.get("network_type", "IP")
+            if network_type != "IP":
                 continue
 
-            # Send via ROUTER
+            # ROUTER identity for this node
+            identity = (
+                node_entry.get("identity")
+                or node_entry.get("router_identity")
+            )
+
+            if identity is None:
+                self.logger.warning(
+                    f"Skipping logging-level update for node {node_uid}: no ROUTER identity found."
+                )
+                continue
+
             try:
                 await self.sensor_node_router.send_msg(
                     fissure.comms.MessageTypes.COMMANDS,
                     msg,
                     target_ids=[identity],
                 )
+
             except Exception as e:
                 self.logger.error(
-                    f"Failed sending logging-level update to node {uuid} ({net_type}): {e}"
+                    f"Failed sending logging-level update to node {node_uid} ({network_type}): {e}"
                 )
 
 
