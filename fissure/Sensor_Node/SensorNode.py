@@ -19,6 +19,7 @@ from dateutil import parser
 import csv
 import signal
 import json
+import socket
 
 from inspect import isfunction
 from types import ModuleType
@@ -205,13 +206,7 @@ class SensorNode(object):
         with open(filename) as yaml_library_file:
             self.settings_dict = yaml.load(yaml_library_file, yaml.FullLoader)
 
-        if self.local_remote == "local":
-            self.network_type = "IP"
-            self.ip_address = "ipc"
-            self.settings_dict["Sensor Node"]["nickname"] = "Local Sensor Node"
-        else:
-            self.network_type = str(self.settings_dict['Sensor Node']['network_type'])
-            self.ip_address = str(self.settings_dict['Sensor Node']['ip_address'])
+        self.update_ip_address_settings()
         
         self.child_tasks = []
         self.sockets = []
@@ -329,7 +324,7 @@ class SensorNode(object):
 
             self.hiprfisr_address = fissure.comms.Address(
                 protocol=network_protocol,
-                address=self.ip_address,
+                address=self.hiprfisr_ip_address,
                 hb_channel=6100,  # TODO: pull from YAML anyway in case default is changed
                 msg_channel=6101,
             )
@@ -1574,22 +1569,29 @@ class SensorNode(object):
         if not force and (now - last) < self.heartbeat_interval:
             return
 
-        # Build the message
+        # Get Sensor Node nickname
         if self.local_remote == "local":
             nickname = "Local Sensor Node"
         else:
-            nickname = self.settings_dict.get("Sensor Node", {}).get("nickname", "-")
+            nickname = (
+                self.settings_dict
+                .get("Sensor Node", {})
+                .get("nickname", "-")
+            )
 
+        # Build the message
         if self.network_type == "IP":
             hb = {
                 fissure.comms.MessageFields.IDENTIFIER: self.identifier,
                 fissure.comms.MessageFields.MESSAGE_NAME: fissure.comms.MessageFields.HEARTBEAT,
                 fissure.comms.MessageFields.TIME: now,
-                fissure.comms.MessageFields.IP: self.ip_address,
+                fissure.comms.MessageFields.IP: self.node_ip_address,
                 fissure.comms.MessageFields.INTERVAL: self.heartbeat_interval,
                 fissure.comms.MessageFields.PARAMETERS: {
                     "network_type": self.network_type,
                     "nickname": nickname,
+                    "hiprfisr_ip_address": self.hiprfisr_ip_address,
+                    "node_ip_address": self.node_ip_address,
                 }
             }
 
@@ -1614,6 +1616,7 @@ class SensorNode(object):
 
             await self.hiprfisr_socket.send_heartbeat(heartbeat_message)
 
+        # Update Heartbeat Time
         self.heartbeats["self"] = now
         self.logger.debug(f"Sent heartbeat at {now} force={force}")
 
@@ -3862,6 +3865,76 @@ class SensorNode(object):
         await self.gpsUpdate(None)
 
 
+    def get_local_ip_for_remote(self, remote_ip):
+        """
+        Returns the local interface IP address used to reach remote_ip.
+
+        This is the sensor node's own IP address from the perspective of the route
+        to HIPRFISR. It does not actually send UDP traffic.
+        """
+        if not remote_ip:
+            return ""
+
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.connect((remote_ip, 9))
+            local_ip = sock.getsockname()[0]
+            sock.close()
+
+            return local_ip
+
+        except Exception:
+            return ""
+
+
+    def update_ip_address_settings(self):
+        """
+        Updates cached HIPRFISR and node IP address values from settings.
+
+        hiprfisr_ip_address:
+            IP address the Sensor Node connects to.
+
+        node_ip_address:
+            IP address displayed by HIPRFISR/Dashboard for this Sensor Node.
+            If set to "auto", detect the local route IP used to reach HIPRFISR.
+        """
+        sensor_node_settings = self.settings_dict.get("Sensor Node", {})
+
+        if self.local_remote == "local":
+            self.network_type = "IP"
+            self.hiprfisr_ip_address = "ipc"
+            self.node_ip_address = "ipc"
+            self.settings_dict["Sensor Node"]["nickname"] = "Local Sensor Node"
+            return
+
+        self.network_type = str(
+            sensor_node_settings.get("network_type", "IP")
+        )
+
+        self.hiprfisr_ip_address = str(
+            sensor_node_settings.get(
+                "hiprfisr_ip_address",
+                sensor_node_settings.get("ip_address", "")
+            )
+        ).strip()
+
+        node_ip_setting = str(
+            sensor_node_settings.get("node_ip_address", "auto")
+        ).strip()
+
+        if node_ip_setting and node_ip_setting.lower() != "auto":
+            self.node_ip_address = node_ip_setting
+        else:
+            self.node_ip_address = self.get_local_ip_for_remote(
+                self.hiprfisr_ip_address
+            )
+
+        if not self.node_ip_address:
+            self.node_ip_address = "unknown"
+
+        print(f"hiprfisr_ip_address={self.hiprfisr_ip_address}")
+        print(f"node_ip_setting={node_ip_setting}")
+        print(f"auto node_ip_address={self.node_ip_address}")
 
     ########################################################################
 

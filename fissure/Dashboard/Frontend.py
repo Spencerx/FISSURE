@@ -1703,7 +1703,6 @@ class Dashboard(QtWidgets.QMainWindow):
         self.configureIQ_Hardware()
         self.configureArchiveHardware()
         self.configureSensorNodeHardware()
-        print("AFTER!")
 
 
     def configureHighThroughputWidgets(self):

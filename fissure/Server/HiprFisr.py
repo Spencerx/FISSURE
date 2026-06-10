@@ -986,27 +986,60 @@ class HiprFisr:
 
         for hb in hbs:
             sn_time = float(hb.get(fissure.comms.MessageFields.TIME))
-            sn_int  = hb.get(fissure.comms.MessageFields.INTERVAL, 5)
-            sn_uuid  = hb.get(fissure.comms.MessageFields.IDENTIFIER)  # ← UUID is the real node key
+            sn_int = hb.get(fissure.comms.MessageFields.INTERVAL, 5)
+            sn_uuid = hb.get(fissure.comms.MessageFields.IDENTIFIER)  # UUID is the real node key
 
-            params = hb.get(fissure.comms.MessageFields.PARAMETERS, {})
-            sn_ip        = hb.get(fissure.comms.MessageFields.IP)        # ← IP now at top level
-            sn_nickname  = params.get("nickname", "-")
-            sn_nettype   = params.get("network_type", "IP")
-            sn_id_zmq    = hb.get(fissure.comms.MessageFields.SENDER_ID) # sensor-node-sensor node f8be9c34-39dbbc90-32e1-43ea-b0ce-f4729ab2e3a5
+            params = hb.get(fissure.comms.MessageFields.PARAMETERS, {}) or {}
+
+            # Node IP address reported by the Sensor Node.
+            # Prefer explicit parameter, then fallback to the top-level heartbeat IP field.
+            sn_ip = (
+                params.get("node_ip_address")
+                or hb.get(fissure.comms.MessageFields.IP)
+                or "unknown"
+            )
+
+            # HIPRFISR IP address the Sensor Node is configured to connect to.
+            sn_hiprfisr_ip = params.get("hiprfisr_ip_address", "")
+
+            sn_nickname = params.get("nickname", "-")
+            sn_nettype = params.get("network_type", "IP")
+            sn_id_zmq = hb.get(fissure.comms.MessageFields.SENDER_ID)
             sn_assigned_id = -1  # For Meshtastic handshake
 
-            await self.node_heartbeat_updates(sn_time, sn_int, sn_uuid, sn_ip, sn_nickname, sn_nettype, sn_id_zmq, sn_assigned_id)
+            await self.node_heartbeat_updates(
+                sn_time,
+                sn_int,
+                sn_uuid,
+                sn_ip,
+                sn_hiprfisr_ip,
+                sn_nickname,
+                sn_nettype,
+                sn_id_zmq,
+                sn_assigned_id,
+            )
 
 
-    async def node_heartbeat_updates(self, sn_time, sn_int, sn_uuid, sn_ip, sn_nickname, sn_nettype, sn_id_zmq, sn_assigned_id: int):
+    async def node_heartbeat_updates(
+        self,
+        sn_time,
+        sn_int,
+        sn_uuid,
+        sn_ip,
+        sn_hiprfisr_ip,
+        sn_nickname,
+        sn_nettype,
+        sn_id_zmq,
+        sn_assigned_id: int,
+    ):
         """
+        Updates HIPRFISR's sensor node registry from heartbeat data.
         """
         # Validate input variables
         if not sn_uuid:
             self.logger.error("Heartbeat missing UUID — ignoring.")
             return
-        
+
         try:
             sn_assigned_id = int(sn_assigned_id)
         except (ValueError, TypeError):
@@ -1080,7 +1113,15 @@ class HiprFisr:
                 "uuid": sn_uuid,
                 "identity": sn_id_zmq,
                 "callsign": f"{callsign_prefix}-{sn_nickname}",
+
+                # Backward-compatible display field used by Dashboard.
+                # This is now the Sensor Node IP, not the HIPRFISR IP.
                 "ip": sn_ip,
+
+                # Explicit fields for clarity/debugging.
+                "node_ip_address": sn_ip,
+                "hiprfisr_ip_address": sn_hiprfisr_ip,
+
                 "network_type": sn_nettype,
                 "nickname": sn_nickname,
                 "settings": {},
@@ -1088,26 +1129,29 @@ class HiprFisr:
                 "interval": sn_int,
                 "connected": True,
                 "assigned_id": final_assigned_id,
-                "status": "unknown", 
+                "status": "unknown",
             }
             self.nodes[sn_uuid] = node
 
-            # print("created new entry")
-
         else:
-            node["identity"]     = sn_id_zmq
-            node["callsign"]     = f"{callsign_prefix}-{sn_nickname}"
-            node["ip"]           = sn_ip
-            node["network_type"] = sn_nettype
-            node["nickname"]     = sn_nickname
-            node["last_seen"]    = sn_time
-            node["interval"]     = sn_int
-            node["connected"]    = True
-            node["assigned_id"]  = final_assigned_id
-            # node["status"]       = "unknown"  # If status ever goes in heartbeat, place status here
-            
+            node["identity"] = sn_id_zmq
+            node["callsign"] = f"{callsign_prefix}-{sn_nickname}"
 
-            # print("updated existing entry")
+            # Backward-compatible display field used by Dashboard.
+            # This is now the Sensor Node IP, not the HIPRFISR IP.
+            node["ip"] = sn_ip
+
+            # Explicit fields for clarity/debugging.
+            node["node_ip_address"] = sn_ip
+            node["hiprfisr_ip_address"] = sn_hiprfisr_ip
+
+            node["network_type"] = sn_nettype
+            node["nickname"] = sn_nickname
+            node["last_seen"] = sn_time
+            node["interval"] = sn_int
+            node["connected"] = True
+            node["assigned_id"] = final_assigned_id
+            # node["status"] = "unknown"  # If status ever goes in heartbeat, place status here
 
         # ---------------------------------------------------------
         # SEND HANDSHAKE MESSAGE IF NEEDED (Meshtastic only)
@@ -1124,37 +1168,6 @@ class HiprFisr:
 
             await self.meshtastic_node.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
             # print(f"Handshake sent → assigned_id={final_assigned_id}")
-
-
-        # ---------------------------------------------------------
-        # Maintain heartbeat slot table (still uses identity)
-        # ---------------------------------------------------------
-        # slot_index = None
-        # node_list = self.heartbeats[fissure.comms.Identifiers.SENSOR_NODE]
-
-        # # Existing slot
-        # for idx, entry in enumerate(node_list):
-        #     if entry and entry.get("uuid") == sn_uuid:
-        #         slot_index = idx
-        #         break
-
-        # # Free slot
-        # if slot_index is None:
-        #     for idx, entry in enumerate(node_list):
-        #         if entry is None:
-        #             slot_index = idx
-        #             break
-
-        # if slot_index is None:
-        #     self.logger.error(f"No free heartbeat slots for sensor node identity={sn_id_zmq}")
-        #     return
-
-        # node_list[slot_index] = {
-        #     "uuid": sn_uuid,
-        #     "identity": sn_id_zmq,
-        #     "time": sn_time,
-        #     "interval": sn_int,
-        # }
 
 
     async def check_heartbeats(self):

@@ -16,6 +16,7 @@ Node selection rework, selected-node configuration, Tactical tab integration, an
 - Added Tactical tab integration for selecting nodes from map pins, tables, and node info panels
 - Added Tactical target parsing for node UID, SSID, BSSID, RSSI, observation time, SOI, and artifact metadata
 - Added support for action schema min, max, step, decimals, and options metadata in Dashboard parameter widgets
+- Added explicit HIPRFISR and node IP address settings with automatic node IP detection for selected node display
 
 ### Changed
 
@@ -29,6 +30,7 @@ Node selection rework, selected-node configuration, Tactical tab integration, an
 - Updated selected node configuration to use the new YAML hardware structure with SDR and Wi-Fi adapter defaults
 - Updated dummy CoT type action defaults to reduce message volume during testing
 - Updated parameter widget generation to support negative numbers and bounded numeric inputs
+- Updated Sensor Node heartbeats to report the node IP address separately from the HIPRFISR connection address
 
 ### Fixed
 
