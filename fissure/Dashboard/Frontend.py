@@ -2950,6 +2950,33 @@ def connect_tactical_slots(dashboard: Dashboard):
     dashboard.ui.pushButton_tactical_ecosystem_alerts_delete_row.clicked.connect(
         lambda: TacticalTabSlots._slotTacticalEcosystemAlertsDeleteRowClicked(dashboard)
     )
+    dashboard.ui.pushButton_tactical_node_soi_delete_row.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeSoisDeleteRowClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_soi_clear_rows.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeSoisClearRowsClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_targets_delete_row.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeTargetsDeleteRowClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_targets_clear_rows.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeTargetsClearRowsClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_targets_keep_selected.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeTargetsKeepSelectedClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_artifacts_refresh.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeArtifactsRefreshClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_artifacts_download.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeArtifactsDownloadClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_artifacts_delete_row.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeArtifactsDeleteRowClicked(dashboard)
+    )
+    dashboard.ui.pushButton_tactical_node_artifacts_clear_rows.clicked.connect(
+        lambda: TacticalTabSlots._slotTacticalNodeArtifactsClearRowsClicked(dashboard)
+    )
 
     # Table Widget
     dashboard.ui.tableWidget_tactical_ecosystem.itemSelectionChanged.connect(

@@ -1,6 +1,35 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-6-25
+
+Add Tactical SOI, target, and artifact row controls with artifact refresh and compact metadata styling.
+
+### Added
+
+- Added Node SOI row deletion and clear-row controls for removing local SOI table records and associated map pins.
+- Added Node Targets row cleanup controls: delete row, clear rows, and keep selected.
+- Added Node Targets refresh behavior to preserve the current shortlist when rows are already displayed.
+- Added Node Targets refresh selection handling to restore the previous target selection or select the first row after a full reload.
+- Added Node Artifacts refresh control to reload known artifact metadata for the selected node from the HIPRFISR artifact registry.
+- Added Node Artifacts delete-row and clear-row controls for pruning the local Dashboard artifact view without deleting artifact files or registry entries.
+
+### Changed
+
+- Updated Node Targets to behave as a per-node working shortlist derived from the global Targets table.
+- Updated Node Targets refresh to recalculate only currently displayed targets unless the table is empty.
+- Updated Node Targets row cleanup to affect only the Node > Targets table, not the main Targets tab or global target records.
+- Updated Tactical button enable/disable handling to include the new SOI and Node Targets row-management controls.
+- Updated Node Artifacts refresh handling to repopulate locally cleared artifact rows from hub-tracked metadata.
+- Updated Tactical button enable/disable handling to include the new Node Artifacts refresh and row-management controls.
+- Updated Tactical Node tab and Targets tab detail panels with more compact, consistently spaced metadata text for better readability in the right-side Tactical panel.
+- Removed old poetry.lock file
+
+### Fixed
+
+- Fixed IQ rename button string handling error
+- Removed duplicate frequency parameter from the iq_playback action schema
+
 ## 2026-6-24
 
 IQ Data plugin workflow and plugin folder cleanup.

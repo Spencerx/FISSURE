@@ -1140,12 +1140,6 @@ iq_playback_schema = {
             "default": "",
         },
         {
-            "name": "frequency_mhz",
-            "label": "Frequency (MHz)",
-            "type": "number",
-            "default": 915.0,
-        },
-        {
             "name": "tx_frequency",
             "label": "TX Frequency (MHz)",
             "type": "number",

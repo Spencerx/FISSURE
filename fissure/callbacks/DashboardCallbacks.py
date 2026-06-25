@@ -2183,3 +2183,78 @@ async def nodeStateRemove(component: object, node_uid=""):
         )
 
     component.logger.debug(f"nodeStateRemove: {node_uid}")
+
+
+async def sendArtifactsListTakReturn(
+    component: object,
+    node_uid: str = "",
+    artifacts=None,
+):
+    """
+    Receives artifact metadata from HIPRFISR and updates the Tactical
+    Node > Artifacts cache/table.
+    """
+    artifacts = artifacts or []
+
+    dashboard = component.frontend
+
+    if not hasattr(dashboard, "tactical_artifacts"):
+        dashboard.tactical_artifacts = {}
+
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            continue
+
+        artifact_id = artifact.get("id") or artifact.get("artifact_id")
+        if not artifact_id:
+            continue
+
+        metadata = artifact.get("metadata") or {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+
+        source_id = (
+            artifact.get("source_id")
+            or metadata.get("source_id")
+            or metadata.get("node_uid")
+            or node_uid
+            or ""
+        )
+
+        normalized = {
+            "artifact_id": artifact_id,
+            "node_uid": source_id,
+            "source_id": source_id,
+            "operation_id": (
+                artifact.get("operation_id")
+                or metadata.get("operation_id")
+                or ""
+            ),
+            "name": artifact.get("name", ""),
+            "time": (
+                artifact.get("modified_at")
+                or artifact.get("created_at")
+                or ""
+            ),
+            "file_path": artifact.get("file_path", ""),
+            "artifact_type": artifact.get("artifact_type", ""),
+            "file_size": artifact.get("file_size", 0),
+            "checksum": artifact.get("checksum", ""),
+            "metadata": metadata,
+        }
+
+        dashboard.tactical_artifacts[artifact_id] = normalized
+
+    selected_node_uid = getattr(
+        dashboard,
+        "selected_tactical_node_uid",
+        None,
+    )
+
+    if selected_node_uid == node_uid:
+        from fissure.Dashboard.Slots import TacticalTabSlots
+
+        TacticalTabSlots.rebuild_tactical_node_artifacts(
+            dashboard,
+            node_uid,
+        )
