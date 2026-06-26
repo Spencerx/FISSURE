@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-6-26
+
+Fixing installer style sheet bugs.
+
+### Changed
+
+- Updated Contributions section in the README
+- Moved idea_list.md to ./docs/gsoc/2023_project_ideas.md
+
+### Fixed
+
+- Fixed missing installer operating system radio buttons after icon assets were moved from `docs/Icons` to `UI/Icons`.
+- Updated plugin flow graph compilation to skip GNU Radio version-specific `maint-*` folders that do not match the installer target.
+
 ## 2026-6-25
 
 Add Tactical SOI, target, and artifact row controls with artifact refresh and compact metadata styling.
