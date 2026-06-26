@@ -12,17 +12,19 @@ from typing import Any, Callable, Dict, Union
 
 PLUGIN_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 FISSURE_ROOT = os.path.abspath(os.path.join(PLUGIN_ROOT, "..", ".."))
-FLOW_GRAPH_DIR = os.path.join(
+
+FLOW_GRAPH_BASE_DIR = os.path.join(
     PLUGIN_ROOT,
     "flow_graphs",
     "fixed_detection_flow_graphs",
 )
 
-for path in (FISSURE_ROOT, PLUGIN_ROOT, FLOW_GRAPH_DIR):
+for path in (FISSURE_ROOT, PLUGIN_ROOT):
     if path not in sys.path:
         sys.path.insert(0, path)
 
 from fissure.utils.plugins.operations import Operation
+from fissure.utils import get_library_version
 
 
 class OperationMain(Operation):
@@ -65,6 +67,22 @@ class OperationMain(Operation):
     ) -> Dict[str, Any]:
         return {}
 
+    def _resolve_flow_graph_path(self) -> str:
+        version = get_library_version() or "maint-3.10"
+
+        script_path = os.path.join(
+            FLOW_GRAPH_BASE_DIR,
+            version,
+            "fixed_threshold_b2x0.py",
+        )
+
+        if not os.path.isfile(script_path):
+            raise FileNotFoundError(
+                f"Fixed detection flow graph not found: {script_path}"
+            )
+
+        return script_path
+
     async def run(self) -> None:
         """Run the Fixed Detection operation."""
 
@@ -74,14 +92,13 @@ class OperationMain(Operation):
 
         configured_freq_hz = self.freq_mhz * 1_000_000.0
 
-        script_path = os.path.join(
-            FLOW_GRAPH_DIR,
-            "fixed_threshold_b2x0.py",
-        )
-
-        if not os.path.isfile(script_path):
-            self.logger.error(f"Fixed detection flow graph not found: {script_path}")
+        try:
+            script_path = self._resolve_flow_graph_path()
+        except FileNotFoundError as exc:
+            self.logger.error(str(exc))
             return
+
+        flow_graph_dir = os.path.dirname(script_path)
 
         cmd = [
             sys.executable,
@@ -91,11 +108,12 @@ class OperationMain(Operation):
             str(configured_freq_hz),
         ]
 
+        self.logger.info(f"Using fixed detection flow graph: {script_path}")
         self.logger.info(f"Starting fixed detection flow graph: {' '.join(cmd)}")
 
         process = await asyncio.create_subprocess_exec(
             *cmd,
-            cwd=FLOW_GRAPH_DIR,
+            cwd=flow_graph_dir,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )

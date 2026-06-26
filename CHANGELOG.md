@@ -9,6 +9,8 @@ Fixing installer style sheet bugs.
 
 - Updated Contributions section in the README
 - Moved idea_list.md to ./docs/gsoc/2023_project_ideas.md
+- Moved Base plugin detection flow graphs into GNU Radio version-specific `maint-3.8` and `maint-3.10` folders.
+- Updated Base fixed detection, LFM beacon detection, and LFM beacon geolocation operations to resolve flow graph paths using the active GNU Radio maint version.
 
 ### Fixed
 
