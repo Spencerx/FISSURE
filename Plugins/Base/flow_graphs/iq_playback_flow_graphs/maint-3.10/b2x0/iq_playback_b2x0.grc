@@ -401,6 +401,23 @@ blocks:
     coordinate: [1216, 568.0]
     rotation: 0
     state: enabled
+- name: tx_antenna
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: str
+    value: '"TX/RX"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1216, 656.0]
+    rotation: 0
+    state: enabled
 - name: tx_channel
   id: parameter
   parameters:
@@ -457,7 +474,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    ant0: TX/RX
+    ant0: str(tx_antenna)
     ant1: ''
     ant10: ''
     ant11: ''

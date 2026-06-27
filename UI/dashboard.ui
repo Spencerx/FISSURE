@@ -3900,715 +3900,8 @@
 }*/</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
-     <widget class="QWidget" name="tab_18">
-      <attribute name="title">
-       <string>Automation</string>
-      </attribute>
-      <widget class="QLabel" name="label1_44">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>55</y>
-         <width>270</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Ubuntu</family>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Detector</string>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="margin">
-        <number>0</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label1_45">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>125</y>
-         <width>270</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Ubuntu</family>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Conditioner</string>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="margin">
-        <number>0</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label1_46">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>205</y>
-         <width>270</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Ubuntu</family>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Feature Extractor</string>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="margin">
-        <number>0</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label1_47">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>275</y>
-         <width>270</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Ubuntu</family>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Classifier</string>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="margin">
-        <number>0</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label1_48">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>345</y>
-         <width>270</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Ubuntu</family>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Direction Finding</string>
-       </property>
-       <property name="scaledContents">
-        <bool>false</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="margin">
-        <number>0</number>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>85</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Enable</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_2">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>165</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Enable</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_3">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>240</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Enable</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_4">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>310</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Enable</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_5">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>375</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Enable</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation">
-       <property name="geometry">
-        <rect>
-         <x>265</x>
-         <y>85</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Hardware:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_2">
-       <property name="geometry">
-        <rect>
-         <x>480</x>
-         <y>85</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Detector Method:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_3">
-       <property name="geometry">
-        <rect>
-         <x>690</x>
-         <y>85</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Preset:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_4">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>165</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Hardware:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_5">
-       <property name="geometry">
-        <rect>
-         <x>465</x>
-         <y>165</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Isolation Category:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_6">
-       <property name="geometry">
-        <rect>
-         <x>650</x>
-         <y>165</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Isolation Method:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_7">
-       <property name="geometry">
-        <rect>
-         <x>805</x>
-         <y>165</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Preset:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_8">
-       <property name="geometry">
-        <rect>
-         <x>940</x>
-         <y>85</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Edit:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_9">
-       <property name="geometry">
-        <rect>
-         <x>945</x>
-         <y>165</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Edit:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_10">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>240</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>All Features:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_11">
-       <property name="geometry">
-        <rect>
-         <x>650</x>
-         <y>240</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Model:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_12">
-       <property name="geometry">
-        <rect>
-         <x>500</x>
-         <y>240</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Technique:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_13">
-       <property name="geometry">
-        <rect>
-         <x>880</x>
-         <y>240</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Input Files:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label2_tsi_automation_14">
-       <property name="geometry">
-        <rect>
-         <x>260</x>
-         <y>310</y>
-         <width>136</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Models:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_under_construction">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>240</y>
-         <width>1000</width>
-         <height>550</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_6">
-       <property name="geometry">
-        <rect>
-         <x>395</x>
-         <y>25</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Repeat</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_7">
-       <property name="geometry">
-        <rect>
-         <x>520</x>
-         <y>25</y>
-         <width>92</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Stop After</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton">
-       <property name="geometry">
-        <rect>
-         <x>1115</x>
-         <y>85</y>
-         <width>89</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="geometry">
-        <rect>
-         <x>1115</x>
-         <y>160</y>
-         <width>89</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="geometry">
-        <rect>
-         <x>1115</x>
-         <y>235</y>
-         <width>89</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="geometry">
-        <rect>
-         <x>1115</x>
-         <y>315</y>
-         <width>89</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_5">
-       <property name="geometry">
-        <rect>
-         <x>1110</x>
-         <y>380</y>
-         <width>89</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_6">
-       <property name="geometry">
-        <rect>
-         <x>630</x>
-         <y>555</y>
-         <width>89</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-      <zorder>label1_44</zorder>
-      <zorder>label1_45</zorder>
-      <zorder>label1_46</zorder>
-      <zorder>label1_47</zorder>
-      <zorder>label1_48</zorder>
-      <zorder>checkBox</zorder>
-      <zorder>checkBox_2</zorder>
-      <zorder>checkBox_3</zorder>
-      <zorder>checkBox_4</zorder>
-      <zorder>checkBox_5</zorder>
-      <zorder>label2_tsi_automation</zorder>
-      <zorder>label2_tsi_automation_2</zorder>
-      <zorder>label2_tsi_automation_3</zorder>
-      <zorder>label2_tsi_automation_4</zorder>
-      <zorder>label2_tsi_automation_5</zorder>
-      <zorder>label2_tsi_automation_6</zorder>
-      <zorder>label2_tsi_automation_7</zorder>
-      <zorder>label2_tsi_automation_8</zorder>
-      <zorder>label2_tsi_automation_9</zorder>
-      <zorder>label2_tsi_automation_10</zorder>
-      <zorder>label2_tsi_automation_11</zorder>
-      <zorder>label2_tsi_automation_12</zorder>
-      <zorder>label2_tsi_automation_13</zorder>
-      <zorder>label2_tsi_automation_14</zorder>
-      <zorder>checkBox_6</zorder>
-      <zorder>checkBox_7</zorder>
-      <zorder>pushButton</zorder>
-      <zorder>pushButton_2</zorder>
-      <zorder>pushButton_3</zorder>
-      <zorder>pushButton_4</zorder>
-      <zorder>pushButton_5</zorder>
-      <zorder>pushButton_6</zorder>
-      <zorder>label_under_construction</zorder>
-     </widget>
      <widget class="QWidget" name="tab_tsi_detector">
       <attribute name="title">
        <string>Detector</string>
@@ -6196,7 +5489,7 @@ p, li { white-space: pre-wrap; }
            <x>620</x>
            <y>35</y>
            <width>200</width>
-           <height>245</height>
+           <height>250</height>
           </rect>
          </property>
          <property name="currentIndex">
@@ -6209,7 +5502,7 @@ p, li { white-space: pre-wrap; }
              <x>5</x>
              <y>0</y>
              <width>185</width>
-             <height>220</height>
+             <height>250</height>
             </rect>
            </property>
            <property name="frameShape">
@@ -6442,7 +5735,7 @@ p, li { white-space: pre-wrap; }
              </rect>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>4</number>
             </property>
             <item>
              <property name="text">
@@ -6469,6 +5762,62 @@ p, li { white-space: pre-wrap; }
               <string>1e6</string>
              </property>
             </item>
+           </widget>
+           <widget class="QLabel" name="label2_294">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>195</y>
+              <width>100</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Min. Interval (s):</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_tsi_detector_fixed_min_interval">
+            <property name="geometry">
+             <rect>
+              <x>105</x>
+              <y>190</y>
+              <width>70</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>99999.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="checkBox_tsi_detector_fixed_gui">
+            <property name="geometry">
+             <rect>
+              <x>55</x>
+              <y>220</y>
+              <width>92</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Show GUI</string>
+            </property>
            </widget>
           </widget>
          </widget>
@@ -37062,7 +36411,7 @@ p, li { white-space: pre-wrap; }
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab_20">
       <attribute name="title">

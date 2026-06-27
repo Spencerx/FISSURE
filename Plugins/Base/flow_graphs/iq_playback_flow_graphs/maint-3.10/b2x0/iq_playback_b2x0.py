@@ -26,7 +26,7 @@ import time
 
 class iq_playback_b2x0(gr.top_block):
 
-    def __init__(self, filepath="", ip_address="192.168.40.2", sample_rate="4", serial="False", tx_channel="A:A", tx_frequency="2425.715", tx_gain="70"):
+    def __init__(self, filepath="", ip_address="192.168.40.2", sample_rate="4", serial="False", tx_antenna="TX/RX", tx_channel="A:A", tx_frequency="2425.715", tx_gain="70"):
         gr.top_block.__init__(self, "Iq Playback B2X0", catch_exceptions=True)
 
         ##################################################
@@ -36,6 +36,7 @@ class iq_playback_b2x0(gr.top_block):
         self.ip_address = ip_address
         self.sample_rate = sample_rate
         self.serial = serial
+        self.tx_antenna = tx_antenna
         self.tx_channel = tx_channel
         self.tx_frequency = tx_frequency
         self.tx_gain = tx_gain
@@ -58,7 +59,7 @@ class iq_playback_b2x0(gr.top_block):
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec(0))
 
         self.uhd_usrp_sink_0.set_center_freq(float(tx_frequency)*1e6, 0)
-        self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_sink_0.set_antenna(str(tx_antenna), 0)
         self.uhd_usrp_sink_0.set_gain(float(tx_gain), 0)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, filepath, True, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
@@ -95,6 +96,13 @@ class iq_playback_b2x0(gr.top_block):
 
     def set_serial(self, serial):
         self.serial = serial
+
+    def get_tx_antenna(self):
+        return self.tx_antenna
+
+    def set_tx_antenna(self, tx_antenna):
+        self.tx_antenna = tx_antenna
+        self.uhd_usrp_sink_0.set_antenna(str(self.tx_antenna), 0)
 
     def get_tx_channel(self):
         return self.tx_channel
@@ -133,6 +141,9 @@ def argument_parser():
         "--serial", dest="serial", type=str, default="False",
         help="Set serial [default=%(default)r]")
     parser.add_argument(
+        "--tx-antenna", dest="tx_antenna", type=str, default="TX/RX",
+        help="Set tx_antenna [default=%(default)r]")
+    parser.add_argument(
         "--tx-channel", dest="tx_channel", type=str, default="A:A",
         help="Set tx_channel [default=%(default)r]")
     parser.add_argument(
@@ -147,7 +158,7 @@ def argument_parser():
 def main(top_block_cls=iq_playback_b2x0, options=None):
     if options is None:
         options = argument_parser().parse_args()
-    tb = top_block_cls(filepath=options.filepath, ip_address=options.ip_address, sample_rate=options.sample_rate, serial=options.serial, tx_channel=options.tx_channel, tx_frequency=options.tx_frequency, tx_gain=options.tx_gain)
+    tb = top_block_cls(filepath=options.filepath, ip_address=options.ip_address, sample_rate=options.sample_rate, serial=options.serial, tx_antenna=options.tx_antenna, tx_channel=options.tx_channel, tx_frequency=options.tx_frequency, tx_gain=options.tx_gain)
 
     def sig_handler(sig=None, frame=None):
         tb.stop()

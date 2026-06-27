@@ -34,6 +34,12 @@ class OperationMain(Operation):
         self,
         freq_mhz: float = 915.0,
         min_detection_interval_s: float = 10.0,
+        run_mode: str = "headless",
+        sample_rate: float = 1000000.0,
+        threshold: float = -60.0,
+        gain: float = 65.0,
+        channel: str = "A:A",
+        antenna: str = "TX/RX",
         description: str = "Fixed detection",
         node_uid: str = "",
         logger: logging.Logger = logging.getLogger(__name__),
@@ -49,6 +55,14 @@ class OperationMain(Operation):
 
         self.freq_mhz = float(freq_mhz)
         self.min_detection_interval_s = float(min_detection_interval_s)
+        self.run_mode = str(run_mode or "headless").strip().lower()
+        if self.run_mode not in {"headless", "gui"}:
+            self.run_mode = "headless"
+        self.sample_rate = float(sample_rate)
+        self.threshold = float(threshold)
+        self.gain = float(gain)
+        self.channel = str(channel or "A:A")
+        self.antenna = str(antenna or "TX/RX")
         self.description = description or "Fixed detection"
 
         self.resource_args = {
@@ -56,7 +70,14 @@ class OperationMain(Operation):
         }
 
         self.logger.info(
-            f"fixed_detection init params: freq_mhz={self.freq_mhz}, "
+            f"fixed_detection init params: "
+            f"freq_mhz={self.freq_mhz}, "
+            f"run_mode={self.run_mode}, "
+            f"sample_rate={self.sample_rate}, "
+            f"threshold={self.threshold}, "
+            f"gain={self.gain}, "
+            f"channel={self.channel}, "
+            f"antenna={self.antenna}, "
             f"min_detection_interval_s={self.min_detection_interval_s}, "
             f"description={self.description}"
         )
@@ -73,6 +94,8 @@ class OperationMain(Operation):
         script_path = os.path.join(
             FLOW_GRAPH_BASE_DIR,
             version,
+            "b2x0",
+            self.run_mode,
             "fixed_threshold_b2x0.py",
         )
 
@@ -86,7 +109,7 @@ class OperationMain(Operation):
     async def run(self) -> None:
         """Run the Fixed Detection operation."""
 
-        alert_interval_s = self.min_detection_interval_s
+        alert_interval_s = float(self.min_detection_interval_s)
         last_alert_time = 0.0
         cb_timeout_s = 2.0
 
@@ -106,6 +129,18 @@ class OperationMain(Operation):
             script_path,
             "--rx-freq-default",
             str(configured_freq_hz),
+            "--sample-rate-default",
+            str(self.sample_rate),
+            "--threshold-default",
+            str(self.threshold),
+            "--gain-default",
+            str(self.gain),
+            "--channel-default",
+            str(self.channel),
+            "--antenna-default",
+            str(self.antenna),
+            "--min-interval",
+            str(self.min_detection_interval_s),
         ]
 
         self.logger.info(f"Using fixed detection flow graph: {script_path}")
@@ -182,7 +217,7 @@ class OperationMain(Operation):
                     continue
 
                 last_alert_time = now
-                ts = time.time()
+                ts = now
 
                 detection = {
                     "kind": "detection",
