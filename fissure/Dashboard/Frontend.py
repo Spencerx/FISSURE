@@ -184,6 +184,7 @@ class Dashboard(QtWidgets.QMainWindow):
         self.ui.frame_top_configure_node.style().polish(self.ui.frame_top_configure_node)
 
         # TSI Fixed detector workbench state
+        self.ui.label_tsi_detector_fixed_select_sensor_node_image.setPixmap(QtGui.QPixmap(os.path.join(fissure.utils.UI_DIR, "Icons", "select_node.png")))
         self.tsi_fixed_detector_running = False
         self.tsi_fixed_detector_node_uid = ""
         self.tsi_fixed_detector_opid = ""
@@ -704,6 +705,10 @@ class Dashboard(QtWidgets.QMainWindow):
 
         # Update Detector Settings
         TSITabSlots._slotTSI_DetectorChanged(self)
+        TSITabSlots._slotTSI_DetectorFixedChanged(self)
+
+        # Gate Fixed detector controls until a Sensor Node is selected.
+        TSITabSlots.update_tsi_fixed_detector_node_gate(self)
 
         # Default Detector Simulator File
         self.ui.textEdit_tsi_detector_csv_file.setPlainText(
@@ -1544,8 +1549,8 @@ class Dashboard(QtWidgets.QMainWindow):
         """
         Needed to shut down Server with async function in StatusBarSlots when closing the Dashboard.
         """
-        # Shut down local sensor node launched from new top-bar workflow
-        await self.stop_new_local_sensor_node_process()
+        # Shut down local sensor node launched from the top-bar workflow.
+        await TopBarSlots.stopLocalSensorNode(self, remove_from_hiprfisr=True)
        
         # Shut Down Local HIPRFISR, Disconnect from Remote HIPRFISR
         if self.backend.settings["auto_connect_hiprfisr"] == True:
@@ -1571,47 +1576,6 @@ class Dashboard(QtWidgets.QMainWindow):
         self.close()
 
 
-    async def stop_new_local_sensor_node_process(self):
-        """
-        Stop the local sensor node process launched from the new top-bar workflow.
-        """
-        proc = getattr(self, "local_sensor_node_process", None)
-
-        if proc is None:
-            return
-
-        if proc.poll() is not None:
-            self.local_sensor_node_process = None
-            return
-
-        self.logger.info("Stopping new local sensor node process...")
-
-        try:
-            os.killpg(proc.pid, signal.SIGTERM)
-        except ProcessLookupError:
-            pass
-        except Exception as e:
-            self.logger.warning(f"Failed to terminate local sensor node process group: {e}")
-            proc.terminate()
-
-        try:
-            proc.wait(timeout=3)
-        except subprocess.TimeoutExpired:
-            self.logger.warning("Local sensor node did not stop cleanly. Killing it.")
-
-            try:
-                os.killpg(proc.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            except Exception as e:
-                self.logger.warning(f"Failed to kill local sensor node process group: {e}")
-                proc.kill()
-
-            proc.wait(timeout=3)
-
-        self.local_sensor_node_process = None
-
-
     def configureTSI_Hardware(self):
         """
         Configures TSI after new selected sensor node selection.
@@ -1620,31 +1584,41 @@ class Dashboard(QtWidgets.QMainWindow):
         self.ui.comboBox_tsi_detector_fixed_hardware.clear()
         self.ui.comboBox_tsi_conditioner_settings_isolation_hardware.clear()
 
-        if not self.selected_node_uid:
-            return
+        try:
+            if not self.selected_node_uid:
+                self.ui.checkBox_tsi_detector_fixed_gui.setEnabled(False)
+                self.ui.checkBox_tsi_detector_fixed_gui.setChecked(False)
+                return
 
-        get_sensor_node_hardware = (
-            fissure.utils.hardware.selectedNodeHardwareDisplayNames(
-                self,
-                "tsi",
+            get_sensor_node_hardware = (
+                fissure.utils.hardware.selectedNodeHardwareDisplayNames(
+                    self,
+                    "tsi",
+                )
             )
-        )
 
-        self.ui.comboBox_tsi_detector_sweep_hardware.addItems(get_sensor_node_hardware)
-        self.ui.comboBox_tsi_detector_fixed_hardware.addItems(get_sensor_node_hardware)
-        self.ui.comboBox_tsi_conditioner_settings_isolation_hardware.addItems(get_sensor_node_hardware)
+            self.ui.comboBox_tsi_detector_sweep_hardware.addItems(get_sensor_node_hardware)
+            self.ui.comboBox_tsi_detector_fixed_hardware.addItems(get_sensor_node_hardware)
+            self.ui.comboBox_tsi_conditioner_settings_isolation_hardware.addItems(get_sensor_node_hardware)
 
-        # Refresh Detector Advanced Settings
-        TSITabSlots._slotTSI_DetectorChanged(self)
+            # Refresh Detector Advanced Settings
+            TSITabSlots._slotTSI_DetectorChanged(self)
+            TSITabSlots._slotTSI_DetectorFixedChanged(self)
 
-        # Fixed Detector Show GUI Checkbox
-        is_local = selected_node_is_local(self)
-        print("AAAAAAAAAAAA")
-        print(is_local)
-        self.ui.checkBox_tsi_detector_fixed_gui.setEnabled(is_local)
+            # Fixed Detector Show GUI Checkbox
+            is_local = selected_node_is_local(self)
+            self.ui.checkBox_tsi_detector_fixed_gui.setEnabled(is_local)
 
-        if not is_local:
-            self.ui.checkBox_tsi_detector_fixed_gui.setChecked(False)
+            if not is_local:
+                self.ui.checkBox_tsi_detector_fixed_gui.setChecked(False)
+
+        finally:
+            try:
+                TSITabSlots.update_tsi_fixed_detector_node_gate(self)
+            except Exception as e:
+                self.logger.debug(
+                    f"Could not update TSI Fixed detector selected-node gate: {e}"
+                )
 
 
     def configurePD_Hardware(self):

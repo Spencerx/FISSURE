@@ -2086,6 +2086,13 @@ async def nodeStateUpdate(component: object, node_uid="", node={}):
         if hasattr(frontend, "selected_tactical_node_uid"):
             TacticalTabSlots._updateTacticalNodeInfoFrameState(frontend)
 
+        try:
+            frontend.configureSelectedNodeHardware()
+        except Exception as e:
+            component.logger.debug(
+                f"Could not refresh selected-node hardware after node state update: {e}"
+            )
+
     try:
         TSITabSlots.reconcile_tsi_fixed_detector_state(
             frontend,
@@ -2204,6 +2211,17 @@ async def nodeStateRemove(component: object, node_uid=""):
         component.logger.debug(
             f"Could not refresh Tactical node info frame after removal: {e}"
         )
+
+    # ---------------------------------------------------------
+    # Top-bar selected node cleanup
+    # ---------------------------------------------------------
+    if getattr(frontend, "selected_node_uid", "") == node_uid:
+        try:
+            TopBarSlots.clearSelectedNode(frontend)
+        except Exception as e:
+            component.logger.debug(
+                f"Could not clear selected node after node removal: {e}"
+            )
 
     component.logger.debug(f"nodeStateRemove: {node_uid}")
 

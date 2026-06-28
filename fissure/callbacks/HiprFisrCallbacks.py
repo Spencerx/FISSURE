@@ -774,34 +774,6 @@ async def foundPreamblesInLibrary(component: object, parameters={}):
 # ############################ To TSI ####################################
 
 
-async def addBlacklist(component: object, start_frequency=0, end_frequency=0):
-    """
-    Forwards Add Blacklist message to TSI.
-    """
-    # Send Message to TSI
-    PARAMETERS = {"start_frequency": start_frequency, "end_frequency": end_frequency}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "addBlacklist",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.backend_router.send_msg(fissure.comms.MessageTypes.COMMANDS, msg, target_ids=[component.tsi_id])
-
-
-async def removeBlacklist(component: object, start_frequency=0, end_frequency=0):
-    """
-    Forwards Remove Blacklist message to TSI.
-    """
-    # Send Message to TSI
-    PARAMETERS = {"start_frequency": start_frequency, "end_frequency": end_frequency}
-    msg = {
-        fissure.comms.MessageFields.IDENTIFIER: component.identifier,
-        fissure.comms.MessageFields.MESSAGE_NAME: "removeBlacklist",
-        fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-    }
-    await component.backend_router.send_msg(fissure.comms.MessageTypes.COMMANDS, msg, target_ids=[component.tsi_id])
-
-
 async def startTSI_FE(component: object, common_parameter_names=[], common_parameter_values=[]):
     """
     Signals to TSI to start TSI feature extractor.

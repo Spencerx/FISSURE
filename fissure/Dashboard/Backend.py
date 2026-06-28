@@ -1541,42 +1541,6 @@ class DashboardBackend:
             }
             await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
 
-
-    async def addBlacklist(self, start_frequency=0, end_frequency=0):
-        """
-        Forwards Add Blacklist message to TSI.
-        """
-        # Send the Message
-        if self.hiprfisr_connected is True:
-            PARAMETERS = {
-                "start_frequency": start_frequency,
-                "end_frequency": end_frequency,
-            }
-            msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "addBlacklist",
-                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-            }
-            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
-
-    async def removeBlacklist(self, start_frequency=0, end_frequency=0):
-        """
-        Forwards Remove Blacklist message to TSI.
-        """
-        # Send the Message
-        if self.hiprfisr_connected is True:
-            PARAMETERS = {
-                "start_frequency": start_frequency,
-                "end_frequency": end_frequency,
-            }
-            msg = {
-                    fissure.comms.MessageFields.IDENTIFIER: fissure.comms.Identifiers.DASHBOARD,
-                    fissure.comms.MessageFields.MESSAGE_NAME: "removeBlacklist",
-                    fissure.comms.MessageFields.PARAMETERS: PARAMETERS,
-            }
-            await self.hiprfisr_socket.send_msg(fissure.comms.MessageTypes.COMMANDS, msg)
-
     
     async def startTSI_Detector(self, node_uid="", detector="", variable_names=[], variable_values=[], detector_port=0):
         """

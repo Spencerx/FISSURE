@@ -1,6 +1,30 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-6-28
+
+Improve TSI Fixed detector plotting and selected-node gating.
+
+### Added
+
+- Added a Fixed detector raster plot for visualizing detections by frequency and elapsed time.
+- Added a Fixed detector unavailable-node state for when no online sensor node is selected.
+- Added selected-node gating for Fixed detector controls to prevent starting detection without usable node hardware.
+
+### Changed
+
+- Reworked the Fixed detector blacklist as a Dashboard-side frequency filter for detector results, conditioner input, and plot updates.
+- Reworked Fixed detector plotting to use plugin-action detection reports instead of the legacy wideband detector plot path.
+- Updated Fixed detector plot styling for light, dark, and custom Dashboard themes.
+- Updated selected-node cleanup so local and remote node availability changes refresh TSI hardware-dependent controls.
+
+### Fixed
+
+- Fixed Fixed detector results and plot updates not being scoped to the selected sensor node.
+- Fixed stale Fixed detector controls remaining available after the selected node disconnected or was removed.
+- Fixed local sensor node stop leaving node-dependent TSI controls populated with stale hardware.
+- Fixed Fixed detector result clearing only clearing the table instead of also clearing plotted detections.
+
 ## 2026-6-27
 
 Migrate fixed detector tab to plugin action workflow.

@@ -45,6 +45,9 @@ from fissure.utils.selected_node_utils import (
     selected_node_is_remote,
 )
 
+from collections import deque
+from matplotlib.collections import LineCollection
+
 
 @QtCore.pyqtSlot(QtCore.QObject)
 def _slotTSI_DetectorChanged(dashboard: QtCore.QObject):
@@ -2932,11 +2935,20 @@ def _slotTSI_FE_ResultsRemoveColClicked(dashboard: QtCore.QObject):
 
 @qasync.asyncSlot(QtCore.QObject)
 async def _slotTSI_ClearWidebandListClicked(dashboard: QtCore.QObject):
-    """ 
-    Clears the Wideband list on the Dashboard and in the HIPRFISR
     """
-    dashboard.ui.tableWidget1_tsi_wideband.clearContents()
-    dashboard.ui.tableWidget1_tsi_wideband.setRowCount(0)
+    Clears the TSI detector results list.
+
+    In Fixed detector mode, also clears the raster points without resetting
+    elapsed operation time. In Sweep mode, preserves the existing backend
+    wideband-list clear behavior.
+    """
+    for table in _tsi_fixed_results_tables(dashboard):
+        table.clearContents()
+        table.setRowCount(0)
+
+    if getattr(dashboard, "tsi_fixed_detector_running", False) or hasattr(dashboard, "tsi_fixed_plot_events"):
+        _tsi_fixed_plot_clear_points(dashboard)
+
     await dashboard.backend.clearWidebandList()
 
 
@@ -2972,26 +2984,86 @@ async def _slotTSI_UpdateTSI_Clicked(dashboard: QtCore.QObject):
     await dashboard.backend.updateConfiguration(dashboard.selected_node_uid, start_frequency, end_frequency, step_size, dwell_time, detector_port)
 
 
+def _tsi_blacklist_ranges_mhz(dashboard: QtCore.QObject):
+    ranges = []
+
+    list_widget = dashboard.ui.listWidget_tsi_blacklist
+
+    for row in range(list_widget.count()):
+        item = list_widget.item(row)
+        if item is None:
+            continue
+
+        text = str(item.text()).strip()
+
+        try:
+            start_text, end_text = text.split("-", 1)
+            start_mhz = float(start_text.strip())
+            end_mhz = float(end_text.strip())
+        except Exception:
+            continue
+
+        low_mhz = min(start_mhz, end_mhz)
+        high_mhz = max(start_mhz, end_mhz)
+
+        ranges.append((low_mhz, high_mhz))
+
+    return ranges
+
+
+def _tsi_frequency_is_blacklisted(
+    dashboard: QtCore.QObject,
+    frequency_mhz: float,
+) -> bool:
+    try:
+        frequency_mhz = float(frequency_mhz)
+    except Exception:
+        return False
+
+    for start_mhz, end_mhz in _tsi_blacklist_ranges_mhz(dashboard):
+        if start_mhz <= frequency_mhz <= end_mhz:
+            return True
+
+    return False
+
+
 @qasync.asyncSlot(QtCore.QObject)
 async def _slotTSI_BlacklistAddClicked(dashboard: QtCore.QObject):
     """ 
     Adds frequency range for TSI to ignore to list widget and sends message to TSI.
     """
-    # Get the Start and End Frequencies
-    start_freq = dashboard.ui.textEdit_tsi_ignore_start.toPlainText()
-    end_freq = dashboard.ui.textEdit_tsi_ignore_end.toPlainText()
-    start_freq_hz = str(float(start_freq)*1e6)
-    end_freq_hz = str(float(end_freq)*1e6)
+    start_text = str(dashboard.ui.textEdit_tsi_ignore_start.toPlainText()).strip()
+    end_text = str(dashboard.ui.textEdit_tsi_ignore_end.toPlainText()).strip()
 
-    # Valid Selection
-    # if a number, if end_freq > start_freq, if none are blank
+    try:
+        start_freq = float(start_text)
+        end_freq = float(end_text)
+    except Exception:
+        await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(
+            dashboard,
+            "Enter valid blacklist start and end frequencies in MHz.",
+        )
+        return
 
-    # Add it to the TSI Blacklist List Widget
-    dashboard.ui.listWidget_tsi_blacklist.addItem(start_freq + "-" + end_freq)
+    if start_freq == end_freq:
+        await fissure.Dashboard.UI_Components.Qt5.async_ok_dialog(
+            dashboard,
+            "Blacklist start and end frequencies cannot be the same.",
+        )
+        return
+
+    low_freq = min(start_freq, end_freq)
+    high_freq = max(start_freq, end_freq)
+
+    item_text = f"{low_freq:g}-{high_freq:g}"
+
+    for row in range(dashboard.ui.listWidget_tsi_blacklist.count()):
+        existing = dashboard.ui.listWidget_tsi_blacklist.item(row)
+        if existing is not None and existing.text() == item_text:
+            return
+
+    dashboard.ui.listWidget_tsi_blacklist.addItem(item_text)
     dashboard.ui.pushButton_tsi_blacklist_remove.setEnabled(True)
-
-    # Inform the HIPRFISR
-    await dashboard.backend.addBlacklist(start_freq_hz, end_freq_hz)
 
 
 @qasync.asyncSlot(QtCore.QObject)
@@ -2999,19 +3071,30 @@ async def _slotTSI_BlacklistRemoveClicked(dashboard: QtCore.QObject):
     """ 
     Removes frequency range item for TSI to ignore from the list widget and sends message to TSI.
     """
-    # Get the Values in the Current Row
-    start_freq = str(dashboard.ui.listWidget_tsi_blacklist.currentItem().text()).split("-")[0]
-    end_freq = str(dashboard.ui.listWidget_tsi_blacklist.currentItem().text()).split("-")[1]
-    start_freq_hz = str(float(start_freq)*1e6)
-    end_freq_hz = str(float(end_freq)*1e6)
+    current_item = dashboard.ui.listWidget_tsi_blacklist.currentItem()
 
-    # Remove it from the TSI Blacklist List Widget
-    dashboard.ui.listWidget_tsi_blacklist.takeItem(dashboard.ui.listWidget_tsi_blacklist.currentRow())
+    if current_item is None:
+        return
 
-    # Inform the HIPRFISR
-    await dashboard.backend.removeBlacklist(start_freq_hz, end_freq_hz)
+    try:
+        start_text, end_text = str(current_item.text()).split("-", 1)
+        start_freq = float(start_text.strip())
+        end_freq = float(end_text.strip())
+    except Exception:
+        dashboard.ui.listWidget_tsi_blacklist.takeItem(
+            dashboard.ui.listWidget_tsi_blacklist.currentRow()
+        )
 
-    # Disable the Pusbuttons
+        if dashboard.ui.listWidget_tsi_blacklist.count() == 0:
+            dashboard.ui.pushButton_tsi_blacklist_remove.setEnabled(False)
+            dashboard.ui.pushButton_tsi_update.setEnabled(False)
+
+        return
+
+    dashboard.ui.listWidget_tsi_blacklist.takeItem(
+        dashboard.ui.listWidget_tsi_blacklist.currentRow()
+    )
+
     if dashboard.ui.listWidget_tsi_blacklist.count() == 0:
         dashboard.ui.pushButton_tsi_blacklist_remove.setEnabled(False)
         dashboard.ui.pushButton_tsi_update.setEnabled(False)
@@ -3213,13 +3296,19 @@ async def _slotTSI_DetectorStartClicked(dashboard: QtCore.QObject):
 
 def detectorPlotLoop(dashboard: QtCore.QObject):
     """
-    Continously loops to plot the detector waterfall plot when the detector is active.
+    Continously loops to plot the detector waterfall plot when the sweep detector is active.
+
+    Fixed detector plotting is handled separately by the fixed detector raster helpers.
     """
     # Plot and Draw Incoming Wideband Signals When Running Detector
     total_time = 0
     loop_time_interval = 1  # in seconds
     wideband_time_interval = 1
-    while ((dashboard.ui.pushButton_tsi_detector_start.text() == "Stop") or (dashboard.ui.pushButton_tsi_detector_fixed_start.text() == "Stop")) and (dashboard.all_closed_down == False):
+
+    while (
+        dashboard.ui.pushButton_tsi_detector_start.text() == "Stop"
+        and dashboard.all_closed_down == False
+    ):
         # Single Loop Start Time
         start_time = time.time()
 
@@ -3231,37 +3320,66 @@ def detectorPlotLoop(dashboard: QtCore.QObject):
 
         # Plot
         dashboard.matplotlib_widget.axes.cla()
-        dashboard.matplotlib_widget.axes.imshow(dashboard.wideband_data, cmap='rainbow', clim=(-100,30), extent=[0,1201,801,0])
+        dashboard.matplotlib_widget.axes.imshow(
+            dashboard.wideband_data,
+            cmap='rainbow',
+            clim=(-100, 30),
+            extent=[0, 1201, 801, 0],
+        )
+
         if dashboard.wideband_zoom == True:
-            dashboard.matplotlib_widget.configureAxesZoom1(dashboard.wideband_zoom_start, dashboard.wideband_zoom_end, dashboard.wideband_height)
+            dashboard.matplotlib_widget.configureAxesZoom1(
+                dashboard.wideband_zoom_start,
+                dashboard.wideband_zoom_end,
+                dashboard.wideband_height,
+            )
         else:
             dashboard.matplotlib_widget.configureAxes(
                 title='Detector History',
                 xlabel='Frequency (MHz)',
-                ylabel='Time Elapsed (s)', 
-                xlabels=['0', '','1000', '', '2000', '', '3000', '', '4000', '', '5000', '', '6000'],
+                ylabel='Time Elapsed (s)',
+                xlabels=['0', '', '1000', '', '2000', '', '3000', '', '4000', '', '5000', '', '6000'],
                 ylabels=['0', '5', '10', '15', '20', '25', '30', '35', '40'],
                 ylim=dashboard.wideband_height,
                 background_color=dashboard.backend.settings['color1'],
                 face_color=dashboard.backend.settings['color5'],
-                text_color=dashboard.backend.settings['color4'])
+                text_color=dashboard.backend.settings['color4'],
+            )
+
         dashboard.matplotlib_widget.draw()
 
         # Shift Wideband Rows Down
         if (total_time % wideband_time_interval == 0) and (total_time != 0):
             # Wideband Detector Background Color
-            rgb = tuple(int(dashboard.backend.settings['color2'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
-            background_color = (float(rgb[0])/255, float(rgb[1])/255, float(rgb[2])/255)
+            rgb = tuple(
+                int(dashboard.backend.settings['color2'].lstrip('#')[i:i + 2], 16)
+                for i in (0, 2, 4)
+            )
+            background_color = (
+                float(rgb[0]) / 255,
+                float(rgb[1]) / 255,
+                float(rgb[2]) / 255,
+            )
 
             shift = 20
-            dashboard.wideband_data[shift:dashboard.wideband_height-1 , 0:dashboard.wideband_width-1] = dashboard.wideband_data[0:dashboard.wideband_height-1-shift, 0:dashboard.wideband_width-1]
-            dashboard.wideband_data[0:shift, 0:dashboard.wideband_width-1] = background_color
+            dashboard.wideband_data[
+                shift:dashboard.wideband_height - 1,
+                0:dashboard.wideband_width - 1,
+            ] = dashboard.wideband_data[
+                0:dashboard.wideband_height - 1 - shift,
+                0:dashboard.wideband_width - 1,
+            ]
+
+            dashboard.wideband_data[
+                0:shift,
+                0:dashboard.wideband_width - 1,
+            ] = background_color
 
         # Update the Total Time
         total_time = total_time + loop_time_interval
 
         # Sleep the Remainder of the Time Interval
-        time_difference = loop_time_interval-(time.time()-start_time)
+        time_difference = loop_time_interval - (time.time() - start_time)
         if time_difference > 0:
             time.sleep(time_difference)
 
@@ -3301,19 +3419,542 @@ def _tsi_fixed_run_mode(dashboard: QtCore.QObject) -> str:
     return "headless"
 
 
+def update_tsi_fixed_detector_node_gate(dashboard: QtCore.QObject):
+    """
+    Shows the Fixed detector controls only when a selected Sensor Node exists
+    and is currently connected.
+
+    stackedWidget_tsi_detector_fixed:
+        page 0 = normal Fixed detector controls
+        page 1 = no Sensor Node selected / unavailable empty-state page
+    """
+    selected_uid = getattr(dashboard, "selected_node_uid", "") or ""
+    has_selected_node = bool(selected_uid)
+
+    if has_selected_node:
+        node_states = getattr(dashboard, "node_states", {}) or {}
+        node_state = node_states.get(selected_uid)
+
+        # If we have a state record and it explicitly says disconnected,
+        # treat the node as unavailable. If there is no state yet, allow it:
+        # recallSettingsReturn just selected it and populated settings.
+        if isinstance(node_state, dict) and node_state.get("connected") is False:
+            has_selected_node = False
+
+    stack = getattr(dashboard.ui, "stackedWidget_tsi_detector_fixed", None)
+    if stack is not None:
+        stack.setCurrentIndex(0 if has_selected_node else 1)
+
+    # If the detector is already running, leave Stop/control state alone.
+    if getattr(dashboard, "tsi_fixed_detector_running", False):
+        return
+
+    start_button = getattr(dashboard.ui, "pushButton_tsi_detector_fixed_start", None)
+    if start_button is not None:
+        start_button.setEnabled(has_selected_node)
+        start_button.setText("Start")
+
+    settings_frame = getattr(dashboard.ui, "frame_tsi_detector_fixed_settings1", None)
+    if settings_frame is not None:
+        settings_frame.setEnabled(has_selected_node)
+
+    hardware_combo = getattr(dashboard.ui, "comboBox_tsi_detector_fixed_hardware", None)
+    if hardware_combo is not None:
+        hardware_combo.setEnabled(has_selected_node)
+
+    detector_combo = getattr(dashboard.ui, "comboBox_tsi_detector_fixed", None)
+    if detector_combo is not None:
+        detector_combo.setEnabled(has_selected_node)
+
+    gui_checkbox = getattr(dashboard.ui, "checkBox_tsi_detector_fixed_gui", None)
+    if gui_checkbox is not None and not has_selected_node:
+        gui_checkbox.setEnabled(False)
+        gui_checkbox.setChecked(False)
+   
+
+def _tsi_fixed_plot_color_settings(dashboard: QtCore.QObject):
+    """
+    Returns plot colors tuned for the current Dashboard color mode.
+
+    The light-mode plot intentionally uses a neutral gray plotting area so the
+    detector raster does not clash with the existing light UI.
+    """
+    settings = getattr(dashboard.backend, "settings", {}) or {}
+    color_mode = str(settings.get("color_mode", "") or "")
+
+    text_color = settings.get("color4", "#000000")
+    fig_face = settings.get("color1", "#f4f4f4")
+
+    if "Dark" in color_mode:
+        plot_face = "#1f2933"
+        grid_color = "#56616f"
+    else:
+        plot_face = "#e9ecef"
+        grid_color = "#b8c0ca"
+
+    return fig_face, plot_face, grid_color, text_color
+
+
+def _tsi_fixed_plot_frequency_range(dashboard: QtCore.QObject, events=None):
+    """
+    Returns a stable x-axis range for the Fixed detector raster.
+
+    Behavior:
+      - No detections: use Dashboard configured frequency/sample rate.
+      - Detections present: use min/max frequency from the current raster buffer.
+      - Add padding before/after the observed frequency span.
+      - Expand when new detections fall outside the current range.
+      - Do not recenter/shrink during a run, which prevents jumpy scaling.
+      - Start/clear resets the stored x-axis range.
+    """
+    _tsi_fixed_plot_ensure_state(dashboard)
+
+    events = events or []
+
+    min_span_mhz = 1.0
+    padding_fraction = 0.12
+    min_padding_mhz = 0.05
+
+    #
+    # Fallback range from Dashboard fields.
+    #
+    try:
+        configured_center_mhz = float(
+            dashboard.ui.textEdit_tsi_detector_fixed_frequency.toPlainText()
+        )
+    except Exception:
+        configured_center_mhz = None
+
+    try:
+        configured_sample_rate_hz = float(
+            dashboard.ui.comboBox_tsi_detector_fixed_sample_rate.currentText()
+        )
+    except Exception:
+        configured_sample_rate_hz = 1_000_000.0
+
+    configured_span_mhz = max(float(configured_sample_rate_hz) / 1e6, min_span_mhz)
+
+    if configured_center_mhz is None:
+        fallback_xmin = 0.0
+        fallback_xmax = min_span_mhz
+    else:
+        fallback_xmin = configured_center_mhz - (configured_span_mhz / 2.0)
+        fallback_xmax = configured_center_mhz + (configured_span_mhz / 2.0)
+
+    #
+    # No detections yet: use configured span and store it.
+    #
+    if not events:
+        if getattr(dashboard, "tsi_fixed_plot_xlim", None) is None:
+            dashboard.tsi_fixed_plot_xlim = (fallback_xmin, fallback_xmax)
+
+        return dashboard.tsi_fixed_plot_xlim
+
+    #
+    # Use the current plotted/raster-buffer events, not a moving median.
+    #
+    freqs = []
+    for event in events:
+        try:
+            freqs.append(float(event["frequency_mhz"]))
+        except Exception:
+            pass
+
+    if not freqs:
+        if getattr(dashboard, "tsi_fixed_plot_xlim", None) is None:
+            dashboard.tsi_fixed_plot_xlim = (fallback_xmin, fallback_xmax)
+
+        return dashboard.tsi_fixed_plot_xlim
+
+    freq_min = min(freqs)
+    freq_max = max(freqs)
+
+    observed_span = max(freq_max - freq_min, 0.0)
+    target_span = max(observed_span, min_span_mhz)
+
+    padding_mhz = max(target_span * padding_fraction, min_padding_mhz)
+
+    proposed_xmin = freq_min - padding_mhz
+    proposed_xmax = freq_max + padding_mhz
+
+    #
+    # Keep the configured sample-rate span initially if the results are inside it.
+    # This gives a nice fixed-detector view for ordinary single-frequency runs.
+    #
+    configured_contains_results = (
+        freq_min >= fallback_xmin and freq_max <= fallback_xmax
+    )
+
+    if configured_contains_results and configured_span_mhz <= 25.0:
+        proposed_xmin = min(proposed_xmin, fallback_xmin)
+        proposed_xmax = max(proposed_xmax, fallback_xmax)
+
+    #
+    # Guarantee minimum readable span.
+    #
+    proposed_span = proposed_xmax - proposed_xmin
+    if proposed_span < min_span_mhz:
+        midpoint = (proposed_xmin + proposed_xmax) / 2.0
+        proposed_xmin = midpoint - (min_span_mhz / 2.0)
+        proposed_xmax = midpoint + (min_span_mhz / 2.0)
+
+    current_xlim = getattr(dashboard, "tsi_fixed_plot_xlim", None)
+
+    #
+    # First range after start/clear: adopt proposed range.
+    #
+    if current_xlim is None:
+        dashboard.tsi_fixed_plot_xlim = (proposed_xmin, proposed_xmax)
+        return dashboard.tsi_fixed_plot_xlim
+
+    current_xmin, current_xmax = current_xlim
+
+    #
+    # Sticky behavior:
+    #   - expand to include new observed min/max
+    #   - never shrink/recenter during the run
+    #
+    new_xmin = min(current_xmin, proposed_xmin)
+    new_xmax = max(current_xmax, proposed_xmax)
+
+    #
+    # If the GUI retunes far away, this will expand to include both old and new
+    # clusters. The table X / clear button resets the extent when the operator
+    # wants to focus on the new cluster.
+    #
+    dashboard.tsi_fixed_plot_xlim = (new_xmin, new_xmax)
+
+    return dashboard.tsi_fixed_plot_xlim
+
+
+def _tsi_fixed_plot_ensure_state(dashboard: QtCore.QObject):
+    """
+    Lazily initializes Fixed detector raster state.
+    """
+    if not hasattr(dashboard, "tsi_fixed_plot_events"):
+        dashboard.tsi_fixed_plot_events = deque(maxlen=2000)
+
+    if not hasattr(dashboard, "tsi_fixed_plot_start_time"):
+        dashboard.tsi_fixed_plot_start_time = None
+
+    if not hasattr(dashboard, "tsi_fixed_plot_dirty"):
+        dashboard.tsi_fixed_plot_dirty = False
+
+    if not hasattr(dashboard, "tsi_fixed_plot_timer"):
+        dashboard.tsi_fixed_plot_timer = None
+
+    if not hasattr(dashboard, "tsi_fixed_plot_window_s"):
+        dashboard.tsi_fixed_plot_window_s = 60.0
+
+    # Smoothed x-axis range for the Fixed detector raster.
+    # This prevents jitter while still allowing GUI retunes to be followed.
+    if not hasattr(dashboard, "tsi_fixed_plot_xlim"):
+        dashboard.tsi_fixed_plot_xlim = None
+
+
+def _tsi_fixed_plot_reset(dashboard: QtCore.QObject):
+    """
+    Clears current Fixed detector plot state and draws an empty raster.
+    """
+    _tsi_fixed_plot_ensure_state(dashboard)
+
+    dashboard.tsi_fixed_plot_events.clear()
+    dashboard.tsi_fixed_plot_start_time = time.time()
+    dashboard.tsi_fixed_plot_dirty = True
+    dashboard.tsi_fixed_plot_xlim = None
+
+    _tsi_fixed_plot_refresh(dashboard, force=True, running=True)
+
+
+def _tsi_fixed_plot_clear_points(dashboard: QtCore.QObject):
+    """
+    Clears Fixed detector raster points without resetting operation elapsed time.
+
+    This is used by the Detector Results clear button so the table and plot
+    stay synchronized while the detector may continue running.
+    """
+    _tsi_fixed_plot_ensure_state(dashboard)
+
+    dashboard.tsi_fixed_plot_events.clear()
+    dashboard.tsi_fixed_plot_dirty = True
+    dashboard.tsi_fixed_plot_xlim = None
+
+    _tsi_fixed_plot_refresh(
+        dashboard,
+        force=True,
+        running=getattr(dashboard, "tsi_fixed_detector_running", False),
+    )
+
+
+def _tsi_fixed_plot_start(dashboard: QtCore.QObject):
+    """
+    Starts the Fixed detector raster update timer.
+    """
+    _tsi_fixed_plot_reset(dashboard)
+
+    old_timer = getattr(dashboard, "tsi_fixed_plot_timer", None)
+    if old_timer is not None:
+        try:
+            old_timer.stop()
+            old_timer.timeout.disconnect()
+        except Exception:
+            pass
+
+    timer = QtCore.QTimer(dashboard)
+    timer.setInterval(250)
+    timer.timeout.connect(lambda: _tsi_fixed_plot_refresh(dashboard))
+    dashboard.tsi_fixed_plot_timer = timer
+    timer.start()
+
+
+def _tsi_fixed_plot_stop(dashboard: QtCore.QObject):
+    """
+    Stops the Fixed detector raster update timer and leaves the last run visible.
+    """
+    _tsi_fixed_plot_ensure_state(dashboard)
+
+    timer = getattr(dashboard, "tsi_fixed_plot_timer", None)
+    if timer is not None:
+        try:
+            timer.stop()
+        except Exception:
+            pass
+
+    _tsi_fixed_plot_refresh(dashboard, force=True, running=False)
+
+
+def _tsi_fixed_plot_add_detection(
+    dashboard: QtCore.QObject,
+    frequency_mhz: float,
+    power_dbm: float,
+    timestamp_s: float = None,
+):
+    """
+    Adds one reported Fixed detector event to the raster buffer.
+
+    This stores reported detections only. It does not attempt to infer missed
+    short-burst activity between min-interval reports.
+    """
+    _tsi_fixed_plot_ensure_state(dashboard)
+
+    if timestamp_s is None:
+        timestamp_s = time.time()
+
+    if dashboard.tsi_fixed_plot_start_time is None:
+        dashboard.tsi_fixed_plot_start_time = timestamp_s
+
+    elapsed_s = max(0.0, float(timestamp_s) - float(dashboard.tsi_fixed_plot_start_time))
+
+    dashboard.tsi_fixed_plot_events.append(
+        {
+            "frequency_mhz": float(frequency_mhz),
+            "power_dbm": float(power_dbm),
+            "timestamp_s": float(timestamp_s),
+            "elapsed_s": elapsed_s,
+        }
+    )
+
+    dashboard.tsi_fixed_plot_dirty = True
+
+
+def _tsi_fixed_plot_refresh(
+    dashboard: QtCore.QObject,
+    force: bool = False,
+    running: bool = None,
+):
+    """
+    Redraws the Fixed detector raster when there are new events.
+
+    This function intentionally rebuilds the Matplotlib figure contents for
+    the Fixed detector view because the shared TSI canvas is normally used as
+    an image/waterfall canvas. Rebuilding prevents old imshow/colorbar state
+    from forcing an equal-aspect, vertically squished plot.
+    """
+    _tsi_fixed_plot_ensure_state(dashboard)
+
+    if not force and not getattr(dashboard, "tsi_fixed_plot_dirty", False):
+        return
+
+    canvas = getattr(dashboard, "matplotlib_widget", None)
+    if canvas is None:
+        return
+
+    try:
+        fig = canvas.fig
+
+        fig_face, plot_face, grid_color, text_color = _tsi_fixed_plot_color_settings(dashboard)
+
+        events_all = list(dashboard.tsi_fixed_plot_events)
+        window_s = float(getattr(dashboard, "tsi_fixed_plot_window_s", 60.0) or 60.0)
+
+        if events_all:
+            latest_elapsed = max(float(e["elapsed_s"]) for e in events_all)
+        else:
+            latest_elapsed = 0.0
+
+        y_min = max(0.0, latest_elapsed - window_s)
+        y_max = max(window_s, latest_elapsed + 1.0)
+
+        events = [
+            e for e in events_all
+            if float(e["elapsed_s"]) >= y_min
+        ]
+
+        x_min, x_max = _tsi_fixed_plot_frequency_range(dashboard, events)
+
+        #
+        # Rebuild the figure for fixed-raster mode.
+        # This prevents the original MPLCanvas imshow state from carrying over.
+        #
+        fig.clear()
+        fig.set_facecolor(fig_face)
+
+        ax = fig.add_subplot(111)
+        canvas.axes = ax
+
+        # Critical: do not let imshow/equal aspect behavior squeeze the raster.
+        ax.set_aspect("auto", adjustable="box")
+
+        # Leave room for the colorbar while still using most of the frame width.
+        fig.subplots_adjust(
+            left=0.085,
+            right=0.895,
+            bottom=0.125,
+            top=0.94,
+            wspace=0.0,
+            hspace=0.0,
+        )
+
+        ax.set_facecolor(plot_face)
+
+        title_state = "Running"
+        if running is False:
+            title_state = "Stopped"
+        elif running is None and not getattr(dashboard, "tsi_fixed_detector_running", False):
+            title_state = "Stopped"
+
+        ax.set_title(
+            f"Fixed Detector Activity - {title_state}",
+            color=text_color,
+            fontsize=10,
+            pad=8,
+        )
+        ax.set_xlabel("Frequency (MHz)", color=text_color, fontsize=9, labelpad=7)
+        ax.set_ylabel("Time Elapsed (s)", color=text_color, fontsize=9, labelpad=7)
+
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+
+        try:
+            ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=6))
+            ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.3f"))
+        except Exception:
+            pass
+
+        ax.grid(True, color=grid_color, linestyle="--", linewidth=0.6, alpha=0.75)
+        ax.set_axisbelow(True)
+
+        ax.tick_params(axis="x", colors=text_color, labelsize=8)
+        ax.tick_params(axis="y", colors=text_color, labelsize=8)
+
+        for spine in ax.spines.values():
+            spine.set_color(grid_color)
+
+        try:
+            cmap = matplotlib.cm.get_cmap("turbo")
+        except Exception:
+            cmap = matplotlib.cm.get_cmap("rainbow")
+
+        norm = matplotlib.colors.Normalize(vmin=-60.0, vmax=40.0)
+
+        if events:
+            tick_height = max(0.35, (y_max - y_min) * 0.012)
+
+            segments = []
+            powers = []
+
+            for event in events:
+                x = float(event["frequency_mhz"])
+                y = float(event["elapsed_s"])
+
+                segments.append(
+                    [
+                        (x, max(y_min, y - tick_height)),
+                        (x, min(y_max, y + tick_height)),
+                    ]
+                )
+                powers.append(float(event["power_dbm"]))
+
+            line_collection = LineCollection(
+                segments,
+                cmap=cmap,
+                norm=norm,
+                linewidths=2.8,
+                alpha=0.95,
+            )
+            line_collection.set_array(np.array(powers))
+            ax.add_collection(line_collection)
+        else:
+            message = "Waiting for fixed detector reports..."
+            if running is False:
+                message = "No fixed detector data"
+
+            ax.text(
+                0.5,
+                0.5,
+                message,
+                transform=ax.transAxes,
+                ha="center",
+                va="center",
+                color=text_color,
+                alpha=0.75,
+                fontsize=10,
+            )
+
+        sm = matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap)
+        sm.set_array([])
+
+        cbar = fig.colorbar(
+            sm,
+            ax=ax,
+            fraction=0.035,
+            pad=0.025,
+        )
+        canvas.cbar = cbar
+
+        cbar.set_label(label="Power (dB)", color=text_color, fontsize=9)
+        cbar.ax.tick_params(labelsize=8, color=text_color)
+        matplotlib.pyplot.setp(
+            matplotlib.pyplot.getp(cbar.ax.axes, "yticklabels"),
+            color=text_color,
+        )
+
+        canvas.draw_idle()
+        dashboard.tsi_fixed_plot_dirty = False
+
+    except Exception as e:
+        dashboard.logger.debug(f"Failed to refresh TSI Fixed detector raster: {e}")
+
+
 def _tsi_fixed_set_running(dashboard: QtCore.QObject, node_uid: str):
     dashboard.tsi_fixed_detector_running = True
     dashboard.tsi_fixed_detector_node_uid = node_uid or ""
     dashboard.tsi_fixed_detector_opid = ""
     dashboard.tsi_fixed_detector_waiting_for_opid = True
 
+    stack = getattr(dashboard.ui, "stackedWidget_tsi_detector_fixed", None)
+    if stack is not None:
+        stack.setCurrentIndex(0)
+
     for table in _tsi_fixed_results_tables(dashboard):
         table.clearContents()
         table.setRowCount(0)
 
-    dashboard.ui.label2_tsi_detector.setText("Detector - Running")
-    dashboard.ui.label2_tsi_detector.raise_()
+    _tsi_fixed_plot_start(dashboard)
 
+    dashboard.ui.label2_tsi_detector.setVisible(False)
+
+    dashboard.ui.pushButton_tsi_detector_fixed_start.setEnabled(True)
     dashboard.ui.pushButton_tsi_detector_fixed_start.setText("Stop")
     dashboard.ui.frame_tsi_detector_fixed_settings1.setEnabled(False)
     dashboard.ui.comboBox_tsi_detector_fixed_hardware.setEnabled(False)
@@ -3321,18 +3962,20 @@ def _tsi_fixed_set_running(dashboard: QtCore.QObject, node_uid: str):
 
 
 def _tsi_fixed_set_stopped(dashboard: QtCore.QObject):
+    _tsi_fixed_plot_stop(dashboard)
+
     dashboard.tsi_fixed_detector_running = False
     dashboard.tsi_fixed_detector_node_uid = ""
     dashboard.tsi_fixed_detector_opid = ""
     dashboard.tsi_fixed_detector_waiting_for_opid = False
 
-    dashboard.ui.label2_tsi_detector.setText("Detector - Not Running")
-    dashboard.ui.label2_tsi_detector.raise_()
+    dashboard.ui.label2_tsi_detector.setVisible(False)
 
     dashboard.ui.pushButton_tsi_detector_fixed_start.setText("Start")
-    dashboard.ui.frame_tsi_detector_fixed_settings1.setEnabled(True)
-    dashboard.ui.comboBox_tsi_detector_fixed_hardware.setEnabled(True)
-    dashboard.ui.comboBox_tsi_detector_fixed.setEnabled(True)
+
+    # Re-apply selected-node gate so controls are only enabled if a node
+    # is still selected.
+    update_tsi_fixed_detector_node_gate(dashboard)
 
 
 def append_tsi_fixed_detection_from_cot(
@@ -3376,6 +4019,12 @@ def append_tsi_fixed_detection_from_cot(
     except Exception:
         return
 
+    if _tsi_frequency_is_blacklisted(dashboard, frequency_mhz):
+        dashboard.logger.debug(
+            f"Ignoring blacklisted Fixed detection: {frequency_mhz} MHz"
+        )
+        return
+
     try:
         power_value = float(cot_message.get("detection_power_dbm"))
     except Exception:
@@ -3386,51 +4035,27 @@ def append_tsi_fixed_detection_from_cot(
     except Exception:
         time_value = time.time()
 
-    # Plot point on existing wideband detector plot.
-    try:
-        if dashboard.wideband_zoom == True:
-            labels = dashboard.matplotlib_widget.axes.get_xticklabels()
-
-            try:
-                start_freq = float(str(labels[0]).split("'")[1])
-                end_freq = float(str(labels[-1]).split("'")[1])
-            except Exception:
-                start_freq = 0
-                end_freq = 6000e6
-
-            plot_x = 600 * (frequency_mhz - start_freq) / (end_freq - start_freq)
-        else:
-            plot_x = frequency_mhz / 10
-
-        dashboard.matplotlib_widget.plotPoint(
-            plot_x,
-            11,
-            dashboard.matplotlib_widget.computeColormapValue(power_value),
-            5,
-            dashboard.wideband_data,
-        )
-    except Exception as e:
-        dashboard.logger.debug(f"Failed to plot TSI Fixed detection point: {e}")
+    _tsi_fixed_plot_add_detection(
+        dashboard,
+        frequency_mhz=frequency_mhz,
+        power_dbm=power_value,
+        timestamp_s=time_value,
+    )
 
     get_time = time.strftime("%H:%M:%S", time.localtime(time_value))
     time_obj = QtCore.QTime.fromString(get_time, "HH:mm:ss")
 
-    tables = [
-        dashboard.ui.tableWidget1_tsi_wideband,
-        dashboard.ui.tableWidget_tsi_conditioner_input_detector,
-    ]
-
-    for table in tables:
+    for table in _tsi_fixed_results_tables(dashboard):
         row = table.rowCount()
         table.setRowCount(row + 1)
 
-        frequency_item = QtWidgets.QTableWidgetItem(str(frequency_mhz))
+        frequency_item = QtWidgets.QTableWidgetItem(f"{frequency_mhz:.6f}")
         frequency_item.setTextAlignment(QtCore.Qt.AlignCenter)
         frequency_item.setData(QtCore.Qt.UserRole, cot_message)
         frequency_item.setData(QtCore.Qt.UserRole + 1, detection_opid)
         table.setItem(row, 0, frequency_item)
 
-        power_item = QtWidgets.QTableWidgetItem(str(power_value))
+        power_item = QtWidgets.QTableWidgetItem(f"{power_value:.1f}")
         power_item.setTextAlignment(QtCore.Qt.AlignCenter)
         power_item.setData(QtCore.Qt.UserRole, cot_message)
         power_item.setData(QtCore.Qt.UserRole + 1, detection_opid)
