@@ -3878,7 +3878,7 @@
           <property name="geometry">
            <rect>
             <x>130</x>
-            <y>415</y>
+            <y>410</y>
             <width>135</width>
             <height>28</height>
            </rect>
@@ -3992,7 +3992,7 @@
             <x>10</x>
             <y>50</y>
             <width>500</width>
-            <height>360</height>
+            <height>355</height>
            </rect>
           </property>
           <property name="widgetResizable">
@@ -4004,7 +4004,7 @@
              <x>0</x>
              <y>0</y>
              <width>498</width>
-             <height>358</height>
+             <height>353</height>
             </rect>
            </property>
           </widget>
@@ -4016,7 +4016,7 @@
           <property name="geometry">
            <rect>
             <x>193</x>
-            <y>415</y>
+            <y>410</y>
             <width>135</width>
             <height>28</height>
            </rect>
@@ -5273,7 +5273,7 @@
           <property name="geometry">
            <rect>
             <x>130</x>
-            <y>335</y>
+            <y>330</y>
             <width>135</width>
             <height>28</height>
            </rect>
@@ -5314,9 +5314,9 @@
           <property name="geometry">
            <rect>
             <x>15</x>
-            <y>200</y>
+            <y>205</y>
             <width>365</width>
-            <height>125</height>
+            <height>105</height>
            </rect>
           </property>
           <property name="text">
@@ -5387,7 +5387,7 @@
             <x>10</x>
             <y>50</y>
             <width>775</width>
-            <height>280</height>
+            <height>275</height>
            </rect>
           </property>
           <property name="widgetResizable">
@@ -5399,7 +5399,7 @@
              <x>0</x>
              <y>0</y>
              <width>773</width>
-             <height>278</height>
+             <height>273</height>
             </rect>
            </property>
           </widget>
@@ -5411,7 +5411,7 @@
           <property name="geometry">
            <rect>
             <x>330</x>
-            <y>335</y>
+            <y>330</y>
             <width>135</width>
             <height>28</height>
            </rect>
@@ -5501,7 +5501,7 @@
            <rect>
             <x>120</x>
             <y>75</y>
-            <width>307</width>
+            <width>300</width>
             <height>28</height>
            </rect>
           </property>
@@ -5989,6 +5989,1902 @@ Run a capture to see the resulting artifact here.</string>
       <attribute name="title">
        <string>Inspection</string>
       </attribute>
+      <widget class="QFrame" name="frame_sa_inspection_view">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>300</y>
+         <width>665</width>
+         <height>305</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_view_title">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>10</y>
+          <width>240</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Analysis View</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_view_subtitle">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>29</y>
+          <width>600</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Visualize the selected data using different views. Use cursors and measurements to analyze signals.</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_view_badge">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>3</string>
+        </property>
+       </widget>
+       <widget class="QTabWidget" name="tabWidget_sa_inspection_view">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>55</y>
+          <width>650</width>
+          <height>29</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab_sa_inspection_time">
+         <attribute name="title">
+          <string>Time / I-Q</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_sa_inspection_spectrum">
+         <attribute name="title">
+          <string>Spectrum</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_sa_inspection_spectrogram">
+         <attribute name="title">
+          <string>Spectrogram</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_sa_inspection_magnitude">
+         <attribute name="title">
+          <string>Magnitude</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_sa_inspection_if">
+         <attribute name="title">
+          <string>IF</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_sa_inspection_phase">
+         <attribute name="title">
+          <string>Phase</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_sa_inspection_constellation">
+         <attribute name="title">
+          <string>Constellation</string>
+         </attribute>
+        </widget>
+       </widget>
+       <widget class="QFrame" name="frame_sa_inspection_view_plot">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>79</y>
+          <width>655</width>
+          <height>221</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+       <zorder>label_sa_inspection_view_title</zorder>
+       <zorder>label_sa_inspection_view_subtitle</zorder>
+       <zorder>label_sa_inspection_view_badge</zorder>
+       <zorder>frame_sa_inspection_view_plot</zorder>
+       <zorder>tabWidget_sa_inspection_view</zorder>
+      </widget>
+      <widget class="QFrame" name="frame_sa_inspection_measurements">
+       <property name="geometry">
+        <rect>
+         <x>680</x>
+         <y>300</y>
+         <width>185</width>
+         <height>305</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_measurements_title">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>10</y>
+          <width>240</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Measurements</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_measurements_badge">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>4</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_measurements_frequency">
+        <property name="geometry">
+         <rect>
+          <x>92</x>
+          <y>50</y>
+          <width>85</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_measurements_time">
+        <property name="geometry">
+         <rect>
+          <x>7</x>
+          <y>50</y>
+          <width>85</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Time</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_measurements_cursor_a_label">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>80</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Cursor A:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_measurements_cursor_b_label">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>110</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Cursor B:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_measurements_delta_label">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>140</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Δt:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_measurements_samples_label">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>170</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Samples:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_measurements_sample_rate_label">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>200</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Samp. Rate:</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_measurements_cursor_a">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>80</y>
+          <width>100</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_measurements_cursor_b">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>110</y>
+          <width>100</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_measurements_delta">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>140</y>
+          <width>100</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_measurements_samples">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>170</y>
+          <width>100</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_measurements_sample_rate">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>200</y>
+          <width>100</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_measurements_set_from_selection">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>235</y>
+          <width>145</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Set from Selection</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_measurements_save_as_finding">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>270</y>
+          <width>145</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Save as Finding</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QFrame" name="frame_sa_inspection_findings">
+       <property name="geometry">
+        <rect>
+         <x>870</x>
+         <y>300</y>
+         <width>340</width>
+         <height>505</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_findings_title">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>10</y>
+          <width>235</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Findings</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_findings_subtitle">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>29</y>
+          <width>400</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Saved measurements and analysis results.</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_findings_badge">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>6</string>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="tableWidget_sa_inspection_findings">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>55</y>
+          <width>320</width>
+          <height>150</height>
+         </rect>
+        </property>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Finding</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Source</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_findings_add">
+        <property name="geometry">
+         <rect>
+          <x>67</x>
+          <y>210</y>
+          <width>100</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_findings_delete">
+        <property name="geometry">
+         <rect>
+          <x>172</x>
+          <y>210</y>
+          <width>100</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delete</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_findings_title">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>280</y>
+          <width>280</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_findings_selected_title_label">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>280</y>
+          <width>40</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Title:</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_findings_details">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>310</y>
+          <width>320</width>
+          <height>155</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>false</bool>
+        </property>
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_findings_save_changes">
+        <property name="geometry">
+         <rect>
+          <x>55</x>
+          <y>470</y>
+          <width>110</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Save Changes</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_findings_save_to_soi">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>470</y>
+          <width>110</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Save to SOI</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_findings_selected_title">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>250</y>
+          <width>235</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Selected Finding Details</string>
+        </property>
+       </widget>
+       <widget class="Line" name="line">
+        <property name="geometry">
+         <rect>
+          <x>1</x>
+          <y>245</y>
+          <width>338</width>
+          <height>3</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QFrame" name="frame_sa_inspection_actions">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>610</y>
+         <width>855</width>
+         <height>195</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_actions_title">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>9</y>
+          <width>235</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Analysis Actions</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_actions_subtitle">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>28</y>
+          <width>300</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Run plugin-based analysis and save results as findings.</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_actions_badge">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>9</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>5</string>
+        </property>
+       </widget>
+       <widget class="QStackedWidget" name="stackedWidget_sa_inspection_actions">
+        <property name="geometry">
+         <rect>
+          <x>1</x>
+          <y>1</y>
+          <width>850</width>
+          <height>193</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page_sa_inspection_actions_controls">
+         <widget class="QLabel" name="label2_490">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>59</y>
+            <width>45</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Plugin:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_sa_inspection_actions_operation_id_label">
+          <property name="geometry">
+           <rect>
+            <x>655</x>
+            <y>45</y>
+            <width>80</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Operation ID:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_actions_start_stop">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>667</x>
+            <y>75</y>
+            <width>160</width>
+            <height>36</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="comboBox_sa_inspection_actions_plugin">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>55</y>
+            <width>275</width>
+            <height>28</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_actions_query">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>140</y>
+            <width>120</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Query Actions</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_actions_customize">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>200</x>
+            <y>140</y>
+            <width>120</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Customize</string>
+          </property>
+         </widget>
+         <widget class="QScrollArea" name="scrollArea_sa_inspection_actions_parameters">
+          <property name="geometry">
+           <rect>
+            <x>355</x>
+            <y>25</y>
+            <width>275</width>
+            <height>160</height>
+           </rect>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents_sa_inspection_actions_parameters">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>273</width>
+             <height>158</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QComboBox" name="comboBox_sa_inspection_actions_action">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>90</y>
+            <width>275</width>
+            <height>28</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_inspection_actions_operation_id">
+          <property name="geometry">
+           <rect>
+            <x>745</x>
+            <y>45</y>
+            <width>100</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>—</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_489">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>94</y>
+            <width>45</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Action:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_inspection_actions_status">
+          <property name="geometry">
+           <rect>
+            <x>705</x>
+            <y>20</y>
+            <width>140</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Idle</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_sa_inspection_actions_parameters_title">
+          <property name="geometry">
+           <rect>
+            <x>355</x>
+            <y>0</y>
+            <width>90</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Parameters</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_sa_inspection_actions_execution_title">
+          <property name="geometry">
+           <rect>
+            <x>650</x>
+            <y>0</y>
+            <width>90</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Execution</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_actions_save_as_finding">
+          <property name="geometry">
+           <rect>
+            <x>675</x>
+            <y>155</y>
+            <width>145</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Save as Finding</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_sa_inspection_actions_status_label">
+          <property name="geometry">
+           <rect>
+            <x>655</x>
+            <y>20</y>
+            <width>50</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Status:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_actions_view_result">
+          <property name="geometry">
+           <rect>
+            <x>675</x>
+            <y>120</y>
+            <width>145</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>View Result</string>
+          </property>
+         </widget>
+         <widget class="Line" name="line_2">
+          <property name="geometry">
+           <rect>
+            <x>640</x>
+            <y>0</y>
+            <width>3</width>
+            <height>193</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="Line" name="line_5">
+          <property name="geometry">
+           <rect>
+            <x>345</x>
+            <y>1</y>
+            <width>3</width>
+            <height>193</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_sa_inspection_actions_no_node">
+         <widget class="QLabel" name="label_sa_inspection_actions_select_sensor_node_image">
+          <property name="geometry">
+           <rect>
+            <x>389</x>
+            <y>65</y>
+            <width>64</width>
+            <height>48</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Image</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_sa_inspection_actions_no_node_selected">
+          <property name="geometry">
+           <rect>
+            <x>1</x>
+            <y>130</y>
+            <width>840</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Local Sensor Node Required</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_sa_inspection_actions_select_a_node">
+          <property name="geometry">
+           <rect>
+            <x>1</x>
+            <y>155</y>
+            <width>840</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Select the Local Sensor Node to run Inspection analysis tools.</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_inspection_actions_empty_icon">
+          <property name="geometry">
+           <rect>
+            <x>383</x>
+            <y>59</y>
+            <width>76</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <zorder>label_sa_inspection_actions_empty_icon</zorder>
+         <zorder>label_sa_inspection_actions_select_sensor_node_image</zorder>
+         <zorder>label2_sa_inspection_actions_no_node_selected</zorder>
+         <zorder>label2_sa_inspection_actions_select_a_node</zorder>
+        </widget>
+       </widget>
+       <zorder>stackedWidget_sa_inspection_actions</zorder>
+       <zorder>label_sa_inspection_actions_badge</zorder>
+       <zorder>label_sa_inspection_actions_subtitle</zorder>
+       <zorder>label_sa_inspection_actions_title</zorder>
+      </widget>
+      <widget class="QFrame" name="frame_sa_inspection_selection">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>1020</width>
+         <height>130</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_selection_title">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>10</y>
+          <width>240</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Evidence Selection</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_selection_subtitle">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>29</y>
+          <width>500</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Choose an artifact or local file to inspect, with optional SOI context.</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_selection_badge">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>1</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_498">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>94</y>
+          <width>50</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>SOI:</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_sa_inspection_selection_soi">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>90</y>
+          <width>230</width>
+          <height>28</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QFrame" name="frame_sa_inspection_selection_details">
+        <property name="geometry">
+         <rect>
+          <x>765</x>
+          <y>5</y>
+          <width>251</width>
+          <height>120</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QWidget" name="gridLayoutWidget_4">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>251</width>
+           <height>121</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_sa_inspection_selection_details" columnstretch="0,0">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label2_sa_inspection_selection_center_frequency">
+            <property name="text">
+             <string>—</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="label2_sa_inspection_selection_size">
+            <property name="text">
+             <string>—</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label2_sa_inspection_selection_center_frequency_label">
+            <property name="text">
+             <string>Center Frequency:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="label2_sa_inspection_selection_samples">
+            <property name="text">
+             <string>—</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label2_sa_inspection_selection_size_label">
+            <property name="text">
+             <string>Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label2_sa_inspection_selection_data_type_label">
+            <property name="text">
+             <string>Data Type:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label2_sa_inspection_selection_samples_label">
+            <property name="text">
+             <string>Samples:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label2_sa_inspection_selection_sample_rate">
+            <property name="text">
+             <string>—</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label2_sa_inspection_selection_duration_label">
+            <property name="text">
+             <string>Duration:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="label2_sa_inspection_selection_duration">
+            <property name="text">
+             <string>—</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label2_sa_inspection_selection_sample_rate_label">
+            <property name="text">
+             <string>Sample Rate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="label2_sa_inspection_selection_data_type">
+            <property name="text">
+             <string>—</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+       <widget class="Line" name="line1_6">
+        <property name="geometry">
+         <rect>
+          <x>755</x>
+          <y>1</y>
+          <width>3</width>
+          <height>128</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_501">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>59</y>
+          <width>50</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Source:</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_selection_source_artifact">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>55</y>
+          <width>115</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Artifact</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_selection_source_local_file">
+        <property name="geometry">
+         <rect>
+          <x>175</x>
+          <y>55</y>
+          <width>115</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Local File</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QStackedWidget" name="stackedWidget_sa_inspection_selection_source">
+        <property name="geometry">
+         <rect>
+          <x>300</x>
+          <y>50</y>
+          <width>455</width>
+          <height>75</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page_artifact">
+         <widget class="QPushButton" name="pushButton_sa_inspection_selection_file_right">
+          <property name="geometry">
+           <rect>
+            <x>325</x>
+            <y>40</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_selection_artifact_right">
+          <property name="geometry">
+           <rect>
+            <x>325</x>
+            <y>5</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_499">
+          <property name="geometry">
+           <rect>
+            <x>5</x>
+            <y>9</y>
+            <width>50</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Artifact:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_500">
+          <property name="geometry">
+           <rect>
+            <x>5</x>
+            <y>44</y>
+            <width>50</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>File:</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="comboBox_sa_inspection_selection_file">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>40</y>
+            <width>230</width>
+            <height>28</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_selection_artifact_left">
+          <property name="geometry">
+           <rect>
+            <x>295</x>
+            <y>5</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="comboBox_sa_inspection_selection_artifact">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>5</y>
+            <width>230</width>
+            <height>28</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_selection_file_left">
+          <property name="geometry">
+           <rect>
+            <x>295</x>
+            <y>40</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_selection_prepare">
+          <property name="geometry">
+           <rect>
+            <x>360</x>
+            <y>5</y>
+            <width>85</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Prepare</string>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_file">
+         <widget class="QTextEdit" name="textEdit_sa_inspection_selection_file_name">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>20</y>
+            <width>275</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="tabChangesFocus">
+           <bool>true</bool>
+          </property>
+          <property name="html">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_15">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>20</y>
+            <width>45</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>File:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_sa_inspection_selection_file_select">
+          <property name="geometry">
+           <rect>
+            <x>370</x>
+            <y>20</y>
+            <width>27</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QFrame" name="frame_sa_inspection_external_tools">
+       <property name="geometry">
+        <rect>
+         <x>1035</x>
+         <y>10</y>
+         <width>175</width>
+         <height>285</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_external_tools_title">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>5</y>
+          <width>150</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>External Tools</string>
+        </property>
+       </widget>
+       <widget class="QScrollArea" name="scrollArea_sa_inspection_external_tools">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>30</y>
+          <width>165</width>
+          <height>250</height>
+         </rect>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents_sa_inspection_external_tools">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>163</width>
+           <height>248</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QFrame" name="frame_sa_inspection_overview">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>145</y>
+         <width>1020</width>
+         <height>150</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="label_sa_inspection_overview_title">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>10</y>
+          <width>240</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>File Overview</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_overview_subtitle">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>29</y>
+          <width>530</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Whole file view with selection. Drag to choose a time range for detailed analysis.</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_sa_inspection_overview_badge">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>2</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QFrame" name="frame_sa_inspection_overview_plot">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>50</y>
+          <width>1000</width>
+          <height>65</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_1">
+        <property name="geometry">
+         <rect>
+          <x>425</x>
+          <y>118</y>
+          <width>65</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Selection:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_10">
+        <property name="geometry">
+         <rect>
+          <x>770</x>
+          <y>118</y>
+          <width>70</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Duration:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_sa_inspection_overview_duration">
+        <property name="geometry">
+         <rect>
+          <x>845</x>
+          <y>118</y>
+          <width>160</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>—</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_overview_zoom">
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>118</y>
+          <width>135</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Zoom to Selection</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_overview_reset">
+        <property name="geometry">
+         <rect>
+          <x>115</x>
+          <y>118</y>
+          <width>80</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sa_inspection_overview_full_file">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>118</y>
+          <width>100</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Full File</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_overview_start">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>490</x>
+          <y>118</y>
+          <width>75</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QTextEdit" name="textEdit_sa_inspection_overview_end">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>600</x>
+          <y>118</y>
+          <width>75</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <strikeout>false</strikeout>
+         </font>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_3">
+        <property name="geometry">
+         <rect>
+          <x>570</x>
+          <y>118</y>
+          <width>25</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>to</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label2_6">
+        <property name="geometry">
+         <rect>
+          <x>680</x>
+          <y>118</y>
+          <width>15</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>s</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_tsi_conditioner">
       <attribute name="title">

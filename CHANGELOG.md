@@ -1,6 +1,25 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-9-7
+
+Build evidence-driven Signal Analysis Inspection workflows
+
+### Added
+
+- Added the new Signal Analysis → Inspection workspace for one-file evidence analysis with Artifact or Local File sources, optional SOI context, metadata display, large-file overview selection, and native Time/I-Q, Spectrum, Spectrogram, Magnitude, IF, Phase, and Constellation views.
+- Added interactive Inspection measurements with time/frequency cursors, selection-derived values, editable Findings, plugin-result-to-Finding promotion, and explicit Save to SOI snapshots for preserving analysis results.
+- Added the `sa.inspection` plugin action path with hardware-aware action discovery, dynamic parameter customization, operation-specific Start/Stop control, result viewing, and a Base `iq_basic_analysis` action for structured IQ characterization.
+- Added the dedicated `inspection_callback` / `inspectionReturn` semantic result path across plugin Operations, Sensor Nodes, HIPRFISR, and the Dashboard so Inspection actions can return arbitrary structured analysis results without using detection, SOI, target, or artifact channels.
+- Added context-aware External Tools launching for Inspectrum, Gqrx, IQEngine, and Universal Radio Hacker while keeping those tools available independently of selected evidence.
+
+### Changed
+
+- Changed Inspection evidence handling to support local and remote artifacts, explicit remote Download/Prepare lifecycle, ZIP extraction before analysis, SigMF metadata interpretation, raw IQ fallback handling, and safe bounded reads for large or imperfect files.
+- Changed Signal Analysis handoff behavior so Capture and SOI context can prefill Inspection without forcing evidence/SOI linkage, while Findings remain local until explicitly saved to an SOI.
+- Changed Inspection plotting and controls to use scalable decimated previews, range-focused detailed analysis, a compact Matplotlib navigation toolbar, view-aware measurement modes, and cleaner first-boot/empty-state behavior.
+- Changed Inspection Analysis Actions to require a local Sensor Node for Dashboard-local evidence while preserving normal Sensor Node → HIPRFISR → Dashboard communications for structured operation results.
+
 ## 2026-9-5
 
 Build plugin-driven Signal Analysis Capture workflows

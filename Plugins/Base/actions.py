@@ -83,6 +83,13 @@ ACTION_TAGS = {
         "node.local",
     ],
 
+    "iq_basic_analysis": [
+        "All",
+        "sa.inspection",
+        "client.dashboard",
+        "node.local",
+    ],
+
     "promote_to_soi": ["All"],
 
     "take_photo": ["All"],
@@ -2743,6 +2750,57 @@ async def iq_inspection_file(
     )
 
 
+iq_basic_analysis_schema = {
+    "params": [
+        {
+            "name": "max_samples",
+            "label": "Max Samples",
+            "type": "integer",
+            "default": 1000000,
+            "min": 1000,
+            "max": 10000000,
+            "step": 1000,
+            "description": "Maximum samples used for the basic statistics calculation.",
+        },
+    ]
+}
+async def iq_basic_analysis(
+    component: SensorNode,
+    parameters: Dict[str, Any],
+    node_uid: str = "",
+) -> None:
+    """Run basic IQ analysis against the active Inspection evidence/range."""
+    parameters = dict(parameters or {})
+    context = parameters.get("_fissure_inspection_context", {})
+    if not isinstance(context, dict):
+        context = {}
+
+    filepath = str(context.get("filepath") or "").strip()
+    if not filepath:
+        raise ValueError("Inspection context did not provide a local IQ filepath.")
+
+    op_params = {
+        "operation_id": str(parameters.get("operation_id") or ""),
+        "filepath": filepath,
+        "data_type": str(context.get("data_type") or "Complex Float 32"),
+        "sigmf_datatype": str(context.get("sigmf_datatype") or ""),
+        "sample_rate_hz": float(context.get("sample_rate_hz") or 0.0),
+        "center_frequency_hz": float(context.get("center_frequency_hz") or 0.0),
+        "sample_count": int(context.get("sample_count") or 0),
+        "start_sample": int(context.get("start_sample") or 0),
+        "end_sample": int(context.get("end_sample") or 0),
+        "max_samples": int(parameters.get("max_samples") or 1000000),
+    }
+
+    await component.run_plugin_operation(
+        component,
+        PLUGIN_NAME,
+        "iq_basic_analysis.py",
+        op_params,
+        node_uid,
+    )
+
+    
 scapy_transmit_schema = {
     "params": [
         {

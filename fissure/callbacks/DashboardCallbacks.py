@@ -1365,6 +1365,34 @@ async def nodeRefreshReturn(component: object, nodes):
     component.frontend.popups["NodeSelectDialog"].refreshNodes(nodes=nodes)
 
 
+async def inspectionReturn(
+    component: object,
+    node_uid: str = "",
+    operation_id: str = "",
+    inspection: dict = None,
+    final: bool = True,
+    timestamp: str = "",
+):
+    """Route one structured Inspection result into the Inspection workspace."""
+    if not isinstance(inspection, dict):
+        component.logger.error("Dashboard inspectionReturn received invalid Inspection data.")
+        return
+
+    try:
+        TSITabSlots.handle_sa_inspection_return(
+            component.frontend,
+            node_uid=node_uid,
+            operation_id=operation_id,
+            inspection=inspection,
+            final=final,
+            timestamp=timestamp,
+        )
+    except Exception as error:
+        component.logger.error(
+            f"Failed to process Inspection result: {error}"
+        )
+
+
 async def detectionReturn(component: object, detection: dict):
     """
     Receive one native FISSURE Detection for Dashboard engineering workflows.
@@ -2156,6 +2184,19 @@ async def sendArtifactsListTakReturn(
             )
 
     try:
+        TSITabSlots.handle_sa_inspection_artifact_metadata(
+            dashboard,
+            node_uid=node_uid,
+            artifacts=normalized_records,
+        )
+    except Exception as error:
+        component.logger.debug(
+            "Could not route Artifact metadata "
+            "to Signal Analysis Inspection: "
+            f"{error}"
+        )
+
+    try:
         TSITabSlots.refresh_sa_sois_selected_details(
             dashboard
         )
@@ -2251,6 +2292,15 @@ async def sendSoisListTakReturn(
     except Exception as error:
         component.logger.debug(
             f"Could not refresh Capture SOI context after SOI refresh: {error}"
+        )
+
+    try:
+        TSITabSlots.refresh_sa_inspection_soi_context(
+            frontend
+        )
+    except Exception as error:
+        component.logger.debug(
+            f"Could not refresh Inspection SOI context after SOI refresh: {error}"
         )
 
     try:
@@ -2351,6 +2401,15 @@ def queryPluginActionsResults(
 
     if context.startswith("sa.capture"):
         TSITabSlots.handle_sa_capture_action_query_results(
+            frontend,
+            node_uid=node_uid,
+            context=context,
+            actions=actions,
+        )
+        return
+    
+    if context.startswith("sa.inspection"):
+        TSITabSlots.handle_sa_inspection_action_query_results(
             frontend,
             node_uid=node_uid,
             context=context,
@@ -2528,6 +2587,16 @@ def queryPluginActionSchemaResults(
         )
         return
     
+    if context.startswith("sa.inspection"):
+        TSITabSlots.handle_sa_inspection_action_schema(
+            frontend,
+            plugin_name=plugin_name,
+            action_name=action_name,
+            node_uid=node_uid,
+            parameters=schema.get("params", []),
+        )
+        return
+        
     if context.startswith("tsi.detector"):
         TSITabSlots.handle_tsi_detector_action_schema(
             frontend,
