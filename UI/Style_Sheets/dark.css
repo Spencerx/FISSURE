@@ -1433,6 +1433,96 @@ QLabel#label_tsi_conditioner_workflow_promoted[promoted="true"] {
     font: bold 9pt "Ubuntu";
 }
 
+QLabel#label_sa_conditioner_input_badge,
+QLabel#label_sa_conditioner_method_badge,
+QLabel#label_sa_conditioner_run_badge {
+    qproperty-alignment: AlignCenter;
+    color: @color4;
+    background-color: @color3;
+    border: 1px solid @color3;
+    border-radius: 14px;
+    font: bold 10pt "Ubuntu";
+    min-width: 28px;
+    max-width: 28px;
+    min-height: 28px;
+    max-height: 28px;
+}
+
+QLabel#label_sa_conditioner_input_title,
+QLabel#label_sa_conditioner_method_title,
+QLabel#label_sa_conditioner_run_title {
+    color: @color4;
+    background-color: transparent;
+    border: none;
+    font: bold 11pt "Ubuntu";
+}
+
+QFrame#frame_sa_conditioner_source,
+QFrame#frame_sa_conditioner_method,
+QFrame#frame_sa_conditioner_run {
+    background-color: @color2;
+    border: 1px solid @color3;
+    border-radius: 8px;
+}
+
+QPushButton#pushButton_tsi_conditioner_method_query_actions,
+QPushButton#pushButton_tsi_conditioner_method_query_parameters,
+QPushButton#pushButton_tsi_conditioner_run_download_artifact,
+QPushButton#pushButton_tsi_conditioner_results_promote_to_soi {
+    color: #FFFFFF;
+    border: 1px solid #0B2D52;
+    border-radius: 4px;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2F5F8F,
+        stop:0.45 #1D456D,
+        stop:1 #0B2D52
+    );
+    font: bold 10pt "Ubuntu";
+    padding-bottom: 1px;
+    min-height: 28px;
+}
+
+QPushButton#pushButton_tsi_conditioner_method_query_actions:hover,
+QPushButton#pushButton_tsi_conditioner_method_query_parameters:hover,
+QPushButton#pushButton_tsi_conditioner_run_download_artifact:hover,
+QPushButton#pushButton_tsi_conditioner_results_promote_to_soi:hover {
+    color: #FFFFFF;
+    border: 1px solid #0B2D52;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #3C76AD,
+        stop:0.45 #265A88,
+        stop:1 #123B63
+    );
+}
+
+QPushButton#pushButton_tsi_conditioner_method_query_actions:pressed,
+QPushButton#pushButton_tsi_conditioner_method_query_parameters:pressed,
+QPushButton#pushButton_tsi_conditioner_run_download_artifact:pressed,
+QPushButton#pushButton_tsi_conditioner_results_promote_to_soi:pressed {
+    color: #FFFFFF;
+    border: 1px solid #061F3A;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #061F3A,
+        stop:0.45 #0B2D52,
+        stop:1 #1D456D
+    );
+}
+
+QPushButton#pushButton_tsi_conditioner_method_query_actions:disabled,
+QPushButton#pushButton_tsi_conditioner_method_query_parameters:disabled,
+QPushButton#pushButton_tsi_conditioner_run_download_artifact:disabled,
+QPushButton#pushButton_tsi_conditioner_results_promote_to_soi:disabled {
+    color: @color13;
+    border: 1px solid @color9;
+    background-color: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 @color8,
+        stop:1 @color9
+    );
+}
 
 
 /* ==========================================================
@@ -4031,7 +4121,7 @@ QTableWidget#tableWidget_sa_sois_list {
     background-color: @color2;
     color: @color4;
     border: 1px solid @color13;
-    border-radius: 4px;
+    border-radius: 0px;
     gridline-color: @color13;
     font: 9pt "Ubuntu";
 }

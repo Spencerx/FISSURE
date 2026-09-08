@@ -2293,14 +2293,26 @@ async def sendSoisListTakReturn(
         component.logger.debug(
             f"Could not refresh Capture SOI context after SOI refresh: {error}"
         )
+    
+    try:
+        TSITabSlots.refresh_tsi_conditioner_soi_context(frontend)
+    except Exception as error:
+        component.logger.debug(f"Could not refresh Conditioner SOI context after SOI refresh: {error}")
 
     try:
-        TSITabSlots.refresh_sa_inspection_soi_context(
+        TSITabSlots.refresh_sa_inspection_soi_context(frontend)
+    except Exception as error:
+        component.logger.debug(
+            f"Could not refresh Inspection SOI context after SOI refresh: {error}"
+        )
+
+    try:
+        TSITabSlots.refresh_tsi_conditioner_soi_context(
             frontend
         )
     except Exception as error:
         component.logger.debug(
-            f"Could not refresh Inspection SOI context after SOI refresh: {error}"
+            f"Could not refresh Conditioner SOI context after SOI refresh: {error}"
         )
 
     try:
@@ -2831,22 +2843,28 @@ async def soiUpdate(component: object, soi=None):
 
     if not getattr(frontend, "sa_sois_bulk_refreshing", False):
         try:
-            TSITabSlots.refresh_sa_sois_table(
-                frontend
-            )
+            TSITabSlots.refresh_sa_sois_table(frontend)
         except Exception as error:
             component.logger.debug(
                 f"Could not refresh Signal Analysis SOIs: {error}"
             )    
 
         try:
-            TSITabSlots.refresh_sa_capture_soi_context(
-                frontend
-            )
+            TSITabSlots.refresh_sa_capture_soi_context(frontend)
         except Exception as error:
             component.logger.debug(
                 f"Could not refresh Capture SOI context: {error}"
             )
+
+        try:
+            TSITabSlots.refresh_tsi_conditioner_soi_context(frontend)
+        except Exception as error:
+            component.logger.debug(f"Could not refresh Conditioner SOI context: {error}")
+
+        try:
+            TSITabSlots.refresh_tsi_conditioner_soi_context(frontend)
+        except Exception as error:
+            component.logger.debug(f"Could not refresh Conditioner SOI context: {error}") 
 
 
 async def soiDeleted(
@@ -2932,25 +2950,31 @@ async def soiDeleted(
             )
 
     try:
-        TSITabSlots.refresh_sa_sois_table(
-            frontend
-        )
+        TSITabSlots.refresh_sa_sois_table(frontend)
     except Exception as error:
         component.logger.debug(
             f"Could not refresh Signal Analysis SOIs after delete: {error}"
         )
 
     try:
-        TSITabSlots.refresh_tsi_fe_input_sois(
-            frontend
-        )
-        TSITabSlots.refresh_tsi_fe_run_sois(
-            frontend
-        )
+        TSITabSlots.refresh_tsi_conditioner_soi_context(frontend)
+    except Exception as error:
+        component.logger.debug(f"Could not refresh Conditioner SOIs after delete: {error}")
+
+    try:
+        TSITabSlots.refresh_tsi_fe_input_sois(frontend)
+        TSITabSlots.refresh_tsi_fe_run_sois(frontend)
     except Exception as error:
         component.logger.debug(
             f"Could not refresh Feature Extractor SOIs after delete: {error}"
         )
+
+    try:
+        TSITabSlots.refresh_tsi_conditioner_soi_context(frontend)
+    except Exception as error:
+        component.logger.debug(
+            f"Could not refresh Conditioner SOIs after delete: {error}"
+        )        
 
 
 async def dashboardArtifactTransferStatus(

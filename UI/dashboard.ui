@@ -3269,7 +3269,7 @@
         </rect>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <widget class="QWidget" name="tab_sa_sois_record">
         <attribute name="title">
@@ -3497,36 +3497,30 @@
             <height>360</height>
            </rect>
           </property>
-          <widget class="QWidget" name="verticalLayoutWidget_4">
+          <widget class="QLabel" name="label_sa_sois_history_details">
            <property name="geometry">
             <rect>
-             <x>4</x>
-             <y>4</y>
-             <width>671</width>
-             <height>351</height>
+             <x>10</x>
+             <y>10</y>
+             <width>659</width>
+             <height>339</height>
             </rect>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
-            <property name="leftMargin">
-             <number>6</number>
-            </property>
-            <property name="topMargin">
-             <number>6</number>
-            </property>
-            <property name="rightMargin">
-             <number>6</number>
-            </property>
-            <property name="bottomMargin">
-             <number>6</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_sa_sois_history_details">
-              <property name="text">
-               <string>TextLabel</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
           </widget>
          </widget>
         </widget>
@@ -8045,8 +8039,8 @@ p, li { white-space: pre-wrap; }
          <widget class="QPushButton" name="pushButton_tsi_conditioner_results_preview">
           <property name="geometry">
            <rect>
-            <x>10</x>
-            <y>210</y>
+            <x>20</x>
+            <y>225</y>
             <width>95</width>
             <height>27</height>
            </rect>
@@ -8149,10 +8143,10 @@ p, li { white-space: pre-wrap; }
          <widget class="QPushButton" name="pushButton_tsi_conditioner_results_promote_to_soi">
           <property name="geometry">
            <rect>
-            <x>570</x>
-            <y>210</y>
+            <x>560</x>
+            <y>225</y>
             <width>120</width>
-            <height>27</height>
+            <height>28</height>
            </rect>
           </property>
           <property name="text">
@@ -8188,13 +8182,13 @@ p, li { white-space: pre-wrap; }
           <string>Results / Output Files</string>
          </property>
         </widget>
-        <widget class="QFrame" name="frame1_18">
+        <widget class="QFrame" name="frame_sa_conditioner_method">
          <property name="geometry">
           <rect>
            <x>412</x>
-           <y>135</y>
+           <y>115</y>
            <width>393</width>
-           <height>365</height>
+           <height>385</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -8207,7 +8201,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>75</x>
-            <y>40</y>
+            <y>75</y>
             <width>310</width>
             <height>27</height>
            </rect>
@@ -8226,7 +8220,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>75</x>
-            <y>10</y>
+            <y>45</y>
             <width>310</width>
             <height>27</height>
            </rect>
@@ -8242,7 +8236,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>10</y>
+            <y>45</y>
             <width>65</width>
             <height>27</height>
            </rect>
@@ -8263,7 +8257,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>40</y>
+            <y>75</y>
             <width>65</width>
             <height>27</height>
            </rect>
@@ -8284,7 +8278,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>75</x>
-            <y>100</y>
+            <y>135</y>
             <width>310</width>
             <height>27</height>
            </rect>
@@ -8303,7 +8297,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>100</y>
+            <y>135</y>
             <width>65</width>
             <height>27</height>
            </rect>
@@ -8327,9 +8321,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>40</x>
-            <y>135</y>
+            <y>168</y>
             <width>140</width>
-            <height>27</height>
+            <height>28</height>
            </rect>
           </property>
           <property name="text">
@@ -8343,9 +8337,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>215</x>
-            <y>135</y>
+            <y>168</y>
             <width>140</width>
-            <height>27</height>
+            <height>28</height>
            </rect>
           </property>
           <property name="text">
@@ -8356,9 +8350,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>5</x>
-            <y>170</y>
+            <y>205</y>
             <width>383</width>
-            <height>185</height>
+            <height>170</height>
            </rect>
           </property>
           <property name="widgetResizable">
@@ -8370,7 +8364,7 @@ p, li { white-space: pre-wrap; }
              <x>0</x>
              <y>0</y>
              <width>381</width>
-             <height>183</height>
+             <height>168</height>
             </rect>
            </property>
           </widget>
@@ -8379,7 +8373,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>70</y>
+            <y>105</y>
             <width>65</width>
             <height>27</height>
            </rect>
@@ -8397,40 +8391,41 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>75</x>
-            <y>70</y>
+            <y>105</y>
             <width>310</width>
             <height>28</height>
            </rect>
           </property>
          </widget>
-        </widget>
-        <widget class="QLabel" name="label1_44">
-         <property name="geometry">
-          <rect>
-           <x>815</x>
-           <y>115</y>
-           <width>393</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Ubuntu</family>
-           <pointsize>10</pointsize>
-           <weight>75</weight>
-           <italic>false</italic>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>3. Run Conditioner</string>
-         </property>
+         <widget class="QLabel" name="label_sa_conditioner_method_badge">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>2</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_conditioner_method_title">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>10</y>
+            <width>240</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Conditioner Method</string>
+          </property>
+         </widget>
         </widget>
         <widget class="QLabel" name="label1_24">
          <property name="geometry">
@@ -8801,41 +8796,13 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </widget>
-        <widget class="QLabel" name="label1_34">
-         <property name="geometry">
-          <rect>
-           <x>412</x>
-           <y>115</y>
-           <width>393</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Ubuntu</family>
-           <pointsize>10</pointsize>
-           <weight>75</weight>
-           <italic>false</italic>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>2. Conditioner Method</string>
-         </property>
-        </widget>
-        <widget class="QFrame" name="frame1_28">
+        <widget class="QFrame" name="frame_sa_conditioner_run">
          <property name="geometry">
           <rect>
            <x>815</x>
-           <y>135</y>
+           <y>115</y>
            <width>393</width>
-           <height>365</height>
+           <height>385</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -8848,9 +8815,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>205</y>
+            <y>210</y>
             <width>175</width>
-            <height>20</height>
+            <height>25</height>
            </rect>
           </property>
           <property name="maximum">
@@ -8867,7 +8834,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>350</x>
-            <y>70</y>
+            <y>75</y>
             <width>27</width>
             <height>27</height>
            </rect>
@@ -8880,7 +8847,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>70</y>
+            <y>75</y>
             <width>90</width>
             <height>27</height>
            </rect>
@@ -8901,7 +8868,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>350</x>
-            <y>130</y>
+            <y>135</y>
             <width>40</width>
             <height>27</height>
            </rect>
@@ -8914,7 +8881,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>130</y>
+            <y>135</y>
             <width>90</width>
             <height>27</height>
            </rect>
@@ -8935,7 +8902,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>130</y>
+            <y>135</y>
             <width>240</width>
             <height>27</height>
            </rect>
@@ -8951,32 +8918,11 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;output_&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
-         <widget class="QLabel" name="label2_tsi_conditioner_run_node_label">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>10</y>
-            <width>65</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Node:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
          <widget class="QLabel" name="label2_tsi_conditioner_run_status_label">
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>262</y>
+            <y>285</y>
             <width>65</width>
             <height>27</height>
            </rect>
@@ -8993,32 +8939,11 @@ p, li { white-space: pre-wrap; }
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
-         <widget class="QLabel" name="label2_tsi_conditioner_run_node">
-          <property name="geometry">
-           <rect>
-            <x>105</x>
-            <y>10</y>
-            <width>280</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>—</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
          <widget class="QLabel" name="label2_tsi_conditioner_run_status">
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>262</y>
+            <y>285</y>
             <width>280</width>
             <height>27</height>
            </rect>
@@ -9039,9 +8964,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>232</y>
+            <y>245</y>
             <width>175</width>
-            <height>28</height>
+            <height>36</height>
            </rect>
           </property>
           <property name="text">
@@ -9052,7 +8977,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>40</y>
+            <y>45</y>
             <width>90</width>
             <height>27</height>
            </rect>
@@ -9073,7 +8998,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>100</y>
+            <y>105</y>
             <width>240</width>
             <height>27</height>
            </rect>
@@ -9089,7 +9014,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>100</y>
+            <y>105</y>
             <width>95</width>
             <height>27</height>
            </rect>
@@ -9110,7 +9035,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>70</y>
+            <y>75</y>
             <width>240</width>
             <height>27</height>
            </rect>
@@ -9130,9 +9055,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>200</y>
+            <y>210</y>
             <width>65</width>
-            <height>27</height>
+            <height>25</height>
            </rect>
           </property>
           <property name="font">
@@ -9151,7 +9076,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>40</y>
+            <y>45</y>
             <width>240</width>
             <height>27</height>
            </rect>
@@ -9167,7 +9092,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>1</x>
-            <y>195</y>
+            <y>200</y>
             <width>391</width>
             <height>3</height>
            </rect>
@@ -9182,10 +9107,10 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="geometry">
            <rect>
-            <x>105</x>
-            <y>330</y>
-            <width>175</width>
-            <height>27</height>
+            <x>121</x>
+            <y>347</y>
+            <width>150</width>
+            <height>28</height>
            </rect>
           </property>
           <property name="text">
@@ -9199,7 +9124,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>305</y>
+            <y>323</y>
             <width>550</width>
             <height>17</height>
            </rect>
@@ -9220,7 +9145,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>15</x>
-            <y>305</y>
+            <y>323</y>
             <width>80</width>
             <height>17</height>
            </rect>
@@ -9238,7 +9163,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>1</x>
-            <y>295</y>
+            <y>315</y>
             <width>391</width>
             <height>3</height>
            </rect>
@@ -9251,7 +9176,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>105</x>
-            <y>160</y>
+            <y>165</y>
             <width>75</width>
             <height>27</height>
            </rect>
@@ -9277,7 +9202,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>160</y>
+            <y>165</y>
             <width>95</width>
             <height>27</height>
            </rect>
@@ -9294,51 +9219,43 @@ p, li { white-space: pre-wrap; }
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
+         <widget class="QLabel" name="label_sa_conditioner_run_title">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>10</y>
+            <width>240</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Run Conditioner</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_conditioner_run_badge">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>3</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </widget>
-        <widget class="QLabel" name="label1_33">
+        <widget class="QFrame" name="frame_sa_conditioner_source">
          <property name="geometry">
           <rect>
            <x>9</x>
            <y>115</y>
            <width>393</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Ubuntu</family>
-           <pointsize>10</pointsize>
-           <weight>75</weight>
-           <italic>false</italic>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>1. Input Source</string>
-         </property>
-         <property name="scaledContents">
-          <bool>false</bool>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-         <property name="margin">
-          <number>0</number>
-         </property>
-        </widget>
-        <widget class="QFrame" name="frame1_14">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>135</y>
-           <width>393</width>
-           <height>365</height>
+           <height>385</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -9351,9 +9268,9 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>5</x>
-            <y>50</y>
+            <y>75</y>
             <width>385</width>
-            <height>310</height>
+            <height>305</height>
            </rect>
           </property>
           <property name="currentIndex">
@@ -9481,7 +9398,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>325</x>
-              <y>5</y>
+              <y>10</y>
               <width>27</width>
               <height>27</height>
              </rect>
@@ -9497,7 +9414,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>357</x>
-              <y>5</y>
+              <y>10</y>
               <width>27</width>
               <height>27</height>
              </rect>
@@ -9510,9 +9427,9 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>40</y>
+              <y>45</y>
               <width>385</width>
-              <height>155</height>
+              <height>150</height>
              </rect>
             </property>
             <property name="horizontalScrollBarPolicy">
@@ -9614,7 +9531,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>5</y>
+              <y>10</y>
               <width>45</width>
               <height>27</height>
              </rect>
@@ -9676,7 +9593,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>48</x>
-              <y>5</y>
+              <y>10</y>
               <width>270</width>
               <height>27</height>
              </rect>
@@ -9726,15 +9643,55 @@ p, li { white-space: pre-wrap; }
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
+           <widget class="QLabel" name="label2_tsi_conditioner_input_artifact">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>10</y>
+              <width>55</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Artifact:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="comboBox_tsi_conditioner_input_artifact">
+            <property name="geometry">
+             <rect>
+              <x>58</x>
+              <y>10</y>
+              <width>294</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhNone</set>
+            </property>
+            <property name="currentIndex">
+             <number>-1</number>
+            </property>
+           </widget>
           </widget>
           <widget class="QWidget" name="page_27">
            <widget class="QTableWidget" name="tableWidget_tsi_conditioner_input_frequencies">
             <property name="geometry">
              <rect>
               <x>5</x>
-              <y>40</y>
+              <y>50</y>
               <width>375</width>
-              <height>205</height>
+              <height>190</height>
              </rect>
             </property>
             <property name="sizePolicy">
@@ -9826,7 +9783,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>195</x>
-              <y>280</y>
+              <y>275</y>
               <width>90</width>
               <height>27</height>
              </rect>
@@ -9842,7 +9799,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>290</x>
-              <y>280</y>
+              <y>275</y>
               <width>90</width>
               <height>27</height>
              </rect>
@@ -9858,7 +9815,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>5</x>
-              <y>280</y>
+              <y>275</y>
               <width>90</width>
               <height>27</height>
              </rect>
@@ -9874,7 +9831,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>100</x>
-              <y>280</y>
+              <y>275</y>
               <width>90</width>
               <height>27</height>
              </rect>
@@ -9887,7 +9844,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>5</x>
-              <y>5</y>
+              <y>15</y>
               <width>105</width>
               <height>27</height>
              </rect>
@@ -9908,7 +9865,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>110</x>
-              <y>5</y>
+              <y>15</y>
               <width>50</width>
               <height>27</height>
              </rect>
@@ -9931,7 +9888,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>5</x>
-              <y>250</y>
+              <y>245</y>
               <width>90</width>
               <height>27</height>
              </rect>
@@ -9947,7 +9904,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>170</x>
-              <y>5</y>
+              <y>15</y>
               <width>95</width>
               <height>27</height>
              </rect>
@@ -9963,13 +9920,13 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>100</x>
-              <y>250</y>
+              <y>245</y>
               <width>137</width>
               <height>27</height>
              </rect>
             </property>
             <property name="text">
-             <string>Import TSI</string>
+             <string>Import Detector</string>
             </property>
            </widget>
            <widget class="QPushButton" name="pushButton_tsi_conditioner_input_frequencies_import_tactical">
@@ -9979,7 +9936,7 @@ p, li { white-space: pre-wrap; }
             <property name="geometry">
              <rect>
               <x>242</x>
-              <y>250</y>
+              <y>245</y>
               <width>138</width>
               <height>27</height>
              </rect>
@@ -9993,9 +9950,9 @@ p, li { white-space: pre-wrap; }
          <widget class="QComboBox" name="comboBox_tsi_conditioner_input_source">
           <property name="geometry">
            <rect>
-            <x>130</x>
-            <y>10</y>
-            <width>210</width>
+            <x>55</x>
+            <y>45</y>
+            <width>110</width>
             <height>27</height>
            </rect>
           </property>
@@ -10027,9 +9984,9 @@ p, li { white-space: pre-wrap; }
          <widget class="QLabel" name="label2_tsi_conditioner_input_source">
           <property name="geometry">
            <rect>
-            <x>50</x>
-            <y>10</y>
-            <width>80</width>
+            <x>5</x>
+            <y>45</y>
+            <width>50</width>
             <height>27</height>
            </rect>
           </property>
@@ -10039,7 +9996,7 @@ p, li { white-space: pre-wrap; }
            </font>
           </property>
           <property name="text">
-           <string>Source Type:</string>
+           <string>Source:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -10049,13 +10006,82 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>1</x>
-            <y>45</y>
+            <y>80</y>
             <width>391</width>
             <height>3</height>
            </rect>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label2_tsi_conditioner_input_soi">
+          <property name="geometry">
+           <rect>
+            <x>175</x>
+            <y>45</y>
+            <width>30</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>SOI:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="comboBox_tsi_conditioner_input_soi">
+          <property name="geometry">
+           <rect>
+            <x>205</x>
+            <y>45</y>
+            <width>180</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
+          </property>
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_conditioner_input_title">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>10</y>
+            <width>240</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Input Source</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_sa_conditioner_input_badge">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>28</width>
+            <height>28</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>1</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </widget>

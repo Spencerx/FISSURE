@@ -3228,6 +3228,12 @@ def connect_tsi_slots(dashboard: Dashboard):
     )
 
     # Combo Box
+    dashboard.ui.comboBox_tsi_conditioner_input_soi.currentIndexChanged.connect(
+        lambda: TSITabSlots._slotTSI_ConditionerInputSOIChanged(dashboard)
+    )
+    dashboard.ui.comboBox_tsi_conditioner_input_artifact.currentIndexChanged.connect(
+        lambda: TSITabSlots._slotTSI_ConditionerInputArtifactChanged(dashboard)
+    )
     dashboard.ui.comboBox_tsi_conditioner_input_source.currentIndexChanged.connect(
         lambda: TSITabSlots._slotTSI_ConditionerInputSourceChanged(dashboard)
     )

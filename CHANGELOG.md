@@ -1,6 +1,23 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 2026-9-8
+
+Expand Conditioner with artifact-first tactical workflows
+
+### Added
+
+- Added SOI-aware Artifact conditioning with linked Artifact filtering, direct managed IQ member selection, multi-file batch execution, and conditioned Artifact outputs that can be saved back to the originating SOI.
+- Added remote Artifact conditioning support that resolves managed files on the Sensor Node, returns conditioned Artifacts through the normal Artifact path, and supports downloading and locally previewing remote results.
+- Added Base Power Squelch conditioning alongside Normal Decay for file-based IQ workflows while retaining live Frequency conditioning for selective RF capture.
+
+### Changed
+
+- Changed Conditioner action discovery to use plugin-provided category, method, hardware, and action tags instead of hardcoded method catalogs, with dynamic Customize parameters owned by the selected plugin action.
+- Changed Conditioner inputs to support File, Folder, Artifact, and Frequencies with optional SOI context, while treating Artifacts as grouped evidence and avoiding ZIP bundles as the normal Signal Analysis interchange format.
+- Changed Conditioner outputs and promotion flow so Artifact results preserve source Artifact and SOI provenance, and Save to SOI appends evidence links and analysis history instead of creating duplicate SOIs.
+- Changed the Conditioner interface to the numbered Signal Analysis workflow-card style with clearer action hierarchy, workflow status, result handling, and clean fresh-session state.
+
 ## 2026-9-7
 
 Build evidence-driven Signal Analysis Inspection workflows
